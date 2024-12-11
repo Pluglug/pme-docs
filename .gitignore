@@ -1,0 +1,36 @@
+# Build files
+_build/
+docs/build/
+
+# Sphinx cache
+doctrees/
+
+# Temp files
+*.tmp
+*.log
+*.pickle
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.so
+*.pyo
+*.pyd
+
+# Python env
+.venv/
+venv/
+.env/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# misc
+*.bak
+*.old
