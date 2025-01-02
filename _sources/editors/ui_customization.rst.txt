@@ -1,14 +1,10 @@
-.. _ui_customization:
-
-UI Customization
-================
-
-(WIP)
+.. _ui-customization:
 
 .. include:: side_panel_editor.rst
 
 .. include:: hiding_unused_panels.rst
 
+.. _pme-toolbar:
 PME Toolbar
 ===========
 

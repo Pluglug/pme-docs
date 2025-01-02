@@ -84,7 +84,7 @@ We continuously update PME to keep pace with Blender's evolution, implementing n
    :class: tip
 
    - `Blender Artists Forum <http://blenderartists.org/forum/showthread.php?392910>`_
-   - `PME-Fork Repository <https://github.com/pluglug/pie-menu-editor-fork>`_
+   - `PME Fork Repository <https://github.com/pluglug/pie-menu-editor-fork>`_
    - `PME Docs Repository <https://github.com/pluglug/pme-docs>`_
    - `Become a Sponsor <https://github.com/sponsors/pluglug>`_
 
@@ -106,11 +106,11 @@ We continuously update PME to keep pace with Blender's evolution, implementing n
    editors/popup_dialog_editor
    editors/sticky_key_editor
    editors/stack_key_editor
-   editors/modal_operator_editor
    editors/macro_operator_editor
-   editors/property_editor
+   editors/modal_operator_editor
    editors/editor_common_elements
    editors/ui_customization
+   editors/property_editor
    editors/custom_icons
    editors/settings
 
