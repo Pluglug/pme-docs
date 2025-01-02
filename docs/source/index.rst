@@ -1,6 +1,5 @@
 .. note::
    This documentation is a community-maintained update of the `original PME documentation <https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/>`_.
-
    Check :ref:`contribute-to-docs` to learn how you can help improve this documentation.
 
 
@@ -22,6 +21,20 @@ Pie Menu Editor (PME) empowers you to reshape Blender's interface to match your 
    Your perfect Blender setup is just a few clicks away - no coding required.
    For those ready to explore Python, PME offers advanced options to extend Blender even further.
 
+.. admonition:: Supporting Sustainable Development
+   :class: tip
+
+   PME's development and maintenance relies primarily on volunteer contributions.
+   Your support through `GitHub Sponsors <https://github.com/sponsors/pluglug>`_ (starting from $1/month)
+   helps make these activities sustainable:
+
+   - Compatibility updates for new Blender versions
+   - Bug fixes and stability improvements
+   - Documentation enhancement
+   - New feature development
+   - Fast and reliable support
+
+   Your support drives PME's evolution into an even better tool.
 
 .. TODO: Get Support Section
 
@@ -58,41 +71,30 @@ The :ref:`contribute-to-docs` project welcomes:
 - Documentation translation
 - Contributions to Examples & Resources
 
-----
-
-Maintenance and Support
------------------------
-
-PME was originally developed by `roaoao <https://github.com/roaoao>`_ in 2016 and is now maintained by the community. 
-We continuously update PME to keep pace with Blender's evolution, implementing new features and fixing bugs.
-
-.. admonition:: Supporting Sustainable Development
-   :class: note
-
-   PME's development and maintenance relies primarily on volunteer contributions.
-   Your support through `GitHub Sponsors <https://github.com/sponsors/pluglug>`_ (starting from $1/month)
-   helps make these activities sustainable:
-
-   - Compatibility updates for new Blender versions
-   - Bug fixes and stability improvements
-   - Documentation enhancement and translations
-   - New feature development and UX improvements
-
-   Your support drives PME's evolution into an even better tool.
 
 .. admonition:: Related Links
    :class: tip
 
-   - `Blender Artists Forum <http://blenderartists.org/forum/showthread.php?392910>`_
-   - `PME Fork Repository <https://github.com/pluglug/pie-menu-editor-fork>`_
-   - `PME Docs Repository <https://github.com/pluglug/pme-docs>`_
-   - `Become a Sponsor <https://github.com/sponsors/pluglug>`_
+   .. hlist::
+      :columns: 2
+
+      * `Blender <https://www.blender.org/>`_
+      * `Blender Development Fund <https://fund.blender.org/>`_
+      * `Blender Manual <https://docs.blender.org/manual/en/latest/>`_
+      * `Blender Python API <https://docs.blender.org/api/current/>`_
+
+      * `PME Original Documentation <https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/>`_
+      * `PME Blender Artists Forum <http://blenderartists.org/forum/showthread.php?392910>`_
+      * `PME Fork Repository <https://github.com/pluglug/pie-menu-editor-fork>`_
+      * `PME Docs Repository <https://github.com/pluglug/pme-docs>`_
+      * `PME Become a Sponsor <https://github.com/sponsors/pluglug>`_
 
 ----
 
 .. toctree::
    :maxdepth: 2
    :caption: Getting Started
+   :hidden:
 
    getting_started/installation
    getting_started/quick_tutorial
@@ -100,6 +102,7 @@ We continuously update PME to keep pace with Blender's evolution, implementing n
 .. toctree::
    :maxdepth: 2
    :caption: Editors
+   :hidden:
 
    editors/pie_menu_editor
    editors/regular_menu_editor
@@ -117,6 +120,7 @@ We continuously update PME to keep pace with Blender's evolution, implementing n
 .. toctree::
    :maxdepth: 2
    :caption: Reference
+   :hidden:
 
    reference/terminology
    reference/scripting
@@ -125,6 +129,7 @@ We continuously update PME to keep pace with Blender's evolution, implementing n
 .. toctree::
    :maxdepth: 2
    :caption: Support & Community
+   :hidden:
 
    support_community/faq
    support_community/known_issues
