@@ -69,7 +69,32 @@
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="terminology.html">Terminology</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Scripting</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Scripting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#tutorials">Tutorials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#global-variables">Global Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#global-functions">Global Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#common-functions">Common Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#command-tab-functions">Command Tab Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-tab-functions">Custom Tab Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#auto-run-scripts">Auto-run Scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#add-custom-global-functions">Add Custom Global Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pme-components">PME Components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pme.context"><code class="docutils literal notranslate"><span class="pre">pme.context</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pme.context.globals"><code class="docutils literal notranslate"><span class="pre">pme.context.globals</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pme.context.add_global"><code class="docutils literal notranslate"><span class="pre">pme.context.add_global()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pme.UserData"><code class="docutils literal notranslate"><span class="pre">pme.UserData</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pme.UserData.get"><code class="docutils literal notranslate"><span class="pre">pme.UserData.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pme.UserData.update"><code class="docutils literal notranslate"><span class="pre">pme.UserData.update()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Support &amp; Community</span></p>
@@ -106,8 +131,571 @@
            <div itemprop="articleBody">
              
   <section id="scripting">
-<span id="reference-scripting"></span><h1>Scripting<a class="headerlink" href="#scripting" title="Link to this heading"></a></h1>
-<p>(WIP)</p>
+<span id="pme-scripting"></span><h1>Scripting<a class="headerlink" href="#scripting" title="Link to this heading"></a></h1>
+<p>PME allows for advanced customization and automation using Blender’s <a class="reference external" href="https://docs.blender.org/api/current/">Python API</a>.
+This article provides an overview of PME’s scripting capabilities and explains the built-in global variables and functions.</p>
+<nav class="contents this-will-duplicate-information-and-it-is-still-useful-here local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#tutorials" id="id1">Tutorials</a></p></li>
+<li><p><a class="reference internal" href="#global-variables" id="id2">Global Variables</a></p></li>
+<li><p><a class="reference internal" href="#global-functions" id="id3">Global Functions</a></p>
+<ul>
+<li><p><a class="reference internal" href="#common-functions" id="id4">Common Functions</a></p></li>
+<li><p><a class="reference internal" href="#command-tab-functions" id="id5">Command Tab Functions</a></p></li>
+<li><p><a class="reference internal" href="#custom-tab-functions" id="id6">Custom Tab Functions</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#auto-run-scripts" id="id7">Auto-run Scripts</a></p></li>
+<li><p><a class="reference internal" href="#add-custom-global-functions" id="id8">Add Custom Global Functions</a></p></li>
+<li><p><a class="reference internal" href="#pme-components" id="id9">PME Components</a></p></li>
+</ul>
+</nav>
+<section id="tutorials">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Tutorials</a><a class="headerlink" href="#tutorials" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Video</strong>: <a class="reference external" href="https://vimeo.com/28203314">Introduction to Scripting with Python in Blender (vimeo.com)</a></p></li>
+<li><p><strong>Video</strong>: <a class="reference external" href="https://www.youtube.com/watch?v=ZZWSvUgR38Y">Task Automation with Python Scripting in Blender (youtube.com)</a></p></li>
+<li><p><a class="reference external" href="https://wiki.python.org/moin/BeginnersGuide/NonProgrammers">Python for Non-Programmers (python.org)</a></p></li>
+<li><p><a class="reference external" href="https://docs.blender.org/api/current/">Blender Python API</a></p></li>
+<li><p><a class="reference external" href="https://docs.blender.org/api/current/info_quickstart.html">Blender/Python Quickstart</a></p></li>
+</ul>
+</section>
+<section id="global-variables">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Global Variables</a><a class="headerlink" href="#global-variables" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>Variables</strong></p></th>
+<th class="head"><p><strong>Description</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">menu</span></code></p></td>
+<td><p>Name of the active menu</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">slot</span></code></p></td>
+<td><p>Name of the active slot</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">C</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.blender.org/api/current/bpy.context.html">bpy.context</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">D</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.blender.org/api/current/bpy.data.html">bpy.data</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.blender.org/api/current/bpy.ops.html">bpy.ops</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">T</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.blender.org/api/current/bpy.types.html">bpy.types</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.blender.org/api/current/bpy.props.html">bpy.props</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">L</span></code></p></td>
+<td><p>Current <a class="reference external" href="https://docs.blender.org/api/current/bpy.types.UILayout.html">UILayout</a> object</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">box</span><span class="p">()</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;My Label&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">E</span></code></p></td>
+<td><p>Current <a class="reference external" href="https://docs.blender.org/api/current/bpy.types.Event.html">Event</a> object</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">E</span><span class="o">.</span><span class="n">ctrl</span> <span class="ow">and</span> <span class="n">E</span><span class="o">.</span><span class="n">shift</span> <span class="ow">and</span> <span class="n">message_box</span><span class="p">(</span><span class="s2">&quot;Ctrl+Shift Pressed&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">U</span></code></p></td>
+<td><p><a class="reference external" href="#pme.UserData">pme.UserData</a> instance for user data storage</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">U</span><span class="o">.</span><span class="n">foo</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+<span class="n">U</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">foo</span><span class="o">=</span><span class="s2">&quot;value1&quot;</span><span class="p">,</span> <span class="n">bar</span><span class="o">=</span><span class="s2">&quot;value2&quot;</span><span class="p">)</span>
+<span class="n">U</span><span class="o">.</span><span class="n">foo</span>
+<span class="n">U</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="s2">&quot;default_value&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="global-functions">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Global Functions</a><a class="headerlink" href="#global-functions" title="Link to this heading"></a></h2>
+<p>Below is a list of global functions provided by PME.</p>
+<section id="common-functions">
+<span id="pme-common-functions"></span><h3><a class="toc-backref" href="#id4" role="doc-backlink">Common Functions</a><a class="headerlink" href="#common-functions" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">execute_script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Execute an external Python script.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Path to the <code class="docutils literal notranslate"><span class="pre">.py</span></code> file.</p></li>
+<li><p><strong>kwargs</strong> – Additional keyword arguments passed to the script.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Value of local variable <code class="docutils literal notranslate"><span class="pre">return_value</span></code> if it exists, otherwise <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</dd>
+</dl>
+<p><strong>Example</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Display &#39;Hello World!&#39; message:</span>
+<span class="n">execute_script</span><span class="p">(</span><span class="s2">&quot;scripts/hello_world.py&quot;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Hello World!&quot;</span><span class="p">)</span>
+
+<span class="c1"># scripts/hello_world.py:</span>
+<span class="c1"># message_box(kwargs[&quot;msg&quot;])</span>
+
+<span class="c1"># Display &#39;Hi!&#39; message:</span>
+<span class="n">message_box</span><span class="p">(</span><span class="n">execute_script</span><span class="p">(</span><span class="s2">&quot;scripts/hi.py&quot;</span><span class="p">))</span>
+
+<span class="c1"># scripts/hi.py:</span>
+<span class="c1"># return_value = &quot;Hi!&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">props</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Get or set the value of a PME Property.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name of the property.</p></li>
+<li><p><strong>value</strong> – New value of the property.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>PME property container if <code class="docutils literal notranslate"><span class="pre">name</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, property value if only <code class="docutils literal notranslate"><span class="pre">name</span></code> is given, <code class="docutils literal notranslate"><span class="pre">True</span></code> if setting a value.</p>
+</dd>
+</dl>
+<p><strong>Example</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get property value using string notation</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">props</span><span class="p">(</span><span class="s2">&quot;MyProperty&quot;</span><span class="p">)</span>
+
+<span class="c1"># Alternative: get property using attribute notation</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">props</span><span class="p">()</span><span class="o">.</span><span class="n">MyProperty</span>  <span class="c1"># props() returns property container</span>
+
+<span class="c1"># Set property value using string notation</span>
+<span class="n">props</span><span class="p">(</span><span class="s2">&quot;MyProperty&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+<span class="c1"># Alternative: set property using attribute notation</span>
+<span class="n">props</span><span class="p">()</span><span class="o">.</span><span class="n">MyProperty</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># props() returns property container</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">paint_settings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Retrieve the context-sensitive paint settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The current paint settings or <code class="docutils literal notranslate"><span class="pre">None</span></code> if not in a paint mode.</p>
+</dd>
+</dl>
+<p><strong>Example</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="o">=</span> <span class="n">paint_settings</span><span class="p">();</span> <span class="n">ps</span> <span class="ow">and</span> <span class="n">L</span><span class="o">.</span><span class="n">template_ID_preview</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="s1">&#39;brush&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">find_by</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Find the first item in <code class="docutils literal notranslate"><span class="pre">collection</span></code> where <code class="docutils literal notranslate"><span class="pre">key</span></code> equals <code class="docutils literal notranslate"><span class="pre">value</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Collection item if found, otherwise <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+</dl>
+<p><strong>Example</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">find_by</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">active_object</span><span class="o">.</span><span class="n">modifiers</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s1">&#39;SUBSURF&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">setattr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Same as Python’s built-in <a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, but returns <code class="docutils literal notranslate"><span class="pre">True</span></code> after setting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="command-tab-functions">
+<span id="pme-command-tab-functions"></span><h3><a class="toc-backref" href="#id5" role="doc-backlink">Command Tab Functions</a><a class="headerlink" href="#command-tab-functions" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">open_menu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Open menu, pie menu, popup dialog or execute a stack key, sticky key, modal operator, or macro operator by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name of the menu.</p></li>
+<li><p><strong>slot</strong> – Index or name of the slot for Stack Key execution.</p></li>
+<li><p><strong>kwargs</strong> – Arguments for Modal / Macro Operators used as local variables.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the menu exists, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+</dd>
+</dl>
+<p><strong>Example</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Open the menu depending on the active object&#39;s type:</span>
+<span class="n">open_menu</span><span class="p">(</span><span class="s2">&quot;Lamp Pie Menu&quot;</span> <span class="k">if</span> <span class="n">C</span><span class="o">.</span><span class="n">active_object</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;LAMP&#39;</span> <span class="k">else</span> <span class="s2">&quot;Object Pie Menu&quot;</span><span class="p">)</span>
+
+<span class="c1"># Call &quot;My Stack Key&quot; slot depending on Ctrl modifier:</span>
+<span class="n">open_menu</span><span class="p">(</span><span class="s2">&quot;My Stack Key&quot;</span><span class="p">,</span> <span class="s2">&quot;Ctrl slot&quot;</span> <span class="k">if</span> <span class="n">E</span><span class="o">.</span><span class="n">ctrl</span> <span class="k">else</span> <span class="s2">&quot;Shift slot&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">toggle_menu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Enable or disable a menu.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name of the menu.</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – <code class="docutils literal notranslate"><span class="pre">True</span></code> to enable, <code class="docutils literal notranslate"><span class="pre">False</span></code> to disable, <code class="docutils literal notranslate"><span class="pre">None</span></code> to toggle.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the menu exists, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">tag_redraw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Redraw UI areas or regions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>area</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The <a class="reference external" href="https://docs.blender.org/api/current/bpy.types.Area.html#bpy.types.Area.type" title="(in Blender 4.3.2 Python API v4.3)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Area.type</span></code></a> to redraw. Redraw all areas if <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+<li><p><strong>region</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – The <code class="xref py py-attr docutils literal notranslate"><span class="pre">Region.type</span></code> to redraw. Redraw all regions if <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">close_popups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Close all popup dialogs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">overlay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Draw an overlay message.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Message to display.</p></li>
+<li><p><strong>kwargs</strong> – <ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">alignment</span></code>: One of <code class="docutils literal notranslate"><span class="pre">['TOP',</span> <span class="pre">'TOP_LEFT',</span> <span class="pre">'TOP_RIGHT',</span> <span class="pre">'BOTTOM',</span> <span class="pre">'BOTTOM_LEFT',</span> <span class="pre">'BOTTOM_RIGHT']</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">'TOP'</span></code> .</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">duration</span></code>: Duration in seconds. Default is <code class="docutils literal notranslate"><span class="pre">2.0</span></code> .</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">offset_x</span></code>: Horizontal offset. Default is <code class="docutils literal notranslate"><span class="pre">10</span></code> px.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">offset_y</span></code>: Vertical offset. Default is <code class="docutils literal notranslate"><span class="pre">10</span></code> px.</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+<p><strong>Example</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">overlay</span><span class="p">(</span><span class="s1">&#39;Hello PME!&#39;</span><span class="p">,</span> <span class="n">offset_y</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">message_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">icon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'INFO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Pie</span> <span class="pre">Menu</span> <span class="pre">Editor'</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Show a message box.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Message to display.</p></li>
+<li><p><strong>icon</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Icon name (e.g. ‘INFO’, ‘ERROR’, ‘QUESTION’, etc.).</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Window title.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">input_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Show an input box.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> – Function to call with the input value.</p></li>
+<li><p><strong>prop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Path to the property to edit.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+<p><strong>Example</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Rename object:</span>
+<span class="n">input_box</span><span class="p">(</span><span class="n">prop</span><span class="o">=</span><span class="s2">&quot;C.active_object.name&quot;</span><span class="p">)</span>
+
+<span class="c1"># Display input value:</span>
+<span class="n">input_box</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="n">overlay</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="custom-tab-functions">
+<span id="pme-custom-tab-functions"></span><h3><a class="toc-backref" href="#id6" role="doc-backlink">Custom Tab Functions</a><a class="headerlink" href="#custom-tab-functions" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">draw_menu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Draw a popup dialog inside another popup dialog or a pie menu.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name of the menu (popup dialog).</p></li>
+<li><p><strong>frame</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether to draw a frame.</p></li>
+<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Horizontal offset.</p></li>
+<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>) – Vertical offset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the popup dialog exists, otherwise <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">operator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">icon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NONE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emboss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">icon_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Similar to <a class="reference external" href="https://docs.blender.org/api/current/bpy.types.UILayout.html#bpy.types.UILayout.operator" title="(in Blender 4.3.2 Python API v4.3)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UILayout.operator()</span></code></a>, but allows filling operator properties.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layout</strong> – A <a class="reference external" href="https://docs.blender.org/api/current/bpy.types.UILayout.html#bpy.types.UILayout" title="(in Blender 4.3.2 Python API v4.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UILayout</span></code></a> instance.</p></li>
+<li><p><strong>operator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Identifier of the operator.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.blender.org/api/current/bpy.types.OperatorProperties.html#bpy.types.OperatorProperties" title="(in Blender 4.3.2 Python API v4.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperatorProperties</span></code></a> object.</p>
+</dd>
+</dl>
+<p><strong>Example</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">operator</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s2">&quot;wm.context_set_int&quot;</span><span class="p">,</span> <span class="s2">&quot;Material Slot 1&quot;</span><span class="p">,</span>
+        <span class="n">data_path</span><span class="o">=</span><span class="s2">&quot;active_object.active_material_index&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># Same as:</span>
+<span class="c1"># op = L.operator(&quot;wm.context_set_int&quot;, text=&quot;Material Slot 1&quot;)</span>
+<span class="c1"># op.data_path = &quot;active_object.active_material_index&quot;</span>
+<span class="c1"># op.value = 0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">custom_icon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Get the integer value associated with a custom icon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Icon filename without extension, located in <code class="docutils literal notranslate"><span class="pre">pie_menu_editor/icons/</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The integer value of the custom icon.</p>
+</dd>
+</dl>
+<p><strong>Example</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;My Custom Icon&quot;</span><span class="p">,</span> <span class="n">icon_value</span><span class="o">=</span><span class="n">custom_icon</span><span class="p">(</span><span class="s2">&quot;p1&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">panel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Draws a panel by its ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – ID of the panel.</p></li>
+<li><p><strong>frame</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Draw a framed panel.</p></li>
+<li><p><strong>header</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Draw the panel header.</p></li>
+<li><p><strong>expand</strong> – <code class="docutils literal notranslate"><span class="pre">True</span></code> to expand, <code class="docutils literal notranslate"><span class="pre">False</span></code> to collapse, <code class="docutils literal notranslate"><span class="pre">None</span></code> to use the current state.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+<p><strong>Example</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">panel</span><span class="p">(</span><span class="s2">&quot;MATERIAL_PT_context_material&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+</section>
+<hr class="docutils" />
+<section id="auto-run-scripts">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Auto-run Scripts</a><a class="headerlink" href="#auto-run-scripts" title="Link to this heading"></a></h2>
+<p>PME allows you to create Python scripts that automatically execute when Blender starts.
+To use this feature, place files in the <code class="docutils literal notranslate"><span class="pre">pie_menu_editor/scripts/autorun</span></code> folder using any of these methods:</p>
+<ul class="simple">
+<li><p>Direct <code class="docutils literal notranslate"><span class="pre">.py</span></code> files</p></li>
+<li><p>Folders containing scripts</p></li>
+<li><p>Symbolic links</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Scripts in the <code class="docutils literal notranslate"><span class="pre">autorun</span></code> folder are executed directly in PME’s context.
+Only use scripts from trusted sources.</p>
+</div>
+</section>
+<section id="add-custom-global-functions">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Add Custom Global Functions</a><a class="headerlink" href="#add-custom-global-functions" title="Link to this heading"></a></h2>
+<p>To use custom functions in PME:</p>
+<ol class="arabic simple">
+<li><p>Place your script in <code class="docutils literal notranslate"><span class="pre">pie_menu_editor/scripts/autorun</span></code> folder</p></li>
+<li><p>Register functions using <code class="docutils literal notranslate"><span class="pre">pme.context.add_global()</span></code></p></li>
+</ol>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">hello_world</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello World&quot;</span><span class="p">)</span>
+
+<span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">,</span> <span class="n">hello_world</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The registered function <code class="docutils literal notranslate"><span class="pre">hello()</span></code> becomes available in:</p>
+<ul class="simple">
+<li><p>Command tab</p></li>
+<li><p>Custom tab</p></li>
+<li><p>External scripts</p></li>
+</ul>
+</section>
+<section id="pme-components">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">PME Components</a><a class="headerlink" href="#pme-components" title="Link to this heading"></a></h2>
+<p>PME maintains a global context that provides access to commonly used functions, variables, and user-defined additions.
+This context is accessible through two main interfaces:</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pme.context">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pme.</span></span><span class="sig-name descname"><span class="pre">context</span></span><a class="headerlink" href="#pme.context" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="pme.context.globals">
+<span class="sig-name descname"><span class="pre">globals</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></em><a class="headerlink" href="#pme.context.globals" title="Link to this definition"></a></dt>
+<dd><p>Access PME’s global context dictionary. Contains:</p>
+<ul class="simple">
+<li><p>Built-in shortcuts (<code class="docutils literal notranslate"><span class="pre">C</span></code>, <code class="docutils literal notranslate"><span class="pre">D</span></code>, <code class="docutils literal notranslate"><span class="pre">O</span></code>, <code class="docutils literal notranslate"><span class="pre">L</span></code>, etc.)</p></li>
+<li><p>Registered custom functions and values</p></li>
+<li><p>User data storage (<code class="docutils literal notranslate"><span class="pre">U</span></code>)</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pie_menu_editor</span> <span class="kn">import</span> <span class="n">pme</span>
+
+<span class="c1"># Access globals from external scripts</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">globals</span>
+<span class="n">props</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;props&#39;</span><span class="p">)</span>
+<span class="n">user_data</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;U&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pme.context.add_global">
+<span class="sig-name descname"><span class="pre">add_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pme.context.add_global" title="Link to this definition"></a></dt>
+<dd><p>Register a custom function or value in the global context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Name for accessing the item</p></li>
+<li><p><strong>value</strong> – Function or value to register</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Register a function</span>
+<span class="k">def</span> <span class="nf">my_tool</span><span class="p">():</span>
+    <span class="n">bpy</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">select_all</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;TOGGLE&#39;</span><span class="p">)</span>
+
+<span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;toggle_select&quot;</span><span class="p">,</span> <span class="n">my_tool</span><span class="p">)</span>
+
+<span class="c1"># Register a constant</span>
+<span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;MAX_ITEMS&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Access from PME menus via Command tab:</span>
+<span class="c1"># toggle_select()</span>
+<span class="c1"># MAX_ITEMS</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pme.UserData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pme.</span></span><span class="sig-name descname"><span class="pre">UserData</span></span><a class="headerlink" href="#pme.UserData" title="Link to this definition"></a></dt>
+<dd><p>Flexible storage for user-defined data that persists during the Blender session.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pme.UserData.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pme.UserData.get" title="Link to this definition"></a></dt>
+<dd><p>Get a stored value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>) – Data key</p></li>
+<li><p><strong>default</strong> – Value to return if key doesn’t exist</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Stored value or default</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pme.UserData.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pme.UserData.update" title="Link to this definition"></a></dt>
+<dd><p>Update multiple values at once.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">U</span> <span class="o">=</span> <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">globals</span><span class="p">[</span><span class="s1">&#39;U&#39;</span><span class="p">]</span>  <span class="c1"># Get UserData instance</span>
+<span class="n">U</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tool_state</span><span class="o">=</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">U</span><span class="o">.</span><span class="n">tool_state</span><span class="p">)</span>  <span class="c1"># &quot;active&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 </section>
 
 
