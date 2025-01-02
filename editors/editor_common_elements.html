@@ -1,0 +1,189 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editor Common Elements &mdash; Pie Menu Editor 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=7f55fa01" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="UI Customization" href="ui_customization.html" />
+    <link rel="prev" title="Property Editor" href="property_editor.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0d82d0" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Pie Menu Editor
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/quick_tutorial.html">Quick Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Editors</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="popup_dialog_editor.html">Pop-up Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property_editor.html">Property Editor</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Editor Common Elements</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#hotkeys">Hotkeys</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#slot">Slot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-widgets">Adding Widgets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rmb-context-menu">RMB Context Menu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#last-action">Last Action</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#info-area">Info Area</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#slot-editor">Slot Editor</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#poll-method">Poll Method</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html">UI Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#side-panel-editor">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#hiding-unused-panels">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#pme-toolbar">PME Toolbar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#menu-panel-extension">Menu/Panel Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_icons.html">Custom Icons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/terminology.html">Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/scripting.html">Scripting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Support &amp; Community</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">Get Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/contribute_to_pme.html">Contribute to PME</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0d82d0" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Pie Menu Editor</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Editor Common Elements</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/editors/editor_common_elements.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="editor-common-elements">
+<span id="id1"></span><h1>Editor Common Elements<a class="headerlink" href="#editor-common-elements" title="Link to this heading"></a></h1>
+<p>This section covers the common elements used across different editors.</p>
+<section id="hotkeys">
+<h2>Hotkeys<a class="headerlink" href="#hotkeys" title="Link to this heading"></a></h2>
+<p>(WIP)</p>
+</section>
+<section id="slot">
+<h2>Slot<a class="headerlink" href="#slot" title="Link to this heading"></a></h2>
+<p>(WIP)</p>
+</section>
+<section id="adding-widgets">
+<h2>Adding Widgets<a class="headerlink" href="#adding-widgets" title="Link to this heading"></a></h2>
+<p>(WIP)</p>
+<section id="rmb-context-menu">
+<h3>RMB Context Menu<a class="headerlink" href="#rmb-context-menu" title="Link to this heading"></a></h3>
+<p>(WIP)</p>
+</section>
+<section id="last-action">
+<h3>Last Action<a class="headerlink" href="#last-action" title="Link to this heading"></a></h3>
+<p>(WIP)</p>
+</section>
+<section id="info-area">
+<h3>Info Area<a class="headerlink" href="#info-area" title="Link to this heading"></a></h3>
+<p>(WIP)</p>
+</section>
+<section id="slot-editor">
+<h3>Slot Editor<a class="headerlink" href="#slot-editor" title="Link to this heading"></a></h3>
+<p>(WIP)</p>
+</section>
+</section>
+<section id="poll-method">
+<h2>Poll Method<a class="headerlink" href="#poll-method" title="Link to this heading"></a></h2>
+<p>(WIP)</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="property_editor.html" class="btn btn-neutral float-left" title="Property Editor" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ui_customization.html" class="btn btn-neutral float-right" title="UI Customization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Pluglug and contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

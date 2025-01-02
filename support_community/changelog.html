@@ -1,0 +1,787 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Change Log &mdash; Pie Menu Editor 0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=7f55fa01" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=2709fde1"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Contribute to PME" href="contribute_to_pme.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #0d82d0" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Pie Menu Editor
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/quick_tutorial.html">Quick Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Editors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../editors/pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/popup_dialog_editor.html">Pop-up Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/property_editor.html">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/editor_common_elements.html">Editor Common Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html">UI Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#side-panel-editor">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#hiding-unused-panels">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#pme-toolbar">PME Toolbar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#menu-panel-extension">Menu/Panel Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/custom_icons.html">Custom Icons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/terminology.html">Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/scripting.html">Scripting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Support &amp; Community</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_support.html">Get Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribute_to_pme.html">Contribute to PME</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Change Log</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">1.18.8 (2023.01.??)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">1.18.7 (2023.04.11)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">1.18.6 (2022.08.13)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">1.18.5 (2022.05.02)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">1.18.4 (2021.11.11)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">1.18.3 (2021.06.28)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">1.18.2 (2021.04.24)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">1.18.1 (2021.03.12)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">1.18.0 (2020.10.30)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id10">1.17.5 (2020.09.23)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">1.17.3 (2020.07.20)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id12">1.17.2 (2020.05.12)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id13">1.17.1 (2020.04.27)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id14">1.17.0 (2020.03.27)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id15">1.16.4 (2019.10.13)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id16">1.16.2 (2019.09.21)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id17">1.16.0 (2019.08.09)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id18">1.15.23 (2019.06.26)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id19">1.15.22 (2019.06.09)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id20">1.15.21 (2019.06.04)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id21">1.15.20 (2019.04.11)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id22">1.15.19 (2019.03.25)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fix-1-2019-03-24">1.15.18 fix 1 (2019.03.24)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id23">1.15.18 (2019.03.21)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id24">1.15.17 (2019.03.12)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fix-1-2019-03-07">1.15.16 fix 1 (2019.03.07)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id25">1.15.16 (2019.02.14)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id26">1.15.15 (2019.02.13)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id27">1.15.14 (2019.01.21)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fix-1-2019-01-15">1.15.13 fix 1 (2019.01.15)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id28">1.15.13 (2019.01.14)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fix-2-2019-01-11">1.15.12 fix 2 (2019.01.11)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id29">1.15.12 (2019.01.07)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fix-7-2019-01-05">1.15.11 fix 7 (2019.01.05)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fix-4-2018-12-28">1.15.11 fix 4 (2018.12.28)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fix-3-2018-12-28">1.15.11 fix 3 (2018.12.28)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id30">1.15.11 (2018.12.23)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fix-1-2018-12-15">1.15.10 fix 1 (2018.12.15)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id31">1.15.10 (2018.12.10)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id32">1.15.9 (2018.12.10)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fix-3-2018-12-06">1.15.8 fix 3 (2018.12.06)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fix-3-2018-12-04">1.15.8 fix 3 (2018.12.04)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id33">1.15.8 (2018.12.03)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fix-3-2018-11-20">1.15.7 fix 3 (2018.11.20)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id34">1.15.7 (2018.11.08)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id35">1.15.6 (2018.10.10)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id36">1.15.5 (2018.09.13)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id37">1.15.4 (2018.08.27)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id38">1.15.3 (2018.06.25)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id39">1.15.2 (2018.05.16)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id40">1.15.1 (2018.05.09)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id41">1.15.0 (2018.05.08)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id42">1.14.15 (2018.04.06)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id43">1.14.13 (2018.02.14)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id44">1.14.9 (2017.10.24)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id45">1.14.7 (2017.10.15)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id46">1.14.6 (2017.10.07)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id47">1.14.3 (2017.09.27)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id49">1.14.2 (2017.09.22)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id50">1.14.1 (2017.09.19)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id51">1.14.0 (2017.09.17)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id52">1.13.6 (2017.06.10)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id53">1.13.4 (2017.04.09)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id54">1.13.1 (2017.02.23)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id55">1.13.0 (2017.02.19)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id57">1.12.1 (2016.12.12)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id58">1.11.4 (2016.11.13)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id59">1.10.1 (2016.07.30)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id60">1.9.2 (2016.05.17)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id61">1.8.3 (2016.04.08)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id62">1.7.0 (2016.02.16)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id63">1.6.0 (2016.01.19)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id64">1.5.2 (2016.01.11)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id65">1.4.1 (2015.12.09)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id66">1.3.0 (2015.11.28)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id67">1.2.0 (2015.10.26)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id68">1.1.5 (2015.10.15)</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #0d82d0" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Pie Menu Editor</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content style-external-links">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Change Log</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/support_community/changelog.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="change-log">
+<span id="changelog"></span><h1>Change Log<a class="headerlink" href="#change-log" title="Link to this heading"></a></h1>
+<section id="id1">
+<h2>1.18.8 (2023.01.??)<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Blender 4.2 Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>1.18.7 (2023.04.11)<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Blender 3.6.0 Alpha Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>1.18.6 (2022.08.13)<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Fixed Click Drag and Hold hotkey modes in Blender 3.2.0+</p></li>
+</ul>
+</section>
+<section id="id4">
+<h2>1.18.5 (2022.05.02)<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Header Tools</p></li>
+</ul>
+</section>
+<section id="id5">
+<h2>1.18.4 (2021.11.11)<a class="headerlink" href="#id5" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Toggle side-area operator fix for recent Blender builds.</p></li>
+</ul>
+</section>
+<section id="id6">
+<h2>1.18.3 (2021.06.28)<a class="headerlink" href="#id6" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Support Blender 3 Alpha</p></li>
+</ul>
+</section>
+<section id="id7">
+<h2>1.18.2 (2021.04.24)<a class="headerlink" href="#id7" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Bug Fix for Panel Groups in Blender 2.93</p></li>
+</ul>
+</section>
+<section id="id8">
+<h2>1.18.1 (2021.03.12)<a class="headerlink" href="#id8" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Blender 2.93 Alpha Support</p></li>
+</ul>
+</section>
+<section id="id9">
+<h2>1.18.0 (2020.10.30)<a class="headerlink" href="#id9" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Key Chords</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id10">
+<h2>1.17.5 (2020.09.23)<a class="headerlink" href="#id10" title="Link to this heading"></a></h2>
+<ul>
+<li><p>Blender 2.91 Support</p></li>
+<li><p>Customizable number of menu list rows</p></li>
+<li><p>New global variable for scripts to store user data:</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">U</span><span class="o">.</span><span class="n">foo</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+<span class="n">U</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">foo</span><span class="o">=</span><span class="s2">&quot;value1&quot;</span><span class="p">,</span> <span class="n">bar</span><span class="o">=</span><span class="s2">&quot;value2&quot;</span><span class="p">)</span>
+<span class="n">U</span><span class="o">.</span><span class="n">foo</span>
+<span class="n">U</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="s2">&quot;default_value&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id11">
+<h2>1.17.3 (2020.07.20)<a class="headerlink" href="#id11" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Option to use check-boxes instead of toggle-buttons.</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id12">
+<h2>1.17.2 (2020.05.12)<a class="headerlink" href="#id12" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>PME Preferences in 3D View area</p></li>
+<li><p>Pie extra slot gap size</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id13">
+<h2>1.17.1 (2020.04.27)<a class="headerlink" href="#id13" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>New backup folder: <code class="docutils literal notranslate"><span class="pre">scripts/addons/pie_menu_editor_data/backups</span></code></p></li>
+<li><p>Support keymaps with commas</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id14">
+<h2>1.17.0 (2020.03.27)<a class="headerlink" href="#id14" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>10 Pie Slots</p></li>
+<li><p>Sub-panels</p></li>
+<li><p>Wider Popups</p></li>
+</ul>
+</section>
+<section id="id15">
+<h2>1.16.4 (2019.10.13)<a class="headerlink" href="#id15" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Blender 2.81 Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id16">
+<h2>1.16.2 (2019.09.21)<a class="headerlink" href="#id16" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Blender 2.81 Support</p></li>
+<li><p>Auto-backups (pie_menu_editor/data/backup folder)</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id17">
+<h2>1.16.0 (2019.08.09)<a class="headerlink" href="#id17" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Remember StackKey State</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id18">
+<h2>1.15.23 (2019.06.26)<a class="headerlink" href="#id18" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id19">
+<h2>1.15.22 (2019.06.09)<a class="headerlink" href="#id19" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id20">
+<h2>1.15.21 (2019.06.04)<a class="headerlink" href="#id20" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Toggle-able menu slots</p></li>
+<li><p>Add existing menus to pies, menus, or popups</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id21">
+<h2>1.15.20 (2019.04.11)<a class="headerlink" href="#id21" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id22">
+<h2>1.15.19 (2019.03.25)<a class="headerlink" href="#id22" title="Link to this heading"></a></h2>
+<p>Bug Fixes
+- Bug Fixes</p>
+</section>
+<section id="fix-1-2019-03-24">
+<h2>1.15.18 fix 1 (2019.03.24)<a class="headerlink" href="#fix-1-2019-03-24" title="Link to this heading"></a></h2>
+</section>
+<section id="id23">
+<h2>1.15.18 (2019.03.21)<a class="headerlink" href="#id23" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id24">
+<h2>1.15.17 (2019.03.12)<a class="headerlink" href="#id24" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Beta Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="fix-1-2019-03-07">
+<h2>1.15.16 fix 1 (2019.03.07)<a class="headerlink" href="#fix-1-2019-03-07" title="Link to this heading"></a></h2>
+</section>
+<section id="id25">
+<h2>1.15.16 (2019.02.14)<a class="headerlink" href="#id25" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id26">
+<h2>1.15.15 (2019.02.13)<a class="headerlink" href="#id26" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id27">
+<h2>1.15.14 (2019.01.21)<a class="headerlink" href="#id27" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="fix-1-2019-01-15">
+<h2>1.15.13 fix 1 (2019.01.15)<a class="headerlink" href="#fix-1-2019-01-15" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Fix for multi-column Regular Menus</p></li>
+<li><p>Multi-column fix</p></li>
+</ul>
+</section>
+<section id="id28">
+<h2>1.15.13 (2019.01.14)<a class="headerlink" href="#id28" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Beta Support</p></li>
+</ul>
+</section>
+<section id="fix-2-2019-01-11">
+<h2>1.15.12 fix 2 (2019.01.11)<a class="headerlink" href="#fix-2-2019-01-11" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Fixes for Blender 2.8 Beta</p></li>
+<li><p>New Python API changes.</p></li>
+</ul>
+</section>
+<section id="id29">
+<h2>1.15.12 (2019.01.07)<a class="headerlink" href="#id29" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Beta Support</p></li>
+</ul>
+</section>
+<section id="fix-7-2019-01-05">
+<h2>1.15.11 fix 7 (2019.01.05)<a class="headerlink" href="#fix-7-2019-01-05" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Fixes for Blender 2.8 Beta</p></li>
+</ul>
+</section>
+<section id="fix-4-2018-12-28">
+<h2>1.15.11 fix 4 (2018.12.28)<a class="headerlink" href="#fix-4-2018-12-28" title="Link to this heading"></a></h2>
+</section>
+<section id="fix-3-2018-12-28">
+<h2>1.15.11 fix 3 (2018.12.28)<a class="headerlink" href="#fix-3-2018-12-28" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Fixes for PME 1.15.11</p></li>
+</ul>
+</section>
+<section id="id30">
+<h2>1.15.11 (2018.12.23)<a class="headerlink" href="#id30" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Beta Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="fix-1-2018-12-15">
+<h2>1.15.10 fix 1 (2018.12.15)<a class="headerlink" href="#fix-1-2018-12-15" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Some Fixes for Blender 2.8 builds</p></li>
+</ul>
+</section>
+<section id="id31">
+<h2>1.15.10 (2018.12.10)<a class="headerlink" href="#id31" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id32">
+<h2>1.15.9 (2018.12.10)<a class="headerlink" href="#id32" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="fix-3-2018-12-06">
+<h2>1.15.8 fix 3 (2018.12.06)<a class="headerlink" href="#fix-3-2018-12-06" title="Link to this heading"></a></h2>
+</section>
+<section id="fix-3-2018-12-04">
+<h2>1.15.8 fix 3 (2018.12.04)<a class="headerlink" href="#fix-3-2018-12-04" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Some Fixes for Blender 2.8 builds</p></li>
+</ul>
+</section>
+<section id="id33">
+<h2>1.15.8 (2018.12.03)<a class="headerlink" href="#id33" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Beta Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="fix-3-2018-11-20">
+<h2>1.15.7 fix 3 (2018.11.20)<a class="headerlink" href="#fix-3-2018-11-20" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Fix for the latest Blender 2.8 builds</p></li>
+</ul>
+</section>
+<section id="id34">
+<h2>1.15.7 (2018.11.08)<a class="headerlink" href="#id34" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Latest Blender 2.8 Builds Support</p></li>
+</ul>
+</section>
+<section id="id35">
+<h2>1.15.6 (2018.10.10)<a class="headerlink" href="#id35" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Latest Blender 2.8 Builds Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id36">
+<h2>1.15.5 (2018.09.13)<a class="headerlink" href="#id36" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Alpha Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id37">
+<h2>1.15.4 (2018.08.27)<a class="headerlink" href="#id37" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Alpha Support</p></li>
+<li><p>Python 3.7 Support</p></li>
+</ul>
+</section>
+<section id="id38">
+<h2>1.15.3 (2018.06.25)<a class="headerlink" href="#id38" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Show/Hide/Toggle Side Area</p></li>
+<li><p>Show/Hide/Toggle Sidebar</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id39">
+<h2>1.15.2 (2018.05.16)<a class="headerlink" href="#id39" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><cite>Store Property Values in `</cite>.blend`` Files &lt;../Editors/Property#Storing_Values&gt;`_</p></li>
+<li><p><a class="reference external" href="../Editors/Property#Functions">On Property Init Function</a></p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id40">
+<h2>1.15.1 (2018.05.09)<a class="headerlink" href="#id40" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://blenderartists.org/t/addon-pie-menu-editor-1-15-0/662456/1261?u=roaoao">Context Sensitive Buttons</a></p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id41">
+<h2>1.15.0 (2018.05.08)<a class="headerlink" href="#id41" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="../Editors/Property">Property Editor</a></p></li>
+<li><p><a class="reference external" href="../Panels#Extending_Panels">Extending Panels</a></p></li>
+<li><p><a class="reference external" href="https://i.imgur.com/Hwrs49a.mp4">Tag/Untag Group of Menus</a></p></li>
+<li><p><a class="reference external" href="https://i.imgur.com/jKvxCLg.mp4">Save/Restore Tree View State</a></p></li>
+<li><p><a class="reference external" href="https://i.imgur.com/bsaKFdq.mp4">Select Menu by Name or Hotkey</a></p></li>
+<li><p><a class="reference external" href="../Scripting#Auto-run_Scripts">Auto-run Python Script Files</a></p></li>
+<li><p><a class="reference external" href="../Scripting#Custom_Global_Functions">Custom Global Functions</a></p></li>
+<li><p><a class="reference external" href="../Scripting#Global_Variables">New Global Variables: menu, slot</a></p></li>
+<li><p><a class="reference external" href="../Scripting#Common_Functions">New Function: props(name)</a></p></li>
+<li><p><a class="reference external" href="../Scripting#Command_Tab_Functions">Updated Function: open_menu(menu, slot, **kwargs)</a></p></li>
+<li><p>Blender 2.8 Support</p></li>
+</ul>
+</section>
+<section id="id42">
+<h2>1.14.15 (2018.04.06)<a class="headerlink" href="#id42" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://i.imgur.com/oV5lASt.mp4">Move Edge Script</a> (idea by <a class="reference external" href="https://blenderartists.org/forum/showthread.php?392910&amp;p=3299258&amp;viewfull=1#post3299258">MickHanks</a>)</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id43">
+<h2>1.14.13 (2018.02.14)<a class="headerlink" href="#id43" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://i.imgur.com/zpCo97J.mp4">Call Pie Menus from Other Add-ons</a></p></li>
+</ul>
+</section>
+<section id="id44">
+<h2>1.14.9 (2017.10.24)<a class="headerlink" href="#id44" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/7/7f/Pme1.14.9_modal_hide_hotkey.png">Option to Hide Modal Sub-Hotkey</a></p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id45">
+<h2>1.14.7 (2017.10.15)<a class="headerlink" href="#id45" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/c/cd/Pme1.14.7_modal_adv_settings.png">New Modal Operator Options</a></p></li>
+<li><p><a class="reference external" href="https://i.imgur.com/Q1nlcm5.mp4">Customizable Modal Overlay Text</a></p></li>
+<li><p><cite>custom_icon()</cite> Function</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> for <a class="reference external" href="../Scripting#Command_Tab_Functions">open_menu()</a> Function</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id46">
+<h2>1.14.6 (2017.10.07)<a class="headerlink" href="#id46" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://youtu.be/-RQFK1kqqVw">Macro Operator Tutorial</a> by <a class="reference external" href="https://blenderartists.org/forum/member.php?104883-jimpaw80">Jimmy Livefjord</a></p></li>
+<li><p>Fixed Hotkey tab</p></li>
+</ul>
+</section>
+<section id="id47">
+<h2>1.14.3 (2017.09.27)<a class="headerlink" href="#id47" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="http://i.imgur.com/Gu3nRSV.mp4">Popup Area’s On-Open command</a></p></li>
+<li><p>Modal Operators:
+- Angle properties support
+- <a class="reference external" href="http://i.imgur.com/ekVYd6y.mp4">Cursor is locked in the current area</a>
+- <a class="reference external" href="http://i.imgur.com/xB3H3Ll.mp4">Panning</a> (unlocks the cursor)</p></li>
+<li><p><a class="reference external" href="https://youtu.be/-rknBwAPypk">Stack Key Tutorial</a> by <a class="reference external" href="https://blenderartists.org/forum/member.php?104883-jimpaw80">Jimmy Livefjord</a></p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id49">
+<h2>1.14.2 (2017.09.22)<a class="headerlink" href="#id49" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="http://i.imgur.com/rumYTRt.gifv">Popup Area</a></p></li>
+<li><p><a class="reference external" href="../Examples#Modal_Subsurf_Modifier">Modal Subsurf Modifier Example</a></p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id50">
+<h2>1.14.1 (2017.09.19)<a class="headerlink" href="#id50" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="../Editors/Popup_Dialog#Button_Hotkeys">Copy/Paste Item hotkeys</a></p></li>
+<li><p>Maximize Button</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id51">
+<h2>1.14.0 (2017.09.17)<a class="headerlink" href="#id51" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="../Editors/Modal_Operator">Modal Operator Editor</a></p></li>
+<li><p><a class="reference external" href="../Toolbars">Toolbars</a></p></li>
+<li><p><a class="reference external" href="../#HotkeyMode">Tweak Hotkeys</a></p></li>
+<li><p><a class="reference external" href="../Examples#1_Hotkey_-_3_Pie_Menus">1 Hotkey - 3 Pie Menus</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'Any'</span></code> Hotkey Modifier</p></li>
+<li><p><a class="reference external" href="../#RMB_Context_Menu">RMB Context Menu Entry</a></p></li>
+<li><p>Blender 2.8 Support</p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/e/ef/Pme1.14.0_pm_title.png">Hide Pie Menu Title</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/b/b7/Pme1.14.0_expand_item_menu.gif">Expand Item Menu</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/6/60/Pme1.14.0_group_by.png">Group Menus by Type/Hotkey</a></p></li>
+<li><p><a class="reference external" href="../Scripting#Global_Functions">New Global Functions</a></p></li>
+<li><p><strong>Pop-up Dialog Editor</strong>:
+- <a class="reference external" href="../Editors/Popup_Dialog#Mode">‘Pop-up’ Mode</a>
+- <a class="reference external" href="../Editors/Popup_Dialog#Alignment">Alignment tools</a>
+- <a class="reference external" href="../Editors/Popup_Dialog#Hotkeys">Hotkeys</a>
+- <a class="reference external" href="../Editors/Popup_Dialog#Expand_Layout">New way to expand popup dialogs</a>
+- <a class="reference external" href="https://wiki.blender.org/uploads/9/99/Pme1.14.0_resize_all.png">Resize All Rows</a></p></li>
+</ul>
+</section>
+<section id="id52">
+<h2>1.13.6 (2017.06.10)<a class="headerlink" href="#id52" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/b/b9/Pme1.13.5_popup.png">Open existing panel in a popup</a></p></li>
+<li><p>Bug fixes</p></li>
+</ul>
+</section>
+<section id="id53">
+<h2>1.13.4 (2017.04.09)<a class="headerlink" href="#id53" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/4/4d/Pme1.13.4_tags.png">Group and filter menus by custom tags</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/b/bf/Pme1.13.4_block_ui.png">Block UI</a> option for Sticky Keys</p></li>
+</ul>
+</section>
+<section id="id54">
+<h2>1.13.1 (2017.02.23)<a class="headerlink" href="#id54" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/e/e2/Pme1.13.1_fixed_columns.gif">Columns with Fixed Width</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/0/0d/Pme1.13.1_dummy_modal.gif">Dummy Modal operator</a>
+Can be used to pause Macro Operator (press Enter or LMB to resume)</p></li>
+<li><p>Removed unstable <a class="reference external" href="https://wiki.blender.org/uploads/e/ea/Pme1.13.0_adv_options.png">Auto-Close Popup Dialog</a> option</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="id55">
+<h2>1.13.0 (2017.02.19)<a class="headerlink" href="#id55" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.youtube.com/watch?v=x4HhN4aHCxg">Macro Operator Editor</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/f/f4/Pme_item_edit.png">Command Generator</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/e/ea/Pme1.13.0_adv_options.png">Poll method</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/e/ea/Pme1.13.0_adv_options.png">Auto-Close Popup Dialog</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/9/9d/Pme_tree.png">Updated tree view &amp; new Show Only New Menus filter</a></p></li>
+<li><p>Compatibility with Blender Tabs Interface add-on</p></li>
+</ul>
+</section>
+<section id="id57">
+<h2>1.12.1 (2016.12.12)<a class="headerlink" href="#id57" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://youtu.be/pcFOPWnHC7U">Sticky Key Editor</a></p></li>
+<li><p><a class="reference external" href="https://s3.amazonaws.com/markets-rails/uploads%2F1480675508687-pme1.12.0_confirm_on_release.png">Option to disable ‘Confirm on Release’ feature for pie menus</a></p></li>
+</ul>
+</section>
+<section id="id58">
+<h2>1.11.4 (2016.11.13)<a class="headerlink" href="#id58" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://static-2.gumroad.com/res/gumroad/1512858036361/asset_previews/38ea290af3476c74fd8b832e4b4351de/retina/pme1.11.3_copy.gif">Adding command using context menu</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/BGs0de6ZYdw">Side panel editor</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/z19c6b7XOWo">Hiding unused panels</a></p></li>
+<li><p><a class="reference external" href="https://cgcookiemarkets.com/app/uploads/edd/2016/10/pme1.11.0_mouse_pos.jpg">Restoring mouse position for pie menus</a></p></li>
+<li><p><a class="reference external" href="https://cgcookiemarkets.com/app/uploads/edd/2016/10/pme1.11.0_expand_pd.jpg">Using popup dialogs inside popup dialogs</a></p></li>
+</ul>
+</section>
+<section id="id59">
+<h2>1.10.1 (2016.07.30)<a class="headerlink" href="#id59" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://youtu.be/4wZKiyKE_P4">Stack Keys</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/9cGWQF6L4o4">Ability to use mouse buttons as a hotkey modifier</a></p></li>
+<li><p><a class="reference external" href="https://cgcookiemarkets.com/app/uploads/edd/2016/07/pme1.10.1_sk_settings.png">Displaying the name of the last stack key command</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/m8pCPZdK_qc">Context sensitive menus examples</a></p></li>
+</ul>
+</section>
+<section id="id60">
+<h2>1.9.2 (2016.05.17)<a class="headerlink" href="#id60" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://youtu.be/A81jLLynssk">Script editor</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/8XUvscCCviA">Double click mode</a></p></li>
+<li><p><cite>Customizable Ctrl+Shift+</cite> hotkey &lt;<a class="reference external" href="https://cgcookiemarkets.com/app/uploads/edd/2016/04/pme1.9.0_prefs_settings.png">https://cgcookiemarkets.com/app/uploads/edd/2016/04/pme1.9.0_prefs_settings.png</a>&gt;`_</p></li>
+<li><p>Hotkeys to confirm (Enter) and cancel (Esc) item/icon editing</p></li>
+</ul>
+</section>
+<section id="id61">
+<h2>1.8.3 (2016.04.08)<a class="headerlink" href="#id61" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://youtu.be/-fhI2imoo4U">Panel mode and Panels</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/5zDp586Uy2w?t=57">Sticky Keys</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/5zDp586Uy2w">Threshold and Confirm Threshold for Pie Menus</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/9/9d/Pme_tree.png">Tree view</a></p></li>
+<li><p>Customizable width of the list/tree</p></li>
+</ul>
+</section>
+<section id="id62">
+<h2>1.7.0 (2016.02.16)<a class="headerlink" href="#id62" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://youtu.be/sF10rVDVo-k">Custom layout using python code</a></p></li>
+</ul>
+</section>
+<section id="id63">
+<h2>1.6.0 (2016.01.19)<a class="headerlink" href="#id63" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Multi-column regular menus</p></li>
+<li><p>Open regular menu on mouse over</p></li>
+</ul>
+</section>
+<section id="id64">
+<h2>1.5.2 (2016.01.11)<a class="headerlink" href="#id64" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Copy/Paste Row (Popup dialog)</p></li>
+<li><p>Preview of the menus</p></li>
+<li><p>External python scripts as a command</p></li>
+</ul>
+</section>
+<section id="id65">
+<h2>1.4.1 (2015.12.09)<a class="headerlink" href="#id65" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Popup dialog editor</p></li>
+<li><p>Pie menus with more than 8 buttons</p></li>
+</ul>
+</section>
+<section id="id66">
+<h2>1.3.0 (2015.11.28)<a class="headerlink" href="#id66" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Custom icons</p></li>
+<li><p>Hotkey as a command</p></li>
+</ul>
+</section>
+<section id="id67">
+<h2>1.2.0 (2015.10.26)<a class="headerlink" href="#id67" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Regular menu editor</p></li>
+<li><p>Multiple keymap names</p></li>
+<li><p>New icon selection mode</p></li>
+</ul>
+</section>
+<section id="id68">
+<h2>1.1.5 (2015.10.15)<a class="headerlink" href="#id68" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Pie Menu Editor</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="contribute_to_pme.html" class="btn btn-neutral float-left" title="Contribute to PME" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Pluglug and contributors.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

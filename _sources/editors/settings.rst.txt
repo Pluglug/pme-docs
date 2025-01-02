@@ -1,0 +1,6 @@
+.. _settings:
+
+Settings
+========
+
+(WIP)
