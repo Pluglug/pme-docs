@@ -1,0 +1,6 @@
+.. _terminology:
+
+Terminology
+===========
+
+(WIP)
