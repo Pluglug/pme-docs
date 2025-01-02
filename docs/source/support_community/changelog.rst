@@ -3,10 +3,15 @@
 Change Log
 ==========
 
-1.18.8 (2023.01.??)
+1.18.8 (2025.01.??)
 ---------------------
 - Blender 4.2 Support
+- Add ``show_error_trace`` option to the PME Settings
+- Add ``bpy.ops.pme.exec_override()`` Operator
 - Bug Fixes
+- New documentation site (📖 you are here)
+
+----
 
 1.18.7 (2023.04.11)
 ---------------------
