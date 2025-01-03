@@ -68,7 +68,39 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Reference</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Terminology</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Terminology</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#basic-blender-concepts">Basic Blender Concepts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#area">Area</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#context">Context</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#header">Header</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#keymap">Keymap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mode">Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#operator">Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#panel">Panel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#property">Property</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#region">Region</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pme-specific-concepts">PME-Specific Concepts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#menu">Menu</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#slot">Slot</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#command-tab">Command Tab</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-tab">Custom Tab</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interactive-panels-mode">Interactive Panels Mode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#macro-operator">Macro Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#modal-operator">Modal Operator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#poll-method">Poll Method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#slot-editor">Slot Editor</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-concepts">Advanced Concepts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#event-system">Event System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#layout-system">Layout System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#operator-execution-context">Operator Execution Context</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="scripting.html">Scripting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
@@ -107,7 +139,275 @@
              
   <section id="terminology">
 <span id="id1"></span><h1>Terminology<a class="headerlink" href="#terminology" title="Link to this heading"></a></h1>
-<p>(WIP)</p>
+<p>This page explains the main terms and concepts used in Blender and PME for newcomers and those looking to deepen their understanding.</p>
+<section id="basic-blender-concepts">
+<h2>Basic Blender Concepts<a class="headerlink" href="#basic-blender-concepts" title="Link to this heading"></a></h2>
+<section id="area">
+<h3>Area<a class="headerlink" href="#area" title="Link to this heading"></a></h3>
+<p>A large workspace region within the Blender interface.
+Different editor types (such as the 3D Viewport, Outliner, etc.) each occupy an <strong>Area</strong>.</p>
+<ul class="simple">
+<li><p>PME offers a feature called <strong>Toggle Side Area</strong>, allowing you to show or hide side regions (like sidebars) in an Area.</p></li>
+<li><p>Areas may contain subregions called <strong>Regions</strong>, such as a toolbar or property shelf.</p></li>
+</ul>
+<div class="line-block">
+<div class="line"><strong>Related</strong>: Region, Window, Workspace</div>
+<div class="line"><strong>Reference</strong>: <a class="reference external" href="https://docs.blender.org/manual/en/latest/interface/window_system/areas.html">Area (docs.blender.org)</a></div>
+</div>
+</section>
+<section id="context">
+<h3>Context<a class="headerlink" href="#context" title="Link to this heading"></a></h3>
+<p>Represents the <strong>current state</strong> of Blender, including:</p>
+<ul class="simple">
+<li><p>The currently selected object</p></li>
+<li><p>The active editing mode (e.g., Object Mode, Edit Mode)</p></li>
+<li><p>Cursor position</p></li>
+<li><p>Active tool</p></li>
+<li><p>Other information depending on user actions</p></li>
+</ul>
+<p>In Python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Retrieve the active object</span>
+<span class="n">active_obj</span> <span class="o">=</span> <span class="n">bpy</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">active_object</span>
+
+<span class="c1"># Check the current mode</span>
+<span class="n">current_mode</span> <span class="o">=</span> <span class="n">bpy</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">mode</span>
+</pre></div>
+</div>
+<p>By leveraging the context, you can conditionally display or enable certain tools based on the current state (mode, selection, etc.).</p>
+<p><strong>Reference</strong>: <a class="reference external" href="https://docs.blender.org/api/current/bpy.context.html">Context (docs.blender.org)</a></p>
+</section>
+<section id="header">
+<h3>Header<a class="headerlink" href="#header" title="Link to this heading"></a></h3>
+<p>A horizontal bar located at the top or bottom of an Area.
+It usually contains menus, frequently used tool icons, and so forth.</p>
+<ul class="simple">
+<li><p>PME allows you to add custom buttons to the header using
+<a class="reference internal" href="../editors/ui_customization.html#pme-menu-panel-extension"><span class="std std-ref">Menu/Panel Extension</span></a>.</p></li>
+</ul>
+<div class="line-block">
+<div class="line"><strong>Related</strong>: Region</div>
+<div class="line"><strong>Reference</strong>: <a class="reference external" href="https://docs.blender.org/manual/en/latest/interface/window_system/regions.html#header">Header (docs.blender.org)</a></div>
+</div>
+</section>
+<section id="keymap">
+<h3>Keymap<a class="headerlink" href="#keymap" title="Link to this heading"></a></h3>
+<p>A collection of <strong>hotkey assignments</strong> that change depending on the Area type or editing mode.</p>
+<ul class="simple">
+<li><p>Example: The <strong>G</strong> key is assigned to “move” in Object Mode but to “grab” in Sculpt Mode.</p></li>
+</ul>
+<p>PME can help you tailor these keymaps further to fit your personal workflow.</p>
+<p><strong>Reference</strong>: <a class="reference external" href="https://docs.blender.org/manual/en/latest/editors/preferences/keymap.html">Keymap (docs.blender.org)</a></p>
+</section>
+<section id="mode">
+<h3>Mode<a class="headerlink" href="#mode" title="Link to this heading"></a></h3>
+<p>Refers to the <strong>operational state</strong> of Blender (e.g., Object Mode, Edit Mode).
+Each mode has its own set of tools and actions.</p>
+<ul class="simple">
+<li><p>PME’s <strong>Poll</strong> feature allows you to show or hide specific tools or menus based on the active mode.</p></li>
+</ul>
+<p><strong>Example</strong>: <code class="docutils literal notranslate"><span class="pre">bpy.context.mode</span> <span class="pre">==</span> <span class="pre">'EDIT_MESH'</span></code></p>
+</section>
+<section id="operator">
+<h3>Operator<a class="headerlink" href="#operator" title="Link to this heading"></a></h3>
+<p>A functional unit in Blender that performs a specific action (part of the <code class="docutils literal notranslate"><span class="pre">bpy.ops</span></code> module).</p>
+<ul class="simple">
+<li><p>Can be assigned to hotkeys</p></li>
+<li><p>Can appear on menus/buttons</p></li>
+<li><p>Callable from Python scripts</p></li>
+<li><p>Executable in Macros</p></li>
+</ul>
+<p>Within PME, you can combine multiple operators using <strong>Macro Operators</strong> or <strong>Modal Operators</strong> to create custom tools.</p>
+<p><strong>Example</strong>: <code class="docutils literal notranslate"><span class="pre">bpy.ops.mesh.subdivide()</span></code></p>
+</section>
+<section id="panel">
+<h3>Panel<a class="headerlink" href="#panel" title="Link to this heading"></a></h3>
+<p>A collapsible group of UI widgets, often found in sidebars or property areas.</p>
+<p>PME allows for:</p>
+<ul class="simple">
+<li><p>Creating new panels</p></li>
+<li><p>Extending existing panels</p></li>
+<li><p>Grouping panels</p></li>
+<li><p>Hiding unneeded panels</p></li>
+</ul>
+<div class="line-block">
+<div class="line"><strong>Related</strong>: Property, Region</div>
+<div class="line"><strong>Reference</strong>: <a class="reference external" href="https://docs.blender.org/manual/en/latest/interface/window_system/tabs_panels.html">Panel (docs.blender.org)</a></div>
+</div>
+</section>
+<section id="property">
+<h3>Property<a class="headerlink" href="#property" title="Link to this heading"></a></h3>
+<p>Refers to various data items in Blender (like object location, material settings, etc.) that are typically displayed as sliders, checkboxes, or fields in the UI.</p>
+<p>In PME, you can:</p>
+<ul class="simple">
+<li><p>Display and edit properties on menus/panels</p></li>
+<li><p>Refer to them in scripts or Poll functions</p></li>
+<li><p>Add custom properties via the Property Editor</p></li>
+</ul>
+<p><strong>Example</strong>: <code class="docutils literal notranslate"><span class="pre">bpy.context.object.location</span></code></p>
+</section>
+<section id="region">
+<h3>Region<a class="headerlink" href="#region" title="Link to this heading"></a></h3>
+<p>A subdivided area within an <strong>Area</strong>, containing specific UI elements (tools, properties, etc.).</p>
+<ul class="simple">
+<li><p>With PME’s <strong>Panel Group</strong> feature, you can add custom content to a Region.</p></li>
+</ul>
+<p><strong>Related</strong>: Area, Panel</p>
+<p><strong>Reference</strong>: <a class="reference external" href="https://docs.blender.org/manual/en/latest/interface/window_system/regions.html">Region (docs.blender.org)</a></p>
+</section>
+</section>
+<section id="pme-specific-concepts">
+<h2>PME-Specific Concepts<a class="headerlink" href="#pme-specific-concepts" title="Link to this heading"></a></h2>
+<section id="menu">
+<h3>Menu<a class="headerlink" href="#menu" title="Link to this heading"></a></h3>
+<p>A broad term in PME describing any customizable UI component you create, such as:</p>
+<ul class="simple">
+<li><p>Pie Menu</p></li>
+<li><p>Regular Menu</p></li>
+<li><p>Macro Operator</p></li>
+<li><p>Modal Operator</p></li>
+<li><p>etc.</p></li>
+</ul>
+<p>Each menu is composed of multiple <strong>Slots</strong>, each providing a distinct functionality or element.</p>
+</section>
+<section id="slot">
+<h3>Slot<a class="headerlink" href="#slot" title="Link to this heading"></a></h3>
+<p>An individual <strong>element</strong> or <strong>slot</strong> within a menu. Each slot can be configured to:</p>
+<ul class="simple">
+<li><p>Run a command</p></li>
+<li><p>Display or edit a property</p></li>
+<li><p>Invoke a sub-menu</p></li>
+<li><p>Draw a custom layout</p></li>
+</ul>
+<p><strong>Related</strong>: Command Tab, Property Tab, Menu Tab, Custom Tab</p>
+</section>
+<section id="command-tab">
+<h3>Command Tab<a class="headerlink" href="#command-tab" title="Link to this heading"></a></h3>
+<p>One of the tabs in the Slot Editor that lets you run Python code or invoke operators directly.</p>
+<ul class="simple">
+<li><p>Execute single-line Python scripts</p></li>
+<li><p>Call custom functions</p></li>
+<li><p>Manipulate variables or operators</p></li>
+</ul>
+<p><strong>Example</strong>: <code class="docutils literal notranslate"><span class="pre">C.active_object.location.x</span> <span class="pre">+=</span> <span class="pre">1.0</span></code></p>
+</section>
+<section id="custom-tab">
+<h3>Custom Tab<a class="headerlink" href="#custom-tab" title="Link to this heading"></a></h3>
+<p>Another tab in the Slot Editor for creating more visually defined UI layouts without manual scripting.</p>
+<p><strong>Example</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">box</span><span class="p">()</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Custom Layout&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="interactive-panels-mode">
+<h3>Interactive Panels Mode<a class="headerlink" href="#interactive-panels-mode" title="Link to this heading"></a></h3>
+<p>A PME mode that displays additional PME Tools buttons within every UI element, making it easier to:</p>
+<ul class="simple">
+<li><p>Identify menu IDs</p></li>
+<li><p>Configure panel extensions</p></li>
+<li><p>Customize your UI</p></li>
+</ul>
+<p>This mode is especially useful when learning PME, as it helps you visualize where various elements and menus are located.</p>
+</section>
+<section id="macro-operator">
+<h3>Macro Operator<a class="headerlink" href="#macro-operator" title="Link to this heading"></a></h3>
+<p>Allows you to <strong>execute multiple operators in sequence</strong>.
+In the PME <strong>Macro Operator Editor</strong>, you can:</p>
+<ul class="simple">
+<li><p>Record operator sequences</p></li>
+<li><p>Adjust operator parameters</p></li>
+<li><p>Manage execution flow</p></li>
+</ul>
+<p>It is invaluable for bundling complex workflows into a single click.</p>
+</section>
+<section id="modal-operator">
+<h3>Modal Operator<a class="headerlink" href="#modal-operator" title="Link to this heading"></a></h3>
+<p>A real-time, interactive operator that responds to continuous user input.
+You can create your own Modal Operators with PME’s <strong>Modal Operator Editor</strong>, enabling:</p>
+<ul class="simple">
+<li><p>Reactions to mouse movements</p></li>
+<li><p>Key events and state changes</p></li>
+<li><p>Real-time feedback and updates</p></li>
+</ul>
+<p>Perfect for building <strong>custom interactive tools</strong>.</p>
+</section>
+<section id="poll-method">
+<h3>Poll Method<a class="headerlink" href="#poll-method" title="Link to this heading"></a></h3>
+<p>A Python function used to determine whether a menu or tool is <strong>currently usable</strong>. It must return <code class="docutils literal notranslate"><span class="pre">True</span></code> if available, or <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+<p>For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ao</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">active_object</span><span class="p">;</span> <span class="k">return</span> <span class="n">ao</span> <span class="ow">and</span> <span class="n">ao</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;MESH&#39;</span>
+</pre></div>
+</div>
+<p>Common use cases include:</p>
+<ul class="simple">
+<li><p>Enabling/disabling UI elements based on the current mode</p></li>
+<li><p>Restricting features to certain object types</p></li>
+<li><p>Preventing errors by hiding invalid tools</p></li>
+</ul>
+</section>
+<section id="slot-editor">
+<h3>Slot Editor<a class="headerlink" href="#slot-editor" title="Link to this heading"></a></h3>
+<p>The <strong>central UI</strong> for defining how PME menus/buttons behave. It includes multiple tabs such as:</p>
+<ul class="simple">
+<li><p>Command (for code execution)</p></li>
+<li><p>Property (for property display)</p></li>
+<li><p>Menu (for calling other PME’s menus)</p></li>
+<li><p>Hotkey (for invoking shortcuts)</p></li>
+<li><p>Custom (for custom layouts)</p></li>
+</ul>
+<p>It’s designed so you can set up everything through a graphical interface, even if you’re new to scripting.</p>
+</section>
+</section>
+<section id="advanced-concepts">
+<h2>Advanced Concepts<a class="headerlink" href="#advanced-concepts" title="Link to this heading"></a></h2>
+<section id="event-system">
+<h3>Event System<a class="headerlink" href="#event-system" title="Link to this heading"></a></h3>
+<p>Blender’s input handling mechanism, which tracks keyboard and mouse events. It is essential for:</p>
+<ul class="simple">
+<li><p>Modal Operators</p></li>
+<li><p>Custom hotkeys</p></li>
+<li><p>Interactive tools</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">E</span><span class="o">.</span><span class="n">ctrl</span> <span class="ow">and</span> <span class="n">E</span><span class="o">.</span><span class="n">shift</span> <span class="ow">and</span> <span class="n">message_box</span><span class="p">(</span><span class="s2">&quot;Ctrl+Shift Pressed&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="layout-system">
+<h3>Layout System<a class="headerlink" href="#layout-system" title="Link to this heading"></a></h3>
+<p>Blender’s system for constructing UI layouts. PME relies on this system to:</p>
+<ul class="simple">
+<li><p>Place labels, buttons, and property fields</p></li>
+<li><p>Position operators and custom widgets</p></li>
+<li><p>Structure UI elements hierarchically</p></li>
+</ul>
+<p>For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">box</span><span class="p">()</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">icon</span><span class="p">,</span> <span class="n">icon_value</span><span class="o">=</span><span class="n">icon_value</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="operator-execution-context">
+<h3>Operator Execution Context<a class="headerlink" href="#operator-execution-context" title="Link to this heading"></a></h3>
+<p>Determines how an operator is executed. The two most common contexts are:</p>
+<ul class="simple">
+<li><p><strong>INVOKE_DEFAULT</strong>
+An interactive mode in which Blender waits for additional user input, such as mouse positioning or pop-up confirmation.</p></li>
+<li><p><strong>EXEC_DEFAULT</strong>
+Runs the operator immediately with preset parameters, often used in scripts or macros.</p></li>
+</ul>
+<p><strong>Example</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Move an object interactively based on mouse input</span>
+<span class="n">bpy</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="s1">&#39;INVOKE_DEFAULT&#39;</span><span class="p">)</span>
+
+<span class="c1"># Move an object 5.0 along the X axis without user input</span>
+<span class="n">bpy</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="s1">&#39;EXEC_DEFAULT&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">(</span><span class="mf">5.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Related</strong>: Operator, Command Tab, Modal Operator, Macro Operator</div>
+<div class="line"><strong>Reference</strong>: <a class="reference external" href="https://docs.blender.org/api/current/bpy.ops.html#execution-context">Execution Context (docs.blender.org)</a></div>
+</div>
+</section>
+</section>
 </section>
 
 
