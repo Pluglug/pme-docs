@@ -132,7 +132,6 @@ The :ref:`contribute-to-docs` project welcomes:
    :hidden:
 
    support_community/faq
-   support_community/known_issues
    support_community/get_support
    support_community/contribute_to_pme
    support_community/changelog
