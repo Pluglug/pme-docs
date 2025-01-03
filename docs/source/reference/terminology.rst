@@ -16,9 +16,8 @@ Different editor types (such as the 3D Viewport, Outliner, etc.) each occupy an 
 - PME offers a feature called **Toggle Side Area**, allowing you to show or hide side regions (like sidebars) in an Area.
 - Areas may contain subregions called **Regions**, such as a toolbar or property shelf.
 
-**Related**: Region, Window, Workspace
-
-**Reference**: `Area (docs.blender.org) <https://docs.blender.org/manual/en/latest/interface/window_system/areas.html>`_
+| **Related**: Region, Window, Workspace
+| **Reference**: `Area (docs.blender.org) <https://docs.blender.org/manual/en/latest/interface/window_system/areas.html>`_
 
 Context
 ^^^^^^^
@@ -52,9 +51,8 @@ It usually contains menus, frequently used tool icons, and so forth.
 - PME allows you to add custom buttons to the header using
   :ref:`Menu/Panel Extension <pme-menu-panel-extension>`.
 
-**Related**: Region
-
-**Reference**: `Header (docs.blender.org) <https://docs.blender.org/manual/en/latest/interface/window_system/regions.html#header>`_
+| **Related**: Region
+| **Reference**: `Header (docs.blender.org) <https://docs.blender.org/manual/en/latest/interface/window_system/regions.html#header>`_
 
 Keymap
 ^^^^^^
@@ -101,9 +99,8 @@ PME allows for:
 - Grouping panels
 - Hiding unneeded panels
 
-**Related**: Property, Region
-
-**Reference**: `Panel (docs.blender.org) <https://docs.blender.org/manual/en/latest/interface/window_system/tabs_panels.html>`_
+| **Related**: Property, Region
+| **Reference**: `Panel (docs.blender.org) <https://docs.blender.org/manual/en/latest/interface/window_system/tabs_panels.html>`_
 
 
 Property
@@ -297,6 +294,5 @@ Determines how an operator is executed. The two most common contexts are:
     # Move an object 5.0 along the X axis without user input
     bpy.ops.transform.translate('EXEC_DEFAULT', value=(5.0, 0.0, 0.0))
 
-**See Also**: Operator, Modal Operator, Macro Operator
-
-**Reference**: `Execution Context (docs.blender.org) <https://docs.blender.org/api/current/bpy.ops.html#execution-context>`_
+| **Related**: Operator, Command Tab, Modal Operator, Macro Operator
+| **Reference**: `Execution Context (docs.blender.org) <https://docs.blender.org/api/current/bpy.ops.html#execution-context>`_
