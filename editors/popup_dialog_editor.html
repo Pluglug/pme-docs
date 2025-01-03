@@ -6,10 +6,10 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pop-up Dialog Editor &mdash; Pie Menu Editor 0.1 documentation</title>
+  <title>Pop-up Dialog &mdash; Pie Menu Editor 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=7f55fa01" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=2e546cb0" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -52,7 +52,19 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="pie_menu_editor.html">Pie Menu Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="regular_menu_editor.html">Regular Menu Editor</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Pop-up Dialog Editor</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pop-up Dialog</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#mode">Mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hotkeys">Hotkeys</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#button-hotkeys">Button Hotkeys</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#row-button-hotkeys">Row Button Hotkeys</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#layout">Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#expand-layout">Expand Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fixed-columns">Fixed Columns</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#alignment">Alignment</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="sticky_key_editor.html">Sticky Key Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stack_key_editor.html">Stack Key Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="macro_operator_editor.html">Macro Operator Editor</a></li>
@@ -60,8 +72,8 @@
 <li class="toctree-l1"><a class="reference internal" href="editor_common_elements.html">Editor Common Elements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ui_customization.html">Side Panel Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ui_customization.html#hiding-unused-panels">Hiding Unused Panels</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#pme-toolbar">PME Toolbar</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ui_customization.html#menu-panel-extension">Menu/Panel Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#pme-toolbar">PME Toolbar</a></li>
 <li class="toctree-l1"><a class="reference internal" href="property_editor.html">Property Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="custom_icons.html">Custom Icons</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
@@ -75,7 +87,7 @@
 <p class="caption" role="heading"><span class="caption-text">Support &amp; Community</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../support_community/known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">Known Issues</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">Get Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../support_community/contribute_to_pme.html">Contribute to PME</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
@@ -95,7 +107,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Pop-up Dialog Editor</li>
+      <li class="breadcrumb-item active">Pop-up Dialog</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/editors/popup_dialog_editor.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -105,9 +117,200 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="pop-up-dialog-editor">
-<span id="popup-dialog-editor"></span><h1>Pop-up Dialog Editor<a class="headerlink" href="#pop-up-dialog-editor" title="Link to this heading"></a></h1>
-<p>This section covers the Popup Dialog Editor.</p>
+  <section id="pop-up-dialog">
+<span id="popup-dialog-editor"></span><h1>Pop-up Dialog<a class="headerlink" href="#pop-up-dialog" title="Link to this heading"></a></h1>
+<p>Pop-up Dialog Editor allows you to create a layout of widgets that can be displayed in pie menus, dialogs, panels or toolbars.</p>
+<section id="mode">
+<h2>Mode<a class="headerlink" href="#mode" title="Link to this heading"></a></h2>
+<img alt="Pop-up dialog mode settings" class="align-center" src="_static/images/original/popup/pme_popup_mode.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>Affects the appearance and behavior of the pop-up.</p>
+<table class="mode-table docutils align-default">
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Mode</p></th>
+<th class="head"><p>Pie</p></th>
+<th class="head"><p>Dialog</p></th>
+<th class="head"><p>Popup</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Moving the mouse outside the pop-up closes it</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p>Interaction with widgets of the pop-up closes it</p></td>
+<td><p>✓</p></td>
+<td><p>❌</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-even"><td><p>OK button</p></td>
+<td><p>❌</p></td>
+<td><p>✓</p></td>
+<td><p>❌</p></td>
+</tr>
+<tr class="row-odd"><td><p>Movable</p></td>
+<td><p>❌</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p>Customizable width</p></td>
+<td><p>❌</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+</tbody>
+</table>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="hotkeys">
+<h2>Hotkeys<a class="headerlink" href="#hotkeys" title="Link to this heading"></a></h2>
+<section id="button-hotkeys">
+<h3>Button Hotkeys<a class="headerlink" href="#button-hotkeys" title="Link to this heading"></a></h3>
+<table class="hotkey-table docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 70.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><kbd class="kbd docutils literal notranslate">LMB</kbd></p></td>
+<td><p>Open Menu</p></td>
+</tr>
+<tr class="row-even"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Ctrl</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Add Button to the Right</p></td>
+</tr>
+<tr class="row-odd"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Ctrl</kbd>+<kbd class="kbd docutils literal notranslate">Shift</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Add Button to the Left</p></td>
+</tr>
+<tr class="row-even"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Ctrl</kbd>+<kbd class="kbd docutils literal notranslate">Alt</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Remove Button</p></td>
+</tr>
+<tr class="row-odd"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Shift</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Edit Button</p></td>
+</tr>
+<tr class="row-even"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Alt</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Change Icon</p></td>
+</tr>
+<tr class="row-odd"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Alt</kbd>+<kbd class="kbd docutils literal notranslate">OS</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Clear Icon</p></td>
+</tr>
+<tr class="row-even"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Alt</kbd>+<kbd class="kbd docutils literal notranslate">Shift</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Hide Text</p></td>
+</tr>
+<tr class="row-odd"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">OS</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Toggle Spacer</p></td>
+</tr>
+<tr class="row-even"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Ctrl</kbd>+<kbd class="kbd docutils literal notranslate">OS</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Copy Button</p></td>
+</tr>
+<tr class="row-odd"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Ctrl</kbd>+<kbd class="kbd docutils literal notranslate">Shift</kbd>+<kbd class="kbd docutils literal notranslate">OS</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Paste Button</p></td>
+</tr>
+</tbody>
+</table>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="row-button-hotkeys">
+<h3>Row Button Hotkeys<a class="headerlink" href="#row-button-hotkeys" title="Link to this heading"></a></h3>
+<table class="hotkey-table docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 70.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><kbd class="kbd docutils literal notranslate">LMB</kbd></p></td>
+<td><p>Open Menu</p></td>
+</tr>
+<tr class="row-even"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Ctrl</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Add Row Below</p></td>
+</tr>
+<tr class="row-odd"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Ctrl</kbd>+<kbd class="kbd docutils literal notranslate">Shift</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Add Row Above</p></td>
+</tr>
+<tr class="row-even"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Shift</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Toggle Row Size</p></td>
+</tr>
+<tr class="row-odd"><td><p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">OS</kbd>+<kbd class="kbd docutils literal notranslate">LMB</kbd></kbd></p></td>
+<td><p>Toggle Row Spacer</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="layout">
+<h2>Layout<a class="headerlink" href="#layout" title="Link to this heading"></a></h2>
+<img alt="Layout demonstration" class="align-center" src="_static/images/original/popup/pme_layout.gif" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<style>
+.layout-colors span {
+    padding: 0 4px;
+    border-radius: 3px;
+    color: white;
+}
+</style>
+
+<div class="layout-colors">
+    <p>Blender uses row/column based layout system. The editor allows you to set-up a column of <span style="background-color:rgb(213, 77, 77)">rows</span> with optional <span style="background-color:rgb(45, 100, 178)">sub-columns</span> and <span style="background-color:rgb(65, 178, 42)">sub-rows</span>.</p>
+</div><div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>In order to add a sub-column, use <kbd class="kbd docutils literal notranslate">LMB</kbd> on one of the buttons to open a menu and select <em>Column</em> separator.
+To add a sub-row to the sub-column there are <em>Begin Subrow</em> and <em>End Subrow</em> entries in the menu.</p>
+<p>If you need more options to control the layout you can write python code in Custom tab which will be used to draw custom layout of widgets instead of default button.</p>
+</section>
+<section id="expand-layout">
+<h2>Expand Layout<a class="headerlink" href="#expand-layout" title="Link to this heading"></a></h2>
+<img alt="Expand layout settings" class="align-center" src="_static/images/original/popup/pme1.14.0_pd_expand.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>To expand layout inside pie menus or another popup dialog you need to enable <em>Expand Popup Dialog</em> option in <em>Menu</em> tab.</p>
+</section>
+<section id="fixed-columns">
+<h2>Fixed Columns<a class="headerlink" href="#fixed-columns" title="Link to this heading"></a></h2>
+<img alt="Fixed columns demonstration" class="align-center" src="_static/images/original/popup/pme_layout_fixed_columns.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>By default Blender resizes columns depending on the number of buttons in sub-rows. You can enable <em>Fixed Columns</em> option to fix that.</p>
+</section>
+<section id="alignment">
+<h2>Alignment<a class="headerlink" href="#alignment" title="Link to this heading"></a></h2>
+<img alt="Alignment demonstration" class="align-center" src="_static/images/original/popup/pme_layout_alignment.gif" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>You can adjust the alignment of buttons if there are no columns in the current row.</p>
+<style>
+.mode-table, .hotkey-table {
+    width: 100%;
+    margin: 1em 0;
+}
+
+.mode-table td, .hotkey-table td {
+    padding: 0.5em;
+}
+
+.mode-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+</style></section>
 </section>
 
 

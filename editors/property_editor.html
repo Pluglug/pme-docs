@@ -9,7 +9,7 @@
   <title>Property Editor &mdash; Pie Menu Editor 0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=7f55fa01" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=2e546cb0" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
@@ -52,7 +52,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="pie_menu_editor.html">Pie Menu Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="regular_menu_editor.html">Regular Menu Editor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="popup_dialog_editor.html">Pop-up Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="popup_dialog_editor.html">Pop-up Dialog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sticky_key_editor.html">Sticky Key Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="stack_key_editor.html">Stack Key Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="macro_operator_editor.html">Macro Operator Editor</a></li>
@@ -60,9 +60,24 @@
 <li class="toctree-l1"><a class="reference internal" href="editor_common_elements.html">Editor Common Elements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ui_customization.html">Side Panel Editor</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ui_customization.html#hiding-unused-panels">Hiding Unused Panels</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#pme-toolbar">PME Toolbar</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ui_customization.html#menu-panel-extension">Menu/Panel Extension</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#pme-toolbar">PME Toolbar</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Property Editor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#supported-property-types">Supported Property Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#storing-values">Storing Values</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scripting">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#slider">Slider</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#color-widget">Color Widget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#direction-widget">Direction Widget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#icon-only-tab-bar">Icon-Only Tab Bar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#directory-path">Directory Path</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="custom_icons.html">Custom Icons</a></li>
 <li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
 </ul>
@@ -75,7 +90,7 @@
 <p class="caption" role="heading"><span class="caption-text">Support &amp; Community</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../support_community/known_issues.html">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">Known Issues</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">Get Support</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../support_community/contribute_to_pme.html">Contribute to PME</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
@@ -107,7 +122,101 @@
              
   <section id="property-editor">
 <span id="id1"></span><h1>Property Editor<a class="headerlink" href="#property-editor" title="Link to this heading"></a></h1>
-<p>This section covers the Property Editor.</p>
+<p>The editor allows you to register new <a class="reference external" href="https://docs.blender.org/api/current/bpy.props.html">Properties</a> without coding.</p>
+<section id="supported-property-types">
+<h2>Supported Property Types<a class="headerlink" href="#supported-property-types" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>BoolProperty</p></li>
+<li><p>IntProperty</p></li>
+<li><p>FloatProperty</p></li>
+<li><p>StringProperty</p></li>
+<li><p>EnumProperty</p></li>
+<li><p>Vector properties</p></li>
+</ul>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
+<div class="video-container">
+   <iframe src="https://www.youtube.com/embed/xQ-ETd8xacA" frameborder="0" allowfullscreen></iframe>
+</div><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="storing-values">
+<h2>Storing Values<a class="headerlink" href="#storing-values" title="Link to this heading"></a></h2>
+<p>By default PME stores property values in Add-on Preferences. If you want to store some custom data in <em>.blend</em> files you need to assign the property to some type.</p>
+<p>For example, if you assign <em>MyProperty</em> to <em>Object</em> type, the data will be stored in <em>.blend</em> files for each object in the scene:</p>
+<img alt="Property storing example" class="align-center" src="_static/images/original/props/pme_prop_storing.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<p>Now you can use <em>MyProperty</em> like any other <em>Object’s</em> property:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">C</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">MyProperty</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h2>
+<img alt="Property functions" class="align-center" src="_static/images/original/props/pme_prop_funcs.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="scripting">
+<h2>Scripting<a class="headerlink" href="#scripting" title="Link to this heading"></a></h2>
+<p>To get the value of the Property by its name use <em>props()</em> function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">value</span> <span class="o">=</span> <span class="n">props</span><span class="p">(</span><span class="s2">&quot;MyProperty&quot;</span><span class="p">)</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">props</span><span class="p">()</span><span class="o">.</span><span class="n">MyProperty</span>
+</pre></div>
+</div>
+<p>To set the value use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">props</span><span class="p">(</span><span class="s2">&quot;MyProperty&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<span class="n">props</span><span class="p">()</span><span class="o">.</span><span class="n">MyProperty</span> <span class="o">=</span> <span class="n">value</span>
+</pre></div>
+</div>
+<p>Custom tab usage example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">props</span><span class="p">(),</span> <span class="s2">&quot;MyBoolProperty&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">slot</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;COLOR_GREEN&#39;</span> <span class="k">if</span> <span class="n">props</span><span class="p">(</span><span class="s2">&quot;MyBoolProperty&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;COLOR_RED&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<section id="slider">
+<h3>Slider<a class="headerlink" href="#slider" title="Link to this heading"></a></h3>
+<img alt="Slider property example" class="align-center" src="_static/images/original/props/pme_prop_slider.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="color-widget">
+<h3>Color Widget<a class="headerlink" href="#color-widget" title="Link to this heading"></a></h3>
+<img alt="Color widget example" class="align-center" src="_static/images/original/props/pme_prop_color.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="direction-widget">
+<h3>Direction Widget<a class="headerlink" href="#direction-widget" title="Link to this heading"></a></h3>
+<img alt="Direction widget example" class="align-center" src="_static/images/original/props/pme_prop_direction.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="icon-only-tab-bar">
+<h3>Icon-Only Tab Bar<a class="headerlink" href="#icon-only-tab-bar" title="Link to this heading"></a></h3>
+<img alt="Icon-only tab bar example" class="align-center" src="_static/images/original/props/pme_prop_tabbar.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+<section id="directory-path">
+<h3>Directory Path<a class="headerlink" href="#directory-path" title="Link to this heading"></a></h3>
+<img alt="Directory path example" class="align-center" src="_static/images/original/props/pme_prop_path.png" />
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+</section>
+</section>
 </section>
 
 
