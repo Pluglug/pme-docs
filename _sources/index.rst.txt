@@ -1,7 +1,9 @@
+.. Reconsider after changing the design of the feature overview
+
+.. :hide-toc:
+
 .. note::
    This documentation is a community-maintained update of the `original PME documentation <https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/>`_.
-   Check :ref:`contribute-to-docs` to learn how you can help improve this documentation.
-
 
 .. image:: /_static/images/pme_logo.webp
    :alt: Pie Menu Editor Logo
@@ -22,7 +24,8 @@ Pie Menu Editor (PME) empowers you to reshape Blender's interface to match your 
    For those ready to explore Python, PME offers advanced options to extend Blender even further.
 
 .. admonition:: Supporting Sustainable Development
-   :class: tip
+   :class: important
+   
 
    PME's development and maintenance relies primarily on volunteer contributions.
    Your support through `GitHub Sponsors <https://github.com/sponsors/pluglug>`_ (starting from $1/month)
@@ -73,7 +76,7 @@ The :ref:`contribute-to-docs` project welcomes:
 
 
 .. admonition:: Related Links
-   :class: tip
+   :class: hint
 
    .. hlist::
       :columns: 2
