@@ -1,3 +1,7 @@
+.. warning::
+
+   This is a simple port from the `original documentation <https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/>`_. It will be improved in the future.
+
 .. _property-editor:
 
 Property Editor
