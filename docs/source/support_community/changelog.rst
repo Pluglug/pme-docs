@@ -3,13 +3,16 @@
 Change Log
 ==========
 
-1.18.8 (2025.01.??)
+1.18.8 (2025.01.05)
 ---------------------
+
 - Blender 4.2 Support
 - Add ``show_error_trace`` option to the PME Settings
 - Add ``bpy.ops.pme.exec_override()`` Operator
 - Bug Fixes
 - New documentation site (📖 you are here)
+
+**Release Notes**: `v1.18.8 <https://github.com/Pluglug/pie-menu-editor-fork/releases/tag/v1.18.8>`_
 
 ----
 
