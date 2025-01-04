@@ -9,7 +9,7 @@
 project = 'Pie Menu Editor'
 copyright = '2024, Pluglug and contributors'
 author = 'Pluglug and contributors'
-release = '0.1'
+release = '1.18.8'
 master_doc = 'index'
 
 # -- General configuration ---------------------------------------------------
@@ -21,26 +21,35 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',  # Support for NumPy and Google style docstrings
     'sphinx.ext.viewcode',
+    'sphinx.ext.todo',
     # 'sphinx_autodoc_typehints'
+    # 'sphinx.ext.autosectionlabel',
+    # 'sphinxcontrib.menuselection',
 ]
-
 
 templates_path = ['_templates']
 exclude_patterns = []
-
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'bpy': ('https://docs.blender.org/api/current', None),
 }
 
-
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_css_files = ['css/custom.css']
+
+# html_theme = 'sphinx_book_theme'
+
+# html_theme = 'furo'
+# html_title = "Pie Menu Editor"
+# html_theme_options = {
+#     'default_mode': 'light',
+# }
+
+html_theme = 'sphinx_rtd_theme'
 
 html_theme_options = {
     'logo_only': False,
@@ -53,3 +62,6 @@ html_theme_options = {
     'includehidden': True,
     'titles_only': False,
 }
+
+# def setup(app):
+#     app.add_css_file('custom.css')
