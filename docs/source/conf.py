@@ -22,6 +22,8 @@ extensions = [
     'sphinx.ext.napoleon',  # Support for NumPy and Google style docstrings
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
+    'myst_parser',
+    'sphinx_design',
     # 'sphinx_autodoc_typehints'
     # 'sphinx.ext.autosectionlabel',
     # 'sphinxcontrib.menuselection',
@@ -34,6 +36,24 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'bpy': ('https://docs.blender.org/api/current', None),
 }
+
+# -- Options for MyST parser ------------------------------------------------
+source_suffix = {
+    '.rst': None,
+    '.md': 'myst_parser',
+}
+
+myst_enable_extensions = [
+    'colon_fence',
+    'deflist',
+    'html_admonition',
+    'html_image',
+    'linkify',
+    'replacements',
+    'smartquotes',
+    'substitution',
+    'tasklist',
+]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
