@@ -17,7 +17,7 @@ Welcome to PME Documentation
 Pie Menu Editor (PME) empowers you to reshape Blender's interface to match your creative vision. Through intuitive menu creation and hotkey customization, PME turns your workflow ideas into reality.
 
 .. include::
-   getting_started/feature_overview.rst
+   getting_started/feature_overview.md
 
 .. note::
    Your perfect Blender setup is just a few clicks away - no coding required.
@@ -99,42 +99,42 @@ The :ref:`contribute-to-docs` project welcomes:
    :caption: Getting Started
    :hidden:
 
-   getting_started/installation
-   getting_started/quick_tutorial
+   getting_started/installation.md
+   getting_started/quick_tutorial.md
 
 .. toctree::
    :maxdepth: 2
    :caption: Editors
    :hidden:
 
-   editors/pie_menu_editor
-   editors/regular_menu_editor
-   editors/popup_dialog_editor
-   editors/sticky_key_editor
-   editors/stack_key_editor
-   editors/macro_operator_editor
-   editors/modal_operator_editor
-   editors/editor_common_elements
-   editors/ui_customization
-   editors/property_editor
-   editors/custom_icons
-   editors/settings
+   editors/pie_menu_editor.md
+   editors/regular_menu_editor.md
+   editors/popup_dialog_editor.md
+   editors/sticky_key_editor.md
+   editors/stack_key_editor.md
+   editors/macro_operator_editor.md
+   editors/modal_operator_editor.md
+   editors/editor_common_elements.md
+   editors/ui_customization.md
+   editors/property_editor.md
+   editors/custom_icons.md
+   editors/settings.md
 
 .. toctree::
    :maxdepth: 2
    :caption: Reference
    :hidden:
 
-   reference/terminology
-   reference/scripting
-   reference/examples
+   reference/terminology.md
+   reference/scripting.md
+   reference/examples.md
 
 .. toctree::
    :maxdepth: 2
    :caption: Support & Community
    :hidden:
 
-   support_community/faq
-   support_community/get_support
-   support_community/contribute_to_pme
-   support_community/changelog
+   support_community/faq.md
+   support_community/get_support.md
+   support_community/contribute_to_pme.md
+   support_community/changelog.md
