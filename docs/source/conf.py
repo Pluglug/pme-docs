@@ -69,19 +69,18 @@ html_css_files = ['css/custom.css']
 #     'default_mode': 'light',
 # }
 
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'furo'
 
 html_theme_options = {
-    'logo_only': False,
-    # 'prev_next_buttons_location': 'both',
-    'style_external_links': True,
-    'style_nav_header_background': '#0d82d0',
-    'collapse_navigation': True,
-    'sticky_navigation': False,
-    'navigation_depth': 4,
-    'includehidden': True,
-    'titles_only': False,
+    'light_css_variables': {
+        'color-brand-primary': '#0d82d0',
+        'color-brand-content': '#0d82d0',
+    },
+    'dark_css_variables': {
+        'color-brand-primary': '#4CAF50',
+        'color-brand-content': '#4CAF50',
+    },
 }
 
-# def setup(app):
-#     app.add_css_file('custom.css')
+def setup(app):
+    app.add_css_file('css/custom.css')
