@@ -1,3 +1,56 @@
+/* Custom CSS for PME Documentation */
+
+/* Language switcher */
+.language-switcher {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.language-switcher a {
+    display: inline-block;
+    padding: 5px 10px;
+    margin: 0 5px;
+    text-decoration: none;
+    border-radius: 3px;
+    font-weight: bold;
+}
+
+.language-switcher a.active {
+    background: #0d82d0;
+    color: white;
+}
+
+.language-switcher a:not(.active) {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.language-switcher a:hover {
+    background: #e0e0e0;
+}
+
+/* Dark mode support */
+[data-theme="dark"] .language-switcher {
+    background: rgba(30, 30, 30, 0.9);
+    border-color: #555;
+}
+
+[data-theme="dark"] .language-switcher a:not(.active) {
+    background: #333;
+    color: #ccc;
+}
+
+[data-theme="dark"] .language-switcher a:hover {
+    background: #444;
+}
+
 /* Feature card styling for sphinx-design */
 .feature-card {
     transition: all 0.3s ease;
@@ -7,7 +60,7 @@
 
 .feature-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     border-color: var(--color-brand-primary);
 }
 
@@ -38,11 +91,13 @@
 
 .video-container {
     position: relative;
-    padding-bottom: 56.25%; /* 16:9 */
+    padding-bottom: 56.25%;
+    /* 16:9 */
     height: 0;
     max-width: 100%;
     overflow: hidden;
 }
+
 .video-container iframe {
     position: absolute;
     top: 0;

@@ -1,0 +1,38 @@
+{%- extends "furo/layout.html" %}
+
+{%- block extrahead %}
+{{ super() }}
+<script>
+    // Language switcher functionality
+    function switchLanguage(lang) {
+        const currentPath = window.location.pathname;
+        const currentHash = window.location.hash;
+
+        if (lang === 'en') {
+            // Switch to English version
+            const newPath = currentPath.replace('/ja/', '/');
+            window.location.href = newPath + currentHash;
+        } else if (lang === 'ja') {
+            // Switch to Japanese version
+            const newPath = currentPath.replace('/docs/', '/docs_ja/');
+            window.location.href = newPath + currentHash;
+        }
+    }
+
+    // Add language switcher to page
+    document.addEventListener('DOMContentLoaded', function () {
+        const switcher = document.createElement('div');
+        switcher.className = 'language-switcher';
+        switcher.innerHTML = `
+        <a href="#" onclick="switchLanguage('en'); return false;" class="lang-en">EN</a>
+        <a href="#" onclick="switchLanguage('ja'); return false;" class="lang-ja">日本語</a>
+    `;
+
+        // Mark current language as active
+        const currentLang = window.location.pathname.includes('/ja/') ? 'ja' : 'en';
+        switcher.querySelector('.lang-' + currentLang).classList.add('active');
+
+        document.body.appendChild(switcher);
+    });
+</script>
+{%- endblock %}

@@ -1,0 +1,52 @@
+/* Feature card styling for sphinx-design */
+.feature-card {
+    transition: all 0.3s ease;
+    border: 1px solid var(--color-card-border);
+    background: var(--color-card-background);
+}
+
+.feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    border-color: var(--color-brand-primary);
+}
+
+.feature-card .card-header {
+    background: var(--color-brand-primary);
+    color: white;
+    font-weight: bold;
+}
+
+.feature-card .card-body {
+    padding: 1.5rem;
+}
+
+.feature-card img {
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.feature-card img:hover {
+    transform: scale(1.05);
+}
+
+/* Grid adjustments for better responsive behavior */
+.sd-container-fluid .sd-row {
+    --sd-gutter-x: 1.5rem;
+    --sd-gutter-y: 1.5rem;
+}
+
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 */
+    height: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
