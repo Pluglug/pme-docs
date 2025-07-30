@@ -1,15 +1,12 @@
-.. _terminology:
+(terminology)=
 
-Terminology
-===========
+# Terminology
 
 This page explains the main terms and concepts used in Blender and PME for newcomers and those looking to deepen their understanding.
 
-Basic Blender Concepts
-----------------------
+## Basic Blender Concepts
 
-Area
-^^^^
+### Area
 A large workspace region within the Blender interface.  
 Different editor types (such as the 3D Viewport, Outliner, etc.) each occupy an **Area**.
 
@@ -17,10 +14,9 @@ Different editor types (such as the 3D Viewport, Outliner, etc.) each occupy an 
 - Areas may contain subregions called **Regions**, such as a toolbar or property shelf.
 
 | **Related**: Region, Window, Workspace
-| **Reference**: `Area (docs.blender.org) <https://docs.blender.org/manual/en/latest/interface/window_system/areas.html>`_
+| **Reference**: [Area (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/areas.html)
 
-Context
-^^^^^^^
+### Context
 Represents the **current state** of Blender, including:
 
 - The currently selected object
@@ -31,52 +27,47 @@ Represents the **current state** of Blender, including:
 
 In Python:
 
-.. code-block:: python
+```python
+# Retrieve the active object
+active_obj = bpy.context.active_object
 
-    # Retrieve the active object
-    active_obj = bpy.context.active_object
-
-    # Check the current mode
-    current_mode = bpy.context.mode
+# Check the current mode
+current_mode = bpy.context.mode
+```
 
 By leveraging the context, you can conditionally display or enable certain tools based on the current state (mode, selection, etc.).
 
-**Reference**: `Context (docs.blender.org) <https://docs.blender.org/api/current/bpy.context.html>`_
+**Reference**: [Context (docs.blender.org)](https://docs.blender.org/api/current/bpy.context.html)
 
-Header
-^^^^^^
+### Header
 A horizontal bar located at the top or bottom of an Area.
 It usually contains menus, frequently used tool icons, and so forth.
 
 - PME allows you to add custom buttons to the header using
-  :ref:`Menu/Panel Extension <pme-menu-panel-extension>`.
+  {ref}`Menu/Panel Extension <pme-menu-panel-extension>`.
 
 | **Related**: Region
-| **Reference**: `Header (docs.blender.org) <https://docs.blender.org/manual/en/latest/interface/window_system/regions.html#header>`_
+| **Reference**: [Header (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/regions.html#header)
 
-Keymap
-^^^^^^
+### Keymap
 A collection of **hotkey assignments** that change depending on the Area type or editing mode.
 
 - Example: The **G** key is assigned to "move" in Object Mode but to "grab" in Sculpt Mode.
 
 PME can help you tailor these keymaps further to fit your personal workflow.
 
-**Reference**: `Keymap (docs.blender.org) <https://docs.blender.org/manual/en/latest/editors/preferences/keymap.html>`_
+**Reference**: [Keymap (docs.blender.org)](https://docs.blender.org/manual/en/latest/editors/preferences/keymap.html)
 
-Mode
-^^^^
+### Mode
 Refers to the **operational state** of Blender (e.g., Object Mode, Edit Mode).  
 Each mode has its own set of tools and actions.
 
 - PME's **Poll** feature allows you to show or hide specific tools or menus based on the active mode.
 
-**Example**: ``bpy.context.mode == 'EDIT_MESH'``
+**Example**: `bpy.context.mode == 'EDIT_MESH'`
 
-
-Operator
-^^^^^^^^
-A functional unit in Blender that performs a specific action (part of the ``bpy.ops`` module).
+### Operator
+A functional unit in Blender that performs a specific action (part of the `bpy.ops` module).
 
 - Can be assigned to hotkeys
 - Can appear on menus/buttons
@@ -85,11 +76,9 @@ A functional unit in Blender that performs a specific action (part of the ``bpy.
 
 Within PME, you can combine multiple operators using **Macro Operators** or **Modal Operators** to create custom tools.
 
-**Example**: ``bpy.ops.mesh.subdivide()``
+**Example**: `bpy.ops.mesh.subdivide()`
 
-
-Panel
-^^^^^
+### Panel
 A collapsible group of UI widgets, often found in sidebars or property areas.
 
 PME allows for:
@@ -100,11 +89,9 @@ PME allows for:
 - Hiding unneeded panels
 
 | **Related**: Property, Region
-| **Reference**: `Panel (docs.blender.org) <https://docs.blender.org/manual/en/latest/interface/window_system/tabs_panels.html>`_
+| **Reference**: [Panel (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/tabs_panels.html)
 
-
-Property
-^^^^^^^^
+### Property
 Refers to various data items in Blender (like object location, material settings, etc.) that are typically displayed as sliders, checkboxes, or fields in the UI.
 
 In PME, you can:
@@ -113,24 +100,20 @@ In PME, you can:
 - Refer to them in scripts or Poll functions
 - Add custom properties via the Property Editor
 
-**Example**: ``bpy.context.object.location``
+**Example**: `bpy.context.object.location`
 
-
-Region
-^^^^^^
+### Region
 A subdivided area within an **Area**, containing specific UI elements (tools, properties, etc.).
 
 - With PME's **Panel Group** feature, you can add custom content to a Region.
 
 **Related**: Area, Panel
 
-**Reference**: `Region (docs.blender.org) <https://docs.blender.org/manual/en/latest/interface/window_system/regions.html>`_
+**Reference**: [Region (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/regions.html)
 
-PME-Specific Concepts
----------------------
+## PME-Specific Concepts
 
-Menu
-^^^^
+### Menu
 A broad term in PME describing any customizable UI component you create, such as:
 
 - Pie Menu
@@ -141,9 +124,7 @@ A broad term in PME describing any customizable UI component you create, such as
 
 Each menu is composed of multiple **Slots**, each providing a distinct functionality or element.
 
-
-Slot
-^^^^
+### Slot
 An individual **element** or **slot** within a menu. Each slot can be configured to:
 
 - Run a command
@@ -153,31 +134,25 @@ An individual **element** or **slot** within a menu. Each slot can be configured
 
 **Related**: Command Tab, Property Tab, Menu Tab, Custom Tab
 
-
-Command Tab
-^^^^^^^^^^^
+### Command Tab
 One of the tabs in the Slot Editor that lets you run Python code or invoke operators directly.
 
 - Execute single-line Python scripts
 - Call custom functions
 - Manipulate variables or operators
 
-**Example**: ``C.active_object.location.x += 1.0``
+**Example**: `C.active_object.location.x += 1.0`
 
-
-Custom Tab
-^^^^^^^^^^
+### Custom Tab
 Another tab in the Slot Editor for creating more visually defined UI layouts without manual scripting.
 
 **Example**:
 
-.. code-block:: python
+```python
+L.box().label(text="Custom Layout")
+```
 
-    L.box().label(text="Custom Layout")
-
-
-Interactive Panels Mode
-^^^^^^^^^^^^^^^^^^^^^^^
+### Interactive Panels Mode
 A PME mode that displays additional PME Tools buttons within every UI element, making it easier to:
 
 - Identify menu IDs
@@ -186,9 +161,7 @@ A PME mode that displays additional PME Tools buttons within every UI element, m
 
 This mode is especially useful when learning PME, as it helps you visualize where various elements and menus are located.
 
-
-Macro Operator
-^^^^^^^^^^^^^^
+### Macro Operator
 Allows you to **execute multiple operators in sequence**.  
 In the PME **Macro Operator Editor**, you can:
 
@@ -198,9 +171,7 @@ In the PME **Macro Operator Editor**, you can:
 
 It is invaluable for bundling complex workflows into a single click.
 
-
-Modal Operator
-^^^^^^^^^^^^^^
+### Modal Operator
 A real-time, interactive operator that responds to continuous user input.
 You can create your own Modal Operators with PME's **Modal Operator Editor**, enabling:
 
@@ -210,16 +181,14 @@ You can create your own Modal Operators with PME's **Modal Operator Editor**, en
 
 Perfect for building **custom interactive tools**.
 
-
-Poll Method
-^^^^^^^^^^^
-A Python function used to determine whether a menu or tool is **currently usable**. It must return ``True`` if available, or ``False`` otherwise.
+### Poll Method
+A Python function used to determine whether a menu or tool is **currently usable**. It must return `True` if available, or `False` otherwise.
 
 For example:
 
-.. code-block:: python
-
-    ao = C.active_object; return ao and ao.type == 'MESH'
+```python
+ao = C.active_object; return ao and ao.type == 'MESH'
+```
 
 Common use cases include:
 
@@ -227,9 +196,7 @@ Common use cases include:
 - Restricting features to certain object types
 - Preventing errors by hiding invalid tools
 
-
-Slot Editor
-^^^^^^^^^^^
+### Slot Editor
 The **central UI** for defining how PME menus/buttons behave. It includes multiple tabs such as:
 
 - Command (for code execution)
@@ -240,12 +207,9 @@ The **central UI** for defining how PME menus/buttons behave. It includes multip
 
 It's designed so you can set up everything through a graphical interface, even if you're new to scripting.
 
+## Advanced Concepts
 
-Advanced Concepts
------------------
-
-Event System
-^^^^^^^^^^^^
+### Event System
 Blender's input handling mechanism, which tracks keyboard and mouse events. It is essential for:
 
 - Modal Operators
@@ -254,13 +218,11 @@ Blender's input handling mechanism, which tracks keyboard and mouse events. It i
 
 For example:
 
-.. code-block:: python
+```python
+E.ctrl and E.shift and message_box("Ctrl+Shift Pressed")
+```
 
-    E.ctrl and E.shift and message_box("Ctrl+Shift Pressed")
-
-
-Layout System
-^^^^^^^^^^^^^
+### Layout System
 Blender's system for constructing UI layouts. PME relies on this system to:
 
 - Place labels, buttons, and property fields
@@ -269,13 +231,11 @@ Blender's system for constructing UI layouts. PME relies on this system to:
 
 For example:
 
-.. code-block:: python
+```python
+L.box().label(text=text, icon=icon, icon_value=icon_value)
+```
 
-    L.box().label(text=text, icon=icon, icon_value=icon_value)
-
-
-Operator Execution Context
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+### Operator Execution Context
 Determines how an operator is executed. The two most common contexts are:
 
 - **INVOKE_DEFAULT**  
@@ -286,13 +246,13 @@ Determines how an operator is executed. The two most common contexts are:
 
 **Example**:
 
-.. code-block:: python
+```python
+# Move an object interactively based on mouse input
+bpy.ops.transform.translate('INVOKE_DEFAULT')
 
-    # Move an object interactively based on mouse input
-    bpy.ops.transform.translate('INVOKE_DEFAULT')
-
-    # Move an object 5.0 along the X axis without user input
-    bpy.ops.transform.translate('EXEC_DEFAULT', value=(5.0, 0.0, 0.0))
+# Move an object 5.0 along the X axis without user input
+bpy.ops.transform.translate('EXEC_DEFAULT', value=(5.0, 0.0, 0.0))
+```
 
 | **Related**: Operator, Command Tab, Modal Operator, Macro Operator
-| **Reference**: `Execution Context (docs.blender.org) <https://docs.blender.org/api/current/bpy.ops.html#execution-context>`_
+| **Reference**: [Execution Context (docs.blender.org)](https://docs.blender.org/api/current/bpy.ops.html#execution-context)
