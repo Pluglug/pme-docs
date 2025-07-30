@@ -1,6 +1,7 @@
 # Build files
 _build/
 docs/build/
+docs_ja/build/
 
 # Sphinx cache
 doctrees/
