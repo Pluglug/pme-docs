@@ -1,5 +1,3 @@
-(feature-overview)=
-
 # Feature Overview
 
 ```{todo}
@@ -16,7 +14,7 @@ Replace images with gifs. Youtube links moved to their own section.
 :class-header: sd-text-center sd-font-weight-bold
 :class-body: sd-text-left
 
-![Pie Menu Demo](../_static/images/overview/overview_vid_pie.png)
+![Pie Menu Demo](/_static/images/overview/overview_vid_pie.png)
 
 Create radial menus with 8+ customizable buttons, perfect for quick access to frequently used tools. Supports nesting menus and display panels to organize complex workflows.
 ```
@@ -27,7 +25,7 @@ Create radial menus with 8+ customizable buttons, perfect for quick access to fr
 :class-header: sd-text-center sd-font-weight-bold
 :class-body: sd-text-left
 
-![Regular Menu Demo](../_static/images/overview/overview_vid_menu.png)
+![Regular Menu Demo](/_static/images/overview/overview_vid_menu.png)
 
 Design multi-column dropdown menus that can be triggered by hotkeys or integrated into existing menus. Ideal for grouping related commands and settings.
 ```
@@ -38,7 +36,7 @@ Design multi-column dropdown menus that can be triggered by hotkeys or integrate
 :class-header: sd-text-center sd-font-weight-bold
 :class-body: sd-text-left
 
-![Popup Dialog Demo](../_static/images/overview/overview_vid_popup.png)
+![Popup Dialog Demo](/_static/images/overview/overview_vid_popup.png)
 
 Build custom widget layouts that can be displayed anywhere - in menus, dialogs, panels, or toolbars. Seamlessly integrate with Blender's UI system.
 ```
@@ -49,7 +47,7 @@ Build custom widget layouts that can be displayed anywhere - in menus, dialogs, 
 :class-header: sd-text-center sd-font-weight-bold
 :class-body: sd-text-left
 
-![Sticky Key Demo](../_static/images/overview/overview_vid_sticky.png)
+![Sticky Key Demo](/_static/images/overview/overview_vid_sticky.png)
 
 Configure different actions for key press and release events. Essential for temporary tool activation or mode switching during operations.
 ```
@@ -60,7 +58,7 @@ Configure different actions for key press and release events. Essential for temp
 :class-header: sd-text-center sd-font-weight-bold
 :class-body: sd-text-left
 
-![Stack Key Demo](../_static/images/overview/overview_vid_stack.png)
+![Stack Key Demo](/_static/images/overview/overview_vid_stack.png)
 
 Assign multiple commands to a single hotkey and cycle through them. Streamline your workflow by reducing the number of required shortcuts.
 ```
@@ -71,7 +69,7 @@ Assign multiple commands to a single hotkey and cycle through them. Streamline y
 :class-header: sd-text-center sd-font-weight-bold
 :class-body: sd-text-left
 
-![Macro Operator Demo](../_static/images/overview/overview_vid_macro.png)
+![Macro Operator Demo](/_static/images/overview/overview_vid_macro.png)
 
 Create new tools by combining existing Blender operations - no coding required. Automate complex workflows with simple button clicks.
 ```
@@ -82,29 +80,29 @@ Create new tools by combining existing Blender operations - no coding required. 
 :class-header: sd-text-center sd-font-weight-bold
 :class-body: sd-text-left
 
-![Modal Operator Demo](../_static/images/overview/overview_vid_modal.png)
+![Modal Operator Demo](/_static/images/overview/overview_vid_modal.png)
 
 Develop interactive tools that respond to user input. Perfect for custom manipulation tools and dynamic operations.
 ```
 
 ```{grid-item-card} Side Panel Editor
-:link: ../editors/ui_customization.html#side-panel-editor
+:link: ../editors/side_panel_editor.html
 :class-card: sd-shadow-md sd-rounded-3 feature-card
 :class-header: sd-text-center sd-font-weight-bold
 :class-body: sd-text-left
 
-![Side Panel Editor Demo](../_static/images/overview/overview_vid_pg.png)
+![Side Panel Editor Demo](/_static/images/overview/overview_vid_pg.png)
 
 Organize and customize Blender's interface by grouping and managing panels. Create new tabs or extend existing categories with custom panels.
 ```
 
 ```{grid-item-card} Hiding Unused Panels
-:link: ../editors/ui_customization.html#hiding-unused-panels
+:link: ../editors/hiding_unused_panels.html
 :class-card: sd-shadow-md sd-rounded-3 feature-card
 :class-header: sd-text-center sd-font-weight-bold
 :class-body: sd-text-left
 
-![Hiding Unused Panels Demo](../_static/images/overview/overview_vid_hpg.png)
+![Hiding Unused Panels Demo](/_static/images/overview/overview_vid_hpg.png)
 
 Declutter Blender's interface by selectively hiding unwanted panels and groups. Keep your workspace focused and efficient by showing only what you need.
 ```
@@ -115,7 +113,7 @@ Declutter Blender's interface by selectively hiding unwanted panels and groups. 
 :class-header: sd-text-center sd-font-weight-bold
 :class-body: sd-text-left
 
-![Property Editor Demo](../_static/images/overview/overview_vid_property.png)
+![Property Editor Demo](/_static/images/overview/overview_vid_property.png)
 
 Create and manage custom properties for objects, materials, and more. Extend Blender's property system with your own controls and settings.
 ```

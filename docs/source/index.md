@@ -1,4 +1,4 @@
-# Reconsider after changing the design of the feature overview
+<!-- Reconsider after changing the design of the feature overview -->
 
 ```{note}
 This documentation is a community-maintained update of the [original PME documentation](https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/).

@@ -353,6 +353,8 @@ Access PME's global context dictionary. Contains:
 - Registered custom functions and values
 - User data storage (`U`)
 
+```
+
 ```python
 from pie_menu_editor import pme
 
@@ -361,7 +363,7 @@ g = pme.context.globals
 props = g.get('props')
 user_data = g.get('U')
 ```
-```
+
 
 ```{py:method} add_global(key, value)
 
@@ -370,6 +372,8 @@ Register a custom function or value in the global context.
 :param str key: Name for accessing the item
 :param value: Function or value to register
 :rtype: None
+
+```
 
 ```python
 # Register a function
@@ -384,7 +388,6 @@ pme.context.add_global("MAX_ITEMS", 10)
 # Access from PME menus via Command tab:
 # toggle_select()
 # MAX_ITEMS
-```
 ```
 ````
 
@@ -405,10 +408,10 @@ Get a stored value.
 
 Update multiple values at once.
 
+```
 ```python
 U = pme.context.globals['U']  # Get UserData instance
 U.update(tool_state="active", count=5)
 print(U.tool_state)  # "active"
-```
 ```
 ````
