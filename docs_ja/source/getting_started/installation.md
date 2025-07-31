@@ -7,11 +7,7 @@ Pie Menu Editor (PME) をBlenderにインストールしましょう。
 ### システム要件
 - **OS**: Windows 10/11, macOS 10.15+, Linux (Ubuntu 18.04+ 推奨)
 - **Blender**: バージョン 3.2 - 4.5
-- **ストレージ**: 約20MB の空き容量
-
-### 購入要件
-- Gumroad または Blender Market アカウント
-- PME の有効なライセンス
+- **ストレージ**: 約8MB の空き容量
 
 ## インストール
 
@@ -81,7 +77,7 @@ Pie Menu Editor (PME) をBlenderにインストールしましょう。
 ::::
 
 :::{admonition} Blender 4.2で「legacy add-on」と表示されるのは問題ですか？
-:class: tip
+:class: seealso
 いいえ、問題ありません。これは新しいExtensionシステムとの違いを示すだけで、機能に影響はありません。
 :::
 
@@ -109,7 +105,7 @@ Pie Menu Editor (PME) をBlenderにインストールしましょう。
 Blenderのシステムコンソールを開くには、**View > Toggle System Console**を選択します。
 :::
 
-### インストールエラー
+<!-- ### インストールエラー
 (WIP)
 
 **エラー**: "Module not found"
@@ -124,41 +120,48 @@ Blenderのシステムコンソールを開くには、**View > Toggle System Co
 
 **問題**: アドオンが表示されない
 - **確認事項**: アドオンの有効化状態
-- **解決手順**: Preferences > Add-ons > Pie Menu Editor にチェック
+- **解決手順**: Preferences > Add-ons > Pie Menu Editor にチェック -->
 
 
-## インストール後の技術的詳細
+::::{dropdown} インストール後のディレクトリ構成
+:icon: book
 
 PMEのインストール後、Blenderのアドオンディレクトリに以下のフォルダが作成されます：
 
 ```{code-block} text
 addons/
-├── pie_menu_editor/          # アドオン本体
+├── pie_menu_editor/  
+|   ├── examples/
+|   │   └── ...
+│   ├── scripts/
+│   │   ├── autorun/
+│   │   │   └── functions.py
+│   │   └── ...
+│   ├── icons/
+│   │   └── ...
 │   ├── __init__.py
-│   ├── operators.py
-│   ├── ui.py
+│   ├── addon.py
 │   └── ...
 └── pie_menu_editor_data/     # ユーザーデータ保存用
-    ├── pie_menus.json
-    ├── settings.json
     └── backups/
 ```
 
 ### フォルダの役割
 
-**`pie_menu_editor/`**
-- PMEアドオンの本体ファイルが格納されます
-- アップデート時にこのフォルダは完全に置き換えられます
+**`pie_menu_editor/`** - アドオン本体
+アドオンのメインプログラムファイルが格納されています。アップデート時にはこのフォルダ全体が新しいバージョンに置き換えられます。
 
-**`pie_menu_editor_data/`**
-- ユーザーが作成したパイメニューの設定
-- カスタマイズした設定やバックアップファイル
-- アップデート時も**保持される**ため、設定が失われません
+**`pie_menu_editor/examples/`** - カスタマイズ例
+PMEの活用方法を示すサンプルファイルが含まれています。これらの例を参考にして、独自のパイメニューを作成できます。
 
-:::{admonition} データ保護の仕組み
-:class: tip
-この2つのフォルダに分ける設計により、アドオンをアップデートしてもユーザーのカスタマイズが失われることがありません。`pie_menu_editor_data/`フォルダは常に保護されます。
-:::
+**`pie_menu_editor/scripts/autorun/`** - 自動実行スクリプト
+アドオン起動時に自動で実行されるスクリプトが格納されています。起動時に実行したいカスタムスクリプトを追加する場合は、この場所にファイルを配置してください。なお、`functions.py`はシステムファイルのため削除しないよう注意してください。
+
+**`pie_menu_editor/icons/`** - カスタムアイコン
+オリジナルのアイコンファイル（PNG形式）を配置することで、パイメニューで独自のアイコンを使用できます。
+
+**`pie_menu_editor_data/`** - ユーザーデータ保護領域
+自動バックアップデータが保存される重要なフォルダです。アドオンをアップデートしても、このフォルダの内容は保持されるため、万が一の設定やデータの損失を防ぐことができます。
 
 ### アドオンディレクトリの場所
 
@@ -196,6 +199,8 @@ addons/
 
 例：`/home/[ユーザー名]/.config/blender/4.2/scripts/addons/`
 :::
+
+::::
 
 ::::
 
