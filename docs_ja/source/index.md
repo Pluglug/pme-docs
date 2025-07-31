@@ -85,12 +85,13 @@ The {ref}`contribute-to-docs` project welcomes:
 ---
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Getting Started
-:hidden:
 
 getting_started/installation
-getting_started/quick_tutorial
+getting_started/basic_pie_menu
+getting_started/popup_dialog_tutorial
+getting_started/macro_tutorial
 ```
 
 ```{toctree}
