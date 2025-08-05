@@ -64,3 +64,16 @@
     /* カード幅。画像アスペクト比次第で調整する場合はここを変更 */
     scroll-snap-align: start;
 }
+
+/* モバイル用の調整 */
+@media (max-width: 768px) {
+    .sd-card-carousel .sd-card {
+        flex: 0 0 clamp(280px, 80vw, 320px);
+        /* モバイルでは画面幅の80%まで使用 */
+    }
+
+    .sd-card-carousel {
+        --sd-gap: 1rem;
+        /* モバイルでは間隔を少し狭く */
+    }
+}
