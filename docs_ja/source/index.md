@@ -1,69 +1,70 @@
-<!-- Reconsider after changing the design of the feature overview -->
+<!-- 機能概要のデザイン変更後に再検討 -->
 
 ```{note}
-This documentation is a community-maintained update of the [original PME documentation](https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/).
+このドキュメントは、[オリジナルのPMEドキュメント](https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/)のコミュニティによる更新版です。
 ```
 
 ![Pie Menu Editor Logo](/_static/images/pme_logo.webp)
 
 ---
 
-# Welcome to PME Documentation
+# PMEドキュメントへようこそ
 
-Pie Menu Editor (PME) empowers you to reshape Blender's interface to match your creative vision. Through intuitive menu creation and hotkey customization, PME turns your workflow ideas into reality.
+Pie Menu Editor (PME)は、Blenderのインターフェースを自由にカスタマイズできるアドオンです。コーディング無しで気軽にカスタマイズできるため、あらゆるBlenderユーザーにとって
+<!-- Pie Menu Editor (PME)は、Blenderのインターフェースをあなたの創造的なビジョンに合わせて再構築する力を与えます。直感的なメニュー作成とホットキーカスタマイズを通じて、PMEはあなたのワークフローのアイデアを現実に変えます。 -->
 
 ```{include} getting_started/feature_overview.md
 ```
 
 ```{note}
-Your perfect Blender setup is just a few clicks away - no coding required.
-For those ready to explore Python, PME offers advanced options to extend Blender even further.
+完璧なBlender設定は、わずか数クリックで実現できます - コーディングは不要です。
+Pythonを探索する準備ができている方には、PMEはBlenderをさらに拡張する高度なオプションを提供します。
 ```
 
-```{admonition} Supporting Sustainable Development
+```{admonition} 持続可能な開発のサポート
 :class: important
 
-PME's development and maintenance relies primarily on volunteer contributions.
-Your support through [GitHub Sponsors](https://github.com/sponsors/pluglug) (starting from $1/month)
-helps make these activities sustainable:
+PMEの開発とメンテナンスは主にボランティアの貢献に依存しています。
+[GitHub Sponsors](https://github.com/sponsors/pluglug)（月額$1から）を通じたあなたのサポートが、
+これらの活動を持続可能にするのに役立ちます：
 
-- Compatibility updates for new Blender versions
-- Bug fixes and stability improvements
-- Documentation enhancement
-- New feature development
-- Fast and reliable support
+- 新しいBlenderバージョンとの互換性アップデート
+- バグ修正と安定性の向上
+- ドキュメントの強化
+- 新機能の開発
+- 迅速で信頼性の高いサポート
 
-Your support drives PME's evolution into an even better tool.
+あなたのサポートがPMEをさらに良いツールへと進化させます。
 ```
 
 ```{todo}
-Get Support Section
+サポートセクション
 ```
 
 ---
 
-## Join the Community
+## コミュニティに参加
 
-PME's development and documentation thrive through community collaboration.
-Here's how you can participate:
+PMEの開発とドキュメントは、コミュニティの協力によって発展しています。
+以下の方法で参加できます：
 
-### Share and Learn
-- [Blender Artists Forum](http://blenderartists.org/forum/showthread.php?392910): Ask questions and share customization examples
-- [GitHub Discussions](https://github.com/Pluglug/pie-menu-editor-fork/discussions): Propose new features and exchange ideas
+### 共有と学習
+- [Blender Artists Forum](http://blenderartists.org/forum/showthread.php?392910): 質問をしたり、カスタマイズ例を共有したり
+- [GitHub Discussions](https://github.com/Pluglug/pie-menu-editor-fork/discussions): 新機能を提案したり、アイデアを交換したり
 
-### Contribute to Development
-- [Issue Tracker](https://github.com/Pluglug/pie-menu-editor-fork/issues): Report bugs and request features
-- [Pull Requests](https://github.com/Pluglug/pie-menu-editor-fork/pulls): Improve code and add new features
-- {ref}`contribute-to-pme`: Development participation guidelines
+### 開発への貢献
+- [Issue Tracker](https://github.com/Pluglug/pie-menu-editor-fork/issues): バグの報告や機能のリクエスト
+- [Pull Requests](https://github.com/Pluglug/pie-menu-editor-fork/pulls): コードの改善や新機能の追加
+- {ref}`contribute-to-pme`: 開発参加ガイドライン
 
-### Improve Documentation
-The {ref}`contribute-to-docs` project welcomes:
+### ドキュメントの改善
+{ref}`contribute-to-docs`プロジェクトは以下を歓迎します：
 
-- Content review and proofreading
-- Documentation translation
-- Contributions to Examples & Resources
+- コンテンツのレビューと校正
+- ドキュメントの翻訳
+- 例とリソースへの貢献
 
-```{admonition} Related Links
+```{admonition} 関連リンク
 :class: hint
 
 :::{hlist}
@@ -86,7 +87,7 @@ The {ref}`contribute-to-docs` project welcomes:
 
 ```{toctree}
 :maxdepth: 1
-:caption: Getting Started
+:caption: はじめに
 
 getting_started/installation
 getting_started/basic_pie_menu
@@ -96,7 +97,7 @@ getting_started/macro_tutorial
 
 ```{toctree}
 :maxdepth: 2
-:caption: Editors
+:caption: エディター
 :hidden:
 
 editors/pie_menu_editor
@@ -115,7 +116,7 @@ editors/settings
 
 ```{toctree}
 :maxdepth: 2
-:caption: Reference
+:caption: リファレンス
 :hidden:
 
 reference/terminology
@@ -125,7 +126,7 @@ reference/examples
 
 ```{toctree}
 :maxdepth: 2
-:caption: Support & Community
+:caption: サポート & コミュニティ
 :hidden:
 
 support_community/faq
