@@ -105,3 +105,15 @@
     width: 100%;
     height: 100%;
 }
+
+/* --- card-carousel 用カスタムサイズ調整 --------------- */
+.sd-card-carousel {
+    --sd-gap: 1.5rem;
+    /* カード間隔 */
+}
+
+.sd-card-carousel .sd-card {
+    flex: 0 0 clamp(240px, 25vw, 320px);
+    /* カード幅。画像アスペクト比次第で調整する場合はここを変更 */
+    scroll-snap-align: start;
+}
