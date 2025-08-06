@@ -1,7 +1,5 @@
-<!-- 機能概要のデザイン変更後に再検討 -->
-
 ```{note}
-このドキュメントは、[オリジナルのPMEドキュメント](https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/)のコミュニティによる更新版です。
+このドキュメントは、[オリジナルのPMEドキュメント](https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/)のPMEファンによる更新版です。
 ```
 
 ![Pie Menu Editor Logo](/_static/images/pme_logo.webp)
@@ -10,65 +8,77 @@
 
 # PMEドキュメントへようこそ
 
-Pie Menu Editor (PME)は、Blenderのインターフェースを自由にカスタマイズできるアドオンです。コーディング無しで気軽にカスタマイズできるため、あらゆるBlenderユーザーにとって
-<!-- Pie Menu Editor (PME)は、Blenderのインターフェースをあなたの創造的なビジョンに合わせて再構築する力を与えます。直感的なメニュー作成とホットキーカスタマイズを通じて、PMEはあなたのワークフローのアイデアを現実に変えます。 -->
+Pie Menu Editor (PME)は、Blenderのインターフェースを思いのままにカスタマイズできるアドオンです。パイメニューやマクロ、カスタムパネルなど、プログラミング知識がなくても手軽に作業環境を改善できます。
 
 ```{include} getting_started/feature_overview.md
 ```
 
-```{note}
-完璧なBlender設定は、わずか数クリックで実現できます - コーディングは不要です。
-Pythonを探索する準備ができている方には、PMEはBlenderをさらに拡張する高度なオプションを提供します。
+```{admonition} プログラミングの知識は必要ですか?
+:class: hint
+いいえ、PMEはプログラミングなしでも十分強力です。\
+もちろん、Pythonを学習すればさらに柔軟なカスタマイズが可能になります。決して難しくありません！ぜひチャレンジしてみてください！
+
+**何か分からないことがあれば、[GitHub Discussions (日本語可)](https://github.com/Pluglug/pie-menu-editor-fork/discussions)でお気軽にご質問ください！**
 ```
 
-```{admonition} 持続可能な開発のサポート
-:class: important
+## PMEの入手方法
 
-PMEの開発とメンテナンスは主にボランティアの貢献に依存しています。
-[GitHub Sponsors](https://github.com/sponsors/pluglug)（月額$1から）を通じたあなたのサポートが、
-これらの活動を持続可能にするのに役立ちます：
+PMEはroaoaoさんが有料で販売しているBlenderアドオンです。
+ぜひ以下の公式販売サイトからご購入ください：
 
-- 新しいBlenderバージョンとの互換性アップデート
-- バグ修正と安定性の向上
-- ドキュメントの強化
+- **[SuperHive (Blender Market)](https://superhivemarket.com/products/pie-menu-editor?ref=7373)**
+- **[Gumroad](https://roaoao.gumroad.com/l/pie_menu_editor)**
+
+なお、当プロジェクトでは、コミュニティによるメンテナンス版も提供予定ですが、
+まずは公式版のご購入をお願いします。
+
+
+```{admonition} 開発を応援する
+:class: tip
+
+PMEは現在、オリジナル開発者のroaoaoさんに代わってPMEファンが個人的にメンテナンスしています。\
+もしこの活動があなたのお役に立っているようでしたら、[GitHub Sponsors](https://github.com/sponsors/pluglug)にてご支援いただけると嬉しいです。
+
+- 新しいBlenderバージョンへの対応
+- バグ修正とパフォーマンス改善
+- ドキュメントの充実
 - 新機能の開発
-- 迅速で信頼性の高いサポート
+- ユーザーサポート
 
-あなたのサポートがPMEをさらに良いツールへと進化させます。
-```
-
-```{todo}
-サポートセクション
+小額でも大変励みになります。\
+よろしくお願いします。
 ```
 
 ---
 
-## コミュニティに参加
+## コミュニティへの参加
 
-PMEの開発とドキュメントは、コミュニティの協力によって発展しています。
-以下の方法で参加できます：
+以下の場所で情報交換や開発協力を受け付けています：
 
-### 共有と学習
-- [Blender Artists Forum](http://blenderartists.org/forum/showthread.php?392910): 質問をしたり、カスタマイズ例を共有したり
-- [GitHub Discussions](https://github.com/Pluglug/pie-menu-editor-fork/discussions): 新機能を提案したり、アイデアを交換したり
+### 質問・情報交換
+- [Blender Artists Forum](http://blenderartists.org/forum/showthread.php?392910): 使い方の質問、カスタマイズ例の共有
+- [GitHub Discussions](https://github.com/Pluglug/pie-menu-editor-fork/discussions): 新機能のアイデア、意見交換
 
-### 開発への貢献
-- [Issue Tracker](https://github.com/Pluglug/pie-menu-editor-fork/issues): バグの報告や機能のリクエスト
-- [Pull Requests](https://github.com/Pluglug/pie-menu-editor-fork/pulls): コードの改善や新機能の追加
-- {ref}`contribute-to-pme`: 開発参加ガイドライン
+### バグ報告・開発協力
+- [Issue Tracker](https://github.com/Pluglug/pie-menu-editor-fork/issues): バグ報告、機能リクエスト
+- [Pull Requests](https://github.com/Pluglug/pie-menu-editor-fork/pulls): コード改善、新機能の実装
+- {ref}`contribute-to-pme`: 開発参加について
 
-### ドキュメントの改善
-{ref}`contribute-to-docs`プロジェクトは以下を歓迎します：
+### ドキュメント作成
+{ref}`contribute-to-docs`では以下のご協力をお待ちしています：
 
-- コンテンツのレビューと校正
-- ドキュメントの翻訳
-- 例とリソースへの貢献
+- 内容の確認・校正
+- 日本語・英語間の翻訳
+- 画像・GIF・動画の提供
+- 使用例やチュートリアルの追加
+
+---
 
 ```{admonition} 関連リンク
-:class: hint
+:class: seealso
 
 :::{hlist}
-:columns: 2
+:columns: 3
 
 * [Blender](https://www.blender.org/)
 * [Blender Development Fund](https://fund.blender.org/)
@@ -77,9 +87,9 @@ PMEの開発とドキュメントは、コミュニティの協力によって�
 
 * [PME Original Documentation](https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/)
 * [PME Blender Artists Forum](http://blenderartists.org/forum/showthread.php?392910)
-* [PME Fork Repository](https://github.com/pluglug/pie-menu-editor-fork)
-* [PME Docs Repository](https://github.com/pluglug/pme-docs)
-* [PME Become a Sponsor](https://github.com/sponsors/pluglug)
+* [PME Fork Repository](https://github.com/Pluglug/pie-menu-editor-fork)
+* [PME Docs Repository](https://github.com/Pluglug/pme-docs)
+* [PME Become a Sponsor](https://github.com/sponsors/Pluglug)
 :::
 ```
 
@@ -87,7 +97,7 @@ PMEの開発とドキュメントは、コミュニティの協力によって�
 
 ```{toctree}
 :maxdepth: 1
-:caption: はじめに
+:caption: はじめる
 
 getting_started/installation
 getting_started/basic_pie_menu
@@ -97,7 +107,7 @@ getting_started/macro_tutorial
 
 ```{toctree}
 :maxdepth: 2
-:caption: エディター
+:caption: エディタ
 :hidden:
 
 editors/pie_menu_editor
@@ -116,7 +126,7 @@ editors/settings
 
 ```{toctree}
 :maxdepth: 2
-:caption: リファレンス
+:caption: 参考資料
 :hidden:
 
 reference/terminology
@@ -126,7 +136,7 @@ reference/examples
 
 ```{toctree}
 :maxdepth: 2
-:caption: サポート & コミュニティ
+:caption: サポート
 :hidden:
 
 support_community/faq
