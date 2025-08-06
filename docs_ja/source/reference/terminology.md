@@ -1,258 +1,257 @@
 (terminology)=
 
-# Terminology
+# 用語集
 
-This page explains the main terms and concepts used in Blender and PME for newcomers and those looking to deepen their understanding.
+このページでは、Blenderの初心者やより深い理解を求める方に向けて、BlenderとPMEで使用される主要な用語と概念を説明します。
 
-## Basic Blender Concepts
+## 基本的なBlenderの概念
 
-### Area
-A large workspace region within the Blender interface.  
-Different editor types (such as the 3D Viewport, Outliner, etc.) each occupy an **Area**.
+### エリア（Area）
+Blenderインターフェース内の大きなワークスペース領域です。
+3Dビューポート、アウトライナーなどの異なるエディタータイプはそれぞれ**エリア**を占有します。
 
-- PME offers a feature called **Toggle Side Area**, allowing you to show or hide side regions (like sidebars) in an Area.
-- Areas may contain subregions called **Regions**, such as a toolbar or property shelf.
+- PMEは**サイドエリア切り替え**機能を提供し、エリア内のサイド領域（サイドバーなど）の表示/非表示を切り替えることができます。
+- エリアには、ツールバーやプロパティシェルフなどの**リージョン**と呼ばれるサブ領域が含まれる場合があります。
 
-| **Related**: Region, Window, Workspace
-| **Reference**: [Area (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/areas.html)
+| **関連**: リージョン、ウィンドウ、ワークスペース
+| **リファレンス**: [Area (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/areas.html)
 
-### Context
-Represents the **current state** of Blender, including:
+### コンテキスト（Context）
+Blenderの**現在の状態**を表し、以下を含みます:
 
-- The currently selected object
-- The active editing mode (e.g., Object Mode, Edit Mode)
-- Cursor position
-- Active tool
-- Other information depending on user actions
+- 現在選択されているオブジェクト
+- アクティブな編集モード（オブジェクトモード、編集モードなど）
+- カーソル位置
+- アクティブなツール
+- ユーザーの操作に応じたその他の情報
 
-In Python:
+Pythonでは:
 
 ```python
-# Retrieve the active object
+# アクティブなオブジェクトを取得
 active_obj = bpy.context.active_object
 
-# Check the current mode
+# 現在のモードを確認
 current_mode = bpy.context.mode
 ```
 
-By leveraging the context, you can conditionally display or enable certain tools based on the current state (mode, selection, etc.).
+コンテキストを活用することで、現在の状態（モード、選択など）に基づいて特定のツールを条件付きで表示または有効化できます。
 
-**Reference**: [Context (docs.blender.org)](https://docs.blender.org/api/current/bpy.context.html)
+**リファレンス**: [Context (docs.blender.org)](https://docs.blender.org/api/current/bpy.context.html)
 
-### Header
-A horizontal bar located at the top or bottom of an Area.
-It usually contains menus, frequently used tool icons, and so forth.
+### ヘッダー（Header）
+エリアの上部または下部にある水平バーです。
+通常、メニュー、よく使用されるツールアイコンなどが含まれます。
 
-- PME allows you to add custom buttons to the header using
-  {ref}`Menu/Panel Extension <pme-menu-panel-extension>`.
+- PMEでは{ref}`メニュー/パネル拡張 <pme-menu-panel-extension>`を使用してヘッダーにカスタムボタンを追加できます。
 
-| **Related**: Region
-| **Reference**: [Header (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/regions.html#header)
+| **関連**: リージョン
+| **リファレンス**: [Header (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/regions.html#header)
 
-### Keymap
-A collection of **hotkey assignments** that change depending on the Area type or editing mode.
+### キーマップ（Keymap）
+エリアタイプや編集モードに応じて変化する**ホットキー割り当て**のコレクションです。
 
-- Example: The **G** key is assigned to "move" in Object Mode but to "grab" in Sculpt Mode.
+- 例: **G**キーはオブジェクトモードでは「移動」に割り当てられていますが、スカルプトモードでは「つかむ」に割り当てられています。
 
-PME can help you tailor these keymaps further to fit your personal workflow.
+PMEは、これらのキーマップを個人のワークフローに合わせてさらにカスタマイズするのに役立ちます。
 
-**Reference**: [Keymap (docs.blender.org)](https://docs.blender.org/manual/en/latest/editors/preferences/keymap.html)
+**リファレンス**: [Keymap (docs.blender.org)](https://docs.blender.org/manual/en/latest/editors/preferences/keymap.html)
 
-### Mode
-Refers to the **operational state** of Blender (e.g., Object Mode, Edit Mode).  
-Each mode has its own set of tools and actions.
+### モード（Mode）
+Blenderの**動作状態**（オブジェクトモード、編集モードなど）を指します。
+各モードにはそれぞれのツールとアクションのセットがあります。
 
-- PME's **Poll** feature allows you to show or hide specific tools or menus based on the active mode.
+- PMEの**Poll**機能により、アクティブなモードに基づいて特定のツールやメニューの表示/非表示を切り替えできます。
 
-**Example**: `bpy.context.mode == 'EDIT_MESH'`
+**例**: `bpy.context.mode == 'EDIT_MESH'`
 
-### Operator
-A functional unit in Blender that performs a specific action (part of the `bpy.ops` module).
+### オペレーター（Operator）
+Blenderで特定のアクションを実行する機能単位（`bpy.ops`モジュールの一部）です。
 
-- Can be assigned to hotkeys
-- Can appear on menus/buttons
-- Callable from Python scripts
-- Executable in Macros
+- ホットキーに割り当て可能
+- メニュー/ボタンに表示可能
+- Pythonスクリプトから呼び出し可能
+- マクロで実行可能
 
-Within PME, you can combine multiple operators using **Macro Operators** or **Modal Operators** to create custom tools.
+PME内では、**マクロオペレーター**や**モーダルオペレーター**を使用して複数のオペレーターを組み合わせ、カスタムツールを作成できます。
 
-**Example**: `bpy.ops.mesh.subdivide()`
+**例**: `bpy.ops.mesh.subdivide()`
 
-### Panel
-A collapsible group of UI widgets, often found in sidebars or property areas.
+### パネル（Panel）
+サイドバーやプロパティエリアによく見られる、折りたたみ可能なUIウィジェットのグループです。
 
-PME allows for:
+PMEでは以下が可能です:
 
-- Creating new panels
-- Extending existing panels
-- Grouping panels
-- Hiding unneeded panels
+- 新しいパネルの作成
+- 既存パネルの拡張
+- パネルのグループ化
+- 不要なパネルの非表示
 
-| **Related**: Property, Region
-| **Reference**: [Panel (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/tabs_panels.html)
+| **関連**: プロパティ、リージョン
+| **リファレンス**: [Panel (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/tabs_panels.html)
 
-### Property
-Refers to various data items in Blender (like object location, material settings, etc.) that are typically displayed as sliders, checkboxes, or fields in the UI.
+### プロパティ（Property）
+Blenderの様々なデータ項目（オブジェクトの位置、マテリアル設定など）を指し、通常UIではスライダー、チェックボックス、フィールドとして表示されます。
 
-In PME, you can:
+PMEでは以下が可能です:
 
-- Display and edit properties on menus/panels
-- Refer to them in scripts or Poll functions
-- Add custom properties via the Property Editor
+- メニュー/パネルでプロパティの表示と編集
+- スクリプトやPoll関数での参照
+- プロパティエディターを介したカスタムプロパティの追加
 
-**Example**: `bpy.context.object.location`
+**例**: `bpy.context.object.location`
 
-### Region
-A subdivided area within an **Area**, containing specific UI elements (tools, properties, etc.).
+### リージョン（Region）
+**エリア**内の細分化された領域で、特定のUI要素（ツール、プロパティなど）を含みます。
 
-- With PME's **Panel Group** feature, you can add custom content to a Region.
+- PMEの**パネルグループ**機能により、リージョンにカスタムコンテンツを追加できます。
 
-**Related**: Area, Panel
+**関連**: エリア、パネル
 
-**Reference**: [Region (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/regions.html)
+**リファレンス**: [Region (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/regions.html)
 
-## PME-Specific Concepts
+## PME固有の概念
 
-### Menu
-A broad term in PME describing any customizable UI component you create, such as:
+### メニュー（Menu）
+PMEで作成するカスタマイズ可能なUIコンポーネントを表す広義の用語で、以下を含みます:
 
-- Pie Menu
-- Regular Menu
-- Macro Operator
-- Modal Operator
-- etc.
+- パイメニュー
+- 通常メニュー
+- マクロオペレーター
+- モーダルオペレーター
+- など
 
-Each menu is composed of multiple **Slots**, each providing a distinct functionality or element.
+各メニューは複数の**スロット**で構成され、それぞれが異なる機能や要素を提供します。
 
-### Slot
-An individual **element** or **slot** within a menu. Each slot can be configured to:
+### スロット（Slot）
+メニュー内の個別の**要素**または**スロット**です。各スロットは以下のように設定できます:
 
-- Run a command
-- Display or edit a property
-- Invoke a sub-menu
-- Draw a custom layout
+- コマンドの実行
+- プロパティの表示または編集
+- サブメニューの呼び出し
+- カスタムレイアウトの描画
 
-**Related**: Command Tab, Property Tab, Menu Tab, Custom Tab
+**関連**: コマンドタブ、プロパティタブ、メニュータブ、カスタムタブ
 
-### Command Tab
-One of the tabs in the Slot Editor that lets you run Python code or invoke operators directly.
+### コマンドタブ（Command Tab）
+スロットエディターのタブの一つで、Pythonコードを実行したり、オペレーターを直接呼び出したりできます。
 
-- Execute single-line Python scripts
-- Call custom functions
-- Manipulate variables or operators
+- 1行のPythonスクリプトの実行
+- カスタム関数の呼び出し
+- 変数やオペレーターの操作
 
-**Example**: `C.active_object.location.x += 1.0`
+**例**: `C.active_object.location.x += 1.0`
 
-### Custom Tab
-Another tab in the Slot Editor for creating more visually defined UI layouts without manual scripting.
+### カスタムタブ（Custom Tab）
+手動スクリプティングなしでより視覚的に定義されたUIレイアウトを作成するためのスロットエディターの別タブです。
 
-**Example**:
+**例**:
 
 ```python
 L.box().label(text="Custom Layout")
 ```
 
-### Interactive Panels Mode
-A PME mode that displays additional PME Tools buttons within every UI element, making it easier to:
+### インタラクティブパネルモード（Interactive Panels Mode）
+すべてのUI要素内に追加のPMEツールボタンを表示するPMEモードで、以下を簡単にします:
 
-- Identify menu IDs
-- Configure panel extensions
-- Customize your UI
+- メニューIDの識別
+- パネル拡張の設定
+- UIのカスタマイズ
 
-This mode is especially useful when learning PME, as it helps you visualize where various elements and menus are located.
+このモードは、様々な要素やメニューがどこに配置されているかを視覚化するのに役立つため、PMEを学習する際に特に有用です。
 
-### Macro Operator
-Allows you to **execute multiple operators in sequence**.  
-In the PME **Macro Operator Editor**, you can:
+### マクロオペレーター（Macro Operator）
+**複数のオペレーターを順番に実行**することを可能にします。
+PME**マクロオペレーターエディター**では以下が可能です:
 
-- Record operator sequences
-- Adjust operator parameters
-- Manage execution flow
+- オペレーターシーケンスの記録
+- オペレーターパラメーターの調整
+- 実行フローの管理
 
-It is invaluable for bundling complex workflows into a single click.
+複雑なワークフローを1クリックにまとめるのに非常に有用です。
 
-### Modal Operator
-A real-time, interactive operator that responds to continuous user input.
-You can create your own Modal Operators with PME's **Modal Operator Editor**, enabling:
+### モーダルオペレーター（Modal Operator）
+継続的なユーザー入力に応答するリアルタイムでインタラクティブなオペレーターです。
+PMEの**モーダルオペレーターエディター**で独自のモーダルオペレーターを作成でき、以下が可能になります:
 
-- Reactions to mouse movements
-- Key events and state changes
-- Real-time feedback and updates
+- マウス移動への反応
+- キーイベントと状態変化
+- リアルタイムフィードバックと更新
 
-Perfect for building **custom interactive tools**.
+**カスタムインタラクティブツール**の構築に最適です。
 
-### Poll Method
-A Python function used to determine whether a menu or tool is **currently usable**. It must return `True` if available, or `False` otherwise.
+### Poll メソッド（Poll Method）
+メニューやツールが**現在使用可能かどうか**を判定するPython関数です。使用可能な場合は`True`、そうでない場合は`False`を返す必要があります。
 
-For example:
+例:
 
 ```python
 ao = C.active_object; return ao and ao.type == 'MESH'
 ```
 
-Common use cases include:
+一般的な使用例:
 
-- Enabling/disabling UI elements based on the current mode
-- Restricting features to certain object types
-- Preventing errors by hiding invalid tools
+- 現在のモードに基づいたUI要素の有効/無効
+- 特定のオブジェクトタイプに機能を制限
+- 無効なツールを非表示にしてエラーを防止
 
-### Slot Editor
-The **central UI** for defining how PME menus/buttons behave. It includes multiple tabs such as:
+### スロットエディター（Slot Editor）
+PMEメニュー/ボタンの動作を定義する**中央UI**です。以下のような複数のタブが含まれます:
 
-- Command (for code execution)
-- Property (for property display)
-- Menu (for calling other PME's menus)
-- Hotkey (for invoking shortcuts)
-- Custom (for custom layouts)
+- コマンド（コード実行用）
+- プロパティ（プロパティ表示用）
+- メニュー（他のPMEメニューの呼び出し用）
+- ホットキー（ショートカット呼び出し用）
+- カスタム（カスタムレイアウト用）
 
-It's designed so you can set up everything through a graphical interface, even if you're new to scripting.
+スクリプティングが初めての場合でも、グラフィカルインターフェースを通じてすべてを設定できるように設計されています。
 
-## Advanced Concepts
+## 高度な概念
 
-### Event System
-Blender's input handling mechanism, which tracks keyboard and mouse events. It is essential for:
+### イベントシステム（Event System）
+キーボードとマウスイベントを追跡するBlenderの入力処理メカニズムです。以下に不可欠です:
 
-- Modal Operators
-- Custom hotkeys
-- Interactive tools
+- モーダルオペレーター
+- カスタムホットキー
+- インタラクティブツール
 
-For example:
+例:
 
 ```python
 E.ctrl and E.shift and message_box("Ctrl+Shift Pressed")
 ```
 
-### Layout System
-Blender's system for constructing UI layouts. PME relies on this system to:
+### レイアウトシステム（Layout System）
+UIレイアウトを構築するBlenderのシステムです。PMEはこのシステムに依存して以下を行います:
 
-- Place labels, buttons, and property fields
-- Position operators and custom widgets
-- Structure UI elements hierarchically
+- ラベル、ボタン、プロパティフィールドの配置
+- オペレーターとカスタムウィジェットの位置決め
+- UI要素の階層構造化
 
-For example:
+例:
 
 ```python
 L.box().label(text=text, icon=icon, icon_value=icon_value)
 ```
 
-### Operator Execution Context
-Determines how an operator is executed. The two most common contexts are:
+### オペレーター実行コンテキスト（Operator Execution Context）
+オペレーターの実行方法を決定します。最も一般的な2つのコンテキストは:
 
 - **INVOKE_DEFAULT**  
-  An interactive mode in which Blender waits for additional user input, such as mouse positioning or pop-up confirmation.
+  Blenderがマウス位置決めやポップアップ確認などの追加ユーザー入力を待つインタラクティブモード。
 
 - **EXEC_DEFAULT**  
-  Runs the operator immediately with preset parameters, often used in scripts or macros.
+  事前設定されたパラメーターでオペレーターを即座に実行。スクリプトやマクロでよく使用される。
 
-**Example**:
+**例**:
 
 ```python
-# Move an object interactively based on mouse input
+# マウス入力に基づいてオブジェクトをインタラクティブに移動
 bpy.ops.transform.translate('INVOKE_DEFAULT')
 
-# Move an object 5.0 along the X axis without user input
+# ユーザー入力なしでオブジェクトをX軸に沿って5.0移動
 bpy.ops.transform.translate('EXEC_DEFAULT', value=(5.0, 0.0, 0.0))
 ```
 
-| **Related**: Operator, Command Tab, Modal Operator, Macro Operator
-| **Reference**: [Execution Context (docs.blender.org)](https://docs.blender.org/api/current/bpy.ops.html#execution-context)
+| **関連**: オペレーター、コマンドタブ、モーダルオペレーター、マクロオペレーター
+| **リファレンス**: [Execution Context (docs.blender.org)](https://docs.blender.org/api/current/bpy.ops.html#execution-context)

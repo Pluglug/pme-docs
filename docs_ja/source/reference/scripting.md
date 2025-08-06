@@ -1,60 +1,114 @@
 (pme-scripting)=
 
-# Scripting
+# スクリプティング
 
-PME allows for advanced customization and automation using Blender's [Python API](https://docs.blender.org/api/current/).
-This article provides an overview of PME's scripting capabilities and explains the built-in global variables and functions.
+PMEはBlenderの[Python API](https://docs.blender.org/api/current/)を使用した高度なカスタマイズと自動化を可能にします。
+この記事では、PMEのスクリプティング機能の概要と、組み込みのグローバル変数と関数について説明します。
 
-## Tutorials
+## チュートリアル
 
-- **Video**: [Introduction to Scripting with Python in Blender (vimeo.com)](https://vimeo.com/28203314)
-- **Video**: [Task Automation with Python Scripting in Blender (youtube.com)](https://www.youtube.com/watch?v=ZZWSvUgR38Y)
+- **動画**: [Introduction to Scripting with Python in Blender (vimeo.com)](https://vimeo.com/28203314)
+- **動画**: [Task Automation with Python Scripting in Blender (youtube.com)](https://www.youtube.com/watch?v=ZZWSvUgR38Y)
 - [Python for Non-Programmers (python.org)](https://wiki.python.org/moin/BeginnersGuide/NonProgrammers)
 - [Blender Python API](https://docs.blender.org/api/current/)
 - [Blender/Python Quickstart](https://docs.blender.org/api/current/info_quickstart.html)
 
-## Global Variables
+## グローバル変数
 
-| Variables | Description |
-|-----------|-------------|
-| `menu` | Name of the active menu |
-| `slot` | Name of the active slot |
-| `C` | [bpy.context](https://docs.blender.org/api/current/bpy.context.html) |
-| `D` | [bpy.data](https://docs.blender.org/api/current/bpy.data.html) |
-| `O` | [bpy.ops](https://docs.blender.org/api/current/bpy.ops.html) |
-| `T` | [bpy.types](https://docs.blender.org/api/current/bpy.types.html) |
-| `P` | [bpy.props](https://docs.blender.org/api/current/bpy.props.html) |
-| `L` | Current [UILayout](https://docs.blender.org/api/current/bpy.types.UILayout.html) object<br><br>```python<br>L.box().label(text="My Label")<br>``` |
-| `E` | Current [Event](https://docs.blender.org/api/current/bpy.types.Event.html) object<br><br>```python<br>E.ctrl and E.shift and message_box("Ctrl+Shift Pressed")<br>``` |
-| `U` | [pme.UserData](#pme.UserData) instance for user data storage<br><br>```python<br>U.foo = "value"<br>U.update(foo="value1", bar="value2")<br>U.foo<br>U.get("foo", "default_value")<br>``` |
+PMEでは以下のグローバル変数が利用できます:
 
-## Global Functions
+### `menu`
+アクティブなメニューの名前を取得します。
 
-Below is a list of global functions provided by PME.
+### `slot`
+アクティブなスロットの名前を取得します。
+
+### `C`
+[bpy.context](https://docs.blender.org/api/current/bpy.context.html)のショートカットです。
+Blenderの現在のコンテキスト（選択オブジェクト、モードなど）にアクセスできます。
+
+```python
+ao = C.active_object; ao and ao.type == 'MESH' and message_box("Mesh Selected")
+```
+
+### `D`
+[bpy.data](https://docs.blender.org/api/current/bpy.data.html)のショートカットです。
+Blenderのデータブロック（メッシュ、マテリアル、テクスチャなど）にアクセスできます。
+
+```python
+m = [m for m in D.meshes if m.name == 'My Mesh']; m and setattr(m, 'name', 'New Name')
+```
+
+### `O`
+[bpy.ops](https://docs.blender.org/api/current/bpy.ops.html)のショートカットです。
+Blenderのオペレーター（コマンド）を実行できます。
+
+```python
+O.mesh.select_all(action='TOGGLE')
+```
+
+### `T`
+[bpy.types](https://docs.blender.org/api/current/bpy.types.html)のショートカットです。
+Blenderのデータタイプとクラス定義にアクセスできます。
+
+### `P`
+[bpy.props](https://docs.blender.org/api/current/bpy.props.html)のショートカットです。
+Blenderのプロパティタイプ（IntProperty、StringPropertyなど）にアクセスできます。
+
+### `L`
+現在の[UILayout](https://docs.blender.org/api/current/bpy.types.UILayout.html)オブジェクトです。
+UI要素（ボタン、ラベル、プロパティフィールドなど）を描画するために使用します。
+
+```python
+L.box().label(text="My Label")
+```
+
+### `E`
+現在の[Event](https://docs.blender.org/api/current/bpy.types.Event.html)オブジェクトです。
+マウスやキーボードの入力状態を取得できます。
+
+```python
+E.ctrl and E.shift and message_box("Ctrl+Shift Pressed")
+```
+
+### `U`
+ユーザーデータ保存用の[pme.UserData](#pme.UserData)インスタンスです。
+Blenderセッション中にカスタムデータを保存・取得できます。
+
+```python
+U.foo = "value"
+U.update(foo="value1", bar="value2")
+U.foo
+U.get("foo", "default_value")
+```
+
+## グローバル関数
+
+以下はPMEが提供するグローバル関数のリストです。
 
 (pme-common-functions)=
 
-### Common Functions
+### 共通関数
 
 ````{py:function} execute_script(path, **kwargs)
 :noindex:
 
-Execute an external Python script.
+外部のPythonスクリプトを実行します。
 
-:param str path: Path to the `.py` file.
-:param kwargs: Additional keyword arguments passed to the script.
-:return: Value of local variable `return_value` if it exists, otherwise `True`.
+:param str path: `.py`ファイルへのパス。
+:param kwargs: スクリプトに渡される追加のキーワード引数。
+:return: ローカル変数`return_value`が存在する場合はその値、存在しない場合は`True`。
 
-**Example**:
+**例**:
 
 ```python
-# Display 'Hello World!' message:
+# 'Hello World!'メッセージを表示:
 execute_script("scripts/hello_world.py", msg="Hello World!")
 
 # scripts/hello_world.py:
 # message_box(kwargs["msg"])
 
-# Display 'Hi!' message:
+# 'Hi!'メッセージを表示:
 message_box(execute_script("scripts/hi.py"))
 
 # scripts/hi.py:
@@ -65,37 +119,37 @@ message_box(execute_script("scripts/hi.py"))
 ````{py:function} props(name=None, value=None)
 :noindex:
 
-Get or set the value of a PME Property.
+PMEプロパティの値を取得または設定します。
 
-:param str name: Name of the property.
-:param value: New value of the property.
-:return: PME property container if `name` is `None`, property value if only `name` is given, `True` if setting a value.
+:param str name: プロパティの名前。
+:param value: プロパティの新しい値。
+:return: `name`が`None`の場合はPMEプロパティコンテナ、`name`のみ指定された場合はプロパティの値、値を設定する場合は`True`。
 
-**Example**:
+**例**:
 
 ```python
-# Get property value using string notation
+# 文字列記法を使ってプロパティ値を取得
 value = props("MyProperty")
 
-# Alternative: get property using attribute notation
-value = props().MyProperty  # props() returns property container
+# 代替: 属性記法を使ってプロパティを取得
+value = props().MyProperty  # props()はプロパティコンテナを返す
 
-# Set property value using string notation
+# 文字列記法を使ってプロパティ値を設定
 props("MyProperty", value)
 
-# Alternative: set property using attribute notation
-props().MyProperty = value  # props() returns property container
+# 代替: 属性記法を使ってプロパティを設定
+props().MyProperty = value  # props()はプロパティコンテナを返す
 ```
 ````
 
 ````{py:function} paint_settings()
 :noindex:
 
-Retrieve the context-sensitive paint settings.
+コンテキストに依存するペイント設定を取得します。
 
-:return: The current paint settings or `None` if not in a paint mode.
+:return: 現在のペイント設定、またはペイントモードでない場合は`None`。
 
-**Example**:
+**例**:
 
 ```python
 ps = paint_settings(); ps and L.template_ID_preview(ps, 'brush')
@@ -105,11 +159,11 @@ ps = paint_settings(); ps and L.template_ID_preview(ps, 'brush')
 ````{py:function} find_by(collection, key, value)
 :noindex:
 
-Find the first item in `collection` where `key` equals `value`.
+`collection`内で`key`が`value`と等しい最初のアイテムを検索します。
 
-:return: Collection item if found, otherwise `None`.
+:return: 見つかった場合はコレクションアイテム、見つからない場合は`None`。
 
-**Example**:
+**例**:
 
 ```python
 m = find_by(C.active_object.modifiers, "type", 'SUBSURF')
@@ -119,32 +173,32 @@ m = find_by(C.active_object.modifiers, "type", 'SUBSURF')
 ````{py:function} setattr(object, name, value)
 :noindex:
 
-Same as Python's built-in `setattr`, but returns `True` after setting.
+Pythonの組み込み`setattr`と同じですが、設定後に`True`を返します。
 
 :return: `True`
 ````
 
 (pme-command-tab-functions)=
 
-### Command Tab Functions
+### コマンドタブ関数
 
 ````{py:function} open_menu(name, slot=None, **kwargs)
 :noindex:
 
-Open menu, pie menu, popup dialog or execute a stack key, sticky key, modal operator, or macro operator by name.
+名前でメニュー、パイメニュー、ポップアップダイアログを開くか、スタックキー、スティッキーキー、モーダルオペレーター、またはマクロオペレーターを実行します。
 
-:param str name: Name of the menu.
-:param slot: Index or name of the slot for Stack Key execution.
-:param kwargs: Arguments for Modal / Macro Operators used as local variables.
-:return: `True` if the menu exists, `False` otherwise.
+:param str name: メニューの名前。
+:param slot: スタックキー実行のためのスロットのインデックスまたは名前。
+:param kwargs: ローカル変数として使用されるモーダル/マクロオペレーターの引数。
+:return: メニューが存在する場合は`True`、存在しない場合は`False`。
 
-**Example**:
+**例**:
 
 ```python
-# Open the menu depending on the active object's type:
+# アクティブなオブジェクトのタイプに応じてメニューを開く:
 open_menu("Lamp Pie Menu" if C.active_object.type == 'LAMP' else "Object Pie Menu")
 
-# Call "My Stack Key" slot depending on Ctrl modifier:
+# Ctrlモディファイアに応じて"My Stack Key"スロットを呼び出す:
 open_menu("My Stack Key", "Ctrl slot" if E.ctrl else "Shift slot")
 ```
 ````
@@ -152,27 +206,27 @@ open_menu("My Stack Key", "Ctrl slot" if E.ctrl else "Shift slot")
 ````{py:function} toggle_menu(name, value=None)
 :noindex:
 
-Enable or disable a menu.
+メニューを有効または無効にします。
 
-:param str name: Name of the menu.
-:param bool value: `True` to enable, `False` to disable, `None` to toggle.
-:return: `True` if the menu exists, `False` otherwise.
+:param str name: メニューの名前。
+:param bool value: 有効にする場合は`True`、無効にする場合は`False`、切り替える場合は`None`。
+:return: メニューが存在する場合は`True`、存在しない場合は`False`。
 ````
 
 ````{py:function} tag_redraw(area=None, region=None)
 :noindex:
 
-Redraw UI areas or regions.
+UIエリアまたはリージョンを再描画します。
 
-:param str area: The Area.type to redraw. Redraw all areas if `None`.
-:param str region: The Region.type to redraw. Redraw all regions if `None`.
+:param str area: 再描画するArea.type。`None`の場合は全エリアを再描画。
+:param str region: 再描画するRegion.type。`None`の場合は全リージョンを再描画。
 :return: `True`
 ````
 
 ````{py:function} close_popups()
 :noindex:
 
-Close all popup dialogs.
+すべてのポップアップダイアログを閉じます。
 
 :return: `True`
 ````
@@ -180,17 +234,17 @@ Close all popup dialogs.
 ````{py:function} overlay(text, **kwargs)
 :noindex:
 
-Draw an overlay message.
+オーバーレイメッセージを描画します。
 
-:param str text: Message to display.
+:param str text: 表示するメッセージ。
 :param kwargs: 
-    - `alignment`: One of `['TOP', 'TOP_LEFT', 'TOP_RIGHT', 'BOTTOM', 'BOTTOM_LEFT', 'BOTTOM_RIGHT']`. Default is `'TOP'`.
-    - `duration`: Duration in seconds. Default is `2.0`.
-    - `offset_x`: Horizontal offset. Default is `10` px.
-    - `offset_y`: Vertical offset. Default is `10` px.
+    - `alignment`: `['TOP', 'TOP_LEFT', 'TOP_RIGHT', 'BOTTOM', 'BOTTOM_LEFT', 'BOTTOM_RIGHT']`のいずれか。デフォルトは`'TOP'`。
+    - `duration`: 秒単位の表示時間。デフォルトは`2.0`。
+    - `offset_x`: 水平オフセット。デフォルトは`10`px。
+    - `offset_y`: 垂直オフセット。デフォルトは`10`px。
 :return: `True`
 
-**Example**:
+**例**:
 
 ```python
 overlay('Hello PME!', offset_y=100, duration=1.0)
@@ -200,66 +254,66 @@ overlay('Hello PME!', offset_y=100, duration=1.0)
 ````{py:function} message_box(text, icon='INFO', title="Pie Menu Editor")
 :noindex:
 
-Show a message box.
+メッセージボックスを表示します。
 
-:param str text: Message to display.
-:param str icon: Icon name (e.g. 'INFO', 'ERROR', 'QUESTION', etc.).
-:param str title: Window title.
+:param str text: 表示するメッセージ。
+:param str icon: アイコン名（例: 'INFO', 'ERROR', 'QUESTION'など）。
+:param str title: ウィンドウタイトル。
 :return: `True`
 ````
 
 ````{py:function} input_box(func=None, prop=None)
 :noindex:
 
-Show an input box.
+入力ボックスを表示します。
 
-:param func: Function to call with the input value.
-:param str prop: Path to the property to edit.
+:param func: 入力値で呼び出す関数。
+:param str prop: 編集するプロパティへのパス。
 :return: `True`
 
-**Example**:
+**例**:
 
 ```python
-# Rename object:
+# オブジェクト名を変更:
 input_box(prop="C.active_object.name")
 
-# Display input value:
+# 入力値を表示:
 input_box(func=lambda value: overlay(value))
 ```
 ````
 
 (pme-custom-tab-functions)=
 
-### Custom Tab Functions
+### カスタムタブ関数
 
 ````{py:function} draw_menu(name, frame=True, dx=0, dy=0)
 :noindex:
 
-Draw a popup dialog inside another popup dialog or a pie menu.
+別のポップアップダイアログまたはパイメニュー内にポップアップダイアログを描画します。
 
-:param str name: Name of the menu (popup dialog).
-:param bool frame: Whether to draw a frame.
-:param int dx: Horizontal offset.
-:param int dy: Vertical offset.
-:return: `True` if the popup dialog exists, otherwise `False`.
+:param str name: メニューの名前（ポップアップダイアログ）。
+:param bool frame: フレームを描画するかどうか。
+:param int dx: 水平オフセット。
+:param int dy: 垂直オフセット。
+:return: ポップアップダイアログが存在する場合は`True`、存在しない場合は`False`。
 ````
 
 ````{py:function} operator(layout, operator, text="", icon='NONE', emboss=True, icon_value=0, **kwargs)
 :noindex:
 
-Similar to UILayout.operator(), but allows filling operator properties.
+UILayout.operator()と似ていますが、オペレータープロパティの設定が可能です。
 
-:param layout: A UILayout instance.
-:param str operator: Identifier of the operator.
-:return: OperatorProperties object.
+:param layout: UILayoutインスタンス。
+:param str operator: オペレーターの識別子。
+:return: OperatorPropertiesオブジェクト。
 
-**Example**:
+**例**:
 
 ```python
 operator(L, "wm.context_set_int", "Material Slot 1",
         data_path="active_object.active_material_index", value=0)
 
-# Same as:
+# 以下と同じ:
 # op = L.operator("wm.context_set_int", text="Material Slot 1")
 # op.data_path = "active_object.active_material_index"
 # op.value = 0
@@ -269,12 +323,12 @@ operator(L, "wm.context_set_int", "Material Slot 1",
 ````{py:function} custom_icon(filename)
 :noindex:
 
-Get the integer value associated with a custom icon.
+カスタムアイコンに関連付けられた整数値を取得します。
 
-:param str filename: Icon filename without extension, located in `pie_menu_editor/icons/`.
-:return: The integer value of the custom icon.
+:param str filename: `pie_menu_editor/icons/`にある拡張子なしのアイコンファイル名。
+:return: カスタムアイコンの整数値。
 
-**Example**:
+**例**:
 
 ```python
 L.label(text="My Custom Icon", icon_value=custom_icon("p1"))
@@ -284,15 +338,15 @@ L.label(text="My Custom Icon", icon_value=custom_icon("p1"))
 ````{py:function} panel(id, frame=True, header=True, expand=None)
 :noindex:
 
-Draws a panel by its ID.
+IDでパネルを描画します。
 
-:param str id: ID of the panel.
-:param bool frame: Draw a framed panel.
-:param bool header: Draw the panel header.
-:param expand: `True` to expand, `False` to collapse, `None` to use the current state.
+:param str id: パネルのID。
+:param bool frame: フレーム付きパネルを描画。
+:param bool header: パネルヘッダーを描画。
+:param expand: 展開する場合は`True`、折りたたむ場合は`False`、現在の状態を使用する場合は`None`。
 :return: `True`
 
-**Example**:
+**例**:
 
 ```python
 panel("MATERIAL_PT_context_material", True, True, True)
@@ -301,28 +355,28 @@ panel("MATERIAL_PT_context_material", True, True, True)
 
 ---
 
-## Auto-run Scripts
+## 自動実行スクリプト
 
-PME allows you to create Python scripts that automatically execute when Blender starts.
-To use this feature, place files in the `pie_menu_editor/scripts/autorun` folder using any of these methods:
+PMEでは、Blender起動時に自動実行されるPythonスクリプトを作成できます。
+この機能を使用するには、以下のいずれかの方法で`pie_menu_editor/scripts/autorun`フォルダにファイルを配置します:
 
-- Direct `.py` files
-- Folders containing scripts
-- Symbolic links
+- 直接の`.py`ファイル
+- スクリプトを含むフォルダ
+- シンボリックリンク
 
 ```{warning}
-Scripts in the `autorun` folder are executed directly in PME's context.
-Only use scripts from trusted sources.
+`autorun`フォルダ内のスクリプトはPMEのコンテキストで直接実行されます。
+信頼できるソースからのスクリプトのみを使用してください。
 ```
 
-## Add Custom Global Functions
+## カスタムグローバル関数の追加
 
-To use custom functions in PME:
+PMEでカスタム関数を使用するには:
 
-1. Place your script in `pie_menu_editor/scripts/autorun` folder 
-2. Register functions using `pme.context.add_global()`
+1. `pie_menu_editor/scripts/autorun`フォルダにスクリプトを配置
+2. `pme.context.add_global()`を使用して関数を登録
 
-Example:
+例:
 
 ```python
 def hello_world():
@@ -331,34 +385,34 @@ def hello_world():
 pme.context.add_global("hello", hello_world)
 ```
 
-The registered function `hello()` becomes available in:
+登録された関数`hello()`は以下で利用可能になります:
 
-- Command tab
-- Custom tab  
-- External scripts
+- コマンドタブ
+- カスタムタブ
+- 外部スクリプト
 
-## PME Components
+## PMEコンポーネント
 
-PME maintains a global context that provides access to commonly used functions, variables, and user-defined additions.
-This context is accessible through two main interfaces:
+PMEは、よく使用される関数、変数、ユーザー定義の追加機能へのアクセスを提供するグローバルコンテキストを維持します。
+このコンテキストは2つの主要なインターフェースを通じてアクセス可能です:
 
 ````{py:class} pme.context
 
 ```{py:attribute} globals
 :type: dict
 
-Access PME's global context dictionary. Contains:
+PMEのグローバルコンテキスト辞書にアクセスします。以下を含みます:
 
-- Built-in shortcuts (`C`, `D`, `O`, `L`, etc.)
-- Registered custom functions and values
-- User data storage (`U`)
+- 組み込みショートカット（`C`, `D`, `O`, `L`など）
+- 登録されたカスタム関数と値
+- ユーザーデータストレージ（`U`）
 
 ```
 
 ```python
 from pie_menu_editor import pme
 
-# Access globals from external scripts
+# 外部スクリプトからグローバルにアクセス
 g = pme.context.globals
 props = g.get('props')
 user_data = g.get('U')
@@ -367,25 +421,25 @@ user_data = g.get('U')
 
 ```{py:method} add_global(key, value)
 
-Register a custom function or value in the global context.
+グローバルコンテキストにカスタム関数または値を登録します。
 
-:param str key: Name for accessing the item
-:param value: Function or value to register
+:param str key: アイテムにアクセスするための名前
+:param value: 登録する関数または値
 :rtype: None
 
 ```
 
 ```python
-# Register a function
+# 関数を登録
 def my_tool():
     bpy.ops.mesh.select_all(action='TOGGLE')
 
 pme.context.add_global("toggle_select", my_tool)
 
-# Register a constant
+# 定数を登録
 pme.context.add_global("MAX_ITEMS", 10)
 
-# Access from PME menus via Command tab:
+# PMEメニューからコマンドタブ経由でアクセス:
 # toggle_select()
 # MAX_ITEMS
 ```
@@ -393,24 +447,24 @@ pme.context.add_global("MAX_ITEMS", 10)
 
 ````{py:class} pme.UserData
 
-Flexible storage for user-defined data that persists during the Blender session.
+Blenderセッション中に持続するユーザー定義データの柔軟なストレージ。
 
 ```{py:method} get(name, default=None)
 
-Get a stored value.
+保存された値を取得します。
 
-:param str name: Data key
-:param default: Value to return if key doesn't exist
-:return: Stored value or default
+:param str name: データキー
+:param default: キーが存在しない場合に返す値
+:return: 保存された値またはデフォルト値
 ```
 
 ```{py:method} update(**kwargs)
 
-Update multiple values at once.
+複数の値を一度に更新します。
 
 ```
 ```python
-U = pme.context.globals['U']  # Get UserData instance
+U = pme.context.globals['U']  # UserDataインスタンスを取得
 U.update(tool_state="active", count=5)
 print(U.tool_state)  # "active"
 ```
