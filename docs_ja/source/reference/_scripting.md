@@ -95,9 +95,12 @@ U.get("foo", "default_value")
 
 外部のPythonスクリプトを実行します。
 
-:param str path: `.py`ファイルへのパス。
-:param kwargs: スクリプトに渡される追加のキーワード引数。
-:return: ローカル変数`return_value`が存在する場合はその値、存在しない場合は`True`。
+**Parameters:**
+- **path** (`str`) -- `.py`ファイルへのパス。
+- **kwargs** -- スクリプトに渡される追加のキーワード引数。
+
+**Returns:**
+  ローカル変数`return_value`が存在する場合はその値、存在しない場合は`True`。
 
 **例**:
 
@@ -121,9 +124,12 @@ message_box(execute_script("scripts/hi.py"))
 
 PMEプロパティの値を取得または設定します。
 
-:param str name: プロパティの名前。
-:param value: プロパティの新しい値。
-:return: `name`が`None`の場合はPMEプロパティコンテナ、`name`のみ指定された場合はプロパティの値、値を設定する場合は`True`。
+**Parameters:**
+- **name** (`str`, optional) -- プロパティの名前。
+- **value** (optional) -- プロパティの新しい値。
+
+**Returns:**
+  `name`が`None`の場合はPMEプロパティコンテナ、`name`のみ指定された場合はプロパティの値、値を設定する場合は`True`。
 
 **例**:
 
@@ -147,7 +153,8 @@ props().MyProperty = value  # props()はプロパティコンテナを返す
 
 コンテキストに依存するペイント設定を取得します。
 
-:return: 現在のペイント設定、またはペイントモードでない場合は`None`。
+**Returns:**
+  現在のペイント設定、またはペイントモードでない場合は`None`。
 
 **例**:
 
@@ -161,7 +168,13 @@ ps = paint_settings(); ps and L.template_ID_preview(ps, 'brush')
 
 `collection`内で`key`が`value`と等しい最初のアイテムを検索します。
 
-:return: 見つかった場合はコレクションアイテム、見つからない場合は`None`。
+**Parameters:**
+- **collection** -- 検索対象のコレクション。
+- **key** (`str`) -- 検索するキー。
+- **value** -- 検索する値。
+
+**Returns:**
+  見つかった場合はコレクションアイテム、見つからない場合は`None`。
 
 **例**:
 
@@ -175,7 +188,13 @@ m = find_by(C.active_object.modifiers, "type", 'SUBSURF')
 
 Pythonの組み込み`setattr`と同じですが、設定後に`True`を返します。
 
-:return: `True`
+**Parameters:**
+- **object** -- 属性を設定するオブジェクト。
+- **name** (`str`) -- 属性名。
+- **value** -- 設定する値。
+
+**Returns:**
+  `True`
 ````
 
 (pme-command-tab-functions)=
@@ -187,10 +206,13 @@ Pythonの組み込み`setattr`と同じですが、設定後に`True`を返し�
 
 名前でメニュー、パイメニュー、ポップアップダイアログを開くか、スタックキー、スティッキーキー、モーダルオペレーター、またはマクロオペレーターを実行します。
 
-:param str name: メニューの名前。
-:param slot: スタックキー実行のためのスロットのインデックスまたは名前。
-:param kwargs: ローカル変数として使用されるモーダル/マクロオペレーターの引数。
-:return: メニューが存在する場合は`True`、存在しない場合は`False`。
+**Parameters:**
+- **name** (`str`) -- メニューの名前。
+- **slot** (optional) -- スタックキー実行のためのスロットのインデックスまたは名前。
+- **kwargs** -- ローカル変数として使用されるモーダル/マクロオペレーターの引数。
+
+**Returns:**
+  メニューが存在する場合は`True`、存在しない場合は`False`。
 
 **例**:
 
@@ -208,9 +230,12 @@ open_menu("My Stack Key", "Ctrl slot" if E.ctrl else "Shift slot")
 
 メニューを有効または無効にします。
 
-:param str name: メニューの名前。
-:param bool value: 有効にする場合は`True`、無効にする場合は`False`、切り替える場合は`None`。
-:return: メニューが存在する場合は`True`、存在しない場合は`False`。
+**Parameters:**
+- **name** (`str`) -- メニューの名前。
+- **value** (`bool`, optional) -- 有効にする場合は`True`、無効にする場合は`False`、切り替える場合は`None`。
+
+**Returns:**
+  メニューが存在する場合は`True`、存在しない場合は`False`。
 ````
 
 ````{py:function} tag_redraw(area=None, region=None)
@@ -218,9 +243,12 @@ open_menu("My Stack Key", "Ctrl slot" if E.ctrl else "Shift slot")
 
 UIエリアまたはリージョンを再描画します。
 
-:param str area: 再描画するArea.type。`None`の場合は全エリアを再描画。
-:param str region: 再描画するRegion.type。`None`の場合は全リージョンを再描画。
-:return: `True`
+**Parameters:**
+- **area** (`str`, optional) -- 再描画するArea.type。`None`の場合は全エリアを再描画。
+- **region** (`str`, optional) -- 再描画するRegion.type。`None`の場合は全リージョンを再描画。
+
+**Returns:**
+  `True`
 ````
 
 ````{py:function} close_popups()
@@ -228,7 +256,8 @@ UIエリアまたはリージョンを再描画します。
 
 すべてのポップアップダイアログを閉じます。
 
-:return: `True`
+**Returns:**
+  `True`
 ````
 
 ````{py:function} overlay(text, **kwargs)
@@ -236,13 +265,16 @@ UIエリアまたはリージョンを再描画します。
 
 オーバーレイメッセージを描画します。
 
-:param str text: 表示するメッセージ。
-:param kwargs: 
-    - `alignment`: `['TOP', 'TOP_LEFT', 'TOP_RIGHT', 'BOTTOM', 'BOTTOM_LEFT', 'BOTTOM_RIGHT']`のいずれか。デフォルトは`'TOP'`。
-    - `duration`: 秒単位の表示時間。デフォルトは`2.0`。
-    - `offset_x`: 水平オフセット。デフォルトは`10`px。
-    - `offset_y`: 垂直オフセット。デフォルトは`10`px。
-:return: `True`
+**Parameters:**
+- **text** (`str`) -- 表示するメッセージ。
+- **kwargs** -- オプションパラメータ:
+  - `alignment`: `['TOP', 'TOP_LEFT', 'TOP_RIGHT', 'BOTTOM', 'BOTTOM_LEFT', 'BOTTOM_RIGHT']`のいずれか。デフォルトは`'TOP'`。
+  - `duration`: 秒単位の表示時間。デフォルトは`2.0`。
+  - `offset_x`: 水平オフセット。デフォルトは`10`px。
+  - `offset_y`: 垂直オフセット。デフォルトは`10`px。
+
+**Returns:**
+  `True`
 
 **例**:
 
@@ -256,10 +288,13 @@ overlay('Hello PME!', offset_y=100, duration=1.0)
 
 メッセージボックスを表示します。
 
-:param str text: 表示するメッセージ。
-:param str icon: アイコン名（例: 'INFO', 'ERROR', 'QUESTION'など）。
-:param str title: ウィンドウタイトル。
-:return: `True`
+**Parameters:**
+- **text** (`str`) -- 表示するメッセージ。
+- **icon** (`str`, optional) -- アイコン名（例: 'INFO', 'ERROR', 'QUESTION'など）。
+- **title** (`str`, optional) -- ウィンドウタイトル。
+
+**Returns:**
+  `True`
 ````
 
 ````{py:function} input_box(func=None, prop=None)
@@ -267,9 +302,12 @@ overlay('Hello PME!', offset_y=100, duration=1.0)
 
 入力ボックスを表示します。
 
-:param func: 入力値で呼び出す関数。
-:param str prop: 編集するプロパティへのパス。
-:return: `True`
+**Parameters:**
+- **func** (optional) -- 入力値で呼び出す関数。
+- **prop** (`str`, optional) -- 編集するプロパティへのパス。
+
+**Returns:**
+  `True`
 
 **例**:
 
@@ -291,11 +329,14 @@ input_box(func=lambda value: overlay(value))
 
 別のポップアップダイアログまたはパイメニュー内にポップアップダイアログを描画します。
 
-:param str name: メニューの名前（ポップアップダイアログ）。
-:param bool frame: フレームを描画するかどうか。
-:param int dx: 水平オフセット。
-:param int dy: 垂直オフセット。
-:return: ポップアップダイアログが存在する場合は`True`、存在しない場合は`False`。
+**Parameters:**
+- **name** (`str`) -- メニューの名前（ポップアップダイアログ）。
+- **frame** (`bool`, optional) -- フレームを描画するかどうか。
+- **dx** (`int`, optional) -- 水平オフセット。
+- **dy** (`int`, optional) -- 垂直オフセット。
+
+**Returns:**
+  ポップアップダイアログが存在する場合は`True`、存在しない場合は`False`。
 ````
 
 ````{py:function} operator(layout, operator, text="", icon='NONE', emboss=True, icon_value=0, **kwargs)
@@ -303,9 +344,17 @@ input_box(func=lambda value: overlay(value))
 
 UILayout.operator()と似ていますが、オペレータープロパティの設定が可能です。
 
-:param layout: UILayoutインスタンス。
-:param str operator: オペレーターの識別子。
-:return: OperatorPropertiesオブジェクト。
+**Parameters:**
+- **layout** -- UILayoutインスタンス。
+- **operator** (`str`) -- オペレーターの識別子。
+- **text** (`str`, optional) -- ボタンのテキスト。
+- **icon** (`str`, optional) -- アイコン名。
+- **emboss** (`bool`, optional) -- ボタンのエンボス。
+- **icon_value** (`int`, optional) -- アイコンの値。
+- **kwargs** -- オペレータープロパティ。
+
+**Returns:**
+  OperatorPropertiesオブジェクト。
 
 **例**:
 
@@ -325,8 +374,11 @@ operator(L, "wm.context_set_int", "Material Slot 1",
 
 カスタムアイコンに関連付けられた整数値を取得します。
 
-:param str filename: `pie_menu_editor/icons/`にある拡張子なしのアイコンファイル名。
-:return: カスタムアイコンの整数値。
+**Parameters:**
+- **filename** (`str`) -- `pie_menu_editor/icons/`にある拡張子なしのアイコンファイル名。
+
+**Returns:**
+  カスタムアイコンの整数値。
 
 **例**:
 
@@ -340,11 +392,14 @@ L.label(text="My Custom Icon", icon_value=custom_icon("p1"))
 
 IDでパネルを描画します。
 
-:param str id: パネルのID。
-:param bool frame: フレーム付きパネルを描画。
-:param bool header: パネルヘッダーを描画。
-:param expand: 展開する場合は`True`、折りたたむ場合は`False`、現在の状態を使用する場合は`None`。
-:return: `True`
+**Parameters:**
+- **id** (`str`) -- パネルのID。
+- **frame** (`bool`, optional) -- フレーム付きパネルを描画。
+- **header** (`bool`, optional) -- パネルヘッダーを描画。
+- **expand** (optional) -- 展開する場合は`True`、折りたたむ場合は`False`、現在の状態を使用する場合は`None`。
+
+**Returns:**
+  `True`
 
 **例**:
 

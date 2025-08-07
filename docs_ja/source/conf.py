@@ -47,6 +47,7 @@ source_suffix = [".rst", ".md"]
 myst_enable_extensions = [
     "colon_fence",
     "deflist",
+    "fieldlist",
     "html_admonition",
     "html_image",
     # 'linkify',  # Temporarily disabled due to dependency issues
