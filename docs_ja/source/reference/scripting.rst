@@ -29,6 +29,8 @@ PMEは、Blenderの `Python API <https://docs.blender.org/api/current/>`_ を使
 グローバル変数
 ----------------
 
+PMEの各スロットエディタ内で利用できる変数です。
+
 .. list-table::
     :header-rows: 1
     :widths: 25 75
@@ -75,7 +77,7 @@ PMEは、Blenderの `Python API <https://docs.blender.org/api/current/>`_ を使
 グローバル関数
 ---------------
 
-以下は、PMEによって提供されるグローバル関数のリストです。
+PMEのスロットエディタ内で利用できる関数です。コマンドタブとカスタムタブで利用できる関数が異なります。
 
 .. _pme-common-functions:
 
@@ -87,23 +89,46 @@ PMEは、Blenderの `Python API <https://docs.blender.org/api/current/>`_ を使
 
     外部のPythonスクリプトを実行します。
 
-    :param str path: ``.py`` ファイルへのパス。
+    :param str path: スクリプトファイルパス。相対パス（``pie_menu_editor`` フォルダから、推奨）または絶対パス。
     :param kwargs: スクリプトに渡される追加のキーワード引数。
-    :return: ローカル変数 ``return_value`` が存在する場合はその値、そうでなければ ``True``。
+    :return: スクリプト内の ``return_value`` またはデフォルトで ``True``。
 
-    **例**::
+    .. warning::
+       - 信頼できるソースのスクリプトのみ配置・実行してください
+       - 実行前に内容を確認し、必要に応じてバックアップやテスト環境で検証してください
+       - ファイル操作や設定変更など、環境に影響する処理が含まれる場合があります
 
-        # 'Hello World!' メッセージを表示:
+    **スクリプト内で利用可能な変数**：``kwargs``、``__file__``、``return_value``、PMEのすべてのグローバル変数
+
+    **使用例**::
+
+        # 基本的な実行と戻り値
         execute_script("scripts/hello_world.py", msg="Hello World!")
+        message_box(execute_script("scripts/get_message.py"))
 
-        # scripts/hello_world.py:
-        # message_box(kwargs["msg"])
+        # scripts/hello_world.py
+        message_box(kwargs["msg"])
 
-        # 'Hi!' メッセージを表示:
-        message_box(execute_script("scripts/hi.py"))
+        # scripts/get_message.py  
+        return_value = "Hi!"
 
-        # scripts/hi.py:
-        # return_value = "Hi!"
+        # パラメータを使用した処理
+        # scripts/process_data.py
+        kwargs = locals().get("kwargs", {})
+        result = my_function(kwargs.get("param1"), kwargs.get("param2", "default"))
+        return_value = result
+        
+        # 呼び出し
+        result = execute_script("scripts/process_data.py", param1=200, param2="Hello")
+
+        # カスタムタブでのUI描画
+        # scripts/custom_ui.py
+        msg = kwargs.get("msg", pme.context.text or "Default Message")
+        box = L.box()
+        box.label(text=msg, icon=pme.context.icon, icon_value=pme.context.icon_value)
+        
+        # 呼び出し
+        execute_script("scripts/custom_ui.py", msg="カスタムメッセージ")
 
 
 .. py:function:: props(name=None, value=None)
@@ -338,8 +363,9 @@ PMEでは、Blender起動時に自動的に実行されるPythonスクリプト�
 - シンボリックリンク
 
 .. warning::
-   ``autorun`` フォルダ内のスクリプトはPMEのコンテキストで直接実行されます。
-   信頼できるソースからのスクリプトのみを使用してください。
+   - 信頼できるソースのスクリプトのみ配置・実行してください
+   - 実行前に内容を確認し、必要に応じてバックアップやテスト環境で検証してください
+   - ファイル操作や設定変更など、環境に影響する処理が含まれる場合があります
 
 ---------------------------------
 カスタムグローバル関数の追加
