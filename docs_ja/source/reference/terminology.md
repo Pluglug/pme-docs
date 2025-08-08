@@ -4,49 +4,52 @@
 
 このページでは、Blenderの初心者やより深い理解を求める方に向けて、BlenderとPMEで使用される主要な用語と概念を説明します。
 
-## 基本的なBlenderの概念
+## Blenderの基本概念
 
-### エリア（Area）
-Blenderインターフェース内の大きなワークスペース領域です。
-3Dビューポート、アウトライナーなどの異なるエディタータイプはそれぞれ**エリア**を占有します。
+### `bpy.context`
+Blenderが入力処理・UI描画・オペレーター可用性を評価するための「評価環境」です。瞬間ごとに組み立てられる参照の束であり、直接編集する対象ではありません。
 
-- PMEは**サイドエリア切り替え**機能を提供し、エリア内のサイド領域（サイドバーなど）の表示/非表示を切り替えることができます。
-- エリアには、ツールバーやプロパティシェルフなどの**リージョン**と呼ばれるサブ領域が含まれる場合があります。
-
-| **関連**: リージョン、ウィンドウ、ワークスペース
-| **リファレンス**: [Area (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/areas.html)
-
-### コンテキスト（Context）
-Blenderの**現在の状態**を表し、以下を含みます:
-
-- 現在選択されているオブジェクト
-- アクティブな編集モード（オブジェクトモード、編集モードなど）
-- カーソル位置
-- アクティブなツール
-- ユーザーの操作に応じたその他の情報
-
-Pythonでは:
+- 含まれる参照: window/screen/workspace/area/region/space_data、scene/view_layer/object（アクティブ/選択）、mode、active_tool など
+- これで決まる: キーマップの解決、オペレーターの poll 可否、UIの分岐、既定の作用先
+- 操作の原則: 値を変えるときは `bpy.data` を更新し、別の場所で実行したい場合は一時オーバーライドを用います。
 
 ```python
-# アクティブなオブジェクトを取得
-active_obj = bpy.context.active_object
-
-# 現在のモードを確認
-current_mode = bpy.context.mode
+area = next(a for a in bpy.context.window.screen.areas if a.type == 'VIEW_3D')
+with bpy.context.temp_override(area=area):
+    bpy.ops.view3d.view_selected('INVOKE_DEFAULT')
 ```
-
-コンテキストを活用することで、現在の状態（モード、選択など）に基づいて特定のツールを条件付きで表示または有効化できます。
 
 **リファレンス**: [Context (docs.blender.org)](https://docs.blender.org/api/current/bpy.context.html)
 
-### ヘッダー（Header）
-エリアの上部または下部にある水平バーです。
-通常、メニュー、よく使用されるツールアイコンなどが含まれます。
+### `bpy.data`
+保存される「データブロック」の集合（シーン、オブジェクト、メッシュ、マテリアル等）です。`.blend`ファイルに永続化されるモデルであり、`bpy.context`（評価環境）と対になる概念です。
 
-- PMEでは{ref}`メニュー/パネル拡張 <pme-menu-panel-extension>`を使用してヘッダーにカスタムボタンを追加できます。
+- 主なデータ: scenes、objects、meshes、materials、images など
+- 用途: プロパティを読み書きし、変更を永続化。次のイベント/描画でコンテキストとUIに反映されます。
 
-| **関連**: リージョン
-| **リファレンス**: [Header (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/regions.html#header)
+```python
+obj = bpy.data.objects.get('Cube')
+if obj: obj.location.x += 1.0
+```
+
+**リファレンス**: [Data (docs.blender.org)](https://docs.blender.org/api/current/bpy.types.BlendData.html)
+
+::::{admonition} ポイント
+:class: hint
+
+データ（`bpy.data`）＝保存されるモデルに対し、コンテキスト（`bpy.context`）＝瞬間ごとに組み立てられる参照です。
+
+::::
+
+
+### モード（Mode）
+Blenderの**動作状態**（オブジェクトモード、編集モードなど）を指します。
+各モードにはそれぞれのツールとアクションのセットがあります。
+
+- PMEの**Poll**機能により、アクティブなモードに基づいて特定のツールやメニューの表示/非表示を切り替えできます。
+
+**例**: `bpy.context.mode == 'EDIT_MESH'`
+
 
 ### キーマップ（Keymap）
 エリアタイプや編集モードに応じて変化する**ホットキー割り当て**のコレクションです。
@@ -57,13 +60,6 @@ PMEは、これらのキーマップを個人のワークフローに合わせ�
 
 **リファレンス**: [Keymap (docs.blender.org)](https://docs.blender.org/manual/en/latest/editors/preferences/keymap.html)
 
-### モード（Mode）
-Blenderの**動作状態**（オブジェクトモード、編集モードなど）を指します。
-各モードにはそれぞれのツールとアクションのセットがあります。
-
-- PMEの**Poll**機能により、アクティブなモードに基づいて特定のツールやメニューの表示/非表示を切り替えできます。
-
-**例**: `bpy.context.mode == 'EDIT_MESH'`
 
 ### オペレーター（Operator）
 Blenderで特定のアクションを実行する機能単位（`bpy.ops`モジュールの一部）です。
@@ -76,6 +72,52 @@ Blenderで特定のアクションを実行する機能単位（`bpy.ops`モジ�
 PME内では、**マクロオペレーター**や**モーダルオペレーター**を使用して複数のオペレーターを組み合わせ、カスタムツールを作成できます。
 
 **例**: `bpy.ops.mesh.subdivide()`
+
+
+### プロパティ（Property）
+Blenderの様々なデータ項目（オブジェクトの位置、マテリアル設定など）を指し、通常UIではスライダー、チェックボックス、フィールドとして表示されます。
+
+PMEでは以下が可能です:
+
+- メニュー/パネルでプロパティの表示と編集
+- スクリプトやPoll関数での参照
+- プロパティエディターを介したカスタムプロパティの追加
+
+**例**: `bpy.context.object.location`
+
+
+## 画面構成の概念
+
+### エリア（Area）
+Blenderインターフェース内の大きなワークスペース領域です。
+3Dビューポート、アウトライナーなどの異なるエディタータイプはそれぞれ**エリア**を占有します。
+
+- PMEは**サイドエリア切り替え**機能を提供し、エリア内のサイド領域（サイドバーなど）の表示/非表示を切り替えることができます。
+- エリアには、ツールバーやプロパティシェルフなどの**リージョン**と呼ばれるサブ領域が含まれる場合があります。
+
+| **関連**: リージョン、ウィンドウ、ワークスペース
+| **リファレンス**: [Area (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/areas.html)
+
+
+### リージョン（Region）
+**エリア**内の細分化された領域で、特定のUI要素（ツール、プロパティなど）を含みます。
+
+- PMEの**パネルグループ**機能により、リージョンにカスタムコンテンツを追加できます。
+
+**関連**: エリア、パネル
+
+**リファレンス**: [Region (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/regions.html)
+
+
+### ヘッダー（Header）
+エリアの上部または下部にある水平バーです。
+通常、メニュー、よく使用されるツールアイコンなどが含まれます。
+
+- PMEでは{ref}`メニュー/パネル拡張 <pme-menu-panel-extension>`を使用してヘッダーにカスタムボタンを追加できます。
+
+| **関連**: リージョン
+| **リファレンス**: [Header (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/regions.html#header)
+
 
 ### パネル（Panel）
 サイドバーやプロパティエリアによく見られる、折りたたみ可能なUIウィジェットのグループです。
@@ -90,25 +132,6 @@ PMEでは以下が可能です:
 | **関連**: プロパティ、リージョン
 | **リファレンス**: [Panel (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/tabs_panels.html)
 
-### プロパティ（Property）
-Blenderの様々なデータ項目（オブジェクトの位置、マテリアル設定など）を指し、通常UIではスライダー、チェックボックス、フィールドとして表示されます。
-
-PMEでは以下が可能です:
-
-- メニュー/パネルでプロパティの表示と編集
-- スクリプトやPoll関数での参照
-- プロパティエディターを介したカスタムプロパティの追加
-
-**例**: `bpy.context.object.location`
-
-### リージョン（Region）
-**エリア**内の細分化された領域で、特定のUI要素（ツール、プロパティなど）を含みます。
-
-- PMEの**パネルグループ**機能により、リージョンにカスタムコンテンツを追加できます。
-
-**関連**: エリア、パネル
-
-**リファレンス**: [Region (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/regions.html)
 
 ## PME固有の概念
 
