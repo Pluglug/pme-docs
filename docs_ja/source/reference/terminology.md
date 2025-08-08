@@ -6,43 +6,60 @@
 
 ## Blenderの基本概念
 
-### `bpy.context`
-Blenderが入力処理・UI描画・オペレーター可用性を評価するための「評価環境」です。瞬間ごとに組み立てられる参照の束であり、直接編集する対象ではありません。
+### データ(`bpy.data`)
 
-- 含まれる参照: window/screen/workspace/area/region/space_data、scene/view_layer/object（アクティブ/選択）、mode、active_tool など
-- これで決まる: キーマップの解決、オペレーターの poll 可否、UIの分岐、既定の作用先
-- 操作の原則: 値を変えるときは `bpy.data` を更新し、別の場所で実行したい場合は一時オーバーライドを用います。
+Blenderファイル(`.blend`)に保存される全てのデータへのアクセスを提供します。
+`bpy.data.objects`・`bpy.data.materials`など、種類ごとのコレクション形式で整理されています。
+名前やインデックス形式で直接データにアクセスできる、**静的なデータベース**です。
 
 ```python
+bpy.data.objects['Cube']        # 特定のオブジェクトデータ
+bpy.data.materials.new("Gold")  # 新規マテリアルの作成
+bpy.data.meshes[0]              # インデックスによるアクセス
+
+obj = bpy.data.objects.get('Cube')
+if obj: obj.location.x += 1.0
+```
+
+<!-- TODO: Consoleもしくはアウトライナー -->
+
+**参考**: [Data Access (bpy.data)](https://docs.blender.org/api/current/bpy.data.html)
+[bpy.types.BlendData](https://docs.blender.org/api/current/bpy.types.BlendData.html)
+
+### コンテキスト(`bpy.context`)
+
+ユーザーの作業状態に応じて、**動的な参照**を提供します。
+選択中のオブジェクト、アクティブなツール、現在のモード、マウスカーソルを置いているエリアなど、ユーザーの操作によって変化する瞬間的な状況を知ることができます。
+例えば、同じショートカットキーでも、3Dビューポートで押した時とシェーダーエディタで押した時で異なる動作をするのは、それぞれのエリアが異なるコンテキスト(文脈)を提供しているからです。
+
+```python
+bpy.context.object              # 現在アクティブなオブジェクト
+bpy.context.selected_objects   # 選択中の全オブジェクト
+bpy.context.mode               # 現在のモード（OBJECT/EDIT等）
+bpy.context.area.type          # 現在のエリアタイプ
+
+# 高度な例：コンテキストを上書きし、特定のエリアでオペレーターを実行
 area = next(a for a in bpy.context.window.screen.areas if a.type == 'VIEW_3D')
 with bpy.context.temp_override(area=area):
     bpy.ops.view3d.view_selected('INVOKE_DEFAULT')
 ```
 
-**リファレンス**: [Context (docs.blender.org)](https://docs.blender.org/api/current/bpy.context.html)
+<!-- TODO: Console画面 -->
 
-### `bpy.data`
-保存される「データブロック」の集合（シーン、オブジェクト、メッシュ、マテリアル等）です。`.blend`ファイルに永続化されるモデルであり、`bpy.context`（評価環境）と対になる概念です。
+**参考**: [Context (docs.blender.org)](https://docs.blender.org/api/current/bpy.context.html)
 
-- 主なデータ: scenes、objects、meshes、materials、images など
-- 用途: プロパティを読み書きし、変更を永続化。次のイベント/描画でコンテキストとUIに反映されます。
-
-```python
-obj = bpy.data.objects.get('Cube')
-if obj: obj.location.x += 1.0
-```
-
-**リファレンス**: [Data (docs.blender.org)](https://docs.blender.org/api/current/bpy.types.BlendData.html)
-
-::::{admonition} ポイント
+::::{admonition} DataとContextの違い
 :class: hint
 
-データ（`bpy.data`）＝保存されるモデルに対し、コンテキスト（`bpy.context`）＝瞬間ごとに組み立てられる参照です。
+- bpy.data を使う場面：全マテリアルをリストアップする、特定の名前のオブジェクトを必ず操作する
+- bpy.context を使う場面：選択中のオブジェクトに対してツールを実行する、現在のモードに応じてUIを切り替える
+
+bpy.data は「何が存在するか」という静的な事実を扱い、bpy.context は「今何をしているか」という動的な状況を扱います。前者がデータベース的な性質を持つのに対し、後者はユーザーインターフェースと密接に結びついた、インタラクティブな性質を持ちます。
 
 ::::
 
-
 ### モード（Mode）
+
 Blenderの**動作状態**（オブジェクトモード、編集モードなど）を指します。
 各モードにはそれぞれのツールとアクションのセットがあります。
 
