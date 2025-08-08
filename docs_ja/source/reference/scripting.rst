@@ -8,11 +8,11 @@ PMEは、Blenderの `Python API <https://docs.blender.org/api/current/>`_ を使
 この記事では、PMEのスクリプティング機能の概要と、組み込まれたグローバル変数と関数について説明します。
 
 
-.. NOTE: furo または book テーマでは不要
-.. contents::
-   :local:
-   :depth: 2
-   :class: this-will-duplicate-information-and-it-is-still-useful-here
+.. NOTE: RTDでのページ内目次のために必要。furo または book テーマでは不要のためコメントアウト
+.. .. contents::
+..    :local:
+..    :depth: 2
+..    :class: this-will-duplicate-information-and-it-is-still-useful-here
 
 
 -----------
@@ -85,7 +85,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 ************
 
 .. py:function:: execute_script(path, **kwargs)
-    :noindex:
 
     外部のPythonスクリプトを実行します。
 
@@ -132,7 +131,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 
 
 .. py:function:: props(name=None, value=None)
-    :noindex:
 
     PMEプロパティの値を取得または設定します。
 
@@ -156,7 +154,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 
 
 .. py:function:: paint_settings()
-    :noindex:
 
     コンテキストに応じたペイント設定を取得します。
 
@@ -169,7 +166,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 
 
 .. py:function:: find_by(collection, key, value)
-    :noindex:
 
     ``collection`` 内で ``key`` が ``value`` と等しい最初のアイテムを検索します。
 
@@ -181,7 +177,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 
 
 .. py:function:: setattr(object, name, value)
-    :noindex:
 
     Pythonの組み込み :func:`setattr` と同じですが、設定後に ``True`` を返します。
 
@@ -193,7 +188,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 *******************
 
 .. py:function:: open_menu(name, slot=None, **kwargs)
-    :noindex:
 
     名前を指定してメニュー、パイメニュー、ポップアップダイアログを開くか、スタックキー、スティッキーキー、モーダルオペレーター、またはマクロオペレーターを実行します。
 
@@ -212,7 +206,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 
 
 .. py:function:: toggle_menu(name, value=None)
-    :noindex:
 
     メニューを有効または無効にします。
 
@@ -222,7 +215,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 
 
 .. py:function:: tag_redraw(area=None, region=None)
-    :noindex:
 
     UIエリアまたはリージョンを再描画します。
 
@@ -232,7 +224,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 
 
 .. py:function:: close_popups()
-    :noindex:
 
     すべてのポップアップダイアログを閉じます。
 
@@ -240,7 +231,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 
 
 .. py:function:: overlay(text, **kwargs)
-    :noindex:
 
     オーバーレイメッセージを描画します。
 
@@ -258,7 +248,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 
 
 .. py:function:: message_box(text, icon='INFO', title="Pie Menu Editor")
-    :noindex:
 
     メッセージボックスを表示します。
 
@@ -269,7 +258,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 
 
 .. py:function:: input_box(func=None, prop=None)
-    :noindex:
 
     入力ボックスを表示します。
 
@@ -290,7 +278,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 *********************
 
 .. py:function:: draw_menu(name, frame=True, dx=0, dy=0)
-   :noindex:
 
    別のポップアップダイアログまたはパイメニュー内にポップアップダイアログを描画します。
 
@@ -302,7 +289,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 
 
 .. py:function:: operator(layout, operator, text="", icon='NONE', emboss=True, icon_value=0, **kwargs)
-    :noindex:
 
     :meth:`UILayout.operator() <bpy.types.UILayout.operator>` と似ていますが、オペレータープロパティの設定が可能です。
 
@@ -322,7 +308,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 
 
 .. py:function:: custom_icon(filename)
-    :noindex:
 
     カスタムアイコンに関連付けられた整数値を取得します。
 
@@ -335,7 +320,6 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
 
 
 .. py:function:: panel(id, frame=True, header=True, expand=None)
-    :noindex:
 
     IDによってパネルを描画します。
 
