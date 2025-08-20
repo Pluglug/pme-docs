@@ -28,6 +28,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
     "sphinx_design",
+    "sphinxcontrib.mermaid",  # Mermaid diagram support
     # 'sphinx_autodoc_typehints'
     # 'sphinx.ext.autosectionlabel',
     # 'sphinxcontrib.menuselection',
@@ -56,6 +57,11 @@ myst_enable_extensions = [
     "substitution",
     "tasklist",
 ]
+
+# -- Mermaid configuration --------------------------------------------------
+mermaid_version = "10.6.1"
+mermaid_cmd = "mmdc"
+mermaid_params = ["-p", "puppeteer-config.json"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

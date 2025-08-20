@@ -4,3 +4,4 @@ myst-parser
 sphinx-design
 sphinx-autobuild
 furo
+sphinxcontrib-mermaid
