@@ -18,19 +18,19 @@
 :align: center
 :::
 
-- **有効性**: 有効/無効を切り替えます。
+- **有効性**: このパイメニューの有効/無効を切り替えます。無効にするとホットキーが無効化されます。
 
-- **プレビュー**: プレビューを表示します。
+- **プレビュー**: パイメニューをプレビュー表示して、レイアウトを事前に確認できます。
 
-- **アイテム選択**: エディタに表示するアイテムを切り替えます。
+- **アイテム選択**: エディタに表示するPMEアイテムを切り替えます。アイコンは現在のメニュータイプを示します。
 
-- **メニュー名**: 名前を変更します。
+- **メニュー名**: パイメニューの名前を設定・変更します。他のメニューから参照する際の識別子としても使用されます。
 
-- **タグ**: タグを設定します。
+- **タグ**: メニューの分類・検索用のタグを設定します。複数のタグを設定可能です。
 
-- **ドキュメント**: ドキュメントを表示します。
+- **ドキュメント**: Pie Menu Editorのオンラインドキュメントを開きます。
 
-- **詳細設定**: 詳細設定を表示します。
+- **詳細設定**: パイメニューの高度な[設定オプション](#id5)（Poll Method、Radius等）を表示・編集します。
 
 ### Hotkey設定
 
@@ -40,8 +40,10 @@
 :align: center
 :::
 
-Pie Menuを呼び出すHotkeyを設定します。
-→ [Hotkeyの設定方法](../hotkeys/index.md)
+パイメニューを呼び出すホットキーを設定します。
+マウス・キーボードの組み合わせや、モディファイアキー（Ctrl、Shift、Alt等）を使用できます。
+
+→ [詳細なホットキー設定方法](../hotkeys/index.md)
 
 ### メニュースロット
 
@@ -51,8 +53,15 @@ Pie Menuを呼び出すHotkeyを設定します。
 :align: right
 :::
 
-8方向 + 最上部 + 最下部の10のメニュースロットを設定できます。
-左から、スロット編集・アイコン設定・スロット表示名・詳細設定です。
+パイメニューは**10個のスロット**で構成されています：
+- **8方向**：上下左右・斜め4方向
+- **最上部・最下部**：垂直方向の追加スロット
+
+各スロットの構成要素（左から右へ）：
+1. **スロット編集ボタン**: スロットエディタを開いて機能を設定
+2. **アイコン設定**: スロットに表示するアイコンを選択
+3. **表示名**: スロットのラベルテキストを設定
+4. **詳細設定**: スロット固有の追加オプション
 
 ::::{admonition} Expansion Tool
 :class: seealso
@@ -73,68 +82,95 @@ Settings > General > Expand Slot Toolsを有効にすると、詳細設定メニ
 :align: right
 :::
 
-- **Pollメソッド**
+- **Poll Method**: メニューの表示条件を制御するPythonコードを設定します。条件が満たされない場合、メニューは表示されません。
 
-- **Radius**
+- **Radius**: パイメニューの円の半径を設定します。デフォルト値（-1）で自動設定、カスタム値でアニメーションが無効化されます。
 
-- **Threshold**
+- **Threshold**: フリックモード時のマウス移動距離の閾値を設定します。この距離を超えるとスロットが選択されます。
 
-- **Confirm Threshold**
+- **Confirm Threshold**: フリックモード時の確定距離の閾値を設定します。この距離まで移動すると選択が確定されます。
 
-- **Confirm on Threshold**
+- **Confirm on Threshold**: 閾値に達した時点で自動的に選択を確定するかどうかを設定します。
 
 ---
 
 ## スロットエディタ
 
 スロット編集をクリックすると、スロットエディタが表示されます。
-各スロットの機能を設定できます。Pie Menuは5つの機能タイプがあります。
+各スロットの機能を設定できます。Pie Menuは以下の機能タイプがあります：
 
 :::{image} /_static/images/editors/pie_menu/pie_slot_editor.png
 :alt: Pie Menu Slot Editor
 :align: center
 :::
 
-### Command
+### Command（コマンド）
 
-任意のPythonコマンドを実行します。
-Python code that will be executed when the user clicks the button.
+ボタンがクリックされた時に実行される任意のPythonコードを設定します。
 
 ```python
 # オペレーターを実行する
 bpy.ops.object.mode_set(mode='OBJECT')
 
-# 条件分岐を使用する
-ao = C.active_object; ao and message_box("Mesh" if ao.type == 'MESH' else "Not a mesh")
+# 条件分岐を使用する (Ctrlを押していた場合はモンキーを追加、それ以外は立方体を追加)
+O.mesh.primitive_monkey_add() if E.ctrl else O.mesh.primitive_cube_add()
 ```
 
 :::{admonition} コマンドの記述方法
+:class: important
 
 Blenderの文字列プロパティーは、複数行のコマンドを記述できません。
-そのため、コマンドを記述する場合は、セミコロン(`;`)で区切る必要があります。
+そのため、複数のコマンドを記述する場合は、セミコロン(`;`)で区切る必要があります。
 
 参考: [Pythonコマンドの記述方法](../python/index.md)
 
-また、利用可能なグローバルは[Scripting](../reference/scripting.rst)を参照してください。
-
 :::
 
-### Property
+:::{admonition} グローバル変数
+:class: hint
 
-Path to the object's property which will be displayed as a widget.
+**利用可能なグローバル変数の例：**
+- `C`: bpy.context（現在のBlenderコンテキスト）
+- `O`: bpy.ops（Blenderのオペレーター）
+- `E`: event（イベント情報）
 
-### Menu
+[こちら](../reference/scripting.rst)でさらに詳細なグローバル変数の一覧を確認できます。
+:::
 
-Open/execute the menu, popup or operator when the user clicks the button. Or draw a popup dialog inside the current popup dialog or pie menu.
 
-### Hotkey
+### Property（プロパティ）
 
-Blender's hotkey that will be used to find and execute an operator assigned to it when the user clicks the button.
+オブジェクトのプロパティへのパスを指定し、ウィジェットとして表示します。
+例：`bpy.context.object.location`でオブジェクトの位置を表示・編集できます。
 
-### Custom
+:::{admonition} 高度なプロパティ操作
+:class: tip
 
-Python code that will be used to draw custom layout of widgets.
+インデックス指定やより複雑なプロパティ操作が必要な場合は、[Property Editor](../editors/property_editor.md)を利用してください。
+:::
+
+### Menu（メニュー）
+
+ボタンがクリックされた時にPME内で作成した他のメニューアイテムを呼び出します。
+例：
+- **Popup Dialog**を`Expand Popup Dialog`で表示
+- **Regular Menu**を`Open on Mouse Over`で表示
+- **Macro Operator**を実行
+
+### Hotkey（ホットキー）
+
+ボタンがクリックされた時に、指定されたBlenderのホットキーに割り当てられているオペレーターを検索して実行します。
+例：`G`でGrab（移動）、`R`でRotate（回転）など、Blenderの標準ホットキーを利用できます。
+
+### Custom（カスタム）
+
+カスタムなウィジェットレイアウトを描画するためのPythonコードを設定します。
+`L`はレイアウトオブジェクトを表し、Blenderのレイアウトシステムを使用してUIを構築できます。
 
 ```python
-L.box().label(text, icon=icon, icon_value=icon_value)
+# ボックス内にラベルを表示
+L.box().label(text=text, icon=icon, icon_value=icon_value)
+
+# 複数のボタンを縦に配置
+col = L.column(); operator(col, "mesh.primitive_cube_add", text="立方体"); operator(col, "mesh.primitive_uv_sphere_add", text="球")
 ```
