@@ -5,25 +5,46 @@ PMEでカスタムメニューを作成する際、適切なKeymapを選択す�
 
 ## Blenderキーマップの基本構造
 
-### 階層システム
-BlenderのKeymapは**階層構造**になっており、より具体的（優先度の高い）キーマップが先に処理されます。
+### 実際の優先度順序
+
+Blenderでキーが押された時、以下の順序でKeymapがチェックされます：
 
 ```
-Screen Editing (全体)
-├── 3D View (3D Viewエリア全体)
-│   ├── Mesh (メッシュ編集モード)
-│   ├── Object Mode (オブジェクトモード)
-│   ├── Sculpt (スカルプトモード)
-│   └── その他のモード...
-├── Image Editor (画像エディタ)
-├── Outliner (アウトライナー)
-└── その他のエディタ...
+【優先度：高→低】
+
+1. Modal Handlers（最高優先度）
+   ├── Screen Editing ← 例外的に最優先！
+   └── Modal Operators（Transform、Grab等）
+
+2. Area/Region Handlers（中間優先度）
+   ├── Tool固有（アクティブツール）
+   ├── Mode固有（Mesh、Sculpt、Object Mode等）
+   └── Editor固有（3D View、Image Editor等）
+
+3. Window Handlers（最低優先度）
+   ├── Window
+   └── Screen
 ```
+
+### Screen Editingの特殊性
+
+:::{admonition} Screen Editingの注意点
+:class: warning
+
+**Screen Editing**は名前に反して「全体共通Keymap」ではありません。
+実際には**最高優先度**で処理される特殊なKeymapです。
+
+- **通常の期待**: 全体共通 → 最低優先度
+- **実際の動作**: Modal Handler → **最高優先度**
+
+PMEでScreen Editingを使用する場合は、他のすべてのKeymapより優先されることを理解した上で慎重に使用してください。
+:::
 
 ### 優先度の仕組み
-1. **モード固有のKeymap** (例: `Mesh`, `Sculpt`) - 最優先
-2. **エディタ固有のKeymap** (例: `3D View`, `Image Editor`)
-3. **全体共通のKeymap** (例: `Screen Editing`) - 最低優先度
+1. **Screen Editing** - **最高優先度**（例外的）
+2. **Tool/Mode固有のKeymap** (例: `Mesh`, `Sculpt`) - 高優先度
+3. **エディタ固有のKeymap** (例: `3D View`, `Image Editor`) - 中優先度  
+4. **Window/Screen** - 最低優先度
 
 ## 主要なKeymap一覧
 
@@ -138,7 +159,7 @@ Screen Editing (全体)
 ├── 3D View, Image Editor, Node Editor等
 │
 全体共通Keymap (最低優先度)
-├── Screen Editing ← 全体共通の中では最優先
+├── Screen Editing ← モード固有よりも優先度が高い
 ├── Window      ← 中間  
 └── Screen      ← 最低
 ```
