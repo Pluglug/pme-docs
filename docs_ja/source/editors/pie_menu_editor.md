@@ -35,7 +35,7 @@
 
 ### Hotkey設定
 
-```{include} ../_includes/hotkey_settings.md
+```{include} common/hotkey_settings.md
 ```
 
 ### メニュースロット
@@ -62,9 +62,11 @@
 
 Settings > General > Expand Slot Toolsを有効にすると、詳細設定メニューの編集ボタンが拡張されます。
 
-:::{image} /_static/images/editors/pie_menu/pie_slot_tools.png
+:::{image} /_static/images/editors/common/slot_tools.png
+:class: img-shadow
 :alt: Pie Menu Slot Tools
 :align: center
+:width: 80%
 :::
 ::::
 
@@ -94,90 +96,66 @@ Settings > General > Expand Slot Toolsを有効にすると、詳細設定メニ
 スロット編集をクリックすると、スロットエディタが表示されます。
 各スロットの機能を設定できます。Pie Menuは以下の機能タイプがあります：
 
-:::{image} /_static/images/editors/pie_menu/pie_slot_editor.png
+:::{image} /_static/images/editors/common/slot_editor.png
 :class: img-shadow
 :alt: Pie Menu Slot Editor
 :align: center
+:width: 100%
 :::
 
-### Command（コマンド）
+<div style="margin: 1.5rem 0;"></div>
 
-ボタンがクリックされた時に実行される任意のPythonコードを設定します。
+### トップ
 
-```python
-# オペレーターを実行する
-bpy.ops.object.mode_set(mode='OBJECT')
+- **アイコン**: スロットに表示するアイコンを選択します。
 
-# 条件分岐を使用する (Ctrlを押していた場合はモンキーを追加、それ以外は立方体を追加)
-O.mesh.primitive_monkey_add() if E.ctrl else O.mesh.primitive_cube_add()
+- **表示名**: スロットのラベルテキストを設定します。{octicon}`arrow-left`ボタンを押すと、提案名を適用します。
+
+- **OK / Cancel**: スロットの選択を確定・キャンセルします。Enter / Escape キーでも確定できます。
+
+### タブ
+
+5つの機能タイプから選択します：
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
 ```
-
-:::{admonition} コマンドの記述方法
-:class: important
-
-Blenderの文字列プロパティーは、複数行のコマンドを記述できません。
-そのため、複数のコマンドを記述する場合は、セミコロン(`;`)で区切る必要があります。
-
-参考: [Pythonコマンドの記述方法](../python/index.md)
-
 :::
 
-:::{admonition} グローバル変数
-:class: hint
+:::{tab-item} Property
+:sync: property
 
-**利用可能なグローバル変数の例：**
-- `C`: bpy.context（現在のBlenderコンテキスト）
-- `O`: bpy.ops（Blenderのオペレーター）
-- `E`: event（イベント情報）
-
-[こちら](../reference/scripting.rst)でさらに詳細なグローバル変数の一覧を確認できます。
-:::
-
-
-### Property（プロパティ）
-
-オブジェクトのプロパティへのパスを指定し、ウィジェットとして表示します。
-例：`bpy.context.object.location`でオブジェクトの位置を表示・編集できます。
-
-:::{admonition} 高度なプロパティ操作
-:class: tip
-
-インデックス指定やより複雑なプロパティ操作が必要な場合は、[Property Editor](../editors/property_editor.md)を利用してください。
-:::
-
-### Menu（メニュー）
-
-ボタンがクリックされた時にPME内で作成した他のメニューアイテムを呼び出します。
-例：
-- **Popup Dialog**を`Expand Popup Dialog`で表示
-- **Regular Menu**を`Open on Mouse Over`で表示
-- **Macro Operator**を実行
-
-### Hotkey（ホットキー）
-
-ボタンがクリックされた時に、指定されたBlenderのホットキーに割り当てられているオペレーターを検索して実行します。
-例：`G`でGrab（移動）、`R`でRotate（回転）など、Blenderの標準ホットキーを利用できます。
-
-### Custom（カスタム）
-
-カスタムなウィジェットレイアウトを描画するためのPythonコードを設定します。
-`L`はレイアウトオブジェクトを表し、Blenderのレイアウトシステムを使用してUIを構築できます。
-
-```python
-# ボックス内にラベルを表示
-L.box().label(text=text, icon=icon, icon_value=icon_value)
-
-# 複数のボタンを縦に配置
-col = L.column(); operator(col, "mesh.primitive_cube_add", text="立方体"); operator(col, "mesh.primitive_uv_sphere_add", text="球")
+```{include} common/slot_types/property.md
 ```
+:::
+
+:::{tab-item} Menu
+:sync: menu
+
+```{include} common/slot_types/menu.md
+```
+:::
+
+:::{tab-item} Hotkey
+:sync: hotkey
+
+```{include} common/slot_types/hotkey.md
+```
+:::
+
+:::{tab-item} Custom
+:sync: custom
+
+```{include} common/slot_types/custom.md
+```
+:::
+::::
 
 ### Examples
 
-:::{image} /_static/images/editors/pie_menu/pie_slot_examples.png
-:class: img-shadow
-:alt: Pie Menu Slot Examples
-:width: 40%
-:align: right
-:::
-
-一番右のハンバーガーメニューを押すと、あらかじめ用意されたいくつかのスロット機能を追加することができます。
+```{include} common/slot_types/examples.md
+```
