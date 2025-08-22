@@ -2,7 +2,7 @@
 このドキュメントは、[オリジナルのPMEドキュメント](https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/)のPMEファンによる更新版です。
 ```
 
-![Pie Menu Editor Logo](/_static/images/pme_logo.webp)
+![Pie Menu Editor Logo](/_static/images/original/pme_logo.webp)
 
 ---
 

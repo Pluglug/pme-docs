@@ -6,10 +6,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Pie Menu Editor (日本語)"
-copyright = "2024, Pluglug and contributors"
+project = "Pie Menu Editor JA"
+copyright = "2025, Pluglug and contributors"
 author = "Pluglug and contributors"
-release = "1.18.8"
+release = "1.18.9"
 master_doc = "index"
 
 # Language settings
@@ -82,7 +82,7 @@ html_theme_options = {
     },
 }
 
-html_title = "PME ドキュメント"
+# html_title = "PME ドキュメント"
 
 
 def setup(app):
