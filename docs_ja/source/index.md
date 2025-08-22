@@ -132,6 +132,7 @@ editors/settings
 reference/terminology
 reference/scripting
 reference/examples
+reference/keymap_guide
 ```
 
 ```{toctree}
