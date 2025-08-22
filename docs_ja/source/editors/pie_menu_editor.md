@@ -13,6 +13,7 @@
 ### トップ
 
 :::{image} /_static/images/editors/pie_menu/pie_ui_top.png
+:class: img-shadow
 :alt: Pie Menu Editor Top
 :width: 100%
 :align: center
@@ -40,6 +41,7 @@
 ### メニュースロット
 
 :::{image} /_static/images/editors/pie_menu/pie_slots.png
+:class: img-shadow
 :alt: Pie Menu Editor Slots
 :width: 30%
 :align: right
@@ -69,6 +71,7 @@ Settings > General > Expand Slot Toolsを有効にすると、詳細設定メニ
 ### 詳細設定メニュー
 
 :::{image} /_static/images/editors/pie_menu/pie_advanced_settings.png
+:class: img-shadow
 :alt: Pie Menu Editor Advanced Settings
 :width: 40%
 :align: right
@@ -92,6 +95,7 @@ Settings > General > Expand Slot Toolsを有効にすると、詳細設定メニ
 各スロットの機能を設定できます。Pie Menuは以下の機能タイプがあります：
 
 :::{image} /_static/images/editors/pie_menu/pie_slot_editor.png
+:class: img-shadow
 :alt: Pie Menu Slot Editor
 :align: center
 :::
@@ -170,6 +174,7 @@ col = L.column(); operator(col, "mesh.primitive_cube_add", text="立方体"); op
 ### Examples
 
 :::{image} /_static/images/editors/pie_menu/pie_slot_examples.png
+:class: img-shadow
 :alt: Pie Menu Slot Examples
 :width: 40%
 :align: right

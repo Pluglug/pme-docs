@@ -1,28 +1,41 @@
 :::{image} /_static/images/editors/pie_menu/pie_hotkey.png
+:class: img-shadow
 :alt: Pie Menu Editor Hotkey
 :width: 100%
 :align: center
 :::
 
-パイメニューを呼び出すホットキーを設定します。
+<div style="margin: 1.5rem 0;"></div>
 
-#### キーマップ
-Blenderのキーマップは階層構造になっており、適切なキーマップを選択することで既存のホットキーを上書きできます。既存のホットキーのキーマップとアクションを調べるには、**+ボタン**を押してください。
+```{grid} 1 1 2 3
+:gutter: 2
 
-適切なKeymapの選び方は、[Keymapの選び方](../reference/keymap_guide.md)を参照してください。
+:::{grid-item-card} キーマップ
+:class-card: ex-card ex-card--keymap
 
-#### ホットキーモード
+Blenderのキーマップは階層構造です。適切なキーマップを選ぶことで既存のホットキーを安全に上書きできます。既存のホットキーのキーマップやアクションを調べるには、エディタの`+`ボタンを使用してください。
+
+- 参考: [Keymapの選び方](../reference/keymap_guide.md)
+:::
+
+:::{grid-item-card} ホットキーモード
+:class-card: ex-card ex-card--hotkey
+
 - **Press**: キーを押す
 - **Hold**: キーを押し続ける  
 - **Tweak**: キーを押しながらマウスを動かす
 - **Double Click**: キーをダブルクリックする
+:::
 
-#### モディファイア
-**Any modifier**は、Ctrl、Shift、Alt、OSKeyの任意の組み合わせです。コンテキスト感応ツールの作成に使用できます。
+:::{grid-item-card} モディファイア
+:class-card: ex-card ex-card--modifier
+
+**Any modifier** は Ctrl / Shift / Alt / OSKey の任意の組み合わせです。コンテキスト感応ツールの作成に使えます。
 
 ```python
 print("Ctrl is pressed" if E.ctrl else "Ctrl isn't pressed")
 ```
 
-このアドオンでは**マウスボタンをホットキーモディファイアとして使用**できます。つまり、LMB+Tab、RMB+Tab、MMB+Tabなどのホットキーが使用可能です。
+このアドオンではマウスボタンをモディファイアとして使えます（例: LMB+Tab / RMB+Tab / MMB+Tab）。
+:::
 
