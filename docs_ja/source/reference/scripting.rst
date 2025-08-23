@@ -319,19 +319,28 @@ PMEのスロットエディタ内で利用できる関数です。コマンド�
         L.label(text="My Custom Icon", icon_value=custom_icon("p1"))
 
 
-.. py:function:: panel(id, frame=True, header=True, expand=None)
+.. py:function:: panel(pt, frame=True, header=True, expand=None, poll=True, layout=None)
 
     IDによってパネルを描画します。
 
-    :param str id: パネルのID。
-    :param bool frame: フレーム付きパネルを描画するかどうか。
-    :param bool header: パネルヘッダーを描画するかどうか。
-    :param expand: 展開する場合は ``True``、折りたたむ場合は ``False``、現在の状態を使用する場合は ``None``。
-    :return: ``True``
+    :param pt: パネルクラスまたはパネルクラス名の文字列。文字列の場合は、 ``bpy.types`` から対応するクラスを検索します。
+    :type pt: Union[str, Type]
+    :param bool frame: パネルをフレームで囲むかどうかを制御。``True`` の場合、``layout.box()`` を使用。``False`` の場合、``layout.column()`` を使用。
+    :param bool header: パネルヘッダーの表示スタイルを制御。
+    :param expand: パネルの初期展開状態を制御。``True`` : 展開された状態で開始、``False`` : 折りたたまれた状態で開始、``None`` : 前回の状態を保持。
+    :type expand: Optional[bool]
+    :param bool poll: パネルの ``poll`` メソッドを実行するかどうかを制御。``True`` の場合、パネルの表示条件をチェック。
+    :param layout: カスタムレイアウトを指定。
+    :type layout: Optional[Any]
+    :return: True
+    :rtype: bool
 
     **例**::
 
         panel("MATERIAL_PT_context_material", True, True, True)
+
+        # パネルサイズを変更
+        L.scale_x = 0.8; panel("USERPREF_PT_interface", layout=L.box())
 
 ----
 
