@@ -18,7 +18,7 @@ sphinx-autobuildを使って開発サーバーを起動します。ファイル�
 
 ```bash
 cd docs_ja
-sphinx-autobuild source build --host 0.0.0.0 --port 8000 --open-browser
+sphinx-autobuild source build --host 0.0.0.0 --port 8000
 ```
 
 - ソース: `docs_ja/source/`
@@ -29,7 +29,7 @@ sphinx-autobuild source build --host 0.0.0.0 --port 8000 --open-browser
 
 ```bash
 cd docs
-sphinx-autobuild source build/en --host 0.0.0.0 --port 8000 --open-browser
+sphinx-autobuild source build/en --host 0.0.0.0 --port 8000
 ```
 
 - ソース: `docs/source/`
@@ -61,10 +61,11 @@ sphinx-autobuild source build/en --host 0.0.0.0 --port 8000 --open-browser
 起動後、以下の動作をします：
 
 1. **初回ビルド**: ドキュメント全体をビルド
-2. **ブラウザ起動**: デフォルトブラウザで http://localhost:8000 を開く
-3. **ファイル監視**: `source/` ディレクトリ内のファイル変更を監視
-4. **自動リビルド**: ファイル保存時に自動的にリビルド
-5. **自動更新**: ブラウザが自動的にリロード
+2. **ファイル監視**: `source/` ディレクトリ内のファイル変更を監視
+3. **自動リビルド**: ファイル保存時に自動的にリビルド
+4. **自動更新**: ブラウザが自動的にリロード
+
+**ブラウザでアクセス**: http://localhost:8000 を手動で開いてください
 
 ## サーバーの停止
 
@@ -132,8 +133,8 @@ Running Sphinx v7.x.x
 Build finished.
 
 ✓ Server is running at http://localhost:8000
-✓ Browser opened automatically
 ✓ Watching for changes...
 
+Open http://localhost:8000 in your browser.
 Press Ctrl+C to stop the server.
 ```
