@@ -144,6 +144,7 @@ When documenting PME features:
 
 Use these custom commands to streamline documentation workflows:
 
+- **`/start-server [lang]`** - Start sphinx-autobuild development server with live reload (default: `ja`, or `en`)
 - **`/investigate-feature [feature_name]`** - Investigate PME source code and create documentation draft
 - **`/translate-to-en [file_path]`** - Translate Japanese docs to English (e.g., `editors/sticky_key_editor.md`)
 - **`/check-source-changes [period]`** - Check recent PME source changes and identify doc updates needed
@@ -156,19 +157,21 @@ Use these custom commands to streamline documentation workflows:
 
 ### Typical Documentation Task Flow
 
-1. Edit Japanese source in `docs_ja/source/` (primary development language)
-2. Use `make livehtml` in `docs_ja/` for live preview
-3. Commit changes when content is complete
-4. Later, use `/translate-to-en` to reflect improvements to English version
-5. Build both versions with `python build_docs.py` or `/build-preview`
+1. Start development server: `/start-server ja` (or `/start-server en`)
+2. Edit Japanese source in `docs_ja/source/` (primary development language)
+3. Preview changes at http://localhost:8000 (auto-reload on save)
+4. Commit changes when content is complete
+5. Later, use `/translate-to-en` to reflect improvements to English version
+6. Build both versions with `/build-preview` to verify
 
 ### Workflow Examples
 
 **Creating new feature documentation:**
-1. `/investigate-feature sticky_key` - Investigate and create draft
-2. User reviews and enhances the draft
-3. `/translate-to-en editors/sticky_key_editor.md` - Translate to English
-4. `/build-preview` - Verify build
+1. `/start-server ja` - Start development server
+2. `/investigate-feature sticky_key` - Investigate and create draft
+3. Edit and preview the draft (auto-reload at http://localhost:8000)
+4. `/translate-to-en editors/sticky_key_editor.md` - Translate to English
+5. `/build-preview` - Verify build
 
 **Syncing with PME updates:**
 1. `/check-source-changes` - Check recent changes

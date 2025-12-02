@@ -7,12 +7,14 @@
 ### commands/
 カスタムSlash Commands - ドキュメント作成タスクを自動化
 
+- **`/start-server [lang]`** - 開発サーバーを起動（sphinx-autobuild、ライブリロード対応）
 - **`/investigate-feature`** - PMEソースコードから機能を調査してたたき台作成
 - **`/translate-to-en`** - 日本語ドキュメントを英語に翻訳
 - **`/check-source-changes`** - PMEの最近の変更を確認してドキュメント更新が必要か判断
 - **`/create-draft`** - 新規ドキュメントセクションのたたき台を作成
 - **`/build-preview`** - ドキュメントをビルドしてエラー・警告をチェック
 - **`/sync-versions`** - PMEアドオンとドキュメントのバージョン情報を同期
+- **`/merge-to-main`** - feature/ja-roughからmainへ選択的にマージ
 
 ### hooks.json
 自動実行Hooks
@@ -44,7 +46,23 @@ PME専門用語辞書
 
 ## 使い方
 
-### 1. 新機能のドキュメント作成
+### 1. 開発サーバーの起動
+
+```bash
+# 日本語版（デフォルト）
+/start-server
+
+# または明示的に
+/start-server ja
+
+# 英語版
+/start-server en
+```
+
+→ sphinx-autobuildで開発サーバーを起動します。ファイル変更時に自動リビルド・ブラウザ自動更新されます。
+→ サーバーURL: http://localhost:8000
+
+### 2. 新機能のドキュメント作成
 
 ```
 /investigate-feature sticky_key
@@ -52,7 +70,7 @@ PME専門用語辞書
 
 → ソースコードを調査してたたき台を作成します。
 
-### 2. 日本語から英語への翻訳
+### 3. 日本語から英語への翻訳
 
 ```
 /translate-to-en editors/sticky_key_editor.md
@@ -60,7 +78,7 @@ PME専門用語辞書
 
 → 日本語版を英語版に翻訳します。
 
-### 3. PME更新の反映
+### 4. PME更新の反映
 
 ```
 /check-source-changes 1 month
@@ -68,7 +86,7 @@ PME専門用語辞書
 
 → 最近1ヶ月のPME変更を確認し、ドキュメント更新が必要か判断します。
 
-### 4. ビルドチェック
+### 5. ビルドチェック
 
 ```
 /build-preview
@@ -76,7 +94,7 @@ PME専門用語辞書
 
 → ドキュメントをビルドして構文エラーやリンク切れをチェックします。
 
-### 5. バージョン同期
+### 6. バージョン同期
 
 ```
 /sync-versions
