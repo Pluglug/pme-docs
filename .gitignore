@@ -35,3 +35,6 @@ pip-delete-this-directory.txt
 # misc
 *.bak
 *.old
+
+# Claude Code local settings (contains permissions)
+.claude/settings.local.json
