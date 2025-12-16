@@ -21,7 +21,13 @@ obj = bpy.data.objects.get('Cube')
 if obj: obj.location.x += 1.0
 ```
 
-<!-- TODO: Consoleもしくはアウトライナー -->
+```{figure} /_static/images/terminology/bpy_data_console.png
+:alt: bpy.dataの例
+:align: center
+:width: 600px
+
+Blender Pythonコンソールでの `bpy.data` の使用例
+```
 
 **参考**: [Data Access (bpy.data)](https://docs.blender.org/api/current/bpy.data.html)
 [bpy.types.BlendData](https://docs.blender.org/api/current/bpy.types.BlendData.html)
@@ -44,7 +50,13 @@ with bpy.context.temp_override(area=area):
     bpy.ops.view3d.view_selected('INVOKE_DEFAULT')
 ```
 
-<!-- TODO: Console画面 -->
+```{figure} /_static/images/terminology/bpy_context_console.png
+:alt: bpy.contextの例
+:align: center
+:width: 600px
+
+Blender Pythonコンソールでの `bpy.context` の使用例
+```
 
 **参考**: [Context (docs.blender.org)](https://docs.blender.org/api/current/bpy.context.html)
 
@@ -109,6 +121,14 @@ Blenderの**動作状態**（オブジェクトモード、編集モードなど
 
 ## 画面構成の概念
 
+```{figure} /_static/images/blender_manual/interface_window-system_introduction_default-screen.png
+:alt: Blenderのインターフェース全体
+:align: center
+:width: 700px
+
+Blenderのデフォルト画面構成
+```
+
 ### エリア（Area）
 Blenderインターフェース内の大きなワークスペース領域です。
 3Dビューポート、アウトライナーなどの異なるエディタータイプはそれぞれ**エリア**を占有します。
@@ -125,6 +145,14 @@ Blenderインターフェース内の大きなワークスペース領域です�
 
 - PMEの**パネルグループ**機能により、リージョンにカスタムコンテンツを追加できます。
 
+```{figure} /_static/images/blender_manual/interface_window-system_regions_3d-view.png
+:alt: 3Dビューのリージョン
+:align: center
+:width: 700px
+
+3Dビューポートのリージョン構成（ヘッダー、ツールバー、サイドバー等）
+```
+
 **関連**: エリア、パネル
 
 **リファレンス**: [Region (docs.blender.org)](https://docs.blender.org/manual/en/latest/interface/window_system/regions.html)
@@ -134,6 +162,14 @@ Blenderインターフェース内の大きなワークスペース領域です�
 エリアの上部または下部にある水平バーです。
 通常、メニュー、よく使用されるツールアイコンなどが含まれます。
 
+```{figure} /_static/images/terminology/blender_header.png
+:alt: Blenderのヘッダー
+:align: center
+:width: 700px
+
+3Dビューポートのヘッダー例
+```
+
 - PMEでは{ref}`メニュー/パネル拡張 <pme-menu-panel-extension>`を使用してヘッダーにカスタムボタンを追加できます。
 
 | **関連**: リージョン
@@ -142,6 +178,14 @@ Blenderインターフェース内の大きなワークスペース領域です�
 
 ### パネル（Panel）
 サイドバーやプロパティエリアによく見られる、折りたたみ可能なUIウィジェットのグループです。
+
+```{figure} /_static/images/blender_manual/interface_window-system_tabs-panels_tabs.png
+:alt: Blenderのパネル
+:align: center
+:width: 500px
+
+サイドバー内のパネル例
+```
 
 PMEでは以下が可能です:
 
@@ -155,6 +199,14 @@ PMEでは以下が可能です:
 
 
 ## PME固有の概念
+
+```{figure} /_static/images/terminology/pme_overview.png
+:alt: PME概要
+:align: center
+:width: 700px
+
+Pie Menu Editorの概要
+```
 
 ### メニュー（Menu）
 PMEで作成するカスタマイズ可能なUIコンポーネントを表す広義の用語で、以下を含みます:
@@ -247,6 +299,14 @@ PMEメニュー/ボタンの動作を定義する**中央UI**です。以下の�
 - メニュー（他のPMEメニューの呼び出し用）
 - ホットキー（ショートカット呼び出し用）
 - カスタム（カスタムレイアウト用）
+
+```{figure} /_static/images/terminology/pme_slot_editor.png
+:alt: スロットエディター
+:align: center
+:width: 500px
+
+スロットエディターのUI
+```
 
 スクリプティングが初めての場合でも、グラフィカルインターフェースを通じてすべてを設定できるように設計されています。
 

@@ -7,9 +7,9 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "Pie Menu Editor"
-copyright = "2024, Pluglug and contributors"
+copyright = "2025, Pluglug and contributors"
 author = "Pluglug and contributors"
-release = "1.18.8"
+release = "1.19.1"
 master_doc = "index"
 
 # -- General configuration ---------------------------------------------------
@@ -24,6 +24,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
     "sphinx_design",
+    "sphinxcontrib.mermaid",  # Mermaid diagram support
     # 'sphinx_autodoc_typehints'
     # 'sphinx.ext.autosectionlabel',
     # 'sphinxcontrib.menuselection',
@@ -43,6 +44,7 @@ source_suffix = [".rst", ".md"]
 myst_enable_extensions = [
     "colon_fence",
     "deflist",
+    "fieldlist",
     "html_admonition",
     "html_image",
     # 'linkify',  # Temporarily disabled due to dependency issues
@@ -52,21 +54,20 @@ myst_enable_extensions = [
     "tasklist",
 ]
 
+# -- Mermaid configuration --------------------------------------------------
+mermaid_version = "10.6.1"
+mermaid_cmd = "mmdc"
+mermaid_params = ["-p", "puppeteer-config.json"]
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_static_path = ["_static"]
 html_css_files = ["css/custom.css"]
 
-# html_theme = 'sphinx_book_theme'
-
-# html_theme = 'furo'
-# html_title = "Pie Menu Editor"
-# html_theme_options = {
-#     'default_mode': 'light',
-# }
-
 html_theme = "furo"
+
+# html_title = "PME Documentation"
 
 html_theme_options = {
     "light_css_variables": {

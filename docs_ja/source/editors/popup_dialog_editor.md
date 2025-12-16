@@ -102,19 +102,3 @@
 | 行サイズを切り替え | {kbd}`LMB` | | {kbd}`Shift` | |
 | 行スペーサーを切り替え | {kbd}`LMB` | | | {kbd}`OS` |
 :::
-
-<style>
-.mode-table, .hotkey-table {
-    width: 100%;
-    margin: 1em 0;
-}
-
-.mode-table td, .hotkey-table td {
-    padding: 0.5em;
-}
-
-.mode-table th {
-    background-color: #f5f5f5;
-    font-weight: bold;
-}
-</style>

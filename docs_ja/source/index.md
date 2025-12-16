@@ -145,3 +145,11 @@ support_community/get_support
 support_community/contribute_to_pme
 support_community/changelog
 ```
+
+```{toctree}
+:maxdepth: 2
+:caption: 開発者向け
+:hidden:
+
+reference/architecture/index
+```

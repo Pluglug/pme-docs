@@ -4,7 +4,7 @@ description: PMEソースコードから指定機能を調査し、ドキュメ�
 
 # Investigate PME Feature
 
-PMEソースコード（`E:\0187_Pie-Menu-Editor\MyScriptDir\addons\pie_menu_editor`）から指定された機能を調査し、ドキュメント用のたたき台を作成してください。
+PMEソースコード（CLAUDE.mdの`PME_SOURCE_PATH`で指定されたパス）から指定された機能を調査し、ドキュメント用のたたき台を作成してください。
 
 ## Arguments
 

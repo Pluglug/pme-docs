@@ -9,7 +9,7 @@
 project = "Pie Menu Editor JA"
 copyright = "2025, Pluglug and contributors"
 author = "Pluglug and contributors"
-release = "1.18.9"
+release = "1.19.1"
 master_doc = "index"
 
 # Language settings

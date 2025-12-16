@@ -18,7 +18,7 @@ PMEアドオンとドキュメントのバージョン情報を確認し、不�
 
 **PMEアドオン:**
 ```python
-# E:\0187_Pie-Menu-Editor\MyScriptDir\addons\pie_menu_editor\__init__.py
+# [PME_SOURCE_PATH]/__init__.py  (CLAUDE.mdで指定されたパス)
 bl_info = {
     "version": (1, 19, 2, "beta", 0),  # 例
     ...

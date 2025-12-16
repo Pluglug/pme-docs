@@ -12,6 +12,15 @@ This is the documentation repository for Pie Menu Editor (PME), a Blender addon 
 
 Each has its own Sphinx configuration and build directory. The Japanese documentation is the primary development language, with English translations following.
 
+## Environment Settings
+
+**PME Source Path** (update this for your environment):
+```
+PME_SOURCE_PATH: E:\0187_Pie-Menu-Editor\MyScriptDir\addons\pie_menu_editor
+```
+
+This path points to the PME addon source code directory. Slash commands like `/investigate-feature`, `/check-source-changes`, and `/sync-versions` use this path. Update it to match your local setup.
+
 ## Repository Structure
 
 ```
@@ -118,7 +127,7 @@ Documentation follows this structure:
 
 ## PME Addon Architecture
 
-The actual addon code is in a separate workspace directory: `E:\0187_Pie-Menu-Editor\MyScriptDir\addons\pie_menu_editor`
+The actual addon code is in a separate workspace directory (see `PME_SOURCE_PATH` in Environment Settings above).
 
 PME is a complex Blender addon with 60+ modules. Key editor modules:
 - `ed_base.py` - Base editor class with common functionality
@@ -264,3 +273,13 @@ The switcher preserves the current page path when switching languages.
 - **Addon code is separate**: The actual PME addon code is in a different workspace directory
 - **Community-maintained**: This documentation is a community effort to update the original PME documentation
 - **Version correspondence**: Documentation version should match the PME addon version (currently 1.18.8 in docs, 1.19.2-beta in addon)
+
+## Japanese-Only Content
+
+The following content is intentionally **Japanese-only** and should NOT be translated to English:
+
+- **`docs_ja/source/reference/architecture/`** - PME internal architecture documentation for developers
+  - Contains detailed technical documentation about PME's internal structure
+  - Intended for PME2 redesign reference and advanced debugging
+  - RST format (reStructuredText), not MyST Markdown
+  - Includes: `index.rst`, `data_model.rst`, `debugging.rst`, `extending.rst`

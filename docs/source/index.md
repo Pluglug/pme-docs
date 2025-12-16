@@ -67,7 +67,7 @@ The {ref}`contribute-to-docs` project welcomes:
 :class: hint
 
 :::{hlist}
-:columns: 2
+:columns: 3
 
 * [Blender](https://www.blender.org/)
 * [Blender Development Fund](https://fund.blender.org/)
@@ -85,9 +85,8 @@ The {ref}`contribute-to-docs` project welcomes:
 ---
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 1
 :caption: Getting Started
-:hidden:
 
 getting_started/installation
 getting_started/quick_tutorial

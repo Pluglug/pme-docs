@@ -4,7 +4,7 @@ description: PMEソースコードの最近の変更を確認し、ドキュメ�
 
 # Check PME Source Changes
 
-PMEソースコード（`E:\0187_Pie-Menu-Editor\MyScriptDir\addons\pie_menu_editor`）の最近の変更を確認し、ドキュメントに反映が必要か判断します。
+PMEソースコード（CLAUDE.mdの`PME_SOURCE_PATH`で指定されたパス）の最近の変更を確認し、ドキュメントに反映が必要か判断します。
 
 ## Arguments
 
@@ -18,7 +18,7 @@ PMEソースコード（`E:\0187_Pie-Menu-Editor\MyScriptDir\addons\pie_menu_edi
 PMEアドオンディレクトリで以下を実行：
 
 ```bash
-cd "E:\0187_Pie-Menu-Editor\MyScriptDir\addons\pie_menu_editor"
+cd "[PME_SOURCE_PATH]"  # CLAUDE.mdで指定されたパス
 git log --since="[period] ago" --oneline --no-merges
 ```
 
