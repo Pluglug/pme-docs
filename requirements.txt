@@ -1,9 +1,0 @@
-sphinx
-sphinx_rtd_theme
-myst-parser
-sphinx-design
-sphinx-autobuild
-furo
-sphinxcontrib-mermaid
-sphinx-copybutton
-sphinx-tabs
