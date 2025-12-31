@@ -29,6 +29,8 @@ extensions = [
     "sphinx.ext.todo",
     "sphinx_design",
     "sphinxcontrib.mermaid",  # Mermaid diagram support
+    "sphinx_copybutton",  # Copy button for code blocks
+    "sphinx_tabs.tabs",  # Tabbed content support
     # 'sphinx_autodoc_typehints'
     # 'sphinx.ext.autosectionlabel',
     # 'sphinxcontrib.menuselection',

@@ -137,6 +137,14 @@ reference/keymap_guide
 
 ```{toctree}
 :maxdepth: 2
+:caption: アーキテクチャ（開発者向け）
+:hidden:
+
+architecture/index
+```
+
+```{toctree}
+:maxdepth: 2
 :caption: サポート
 :hidden:
 

@@ -5,3 +5,5 @@ sphinx-design
 sphinx-autobuild
 furo
 sphinxcontrib-mermaid
+sphinx-copybutton
+sphinx-tabs
