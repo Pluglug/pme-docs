@@ -1,0 +1,174 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pluglug.github.io/pme-docs/schema/pme2-2.0.json",
+  "title": "PME2 Menu Export Format",
+  "description": "Pie Menu Editor 2 JSON export/import format. schema_version 2.0.",
+  "type": "object",
+  "required": ["$schema", "schema_version", "addon_version", "menus"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri",
+      "description": "Must be the URL of this schema document."
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^2\\.",
+      "description": "Schema version. Currently '2.0'.",
+      "examples": ["2.0"]
+    },
+    "addon_version": {
+      "type": "string",
+      "description": "Version of the PME addon that exported this file.",
+      "examples": ["2.0.0"]
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp of when this file was exported."
+    },
+    "menus": {
+      "type": "array",
+      "description": "List of exported menus.",
+      "items": { "$ref": "#/$defs/Menu" }
+    },
+    "tags": {
+      "type": "array",
+      "description": "All tags referenced by menus in this file.",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "extensions": {
+      "type": "object",
+      "description": "File-level vendor extensions.",
+      "default": {}
+    }
+  },
+
+  "$defs": {
+
+    "MenuMode": {
+      "type": "string",
+      "description": "Type of the PME menu.",
+      "enum": ["PMENU", "RMENU", "DIALOG", "FPANEL", "PANEL", "HPANEL", "SCRIPT", "MACRO", "MODAL", "STICKY", "PROPERTY"]
+    },
+
+    "ActivationMode": {
+      "type": "string",
+      "description": "How the hotkey is activated.",
+      "enum": ["PRESS", "HOLD", "DOUBLE_CLICK", "TWEAK", "CHORDS", "CLICK", "CLICK_DRAG"]
+    },
+
+    "DragDirection": {
+      "type": "string",
+      "description": "Drag direction for CLICK_DRAG activation.",
+      "enum": ["ANY", "NORTH", "NORTH_EAST", "EAST", "SOUTH_EAST", "SOUTH", "SOUTH_WEST", "WEST", "NORTH_WEST"]
+    },
+
+    "ActionType": {
+      "type": "string",
+      "description": "Type of action a menu item performs.",
+      "enum": ["command", "custom", "prop", "menu", "hotkey", "empty", "row", "spacer", "invoke", "finish", "cancel", "update"]
+    },
+
+    "Hotkey": {
+      "type": "object",
+      "description": "Hotkey binding for a menu.",
+      "additionalProperties": false,
+      "properties": {
+        "key":            { "type": "string", "default": "NONE", "description": "Key name, e.g. 'A', 'SPACE', 'F1'." },
+        "ctrl":           { "type": "boolean", "default": false },
+        "shift":          { "type": "boolean", "default": false },
+        "alt":            { "type": "boolean", "default": false },
+        "oskey":          { "type": "boolean", "default": false },
+        "any":            { "type": "boolean", "default": false, "description": "Ignore all modifier keys." },
+        "key_mod":        { "type": "string", "default": "NONE", "description": "Regular key used as a modifier." },
+        "chord":          { "type": "string", "default": "NONE", "description": "Second key in a CHORDS sequence." },
+        "keymaps":        {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["Window"],
+          "description": "Keymap(s) to register this hotkey in."
+        },
+        "activation":     { "$ref": "#/$defs/ActivationMode" },
+        "drag_direction": { "$ref": "#/$defs/DragDirection" }
+      }
+    },
+
+    "Style": {
+      "type": "object",
+      "description": "Visual style overrides (experimental, stored under extensions.pme.style).",
+      "additionalProperties": false,
+      "properties": {
+        "accent_color": {
+          "type": ["string", "null"],
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "default": null,
+          "description": "Hex color string, e.g. '#4CAF50'."
+        },
+        "accent_usage": {
+          "type": "string",
+          "enum": ["none", "bar-left", "bar-right", "dot", "background"],
+          "default": "none"
+        }
+      }
+    },
+
+    "Action": {
+      "type": "object",
+      "description": "Action performed when a menu item is activated.",
+      "required": ["type", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "type":  { "$ref": "#/$defs/ActionType" },
+        "value": { "type": "string", "description": "Command string, uid reference, or '' for layout types." },
+        "opts":  { "type": "object", "description": "Type-specific options.", "default": {} }
+      }
+    },
+
+    "MenuItem": {
+      "type": "object",
+      "description": "A single item within a menu.",
+      "required": ["action"],
+      "additionalProperties": false,
+      "properties": {
+        "name":                 { "type": "string", "default": "" },
+        "action":               { "$ref": "#/$defs/Action" },
+        "icon":                 { "type": ["string", "null"], "default": null, "description": "Blender icon name, e.g. 'MESH_CUBE'." },
+        "icon_only":            { "type": "boolean", "default": false },
+        "hidden":               { "type": "boolean", "default": false },
+        "enabled":              { "type": "boolean", "default": true },
+        "description":          { "type": "string", "default": "" },
+        "description_is_expr":  { "type": "boolean", "default": false },
+        "extensions":           { "type": "object", "default": {} }
+      }
+    },
+
+    "Menu": {
+      "type": "object",
+      "description": "A PME menu definition.",
+      "required": ["uid", "name", "mode", "enabled", "settings", "items"],
+      "additionalProperties": false,
+      "properties": {
+        "uid": {
+          "type": "string",
+          "pattern": "^[a-z_]+_[a-z0-9]{8}$",
+          "description": "Unique stable identifier, e.g. 'pm_9f7c2k3h'."
+        },
+        "name":                 { "type": "string", "description": "Display name (duplicates allowed)." },
+        "mode":                 { "$ref": "#/$defs/MenuMode" },
+        "enabled":              { "type": "boolean", "default": true },
+        "hotkey":               { "oneOf": [{ "$ref": "#/$defs/Hotkey" }, { "type": "null" }], "default": null },
+        "settings":             { "type": "object", "description": "Mode-specific settings (flat key/value).", "default": {} },
+        "description":          { "type": "string", "default": "" },
+        "description_is_expr":  { "type": "boolean", "default": false },
+        "poll":                 { "type": ["string", "null"], "default": null },
+        "tags":                 { "type": "array", "items": { "type": "string" }, "default": [] },
+        "items":                { "type": "array", "items": { "$ref": "#/$defs/MenuItem" }, "default": [] },
+        "extensions":           { "type": "object", "default": {} }
+      }
+    }
+
+  }
+}

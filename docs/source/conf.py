@@ -63,6 +63,7 @@ mermaid_params = ["-p", "puppeteer-config.json"]
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_static_path = ["_static"]
+html_extra_path = ["schema"]
 html_css_files = ["css/custom.css"]
 
 html_theme = "furo"
