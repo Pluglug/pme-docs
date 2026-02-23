@@ -1,0 +1,943 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../../genindex.html"><link rel="search" title="検索" href="../../search.html"><link rel="prev" title="デバッグガイド" href="debugging.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>エディター拡張ガイド - Pie Menu Editor JA 2.0.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=bc6c0a41" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=bc6c0a41" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #4CAF50;
+  --color-brand-content: #4CAF50;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #4CAF50;
+  --color-brand-content: #4CAF50;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">Pie Menu Editor JA 2.0.0 ドキュメント</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor JA 2.0.0 ドキュメント</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">はじめる</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/installation.html">PME のインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/basic_pie_menu.html">基本的なパイメニューの作成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/popup_dialog_tutorial.html">ポップアップダイアログをパイメニューに追加</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started/macro_tutorial.html">マクロで独自機能を作成</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">エディタ</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/popup_dialog_editor.html">Popup Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/editor_common_elements.html">Editor Common Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/ui_customization.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/ui_customization.html#hiding-unused-panels">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/ui_customization.html#menu-panel-extension">Menu/Panel Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/ui_customization.html#pme-toolbar">PME Toolbar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/property_editor.html">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/custom_icons.html">カスタムアイコン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../editors/settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">参考資料</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html">用語集</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scripting.html">スクリプティング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../keymap_guide.html">Keymapの選び方</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">アーキテクチャ（開発者向け）</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../architecture/index.html">PME Architecture Deep Dive</a><input aria-label="Toggle navigation of PME Architecture Deep Dive" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../architecture/index.html">PME Architecture Deep Dive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../architecture/data_model.html">データモデル詳解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../architecture/debugging.html">デバッグガイド</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../architecture/extending.html">エディター拡張ガイド</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">サポート</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support_community/faq.html#known-issues">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support_community/get_support.html">Get Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support_community/contribute_to_pme.html">Contribute to PME</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../support_community/changelog.html">Change Log</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">開発者向け</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">PME Architecture Deep Dive</a><input aria-label="Toggle navigation of PME Architecture Deep Dive" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html">PME Architecture Deep Dive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_model.html">データモデル詳解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html">デバッグガイド</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">エディター拡張ガイド</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../../_sources/reference/architecture/extending.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="extending">
+<span id="id1"></span><h1>エディター拡張ガイド<a class="headerlink" href="#extending" title="Link to this heading">¶</a></h1>
+<p>新しいメニュータイプを追加する方法を解説します。
+この知識はPME2の設計にも役立ちます。</p>
+<hr class="docutils" />
+<section id="id2">
+<h2>エディター追加の基本手順<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<section id="id3">
+<h3>1. 新しいモジュールの作成<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">ed_example.py</span></code> を作成：</p>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">ed_example.py</span><a class="headerlink" href="#id15" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">bpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.ed_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">EditorBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.addon</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_prefs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">CC</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Editor</span><span class="p">(</span><span class="n">EditorBase</span><span class="p">):</span>
+    <span class="c1"># === 必須属性 ===</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="s1">&#39;EXAMPLE&#39;</span>           <span class="c1"># ユニークなID</span>
+    <span class="n">icon</span> <span class="o">=</span> <span class="s1">&#39;QUESTION&#39;</span>        <span class="c1"># Blenderアイコン名</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s2">&quot;Example Menu&quot;</span>
+
+    <span class="c1"># === オプション属性 ===</span>
+    <span class="n">has_hotkey</span> <span class="o">=</span> <span class="kc">True</span>        <span class="c1"># ホットキー登録するか</span>
+    <span class="n">supported_slot_modes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COMMAND&#39;</span><span class="p">,</span> <span class="s1">&#39;PROP&#39;</span><span class="p">,</span> <span class="s1">&#39;MENU&#39;</span><span class="p">,</span> <span class="s1">&#39;CUSTOM&#39;</span><span class="p">}</span>
+
+    <span class="c1"># === 必須メソッド ===</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_pm_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;新規作成時の初期化&quot;&quot;&quot;</span>
+        <span class="c1"># 例: 3つの空スロットを作成</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
+
+    <span class="c1"># === オプションメソッド ===</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_pm_rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="n">new_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;リネーム時の処理&quot;&quot;&quot;</span>
+        <span class="n">old_name</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span>
+        <span class="c1"># 必要に応じて追加処理</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_pmi_edit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="n">pmi</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;アイテム編集後の処理&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_pm_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="n">enabled</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;有効/無効切り替え時の処理&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">enabled</span><span class="p">:</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">register_hotkey</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">unregister_hotkey</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_pm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;メニュー登録時の処理（起動時に呼ばれる）&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">pm</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">register_hotkey</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;エディターUIの描画&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pmi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="p">):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">pmi</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span>
+            <span class="n">row</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">pmi</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">():</span>
+    <span class="n">Editor</span><span class="p">()</span>  <span class="c1"># エディターを登録</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">unregister</span><span class="p">():</span>
+    <span class="k">pass</span>  <span class="c1"># 必要に応じてクリーンアップ</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="modules">
+<h3>2. MODULES への追加<a class="headerlink" href="#modules" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> の <code class="docutils literal notranslate"><span class="pre">MODULES</span></code> タプルに追加：</p>
+<div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text">__init__.py</span><a class="headerlink" href="#id16" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MODULES</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="c1"># ... 既存のモジュール ...</span>
+    <span class="s2">&quot;ed_example&quot;</span><span class="p">,</span>   <span class="c1"># ← 追加（ed_base より後）</span>
+    <span class="s2">&quot;preferences&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id4">
+<h3>3. 定数の追加<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">constants.py</span></code> に新しいモードを追加：</p>
+<div class="literal-block-wrapper docutils container" id="id17">
+<div class="code-block-caption"><span class="caption-text">constants.py</span><a class="headerlink" href="#id17" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># PM_ITEMS に追加</span>
+<span class="n">PM_ITEMS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># ... 既存の項目 ...</span>
+    <span class="p">(</span><span class="s1">&#39;EXAMPLE&#39;</span><span class="p">,</span> <span class="s2">&quot;Example&quot;</span><span class="p">,</span> <span class="s2">&quot;Example menu type&quot;</span><span class="p">,</span> <span class="s1">&#39;QUESTION&#39;</span><span class="p">,</span> <span class="mi">99</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="c1"># ED_DATA に追加（エディター選択メニュー用）</span>
+<span class="n">ED_DATA</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># ... 既存の項目 ...</span>
+    <span class="p">(</span><span class="s1">&#39;EXAMPLE&#39;</span><span class="p">,</span> <span class="s2">&quot;Example Menu&quot;</span><span class="p">,</span> <span class="s1">&#39;QUESTION&#39;</span><span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id5">
+<h2>実際のエディター実装例<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<section id="ed-pie-menu-py">
+<h3>パイメニューエディター（ed_pie_menu.py）<a class="headerlink" href="#ed-pie-menu-py" title="Link to this heading">¶</a></h3>
+<p>パイメニューは固定8+2スロットという特殊な構造を持ちます：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Editor</span><span class="p">(</span><span class="n">EditorBase</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="s1">&#39;PMENU&#39;</span>
+    <span class="n">icon</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s2">&quot;Pie Menu&quot;</span>
+    <span class="n">has_hotkey</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">supported_slot_modes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COMMAND&#39;</span><span class="p">,</span> <span class="s1">&#39;PROP&#39;</span><span class="p">,</span> <span class="s1">&#39;MENU&#39;</span><span class="p">,</span> <span class="s1">&#39;HOTKEY&#39;</span><span class="p">,</span> <span class="s1">&#39;CUSTOM&#39;</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_pm_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;パイメニューは常に10スロット&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;8方向 + 2追加の独自レイアウト&quot;&quot;&quot;</span>
+        <span class="c1"># 上段: N (slot 2)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">scale_y</span> <span class="o">=</span> <span class="mf">1.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_slot</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">)</span>
+
+        <span class="c1"># 中段: W (4), 中央, E (0)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_slot</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">)</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">separator</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_slot</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">)</span>
+
+        <span class="c1"># 下段: S (6)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">scale_y</span> <span class="o">=</span> <span class="mf">1.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_slot</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">)</span>
+
+        <span class="c1"># 追加スロット (8, 9)</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">box</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_slot</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;Extra 1&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">draw_slot</span><span class="p">(</span><span class="n">box</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="s1">&#39;Extra 2&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="ed-macro-py">
+<h3>マクロエディター（ed_macro.py）<a class="headerlink" href="#ed-macro-py" title="Link to this heading">¶</a></h3>
+<p>マクロは Blender の Macro オペレーターを動的生成します：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Editor</span><span class="p">(</span><span class="n">EditorBase</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="s1">&#39;MACRO&#39;</span>
+    <span class="n">icon</span> <span class="o">=</span> <span class="s1">&#39;POSE_DATA&#39;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s2">&quot;Macro&quot;</span>
+    <span class="n">has_hotkey</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">docs</span> <span class="o">=</span> <span class="s2">&quot;#macro-operator&quot;</span>
+
+    <span class="n">default_pmi_data</span> <span class="o">=</span> <span class="s2">&quot;COMMAND&quot;</span>
+    <span class="n">supported_slot_modes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COMMAND&#39;</span><span class="p">,</span> <span class="s1">&#39;MENU&#39;</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_pm_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;初期アイテムなし（ユーザーが追加）&quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_pmi_edit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="n">pmi</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;アイテム変更時にマクロを再構築&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.macro_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">update_macro</span>
+        <span class="n">update_macro</span><span class="p">(</span><span class="n">pm</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_pm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;起動時にマクロオペレーターを登録&quot;&quot;&quot;</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.macro_utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_macro</span>
+        <span class="n">add_macro</span><span class="p">(</span><span class="n">pm</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pm</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">register_hotkey</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="ed-modal-py">
+<h3>モーダルエディター（ed_modal.py）<a class="headerlink" href="#ed-modal-py" title="Link to this heading">¶</a></h3>
+<p>モーダルオペレーターは複数のコールバックモードを持ちます：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Editor</span><span class="p">(</span><span class="n">EditorBase</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="s1">&#39;MODAL&#39;</span>
+    <span class="n">icon</span> <span class="o">=</span> <span class="s1">&#39;LONGDISPLAY&#39;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s2">&quot;Modal&quot;</span>
+    <span class="n">has_hotkey</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># モーダル固有のアイテムモード</span>
+    <span class="n">supported_slot_modes</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;COMMAND&#39;</span><span class="p">,</span> <span class="s1">&#39;PROP&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;INVOKE&#39;</span><span class="p">,</span>   <span class="c1"># 起動時</span>
+        <span class="s1">&#39;FINISH&#39;</span><span class="p">,</span>   <span class="c1"># 完了時</span>
+        <span class="s1">&#39;CANCEL&#39;</span><span class="p">,</span>   <span class="c1"># キャンセル時</span>
+        <span class="s1">&#39;UPDATE&#39;</span><span class="p">,</span>   <span class="c1"># 更新時</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_pm_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;コールバック用の初期アイテム&quot;&quot;&quot;</span>
+        <span class="c1"># INVOKE</span>
+        <span class="n">pmi</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
+        <span class="n">pmi</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;INVOKE&#39;</span>
+        <span class="n">pmi</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;On Invoke&#39;</span>
+
+        <span class="c1"># 中間アイテム用のスペース</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
+
+        <span class="c1"># FINISH</span>
+        <span class="n">pmi</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
+        <span class="n">pmi</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;FINISH&#39;</span>
+        <span class="n">pmi</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;On Finish&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="ui">
+<h2>エディターUIのカスタマイズ<a class="headerlink" href="#ui" title="Link to this heading">¶</a></h2>
+<section id="draw-items">
+<h3>draw_items メソッド<a class="headerlink" href="#draw-items" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">draw_items</span></code> はエディターパネルのUI描画を担当します：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">draw_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        layout: bpy.types.UILayout</span>
+<span class="sd">        pm: PMItem インスタンス</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># LayoutHelper を使用</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.layout_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">lh</span>
+
+    <span class="n">lh</span><span class="o">.</span><span class="n">lt</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pmi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="p">):</span>
+        <span class="c1"># アイテム行</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">lh</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
+
+        <span class="c1"># インデックス</span>
+        <span class="n">lh</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+
+        <span class="c1"># 名前</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">pmi</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># モード</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">pmi</span><span class="p">,</span> <span class="s2">&quot;mode&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># コマンド/テキスト</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">pmi</span><span class="p">,</span> <span class="s2">&quot;text&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># 有効/無効</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">pmi</span><span class="p">,</span> <span class="s2">&quot;enabled&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;CHECKBOX_HLT&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h3>共通オペレーターの使用<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">ed_base.py</span></code> には共通で使えるオペレーターが定義されています：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">.ed_base</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PME_OT_pm_add</span><span class="p">,</span>           <span class="c1"># メニュー追加</span>
+    <span class="n">PME_OT_pm_edit</span><span class="p">,</span>          <span class="c1"># メニュー編集</span>
+    <span class="n">WM_OT_pmi_data_edit</span><span class="p">,</span>     <span class="c1"># アイテムデータ編集</span>
+    <span class="n">WM_OT_pmi_icon_select</span><span class="p">,</span>   <span class="c1"># アイコン選択</span>
+<span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+    <span class="c1"># アイテム追加ボタン</span>
+    <span class="n">layout</span><span class="o">.</span><span class="n">operator</span><span class="p">(</span>
+        <span class="s2">&quot;wm.pmi_add&quot;</span><span class="p">,</span>
+        <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Add Item&quot;</span><span class="p">,</span>
+        <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;ADD&#39;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># アイコン選択ボタン</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pmi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="p">):</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">operator</span><span class="p">(</span>
+            <span class="n">WM_OT_pmi_icon_select</span><span class="o">.</span><span class="n">bl_idname</span><span class="p">,</span>
+            <span class="n">text</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">icon</span><span class="o">=</span><span class="n">pmi</span><span class="o">.</span><span class="n">icon</span> <span class="ow">or</span> <span class="s1">&#39;NONE&#39;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">pm_item</span> <span class="o">=</span> <span class="n">i</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id7">
+<h2>データ拡張<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h2>
+<section id="pmitem-data">
+<h3>PMItem.data への新しいプロパティ追加<a class="headerlink" href="#pmitem-data" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pme.py</span></code> でプロパティを定義：</p></li>
+</ol>
+<div class="literal-block-wrapper docutils container" id="id18">
+<div class="code-block-caption"><span class="caption-text">pme.py</span><a class="headerlink" href="#id18" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># PMEProps クラス内、または register() で</span>
+<span class="n">props</span><span class="o">.</span><span class="n">StringProperty</span><span class="p">(</span><span class="s1">&#39;ex&#39;</span><span class="p">,</span> <span class="s1">&#39;ex_custom&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>      <span class="c1"># 文字列</span>
+<span class="n">props</span><span class="o">.</span><span class="n">BoolProperty</span><span class="p">(</span><span class="s1">&#39;ex&#39;</span><span class="p">,</span> <span class="s1">&#39;ex_enabled&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>     <span class="c1"># 真偽値</span>
+<span class="n">props</span><span class="o">.</span><span class="n">IntProperty</span><span class="p">(</span><span class="s1">&#39;ex&#39;</span><span class="p">,</span> <span class="s1">&#39;ex_count&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>           <span class="c1"># 整数</span>
+
+<span class="c1"># &#39;ex&#39; は type プレフィックス（URL の最初の部分）</span>
+</pre></div>
+</div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p><code class="docutils literal notranslate"><span class="pre">types.py</span></code> でアクセサを定義：</p></li>
+</ol>
+<div class="literal-block-wrapper docutils container" id="id19">
+<div class="code-block-caption"><span class="caption-text">types.py - PMItem 内</span><a class="headerlink" href="#id19" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># computed property として定義</span>
+<span class="n">ex_custom</span><span class="p">:</span> <span class="n">bpy</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">StringProperty</span><span class="p">(</span>
+    <span class="n">get</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;ex_custom&quot;</span><span class="p">),</span>
+    <span class="nb">set</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="s2">&quot;ex_custom&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">),</span>
+<span class="p">)</span>
+
+<span class="n">ex_enabled</span><span class="p">:</span> <span class="n">bpy</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">BoolProperty</span><span class="p">(</span>
+    <span class="n">get</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;ex_enabled&quot;</span><span class="p">),</span>
+    <span class="nb">set</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="s2">&quot;ex_enabled&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>エディターUIで使用：</p></li>
+</ol>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">draw_extra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+    <span class="n">box</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">box</span><span class="p">()</span>
+    <span class="n">box</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;Example Settings&quot;</span><span class="p">)</span>
+    <span class="n">box</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">pm</span><span class="p">,</span> <span class="s2">&quot;ex_custom&quot;</span><span class="p">)</span>
+    <span class="n">box</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">pm</span><span class="p">,</span> <span class="s2">&quot;ex_enabled&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id8">
+<h2>実行ロジックのカスタマイズ<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<section id="id9">
+<h3>カスタムオペレーターの作成<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<p>メニュータイプ固有のオペレーターが必要な場合：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PME_OT_example_action</span><span class="p">(</span><span class="n">bpy</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
+    <span class="n">bl_idname</span> <span class="o">=</span> <span class="s2">&quot;pme.example_action&quot;</span>
+    <span class="n">bl_label</span> <span class="o">=</span> <span class="s2">&quot;Example Action&quot;</span>
+    <span class="n">bl_options</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;INTERNAL&#39;</span><span class="p">}</span>
+
+    <span class="n">pm_name</span><span class="p">:</span> <span class="n">bpy</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">StringProperty</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="n">pr</span> <span class="o">=</span> <span class="n">get_prefs</span><span class="p">()</span>
+        <span class="n">pm</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">pie_menus</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pm_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pm</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;CANCELLED&#39;</span><span class="p">}</span>
+
+        <span class="c1"># カスタムロジック</span>
+        <span class="k">for</span> <span class="n">pmi</span> <span class="ow">in</span> <span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pmi</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;COMMAND&#39;</span><span class="p">:</span>
+                <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">exe</span><span class="p">(</span><span class="n">pmi</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;FINISHED&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="wm-ot-pme-user-pie-menu-call">
+<h3>WM_OT_pme_user_pie_menu_call との統合<a class="headerlink" href="#wm-ot-pme-user-pie-menu-call" title="Link to this heading">¶</a></h3>
+<p>メニュー呼び出し時の処理をカスタマイズする場合、
+<code class="docutils literal notranslate"><span class="pre">operators.py</span></code> の <code class="docutils literal notranslate"><span class="pre">WM_OT_pme_user_pie_menu_call.invoke()</span></code> を確認：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">invoke</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="n">pr</span> <span class="o">=</span> <span class="n">get_prefs</span><span class="p">()</span>
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">pie_menus</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pie_menu_name</span><span class="p">]</span>
+
+    <span class="c1"># モードに応じて分岐</span>
+    <span class="k">if</span> <span class="n">pm</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;PMENU&#39;</span><span class="p">:</span>
+        <span class="c1"># パイメニュー</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">window_manager</span><span class="o">.</span><span class="n">popup_menu_pie</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_draw_pm</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">pm</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;RMENU&#39;</span><span class="p">:</span>
+        <span class="c1"># 通常メニュー</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">window_manager</span><span class="o">.</span><span class="n">popup_menu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_draw_rm</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">pm</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;EXAMPLE&#39;</span><span class="p">:</span>  <span class="c1"># ← 新しいモードを追加</span>
+        <span class="c1"># カスタム処理</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">execute_example</span><span class="p">(</span><span class="n">pm</span><span class="p">)</span>
+
+    <span class="c1"># ...</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id10">
+<h2>テストの追加<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<section id="id11">
+<h3>新しいエディターのテスト<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<div class="literal-block-wrapper docutils container" id="id20">
+<div class="code-block-caption"><span class="caption-text">tests/test_ed_example.py</span><a class="headerlink" href="#id20" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">bpy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pytest</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pme_prefs</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">bpy</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">addons</span><span class="p">[</span><span class="s1">&#39;pie_menu_editor&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">preferences</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">TestExampleEditor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_create_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pme_prefs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;メニュー作成テスト&quot;&quot;&quot;</span>
+        <span class="n">pm</span> <span class="o">=</span> <span class="n">pme_prefs</span><span class="o">.</span><span class="n">add_pm</span><span class="p">(</span><span class="s1">&#39;EXAMPLE&#39;</span><span class="p">,</span> <span class="s1">&#39;Test Example&#39;</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">pm</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Test Example&#39;</span>
+        <span class="k">assert</span> <span class="n">pm</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;EXAMPLE&#39;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>  <span class="c1"># on_pm_add で3つ作成</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_add_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pme_prefs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;アイテム追加テスト&quot;&quot;&quot;</span>
+        <span class="n">pm</span> <span class="o">=</span> <span class="n">pme_prefs</span><span class="o">.</span><span class="n">pie_menus</span><span class="p">[</span><span class="s1">&#39;Test Example&#39;</span><span class="p">]</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;COMMAND&#39;</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;print(&quot;test&quot;)&#39;</span>
+
+        <span class="k">assert</span> <span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;COMMAND&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">test_hotkey_registration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pme_prefs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;ホットキー登録テスト&quot;&quot;&quot;</span>
+        <span class="n">pm</span> <span class="o">=</span> <span class="n">pme_prefs</span><span class="o">.</span><span class="n">pie_menus</span><span class="p">[</span><span class="s1">&#39;Test Example&#39;</span><span class="p">]</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;E&#39;</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">ctrl</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">register_hotkey</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="n">pm</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">pm</span><span class="o">.</span><span class="n">kmis_map</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id12">
+<h2>ベストプラクティス<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h2>
+<div class="tip admonition">
+<p class="admonition-title">推奨事項</p>
+<ol class="arabic">
+<li><p><strong>EditorBase のメソッドを適切にオーバーライドする</strong></p>
+<p>必要なメソッドだけオーバーライドし、不要な場合は親クラスの実装を使う</p>
+</li>
+<li><p><strong>PMEContext を正しく使用する</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Good</span>
+<span class="n">exec_globals</span> <span class="o">=</span> <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">gen_globals</span><span class="p">()</span>
+<span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">exe</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">exec_globals</span><span class="p">)</span>
+
+<span class="c1"># Bad</span>
+<span class="n">exec</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;bpy&#39;</span><span class="p">:</span> <span class="n">bpy</span><span class="p">})</span>  <span class="c1"># グローバル変数が不足</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>エラーハンドリングを適切に行う</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">some_operation</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.addon</span><span class="w"> </span><span class="kn">import</span> <span class="n">print_exc</span>
+    <span class="n">print_exc</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;CANCELLED&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>UI更新を忘れずに</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># データ変更後</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.ui</span><span class="w"> </span><span class="kn">import</span> <span class="n">tag_redraw</span>
+<span class="n">tag_redraw</span><span class="p">()</span>
+
+<span class="c1"># ツリー更新が必要な場合</span>
+<span class="n">pr</span><span class="o">.</span><span class="n">update_tree</span><span class="p">()</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+<div class="warning admonition">
+<p class="admonition-title">避けるべきこと</p>
+<ol class="arabic">
+<li><p><strong>クラス変数への依存を最小限に</strong></p>
+<p>特に <code class="docutils literal notranslate"><span class="pre">poll_methods</span></code>, <code class="docutils literal notranslate"><span class="pre">kmis_map</span></code> のようなパターンは避ける</p>
+</li>
+<li><p><strong>循環インポートに注意</strong></p>
+<p>エディターモジュールは <code class="docutils literal notranslate"><span class="pre">operators.py</span></code> より後に読み込まれるため、
+<code class="docutils literal notranslate"><span class="pre">operators.py</span></code> をインポートする際は関数内で行う</p>
+</li>
+<li><p><strong>Blender API の直接使用を最小限に</strong></p>
+<p>将来の抽象化のため、可能な限りPMEのユーティリティを使用</p>
+</li>
+</ol>
+</div>
+</section>
+<hr class="docutils" />
+<section id="pme2">
+<h2>PME2への示唆<a class="headerlink" href="#pme2" title="Link to this heading">¶</a></h2>
+<p>現在のエディターシステムから学べること：</p>
+<section id="id13">
+<h3>良い点<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>プラグイン的な拡張性（<code class="docutils literal notranslate"><span class="pre">MODULES</span></code> に追加するだけ）</p></li>
+<li><p>共通インターフェース（<code class="docutils literal notranslate"><span class="pre">EditorBase</span></code>）</p></li>
+<li><p>メソッドのオーバーライドによるカスタマイズ</p></li>
+</ul>
+</section>
+<section id="id14">
+<h3>改善すべき点<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p>型安全性の欠如（Protocol/ABC を使うべき）</p></li>
+<li><p>クラス変数による状態管理（インスタンス管理が望ましい）</p></li>
+<li><p>テストの不足</p></li>
+</ul>
+<div class="literal-block-wrapper docutils container" id="id21">
+<div class="code-block-caption"><span class="caption-text">PME2での推奨パターン</span><a class="headerlink" href="#id21" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Protocol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">EditorProtocol</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">icon</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_pm_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">:</span> <span class="s2">&quot;Menu&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_pm_rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">:</span> <span class="s2">&quot;Menu&quot;</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">:</span> <span class="s2">&quot;UILayout&quot;</span><span class="p">,</span> <span class="n">pm</span><span class="p">:</span> <span class="s2">&quot;Menu&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EditorConfig</span><span class="p">:</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">icon</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">default_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">has_hotkey</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">supported_slot_modes</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="debugging.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">デバッグガイド</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">エディター拡張ガイド</a><ul>
+<li><a class="reference internal" href="#id2">エディター追加の基本手順</a><ul>
+<li><a class="reference internal" href="#id3">1. 新しいモジュールの作成</a></li>
+<li><a class="reference internal" href="#modules">2. MODULES への追加</a></li>
+<li><a class="reference internal" href="#id4">3. 定数の追加</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id5">実際のエディター実装例</a><ul>
+<li><a class="reference internal" href="#ed-pie-menu-py">パイメニューエディター（ed_pie_menu.py）</a></li>
+<li><a class="reference internal" href="#ed-macro-py">マクロエディター（ed_macro.py）</a></li>
+<li><a class="reference internal" href="#ed-modal-py">モーダルエディター（ed_modal.py）</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ui">エディターUIのカスタマイズ</a><ul>
+<li><a class="reference internal" href="#draw-items">draw_items メソッド</a></li>
+<li><a class="reference internal" href="#id6">共通オペレーターの使用</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id7">データ拡張</a><ul>
+<li><a class="reference internal" href="#pmitem-data">PMItem.data への新しいプロパティ追加</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id8">実行ロジックのカスタマイズ</a><ul>
+<li><a class="reference internal" href="#id9">カスタムオペレーターの作成</a></li>
+<li><a class="reference internal" href="#wm-ot-pme-user-pie-menu-call">WM_OT_pme_user_pie_menu_call との統合</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id10">テストの追加</a><ul>
+<li><a class="reference internal" href="#id11">新しいエディターのテスト</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id12">ベストプラクティス</a></li>
+<li><a class="reference internal" href="#pme2">PME2への示唆</a><ul>
+<li><a class="reference internal" href="#id13">良い点</a></li>
+<li><a class="reference internal" href="#id14">改善すべき点</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=c8adcb1d"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/force-light.js?v=3c6bdc37"></script>
+    <script src="../../_static/translations.js?v=4755f45a"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

@@ -1,0 +1,1492 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="デバッグガイド" href="debugging.html"><link rel="prev" title="PME Architecture Deep Dive" href="index.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>データモデル詳解 - Pie Menu Editor JA 2.0.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=bc6c0a41" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=bc6c0a41" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #4CAF50;
+  --color-brand-content: #4CAF50;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #4CAF50;
+  --color-brand-content: #4CAF50;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Pie Menu Editor JA 2.0.0 ドキュメント</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor JA 2.0.0 ドキュメント</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">はじめる</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">PME のインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/basic_pie_menu.html">基本的なパイメニューの作成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/popup_dialog_tutorial.html">ポップアップダイアログをパイメニューに追加</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/macro_tutorial.html">マクロで独自機能を作成</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">エディタ</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../editors/pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/popup_dialog_editor.html">Popup Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/editor_common_elements.html">Editor Common Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#hiding-unused-panels">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#menu-panel-extension">Menu/Panel Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#pme-toolbar">PME Toolbar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/property_editor.html">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/custom_icons.html">カスタムアイコン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">参考資料</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/terminology.html">用語集</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/scripting.html">スクリプティング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_guide.html">Keymapの選び方</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">アーキテクチャ（開発者向け）</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">PME Architecture Deep Dive</a><input aria-label="Toggle navigation of PME Architecture Deep Dive" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html">PME Architecture Deep Dive</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">データモデル詳解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html">デバッグガイド</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html">エディター拡張ガイド</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">サポート</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">Get Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/contribute_to_pme.html">Contribute to PME</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">開発者向け</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/architecture/index.html">PME Architecture Deep Dive</a><input aria-label="Toggle navigation of PME Architecture Deep Dive" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture/index.html">PME Architecture Deep Dive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture/data_model.html">データモデル詳解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture/debugging.html">デバッグガイド</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture/extending.html">エディター拡張ガイド</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/architecture/data_model.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="data-model">
+<span id="id1"></span><h1>データモデル詳解<a class="headerlink" href="#data-model" title="Link to this heading">¶</a></h1>
+<p>このページでは、PMEのデータモデルをより詳細に解説します。</p>
+<hr class="docutils" />
+<section id="propertygroup">
+<h2>PropertyGroup の継承階層<a class="headerlink" href="#propertygroup" title="Link to this heading">¶</a></h2>
+<pre  class="mermaid">
+        classDiagram
+    class bpy_struct {
+        &lt;&lt;Blender Internal&gt;&gt;
+    }
+
+    class PropertyGroup {
+        &lt;&lt;bpy.types&gt;&gt;
+        +name: str
+        +keys()
+        +values()
+        +items()
+    }
+
+    class PMItem {
+        +mode: EnumProperty
+        +km_name: StringProperty
+        +key: EnumProperty
+        +pmis: CollectionProperty
+        +data: StringProperty
+        +poll_cmd: StringProperty
+    }
+
+    class PMIItem {
+        +mode: EnumProperty
+        +text: StringProperty
+        +icon: StringProperty
+        +enabled: BoolProperty
+    }
+
+    class PMLink {
+        +pm_name: StringProperty
+        +is_folder: BoolProperty
+        +label: StringProperty
+    }
+
+    class Tag {
+        +filtered_pms: ClassVar
+    }
+
+    bpy_struct &lt;|-- PropertyGroup
+    PropertyGroup &lt;|-- PMItem
+    PropertyGroup &lt;|-- PMIItem
+    PropertyGroup &lt;|-- PMLink
+    PropertyGroup &lt;|-- Tag
+    </pre></section>
+<hr class="docutils" />
+<section id="pmitem">
+<h2>PMItem の全プロパティ<a class="headerlink" href="#pmitem" title="Link to this heading">¶</a></h2>
+<section id="id2">
+<h3>識別情報<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>プロパティ</p></th>
+<th class="head"><p>型</p></th>
+<th class="head"><p>説明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>str</p></td>
+<td><p>メニュー名（PropertyGroupから継承、コレクションキー）</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mode</span></code></p></td>
+<td><p>Enum</p></td>
+<td><p>メニュータイプ（PMENU, RMENU, MACRO 等）</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">label</span></code></p></td>
+<td><p>str (computed)</p></td>
+<td><p>getter/setterによるリネーム処理付きプロパティ</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id3">
+<h3>ホットキー設定<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>プロパティ</p></th>
+<th class="head"><p>型</p></th>
+<th class="head"><p>説明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">km_name</span></code></p></td>
+<td><p>str</p></td>
+<td><p>キーマップ名（複数はセミコロン区切り）</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">key</span></code></p></td>
+<td><p>Enum</p></td>
+<td><p>キー（A, SPACE, LEFTMOUSE 等）</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ctrl</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>Ctrlキー</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">shift</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>Shiftキー</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">alt</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>Altキー</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">oskey</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>OS/Cmdキー</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">any</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>任意の修飾キー</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">key_mod</span></code></p></td>
+<td><p>Enum</p></td>
+<td><p>追加の修飾キー</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chord</span></code></p></td>
+<td><p>Enum</p></td>
+<td><p>コードキー（Chordsモード用）</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">open_mode</span></code></p></td>
+<td><p>Enum</p></td>
+<td><p>起動モード（PRESS, CLICK, DOUBLE_CLICK, CLICK_DRAG, CHORDS）</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">drag_dir</span></code></p></td>
+<td><p>Enum</p></td>
+<td><p>ドラッグ方向（CLICK_DRAGモード用）</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id4">
+<h3>アイテムコレクション<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pmis</span><span class="p">:</span> <span class="n">CollectionProperty</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">PMIItem</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パイメニュー: 常に10個（8方向 + 2追加）</p></li>
+<li><p>通常メニュー: 可変長</p></li>
+<li><p>スタックキー: 可変長</p></li>
+<li><p>スティッキーキー: 2個（押下時、解放時）</p></li>
+</ul>
+</section>
+<section id="data">
+<h3>追加設定（data）<a class="headerlink" href="#data" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">data</span></code> プロパティはURL形式で追加設定を格納します：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># パイメニュー固有の設定</span>
+<span class="n">pm_radius</span><span class="p">:</span> <span class="nb">int</span>     <span class="c1"># 半径（-1 = デフォルト）</span>
+<span class="n">pm_threshold</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># 選択しきい値</span>
+<span class="n">pm_confirm</span><span class="p">:</span> <span class="nb">int</span>    <span class="c1"># 確定距離</span>
+<span class="n">pm_flick</span><span class="p">:</span> <span class="nb">bool</span>     <span class="c1"># リリースで確定</span>
+
+<span class="c1"># ポップアップダイアログ固有</span>
+<span class="n">pd_title</span><span class="p">:</span> <span class="nb">bool</span>     <span class="c1"># タイトル表示</span>
+<span class="n">pd_box</span><span class="p">:</span> <span class="nb">bool</span>       <span class="c1"># フレーム使用</span>
+<span class="n">pd_auto_close</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># マウスアウトで閉じる</span>
+<span class="n">pd_width</span><span class="p">:</span> <span class="nb">int</span>      <span class="c1"># 幅</span>
+
+<span class="c1"># 通常メニュー固有</span>
+<span class="n">rm_title</span><span class="p">:</span> <span class="nb">bool</span>     <span class="c1"># タイトル表示</span>
+
+<span class="c1"># スティッキーキー固有</span>
+<span class="n">sk_block_ui</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># UI ブロック</span>
+
+<span class="c1"># モーダル固有</span>
+<span class="n">confirm</span><span class="p">:</span> <span class="nb">bool</span>      <span class="c1"># リリースで確定</span>
+<span class="n">block_ui</span><span class="p">:</span> <span class="nb">bool</span>     <span class="c1"># UI ブロック</span>
+<span class="n">lock</span><span class="p">:</span> <span class="nb">bool</span>         <span class="c1"># マウスロック</span>
+</pre></div>
+</div>
+</section>
+<section id="poll">
+<h3>Poll設定<a class="headerlink" href="#poll" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">poll_cmd</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">CC</span><span class="o">.</span><span class="n">DEFAULT_POLL</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>表示条件をPythonコードで指定。デフォルトは <code class="docutils literal notranslate"><span class="pre">&quot;</span> <span class="pre">return</span> <span class="pre">True&quot;</span></code>。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>動的コンパイル</p>
+<p><code class="docutils literal notranslate"><span class="pre">poll_cmd</span></code> は実行時に <code class="docutils literal notranslate"><span class="pre">compile()</span></code> されて <code class="docutils literal notranslate"><span class="pre">poll_methods</span></code> クラス変数にキャッシュされます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># poll_cmd の例</span>
+<span class="s2">&quot; return C.mode == &#39;OBJECT&#39;&quot;</span>
+<span class="s2">&quot; return C.active_object and C.active_object.type == &#39;MESH&#39;&quot;</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id5">
+<h3>タグ<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tag</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>カンマ区切りでタグを格納：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 例</span>
+<span class="s2">&quot;Modeling, Transform&quot;</span>
+<span class="s2">&quot;Animation&quot;</span>
+<span class="s2">&quot;&quot;</span>  <span class="c1"># タグなし</span>
+</pre></div>
+</div>
+</section>
+<section id="id6">
+<h3>有効/無効<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">enabled</span><span class="p">:</span> <span class="n">BoolProperty</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">False</span></code> の場合、ホットキーは登録されず、ツリービューでグレーアウト表示。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="pmiitem">
+<h2>PMIItem の全プロパティ<a class="headerlink" href="#pmiitem" title="Link to this heading">¶</a></h2>
+<section id="id7">
+<h3>基本情報<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>プロパティ</p></th>
+<th class="head"><p>型</p></th>
+<th class="head"><p>説明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>str</p></td>
+<td><p>表示ラベル</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mode</span></code></p></td>
+<td><p>Enum</p></td>
+<td><p>アイテムタイプ</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">text</span></code></p></td>
+<td><p>str</p></td>
+<td><p>コマンド/パス/参照名</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">icon</span></code></p></td>
+<td><p>str</p></td>
+<td><p>アイコン名 + フラグ</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">enabled</span></code></p></td>
+<td><p>bool</p></td>
+<td><p>有効/無効</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="mode">
+<h3>mode の詳細<a class="headerlink" href="#mode" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">EMODE_ITEMS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;COMMAND&#39;</span><span class="p">,</span> <span class="s2">&quot;Command&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>      <span class="c1"># Pythonコード</span>
+    <span class="p">(</span><span class="s1">&#39;PROP&#39;</span><span class="p">,</span> <span class="s2">&quot;Property&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>        <span class="c1"># プロパティウィジェット</span>
+    <span class="p">(</span><span class="s1">&#39;MENU&#39;</span><span class="p">,</span> <span class="s2">&quot;Menu&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>            <span class="c1"># サブメニュー参照</span>
+    <span class="p">(</span><span class="s1">&#39;HOTKEY&#39;</span><span class="p">,</span> <span class="s2">&quot;Hotkey&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>        <span class="c1"># ホットキー実行</span>
+    <span class="p">(</span><span class="s1">&#39;CUSTOM&#39;</span><span class="p">,</span> <span class="s2">&quot;Custom&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>        <span class="c1"># カスタムレイアウト</span>
+    <span class="p">(</span><span class="s1">&#39;EMPTY&#39;</span><span class="p">,</span> <span class="s2">&quot;Empty&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>          <span class="c1"># 空/セパレーター</span>
+
+    <span class="c1"># モーダル専用</span>
+    <span class="p">(</span><span class="s1">&#39;INVOKE&#39;</span><span class="p">,</span> <span class="s2">&quot;Invoke&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>        <span class="c1"># 起動時</span>
+    <span class="p">(</span><span class="s1">&#39;FINISH&#39;</span><span class="p">,</span> <span class="s2">&quot;Finish&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>        <span class="c1"># 完了時</span>
+    <span class="p">(</span><span class="s1">&#39;CANCEL&#39;</span><span class="p">,</span> <span class="s2">&quot;Cancel&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>        <span class="c1"># キャンセル時</span>
+    <span class="p">(</span><span class="s1">&#39;UPDATE&#39;</span><span class="p">,</span> <span class="s2">&quot;Update&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span>        <span class="c1"># 更新時</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="icon">
+<h3>icon のフラグ文字<a class="headerlink" href="#icon" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">icon</span></code> フィールドにはアイコン名の前にフラグ文字を付けられます：</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 15.0%" />
+<col style="width: 70.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>フラグ</p></th>
+<th class="head"><p>定数</p></th>
+<th class="head"><p>説明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">#</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">F_ICON_ONLY</span></code></p></td>
+<td><p>アイコンのみ表示（テキスト非表示）</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">!</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">F_HIDDEN</span></code></p></td>
+<td><p>隠し表示（見えないがスペースは確保）</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">^</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">F_CB</span></code></p></td>
+<td><p>チェックボックススタイル（PROP用）</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">&amp;</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">F_CUSTOM_ICON</span></code></p></td>
+<td><p>カスタムアイコンファイル参照</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 例</span>
+<span class="s2">&quot;#CUBE&quot;</span>       <span class="c1"># アイコンのみ</span>
+<span class="s2">&quot;!NONE&quot;</span>       <span class="c1"># 隠し</span>
+<span class="s2">&quot;^CHECKBOX&quot;</span>   <span class="c1"># チェックボックス</span>
+<span class="s2">&quot;&amp;myicon&quot;</span>     <span class="c1"># カスタムアイコン</span>
+</pre></div>
+</div>
+</section>
+<section id="text">
+<h3>text の解釈<a class="headerlink" href="#text" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">mode</span></code> によって <code class="docutils literal notranslate"><span class="pre">text</span></code> の解釈が異なります：</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-0-0-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-0-0-0" name="0-0" role="tab" tabindex="0">COMMAND</button><button aria-controls="panel-0-0-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-1" name="0-1" role="tab" tabindex="-1">PROP</button><button aria-controls="panel-0-0-2" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-2" name="0-2" role="tab" tabindex="-1">MENU</button><button aria-controls="panel-0-0-3" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-3" name="0-3" role="tab" tabindex="-1">HOTKEY</button><button aria-controls="panel-0-0-4" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-4" name="0-4" role="tab" tabindex="-1">CUSTOM</button><button aria-controls="panel-0-0-5" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-5" name="0-5" role="tab" tabindex="-1">EMPTY</button></div><div aria-labelledby="tab-0-0-0" class="sphinx-tabs-panel" id="panel-0-0-0" name="0-0" role="tabpanel" tabindex="0"><p>Pythonコード。セミコロンで複数文を区切り可能。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;bpy.ops.mesh.primitive_cube_add()&quot;</span>
+<span class="s2">&quot;bpy.ops.transform.translate(&#39;INVOKE_DEFAULT&#39;)&quot;</span>
+<span class="s2">&quot;C.object.location.x += 1; C.object.location.y += 1&quot;</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-1" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-1" name="0-1" role="tabpanel" tabindex="0"><p>プロパティパス。最後のドット以降がプロパティ名。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;C.scene.render.engine&quot;</span>
+<span class="s2">&quot;C.object.location&quot;</span>
+<span class="s2">&quot;C.object[&#39;custom_prop&#39;]&quot;</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-2" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-2" name="0-2" role="tabpanel" tabindex="0"><p>PMEメニュー名または Blender Menu クラス名。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;MyPieMenu&quot;</span>         <span class="c1"># PMEメニュー参照</span>
+<span class="s2">&quot;@MyPieMenu&quot;</span>        <span class="c1"># 展開表示</span>
+<span class="s2">&quot;VIEW3D_MT_mesh_add&quot;</span>  <span class="c1"># Blenderメニュー</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-3" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-3" name="0-3" role="tabpanel" tabindex="0"><p>ホットキー文字列。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;Ctrl+Z&quot;</span>
+<span class="s2">&quot;Shift+D&quot;</span>
+<span class="s2">&quot;Alt+G&quot;</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-4" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-4" name="0-4" role="tabpanel" tabindex="0"><p>レイアウトコード。<code class="docutils literal notranslate"><span class="pre">L</span></code> で UILayout にアクセス。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;L.prop(C.object, &#39;name&#39;)&quot;</span>
+<span class="s2">&quot;L.operator(&#39;mesh.primitive_cube_add&#39;, text=&#39;Add Cube&#39;)&quot;</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-5" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-5" name="0-5" role="tabpanel" tabindex="0"><p>種類を指定する文字列。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;&quot;</span>           <span class="c1"># セパレーター</span>
+<span class="s2">&quot;column&quot;</span>     <span class="c1"># 新しいカラム開始</span>
+<span class="s2">&quot;spacer&quot;</span>     <span class="c1"># スペーサー</span>
+<span class="s2">&quot;label&quot;</span>      <span class="c1"># ラベル（name を表示）</span>
+</pre></div>
+</div>
+</div></div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="pmlink">
+<h2>PMLink の構造<a class="headerlink" href="#pmlink" title="Link to this heading">¶</a></h2>
+<p>ツリービュー表示のためのリンク構造です。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PMLink</span><span class="p">(</span><span class="n">bpy</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">PropertyGroup</span><span class="p">):</span>
+    <span class="n">pm_name</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>    <span class="c1"># 参照するPMItem名</span>
+    <span class="n">is_folder</span><span class="p">:</span> <span class="n">BoolProperty</span><span class="p">()</span>    <span class="c1"># フォルダか否か</span>
+    <span class="n">label</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>      <span class="c1"># 表示ラベル</span>
+    <span class="n">folder</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>     <span class="c1"># 親フォルダ名</span>
+    <span class="n">group</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>      <span class="c1"># グループ名（キーマップ名等）</span>
+
+    <span class="c1"># クラス変数</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>              <span class="c1"># リンク生成カウンター</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="p">{}</span>           <span class="c1"># リンクID → パスリストのマップ</span>
+</pre></div>
+</div>
+<section id="id8">
+<h3>パス構造<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<p>ツリービューでの階層パスは <code class="docutils literal notranslate"><span class="pre">paths</span></code> クラス変数で管理：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 例: &quot;Window&quot; キーマップの &quot;Folder1/MyMenu&quot;</span>
+<span class="n">link</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;123&quot;</span>  <span class="c1"># リンクID</span>
+<span class="n">link</span><span class="o">.</span><span class="n">pm_name</span> <span class="o">=</span> <span class="s2">&quot;MyMenu&quot;</span>
+<span class="n">link</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="s2">&quot;Window&quot;</span>
+<span class="n">PMLink</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="s2">&quot;123&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Folder1&quot;</span><span class="p">]</span>  <span class="c1"># パスリスト</span>
+</pre></div>
+</div>
+</section>
+<section id="id9">
+<h3>フルパス取得<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">fullpath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;フルパスを取得&quot;&quot;&quot;</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">group</span> <span class="o">+</span> <span class="n">CC</span><span class="o">.</span><span class="n">TREE_SPLITTER</span>        <span class="c1"># &quot;Window/&quot;</span>
+    <span class="n">ret</span> <span class="o">+=</span> <span class="n">CC</span><span class="o">.</span><span class="n">TREE_SPLITTER</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>    <span class="c1"># &quot;Folder1&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_folder</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">+=</span> <span class="n">CC</span><span class="o">.</span><span class="n">TREE_SPLITTER</span>
+        <span class="n">ret</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pm_name</span>
+    <span class="k">return</span> <span class="n">ret</span>  <span class="c1"># &quot;Window/Folder1/MyMenu&quot; or &quot;Window/Folder1&quot;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="tag">
+<h2>Tag の構造<a class="headerlink" href="#tag" title="Link to this heading">¶</a></h2>
+<p>タグはフィルタリングに使用されます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Tag</span><span class="p">(</span><span class="n">bpy</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">PropertyGroup</span><span class="p">):</span>
+    <span class="c1"># name は PropertyGroup から継承</span>
+
+    <span class="c1"># クラス変数</span>
+    <span class="n">filtered_pms</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Set[str] or None</span>
+</pre></div>
+</div>
+<section id="id10">
+<h3>フィルタリング処理<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">filter</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;現在のタグフィルターを適用&quot;&quot;&quot;</span>
+    <span class="n">pr</span> <span class="o">=</span> <span class="n">get_prefs</span><span class="p">()</span>
+    <span class="n">tpr</span> <span class="o">=</span> <span class="n">temp_prefs</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tpr</span><span class="o">.</span><span class="n">tags</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">pr</span><span class="o">.</span><span class="n">tag_filter</span><span class="p">:</span>
+        <span class="n">Tag</span><span class="o">.</span><span class="n">filtered_pms</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># フィルターなし</span>
+        <span class="k">return</span>
+
+    <span class="n">Tag</span><span class="o">.</span><span class="n">filtered_pms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">pm</span> <span class="ow">in</span> <span class="n">pr</span><span class="o">.</span><span class="n">pie_menus</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pm</span><span class="o">.</span><span class="n">has_tag</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">tag_filter</span><span class="p">):</span>
+            <span class="n">Tag</span><span class="o">.</span><span class="n">filtered_pms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+<span class="nd">@staticmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_pm</span><span class="p">(</span><span class="n">pm</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;PMがフィルターを通過するかチェック&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tag</span><span class="o">.</span><span class="n">filtered_pms</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">pm</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">Tag</span><span class="o">.</span><span class="n">filtered_pms</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id11">
+<h2>クラス変数の問題点<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h2>
+<p>PMEでは多くのクラス変数が使用されていますが、これは問題を引き起こす可能性があります。</p>
+<section id="id12">
+<h3>問題のあるクラス変数一覧<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 30.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>クラス</p></th>
+<th class="head"><p>変数</p></th>
+<th class="head"><p>問題</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PMItem</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">poll_methods</span></code></p></td>
+<td><p>リネーム/削除時にクリーンアップされない</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PMItem</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">kmis_map</span></code></p></td>
+<td><p>同上</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PMItem</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">_prev_key_mod_map</span></code></p></td>
+<td><p>同上</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PMLink</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">idx</span></code>, <code class="docutils literal notranslate"><span class="pre">paths</span></code></p></td>
+<td><p>ツリー再構築時のみクリア</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Tag</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">filtered_pms</span></code></p></td>
+<td><p>フィルター変更時のみ更新</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PMIItem</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">expandable_props</span></code></p></td>
+<td><p>無限に成長する可能性</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id13">
+<h3>推奨される改善<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 改善案: インスタンスごとの管理</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MenuRegistry</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poll_methods</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CodeType</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keymap_items</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">KeymapItem</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_poll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">unregister_poll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;メニュー削除時に呼ぶ&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poll_methods</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">pm_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keymap_items</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">pm_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id14">
+<h2>シリアライゼーション<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
+<section id="to-dict-from-dict">
+<h3>to_dict / from_dict<a class="headerlink" href="#to-dict-from-dict" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">property_utils.py</span></code> で定義されている、プリファレンスのシリアライゼーション：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">skip_default</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;PropertyGroup を辞書に変換&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">bpy</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">PropertyGroup</span><span class="p">):</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_dict</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">skip_default</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="c1"># Collection</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">to_dict</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">skip_default</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_default</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">get_default</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_py_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;辞書から PropertyGroup を復元&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">from_dict</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">collection</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="n">collection</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">item_values</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                <span class="n">item</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
+                <span class="n">from_dict</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">item_values</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>データドリフト</p>
+<p><code class="docutils literal notranslate"><span class="pre">to_dict/from_dict</span></code> は完全な往復変換を保証しません。
+特に以下のケースで問題が発生します：</p>
+<ul class="simple">
+<li><p>デフォルト値がバージョン間で変わった場合</p></li>
+<li><p>新しいプロパティが追加された場合</p></li>
+<li><p>プロパティの型が変わった場合</p></li>
+</ul>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id15">
+<h2>バージョン互換性<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
+<section id="compatibility-fixes-py">
+<h3>compatibility_fixes.py<a class="headerlink" href="#compatibility-fixes-py" title="Link to this heading">¶</a></h3>
+<p>バージョンアップ時のデータ移行は <code class="docutils literal notranslate"><span class="pre">compatibility_fixes.py</span></code> で処理されます：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">fix</span><span class="p">(</span><span class="n">pms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;メインの修正エントリーポイント&quot;&quot;&quot;</span>
+    <span class="n">pr</span> <span class="o">=</span> <span class="n">get_prefs</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">version</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">version</span>
+
+    <span class="c1"># バージョンごとの修正を適用</span>
+    <span class="k">if</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">fix_1_15_0</span><span class="p">(</span><span class="n">pms</span> <span class="ow">or</span> <span class="n">pr</span><span class="o">.</span><span class="n">pie_menus</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">fix_1_16_0</span><span class="p">(</span><span class="n">pms</span> <span class="ow">or</span> <span class="n">pr</span><span class="o">.</span><span class="n">pie_menus</span><span class="p">)</span>
+
+    <span class="c1"># 現在のバージョンを記録</span>
+    <span class="n">pr</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">addon</span><span class="o">.</span><span class="n">VERSION</span>
+</pre></div>
+</div>
+</section>
+<section id="json">
+<h3>JSON インポート時の修正<a class="headerlink" href="#json" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">fix_json</span><span class="p">(</span><span class="n">pm</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;JSONインポート時のデータ修正&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="c1"># 古い形式からの変換</span>
+        <span class="o">...</span>
+
+    <span class="k">if</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="c1"># poll_cmd のフォーマット変更</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">7</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="mi">7</span><span class="p">]:</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">poll_cmd</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="id16">
+<h3>新しい修正関数の追加方法<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">fix_X_Y_Z</span><span class="p">(</span><span class="n">pms</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;バージョン X.Y.Z への移行修正&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">pm</span> <span class="ow">in</span> <span class="n">pms</span><span class="p">:</span>
+        <span class="c1"># 修正処理</span>
+        <span class="o">...</span>
+
+<span class="c1"># fix() 関数内に追加</span>
+<span class="k">if</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">):</span>
+    <span class="n">fix_X_Y_Z</span><span class="p">(</span><span class="n">pms</span> <span class="ow">or</span> <span class="n">pr</span><span class="o">.</span><span class="n">pie_menus</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="debugging.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">デバッグガイド</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">PME Architecture Deep Dive</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">データモデル詳解</a><ul>
+<li><a class="reference internal" href="#propertygroup">PropertyGroup の継承階層</a></li>
+<li><a class="reference internal" href="#pmitem">PMItem の全プロパティ</a><ul>
+<li><a class="reference internal" href="#id2">識別情報</a></li>
+<li><a class="reference internal" href="#id3">ホットキー設定</a></li>
+<li><a class="reference internal" href="#id4">アイテムコレクション</a></li>
+<li><a class="reference internal" href="#data">追加設定（data）</a></li>
+<li><a class="reference internal" href="#poll">Poll設定</a></li>
+<li><a class="reference internal" href="#id5">タグ</a></li>
+<li><a class="reference internal" href="#id6">有効/無効</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pmiitem">PMIItem の全プロパティ</a><ul>
+<li><a class="reference internal" href="#id7">基本情報</a></li>
+<li><a class="reference internal" href="#mode">mode の詳細</a></li>
+<li><a class="reference internal" href="#icon">icon のフラグ文字</a></li>
+<li><a class="reference internal" href="#text">text の解釈</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pmlink">PMLink の構造</a><ul>
+<li><a class="reference internal" href="#id8">パス構造</a></li>
+<li><a class="reference internal" href="#id9">フルパス取得</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tag">Tag の構造</a><ul>
+<li><a class="reference internal" href="#id10">フィルタリング処理</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id11">クラス変数の問題点</a><ul>
+<li><a class="reference internal" href="#id12">問題のあるクラス変数一覧</a></li>
+<li><a class="reference internal" href="#id13">推奨される改善</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id14">シリアライゼーション</a><ul>
+<li><a class="reference internal" href="#to-dict-from-dict">to_dict / from_dict</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id15">バージョン互換性</a><ul>
+<li><a class="reference internal" href="#compatibility-fixes-py">compatibility_fixes.py</a></li>
+<li><a class="reference internal" href="#json">JSON インポート時の修正</a></li>
+<li><a class="reference internal" href="#id16">新しい修正関数の追加方法</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=c8adcb1d"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/force-light.js?v=3c6bdc37"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        all_mermaids.forEach((el) => {
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+        await mermaid.run();
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);</script>
+    <script src="../_static/tabs.js?v=3030b3cb"></script>
+    </body>
+</html>

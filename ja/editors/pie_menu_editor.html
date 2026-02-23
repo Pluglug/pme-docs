@@ -1,0 +1,612 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="Regular Menu Editor" href="regular_menu_editor.html"><link rel="prev" title="マクロで独自機能を作成" href="../getting_started/macro_tutorial.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>Pie Menu Editor - Pie Menu Editor JA 2.0.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=bc6c0a41" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=bc6c0a41" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #4CAF50;
+  --color-brand-content: #4CAF50;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #4CAF50;
+  --color-brand-content: #4CAF50;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Pie Menu Editor JA 2.0.0 ドキュメント</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor JA 2.0.0 ドキュメント</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">はじめる</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">PME のインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/basic_pie_menu.html">基本的なパイメニューの作成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/popup_dialog_tutorial.html">ポップアップダイアログをパイメニューに追加</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/macro_tutorial.html">マクロで独自機能を作成</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">エディタ</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="popup_dialog_editor.html">Popup Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editor_common_elements.html">Editor Common Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#hiding-unused-panels">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#menu-panel-extension">Menu/Panel Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#pme-toolbar">PME Toolbar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property_editor.html">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_icons.html">カスタムアイコン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">参考資料</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/terminology.html">用語集</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/scripting.html">スクリプティング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_guide.html">Keymapの選び方</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">アーキテクチャ（開発者向け）</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture/index.html">PME Architecture Deep Dive</a><input aria-label="Toggle navigation of PME Architecture Deep Dive" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/index.html">PME Architecture Deep Dive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/data_model.html">データモデル詳解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/debugging.html">デバッグガイド</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/extending.html">エディター拡張ガイド</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">サポート</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">Get Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/contribute_to_pme.html">Contribute to PME</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">開発者向け</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/architecture/index.html">PME Architecture Deep Dive</a><input aria-label="Toggle navigation of PME Architecture Deep Dive" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture/index.html">PME Architecture Deep Dive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture/data_model.html">データモデル詳解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture/debugging.html">デバッグガイド</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture/extending.html">エディター拡張ガイド</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/editors/pie_menu_editor.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="pie-menu-editor">
+<span id="id1"></span><h1>Pie Menu Editor<a class="headerlink" href="#pie-menu-editor" title="Link to this heading">¶</a></h1>
+<div class="video-container">
+   <iframe src="https://www.youtube.com/embed/COW109EjBsU" frameborder="0" allowfullscreen></iframe>
+</div>
+<hr class="docutils" />
+<section id="id2">
+<h2>エディター画面<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<section id="id3">
+<h3>トップ<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<a class="img-shadow reference internal image-reference" href="../_images/pie_ui_top.png"><img alt="Pie Menu Editor Top" class="img-shadow align-center" src="../_images/pie_ui_top.png" style="width: 100%;" />
+</a>
+<dl class="myst field-list simple">
+<dt class="field-odd">有効性<span class="colon">:</span></dt>
+<dd class="field-odd"><p>このパイメニューの有効/無効を切り替えます。無効にするとホットキーが無効化されます。</p>
+</dd>
+<dt class="field-even">プレビュー<span class="colon">:</span></dt>
+<dd class="field-even"><p>パイメニューをプレビュー表示して、レイアウトを事前に確認できます。</p>
+</dd>
+<dt class="field-odd">アイテム選択<span class="colon">:</span></dt>
+<dd class="field-odd"><p>エディタに表示するPMEアイテムを切り替えます。アイコンは現在のメニュータイプを示します。</p>
+</dd>
+<dt class="field-even">メニュー名<span class="colon">:</span></dt>
+<dd class="field-even"><p>パイメニューの名前を設定・変更します。他のメニューから参照する際の識別子としても使用されます。</p>
+</dd>
+<dt class="field-odd">タグ<span class="colon">:</span></dt>
+<dd class="field-odd"><p>メニューの分類・検索用のタグを設定します。複数のタグを設定可能です。</p>
+</dd>
+<dt class="field-even">ドキュメント<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pie Menu Editorのオンラインドキュメントを開きます。</p>
+</dd>
+<dt class="field-odd">詳細設定<span class="colon">:</span></dt>
+<dd class="field-odd"><p>パイメニューの高度な<a class="reference internal" href="#id5"><span class="xref myst">設定オプション</span></a>（Poll Method、Radius等）を表示・編集します。</p>
+</dd>
+</dl>
+</section>
+<section id="hotkey">
+<h3>Hotkey設定<a class="headerlink" href="#hotkey" title="Link to this heading">¶</a></h3>
+<a class="img-shadow reference internal image-reference" href="../_images/hotkey.png"><img alt="Hotkey Settings" class="img-shadow align-center" src="../_images/hotkey.png" style="width: 100%;" />
+</a>
+<div style="margin: 1.5rem 0;"></div>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-3 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm ex-card ex-card-keymap docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+キーマップ</div>
+<p class="sd-card-text">Blenderのキーマップは階層構造です。適切なキーマップを選ぶことで既存のホットキーを安全に上書きできます。既存のホットキーのキーマップやアクションを調べるには、エディタの<code class="docutils literal notranslate"><span class="pre">+</span></code>ボタンを使用してください。</p>
+<ul class="simple">
+<li><p class="sd-card-text">参考: <a class="reference internal" href="../reference/keymap_guide.html"><span class="std std-doc">Keymapの選び方</span></a></p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm ex-card ex-card-hotkey docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+ホットキーモード</div>
+<ul class="simple">
+<li><p class="sd-card-text"><strong>Press</strong>: キーを押す</p></li>
+<li><p class="sd-card-text"><strong>Hold</strong>: キーを押し続ける</p></li>
+<li><p class="sd-card-text"><strong>Tweak</strong>: キーを押しながらマウスを動かす</p></li>
+<li><p class="sd-card-text"><strong>Double Click</strong>: キーをダブルクリックする</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm ex-card ex-card-modifier docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+モディファイア</div>
+<p class="sd-card-text"><strong>Any modifier</strong> は Ctrl / Shift / Alt / OSKey の任意の組み合わせです。コンテキスト感応ツールの作成に使えます。</p>
+<p class="sd-card-text">このアドオンではマウスボタンをモディファイアとして使えます（例: LMB+Tab / RMB+Tab / MMB+Tab）。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ctrl is pressed&quot;</span> <span class="k">if</span> <span class="n">E</span><span class="o">.</span><span class="n">ctrl</span> <span class="k">else</span> <span class="s2">&quot;Ctrl isn&#39;t pressed&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="docutils">
+</div>
+</section>
+<section id="id4">
+<h3>メニュースロット<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<a class="img-shadow reference internal image-reference" href="../_images/pie_slots.png"><img alt="Pie Menu Editor Slots" class="img-shadow align-right" src="../_images/pie_slots.png" style="width: 30%;" />
+</a>
+<p>パイメニューは<strong>10個のスロット</strong>で構成されています：</p>
+<ul class="simple">
+<li><p><strong>8方向</strong>：上下左右・斜め4方向</p></li>
+<li><p><strong>最上部・最下部</strong>：垂直方向の追加スロット</p></li>
+</ul>
+<p>各スロットの構成要素（左から右へ）：</p>
+<ol class="arabic simple">
+<li><p><strong>スロット編集ボタン</strong>: スロットエディタを開いて機能を設定</p></li>
+<li><p><strong>アイコン設定</strong>: スロットに表示するアイコンを選択</p></li>
+<li><p><strong>表示名</strong>: スロットのラベルテキストを設定</p></li>
+<li><p><strong>詳細設定</strong>: スロット固有の追加オプション</p></li>
+</ol>
+<div class="seealso admonition">
+<p class="admonition-title">Expansion Tool</p>
+<p>Settings &gt; General &gt; Expand Slot Toolsを有効にすると、詳細設定メニューの編集ボタンが拡張されます。</p>
+<a class="img-shadow reference internal image-reference" href="../_images/slot_tools.png"><img alt="Pie Menu Slot Tools" class="img-shadow align-center" src="../_images/slot_tools.png" style="width: 80%;" />
+</a>
+</div>
+</section>
+<section id="id5">
+<h3>詳細設定メニュー<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<a class="img-shadow reference internal image-reference" href="../_images/pie_advanced_settings.png"><img alt="Pie Menu Editor Advanced Settings" class="img-shadow align-right" src="../_images/pie_advanced_settings.png" style="width: 40%;" />
+</a>
+<ul class="simple">
+<li><p><strong>Poll Method</strong>: メニューの表示条件を制御するPythonコードを設定します。条件が満たされない場合、メニューは表示されません。</p></li>
+<li><p><strong>Radius</strong>: パイメニューの円の半径を設定します。デフォルト値（-1）で自動設定、カスタム値でアニメーションが無効化されます。</p></li>
+<li><p><strong>Threshold</strong>: フリックモード時のマウス移動距離の閾値を設定します。この距離を超えるとスロットが選択されます。</p></li>
+<li><p><strong>Confirm Threshold</strong>: フリックモード時の確定距離の閾値を設定します。この距離まで移動すると選択が確定されます。</p></li>
+<li><p><strong>Confirm on Threshold</strong>: 閾値に達した時点で自動的に選択を確定するかどうかを設定します。</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id6">
+<h2>スロットエディタ<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h2>
+<p>スロット編集をクリックすると、スロットエディタが表示されます。
+各スロットの機能を設定できます。Pie Menuは以下の機能タイプがあります：</p>
+<a class="img-shadow reference internal image-reference" href="../_images/slot_editor.png"><img alt="Pie Menu Slot Editor" class="img-shadow align-center" src="../_images/slot_editor.png" style="width: 100%;" />
+</a>
+<div style="margin: 1.5rem 0;"></div>
+<section id="id7">
+<h3>トップ<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>アイコン</strong>: スロットに表示するアイコンを選択します。</p></li>
+<li><p><strong>表示名</strong>: スロットのラベルテキストを設定します。<svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-arrow-left" viewBox="0 0 16 16" aria-hidden="true"><path d="M7.78 12.53a.75.75 0 0 1-1.06 0L2.47 8.28a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L4.81 7h7.44a.75.75 0 0 1 0 1.5H4.81l2.97 2.97a.75.75 0 0 1 0 1.06Z"></path></svg>ボタンを押すと、提案名を適用します。</p></li>
+<li><p><strong>OK / Cancel</strong>: スロットの選択を確定・キャンセルします。Enter / Escape キーでも確定できます。</p></li>
+</ul>
+</section>
+<section id="id8">
+<h3>タブ<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<p>5つの機能タイプから選択します：</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="command" for="sd-tab-item-0">
+Command</label><div class="sd-tab-content docutils">
+<p>ボタンがクリックされた時に実行される任意のPythonコードを設定します。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># オペレーターを実行する</span>
+<span class="n">bpy</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">mode_set</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;OBJECT&#39;</span><span class="p">)</span>
+
+<span class="c1"># 条件分岐を使用する (Ctrlを押していた場合はモンキーを追加、それ以外は立方体を追加)</span>
+<span class="n">O</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">primitive_monkey_add</span><span class="p">()</span> <span class="k">if</span> <span class="n">E</span><span class="o">.</span><span class="n">ctrl</span> <span class="k">else</span> <span class="n">O</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">primitive_cube_add</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="important admonition">
+<p class="admonition-title">コマンドの記述方法</p>
+<p>Blenderの文字列プロパティーは、複数行のコマンドを記述できません。
+そのため、複数のコマンドを記述する場合は、セミコロン(<code class="docutils literal notranslate"><span class="pre">;</span></code>)で区切る必要があります。</p>
+<p>参考: <a class="reference internal" href="#../python/index.md"><span class="xref myst">Pythonコマンドの記述方法</span></a></p>
+</div>
+<div class="hint admonition">
+<p class="admonition-title">グローバル変数</p>
+<p><strong>利用可能なグローバル変数の例：</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">C</span></code>: bpy.context（現在のBlenderコンテキスト）</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">O</span></code>: bpy.ops（Blenderのオペレーター）</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">E</span></code>: event（イベント情報）</p></li>
+</ul>
+<p><a class="reference internal" href="../reference/scripting.html"><span class="std std-doc">こちら</span></a>でさらに詳細なグローバル変数の一覧を確認できます。</p>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="property" for="sd-tab-item-1">
+Property</label><div class="sd-tab-content docutils">
+<p>オブジェクトのプロパティへのパスを指定し、ウィジェットとして表示します。
+例：<code class="docutils literal notranslate"><span class="pre">bpy.context.object.location</span></code>でオブジェクトの位置を表示・編集できます。</p>
+<div class="tip admonition">
+<p class="admonition-title">高度なプロパティ操作</p>
+<p>インデックス指定やより複雑なプロパティ操作が必要な場合は、<a class="reference internal" href="property_editor.html"><span class="std std-doc">Property Editor</span></a>を利用してください。</p>
+</div>
+</div>
+<input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="menu" for="sd-tab-item-2">
+Menu</label><div class="sd-tab-content docutils">
+<p>ボタンがクリックされた時にPME内で作成した他のメニューアイテムを呼び出します。
+例：</p>
+<ul class="simple">
+<li><p><strong>Popup Dialog</strong>を<code class="docutils literal notranslate"><span class="pre">Expand</span> <span class="pre">Popup</span> <span class="pre">Dialog</span></code>で表示</p></li>
+<li><p><strong>Regular Menu</strong>を<code class="docutils literal notranslate"><span class="pre">Open</span> <span class="pre">on</span> <span class="pre">Mouse</span> <span class="pre">Over</span></code>で表示</p></li>
+<li><p><strong>Macro Operator</strong>を実行</p></li>
+</ul>
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="hotkey" for="sd-tab-item-3">
+Hotkey</label><div class="sd-tab-content docutils">
+<p>ボタンがクリックされた時に、指定されたBlenderのホットキーに割り当てられているオペレーターを検索して実行します。
+例：<code class="docutils literal notranslate"><span class="pre">G</span></code>でGrab（移動）、<code class="docutils literal notranslate"><span class="pre">R</span></code>でRotate（回転）など、Blenderの標準ホットキーを利用できます。</p>
+</div>
+<input id="sd-tab-item-4" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="custom" for="sd-tab-item-4">
+Custom</label><div class="sd-tab-content docutils">
+<p>カスタムなウィジェットレイアウトを描画するためのPythonコードを設定します。
+<code class="docutils literal notranslate"><span class="pre">L</span></code>はレイアウトオブジェクトを表し、Blenderのレイアウトシステムを使用してUIを構築できます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ボックス内にラベルを表示</span>
+<span class="n">L</span><span class="o">.</span><span class="n">box</span><span class="p">()</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">icon</span><span class="p">,</span> <span class="n">icon_value</span><span class="o">=</span><span class="n">icon_value</span><span class="p">)</span>
+
+<span class="c1"># 複数のボタンを縦に配置</span>
+<span class="n">col</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">column</span><span class="p">();</span> <span class="n">operator</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="s2">&quot;mesh.primitive_cube_add&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;立方体&quot;</span><span class="p">);</span> <span class="n">operator</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="s2">&quot;mesh.primitive_uv_sphere_add&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;球&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h3>
+<a class="reference internal image-reference" href="../_images/slot_examples.png"><img alt="PME Slot Examples" class="align-right" src="../_images/slot_examples.png" style="width: 40%;" />
+</a>
+<p>一番右のハンバーガーメニュー(<svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-three-bars" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"></path></svg>)を押すと、あらかじめ用意されたいくつかのスロット機能を追加することができます。</p>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="regular_menu_editor.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Regular Menu Editor</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../getting_started/macro_tutorial.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">マクロで独自機能を作成</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Pie Menu Editor</a><ul>
+<li><a class="reference internal" href="#id2">エディター画面</a><ul>
+<li><a class="reference internal" href="#id3">トップ</a></li>
+<li><a class="reference internal" href="#hotkey">Hotkey設定</a></li>
+<li><a class="reference internal" href="#id4">メニュースロット</a></li>
+<li><a class="reference internal" href="#id5">詳細設定メニュー</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id6">スロットエディタ</a><ul>
+<li><a class="reference internal" href="#id7">トップ</a></li>
+<li><a class="reference internal" href="#id8">タブ</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=c8adcb1d"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/force-light.js?v=3c6bdc37"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

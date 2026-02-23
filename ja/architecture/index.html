@@ -1,0 +1,2513 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="データモデル詳解" href="data_model.html"><link rel="prev" title="Keymapの選び方" href="../reference/keymap_guide.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>PME Architecture Deep Dive - Pie Menu Editor JA 2.0.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=bc6c0a41" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=bc6c0a41" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #4CAF50;
+  --color-brand-content: #4CAF50;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #4CAF50;
+  --color-brand-content: #4CAF50;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Pie Menu Editor JA 2.0.0 ドキュメント</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor JA 2.0.0 ドキュメント</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">はじめる</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">PME のインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/basic_pie_menu.html">基本的なパイメニューの作成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/popup_dialog_tutorial.html">ポップアップダイアログをパイメニューに追加</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/macro_tutorial.html">マクロで独自機能を作成</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">エディタ</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../editors/pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/popup_dialog_editor.html">Popup Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/editor_common_elements.html">Editor Common Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#hiding-unused-panels">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#menu-panel-extension">Menu/Panel Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#pme-toolbar">PME Toolbar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/property_editor.html">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/custom_icons.html">カスタムアイコン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">参考資料</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/terminology.html">用語集</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/scripting.html">スクリプティング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_guide.html">Keymapの選び方</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">アーキテクチャ（開発者向け）</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="current reference internal" href="#">PME Architecture Deep Dive</a><input aria-label="Toggle navigation of PME Architecture Deep Dive" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">PME Architecture Deep Dive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_model.html">データモデル詳解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html">デバッグガイド</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html">エディター拡張ガイド</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">サポート</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">Get Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/contribute_to_pme.html">Contribute to PME</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">開発者向け</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/architecture/index.html">PME Architecture Deep Dive</a><input aria-label="Toggle navigation of PME Architecture Deep Dive" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture/index.html">PME Architecture Deep Dive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture/data_model.html">データモデル詳解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture/debugging.html">デバッグガイド</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/architecture/extending.html">エディター拡張ガイド</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/architecture/index.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="pme-architecture-deep-dive">
+<span id="architecture-index"></span><h1>PME Architecture Deep Dive<a class="headerlink" href="#pme-architecture-deep-dive" title="Link to this heading">¶</a></h1>
+<section id="pme2">
+<h2>PME2設計のための内部理解ガイド<a class="headerlink" href="#pme2" title="Link to this heading">¶</a></h2>
+<div class="tip admonition">
+<p class="admonition-title">このドキュメントの目的</p>
+<p>Pie Menu Editor (PME) の内部アーキテクチャを「なぜこうなっているのか」という
+設計意図から解説し、PME2を再設計できるレベルの理解を得ることを目標とします。</p>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">アーキテクチャドキュメント</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PME Architecture Deep Dive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_model.html">データモデル詳解</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data_model.html#propertygroup">PropertyGroup の継承階層</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_model.html#pmitem">PMItem の全プロパティ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_model.html#pmiitem">PMIItem の全プロパティ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_model.html#pmlink">PMLink の構造</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_model.html#tag">Tag の構造</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_model.html#id11">クラス変数の問題点</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_model.html#id14">シリアライゼーション</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_model.html#id15">バージョン互換性</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">デバッグガイド</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html#id2">デバッグフラグ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html#id5">セーフモード</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html#id8">よくある問題と解決策</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html#id12">内部状態の確認</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html#id14">クラス変数のクリーンアップ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html#id15">ホットリロード</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html#id16">パフォーマンス計測</a></li>
+<li class="toctree-l2"><a class="reference internal" href="debugging.html#id18">テスト用ユーティリティ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="extending.html">エディター拡張ガイド</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#id2">エディター追加の基本手順</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#id5">実際のエディター実装例</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#ui">エディターUIのカスタマイズ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#id7">データ拡張</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#id8">実行ロジックのカスタマイズ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#id10">テストの追加</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#id12">ベストプラクティス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="extending.html#pme2">PME2への示唆</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<hr class="docutils" />
+</section>
+<hr class="docutils" />
+<section id="pme">
+<h2>概要：PMEとは何か<a class="headerlink" href="#pme" title="Link to this heading">¶</a></h2>
+<section id="id2">
+<h3>本質的な役割<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<p>PMEは単なる「パイメニューエディター」ではありません。</p>
+<div class="sd-card sd-sphinx-override sd-mb-3 sd-shadow-sm sd-border-primary docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+PMEの本質</div>
+<p class="sd-card-text"><strong>BlenderのUIを動的に生成・登録するフレームワーク</strong></p>
+<ul class="simple">
+<li><p class="sd-card-text">パイメニュー、通常メニュー、ポップアップ、パネル</p></li>
+<li><p class="sd-card-text">マクロオペレーター、モーダルオペレーター</p></li>
+<li><p class="sd-card-text">スティッキーキー、スタックキー</p></li>
+<li><p class="sd-card-text">カスタムプロパティ</p></li>
+</ul>
+<p class="sd-card-text">これら全てを <strong>統一的なデータモデル</strong> で管理し、
+<strong>ホットキーと連動</strong> させて動的に登録します。</p>
+</div>
+</div>
+</section>
+<section id="id3">
+<h3>PMEが解決している問題<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>問題</p></th>
+<th class="head"><p>PMEの解決策</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Blender APIでUI作成は面倒</p></td>
+<td><p>GUIエディターで視覚的に作成</p></td>
+</tr>
+<tr class="row-odd"><td><p>ホットキー管理が複雑</p></td>
+<td><p>メニューとホットキーを一体管理</p></td>
+</tr>
+<tr class="row-even"><td><p>Pythonコードが必要</p></td>
+<td><p>ドラッグ&amp;ドロップでコマンド追加</p></td>
+</tr>
+<tr class="row-odd"><td><p>設定の保存・共有が難しい</p></td>
+<td><p>JSON形式でエクスポート/インポート</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id4">
+<h3>サポートされるメニュータイプ<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 15.0%" />
+<col style="width: 20.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Mode</p></th>
+<th class="head"><p>モジュール</p></th>
+<th class="head"><p>説明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PMENU</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ed_pie_menu.py</span></code></p></td>
+<td><p>パイメニュー（8+2固定スロット）</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">RMENU</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ed_menu.py</span></code></p></td>
+<td><p>通常のドロップダウンメニュー</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DIALOG</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ed_popup.py</span></code></p></td>
+<td><p>ポップアップダイアログ</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SCRIPT</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ed_stack_key.py</span></code></p></td>
+<td><p>スタックキー（順次アクション）</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">PANEL</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ed_panel_group.py</span></code></p></td>
+<td><p>パネルグループ</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">HPANEL</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ed_hpanel_group.py</span></code></p></td>
+<td><p>隠しパネルグループ</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">STICKY</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ed_sticky_key.py</span></code></p></td>
+<td><p>スティッキーキー修飾</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MACRO</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ed_macro.py</span></code></p></td>
+<td><p>マクロオペレーター</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MODAL</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ed_modal.py</span></code></p></td>
+<td><p>モーダルオペレーター</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">PROPERTY</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ed_property.py</span></code></p></td>
+<td><p>カスタムプロパティ</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id5">
+<h2>メンタルモデル<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<section id="id6">
+<h3>「全てはメニューである」<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p>PMEでは、パイメニューもスタックキーもマクロも、全て <code class="docutils literal notranslate"><span class="pre">PMItem</span></code> という
+同じデータ構造で表現されます。これが良くも悪くもPMEの特徴です。</p>
+<pre  class="mermaid">
+        graph TB
+    subgraph PMEPreferences[&quot;PMEPreferences (AddonPreferences)&quot;]
+        subgraph pie_menus[&quot;pie_menus: Collection[PMItem]&quot;]
+            PM1[&quot;PMItem&lt;br/&gt;mode=PMENU&lt;br/&gt;pmis: [8+2個]&quot;]
+            PM2[&quot;PMItem&lt;br/&gt;mode=RMENU&lt;br/&gt;pmis: [可変]&quot;]
+            PM3[&quot;PMItem&lt;br/&gt;mode=MACRO&lt;br/&gt;pmis: [可変]&quot;]
+            PM4[&quot;PMItem&lt;br/&gt;mode=STICKY&lt;br/&gt;pmis: [2個]&quot;]
+        end
+    end
+
+    style PMEPreferences fill:#1a1a2e,stroke:#58a6ff
+    style pie_menus fill:#21262d,stroke:#30363d
+    </pre><div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>設計上のトレードオフ</p>
+<p>この「統一モデル」は柔軟性をもたらすが、同時に複雑さも生みます。</p>
+<p>例：パイメニューは固定8+2スロット、通常メニューは可変。
+同じ <code class="docutils literal notranslate"><span class="pre">PMItem</span></code> で表現するため、エディターごとに解釈が異なります。</p>
+</div>
+</section>
+<section id="id7">
+<h3>モード駆動型アーキテクチャ<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<p>PMEのアーキテクチャは「モード」を中心に設計されています：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>ユーザーが「Pie Menu」を作成
+        │
+        ▼
+PMItem.mode = &#39;PMENU&#39; が設定される
+        │
+        ▼
+PMEPreferences.ed(&#39;PMENU&#39;) でエディターを取得
+        │
+        ▼
+EdPieMenu インスタンスがUIと動作を決定
+</pre></div>
+</div>
+<p>このパターンにより、新しいメニュータイプを追加する際は：</p>
+<ol class="arabic simple">
+<li><p>新しい <code class="docutils literal notranslate"><span class="pre">ed_*.py</span></code> モジュールを作成</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EditorBase</span></code> を継承したクラスを定義</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MODULES</span></code> タプルに追加</p></li>
+<li><p>自動的に統合される</p></li>
+</ol>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id8">
+<h2>データモデル詳解<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<section id="types-py">
+<h3>types.py のコア構造<a class="headerlink" href="#types-py" title="Link to this heading">¶</a></h3>
+<p>PMEのデータ構造は <code class="docutils literal notranslate"><span class="pre">types.py</span></code> に定義されています。
+3つの主要な <code class="docutils literal notranslate"><span class="pre">PropertyGroup</span></code> を理解することが重要です。</p>
+<section id="pmitem">
+<h4>PMItem（メニュー定義）<a class="headerlink" href="#pmitem" title="Link to this heading">¶</a></h4>
+<div class="literal-block-wrapper docutils container" id="id56">
+<div class="code-block-caption"><span class="caption-text">types.py - PMItem の主要プロパティ</span><a class="headerlink" href="#id56" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PMItem</span><span class="p">(</span><span class="n">bpy</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">PropertyGroup</span><span class="p">):</span>
+    <span class="c1"># === 識別情報 ===</span>
+    <span class="c1"># name は PropertyGroup から継承（Blenderコレクションのキー）</span>
+
+    <span class="n">mode</span><span class="p">:</span> <span class="n">EnumProperty</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="n">CC</span><span class="o">.</span><span class="n">PM_ITEMS</span><span class="p">)</span>  <span class="c1"># PMENU, RMENU, MACRO...</span>
+
+    <span class="c1"># === ホットキー設定 ===</span>
+    <span class="n">km_name</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="s2">&quot;Window&quot;</span><span class="p">)</span>  <span class="c1"># キーマップ名</span>
+    <span class="n">key</span><span class="p">:</span> <span class="n">EnumProperty</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="n">KH</span><span class="o">.</span><span class="n">key_items</span><span class="p">)</span>      <span class="c1"># A, SPACE, LEFTMOUSE...</span>
+    <span class="n">ctrl</span><span class="p">:</span> <span class="n">BoolProperty</span><span class="p">()</span>
+    <span class="n">shift</span><span class="p">:</span> <span class="n">BoolProperty</span><span class="p">()</span>
+    <span class="n">alt</span><span class="p">:</span> <span class="n">BoolProperty</span><span class="p">()</span>
+    <span class="n">oskey</span><span class="p">:</span> <span class="n">BoolProperty</span><span class="p">()</span>
+    <span class="nb">any</span><span class="p">:</span> <span class="n">BoolProperty</span><span class="p">()</span>
+    <span class="n">key_mod</span><span class="p">:</span> <span class="n">EnumProperty</span><span class="p">()</span>    <span class="c1"># 修飾キー</span>
+    <span class="n">chord</span><span class="p">:</span> <span class="n">EnumProperty</span><span class="p">()</span>      <span class="c1"># コードキー</span>
+    <span class="n">open_mode</span><span class="p">:</span> <span class="n">EnumProperty</span><span class="p">()</span>  <span class="c1"># PRESS, CLICK, DOUBLE_CLICK...</span>
+
+    <span class="c1"># === アイテムコレクション ===</span>
+    <span class="n">pmis</span><span class="p">:</span> <span class="n">CollectionProperty</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">PMIItem</span><span class="p">)</span>
+
+    <span class="c1"># === 追加設定 ===</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>      <span class="c1"># URL形式の拡張データ</span>
+    <span class="n">poll_cmd</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>  <span class="c1"># 表示条件（Pythonコード）</span>
+    <span class="n">tag</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>       <span class="c1"># タグ（カンマ区切り）</span>
+    <span class="n">enabled</span><span class="p">:</span> <span class="n">BoolProperty</span><span class="p">()</span>     <span class="c1"># 有効/無効</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="pmiitem">
+<h4>PMIItem（アイテム定義）<a class="headerlink" href="#pmiitem" title="Link to this heading">¶</a></h4>
+<div class="literal-block-wrapper docutils container" id="id57">
+<div class="code-block-caption"><span class="caption-text">types.py - PMIItem の主要プロパティ</span><a class="headerlink" href="#id57" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PMIItem</span><span class="p">(</span><span class="n">bpy</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">PropertyGroup</span><span class="p">):</span>
+    <span class="c1"># name は PropertyGroup から継承（表示名）</span>
+
+    <span class="n">mode</span><span class="p">:</span> <span class="n">EnumProperty</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="n">CC</span><span class="o">.</span><span class="n">EMODE_ITEMS</span><span class="p">)</span>  <span class="c1"># COMMAND, PROP, MENU...</span>
+    <span class="n">text</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="n">CC</span><span class="o">.</span><span class="n">MAX_STR_LEN</span><span class="p">)</span>  <span class="c1"># コマンド/パス</span>
+    <span class="n">icon</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>  <span class="c1"># アイコン名 + フラグ</span>
+    <span class="n">enabled</span><span class="p">:</span> <span class="n">BoolProperty</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="pmlink">
+<h4>PMLink（ツリービュー用）<a class="headerlink" href="#pmlink" title="Link to this heading">¶</a></h4>
+<div class="literal-block-wrapper docutils container" id="id58">
+<div class="code-block-caption"><span class="caption-text">types.py - PMLink</span><a class="headerlink" href="#id58" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PMLink</span><span class="p">(</span><span class="n">bpy</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">PropertyGroup</span><span class="p">):</span>
+    <span class="n">pm_name</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>   <span class="c1"># 参照するPMItem名</span>
+    <span class="n">is_folder</span><span class="p">:</span> <span class="n">BoolProperty</span><span class="p">()</span>   <span class="c1"># フォルダか否か</span>
+    <span class="n">label</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>     <span class="c1"># 表示ラベル</span>
+    <span class="n">folder</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>    <span class="c1"># 親フォルダ</span>
+    <span class="n">group</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>     <span class="c1"># グループ名</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="emode-items">
+<h3>アイテムモード（EMODE_ITEMS）<a class="headerlink" href="#emode-items" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PMIItem.mode</span></code> が取りうる値と、その振る舞い：</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-0-0-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-0-0-0" name="0-0" role="tab" tabindex="0">COMMAND</button><button aria-controls="panel-0-0-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-1" name="0-1" role="tab" tabindex="-1">PROP</button><button aria-controls="panel-0-0-2" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-2" name="0-2" role="tab" tabindex="-1">MENU</button><button aria-controls="panel-0-0-3" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-3" name="0-3" role="tab" tabindex="-1">HOTKEY</button><button aria-controls="panel-0-0-4" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-4" name="0-4" role="tab" tabindex="-1">CUSTOM</button><button aria-controls="panel-0-0-5" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-5" name="0-5" role="tab" tabindex="-1">EMPTY</button></div><div aria-labelledby="tab-0-0-0" class="sphinx-tabs-panel" id="panel-0-0-0" name="0-0" role="tabpanel" tabindex="0"><p><strong>Pythonコード実行</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">text</span></code> フィールドにPythonコードを格納。
+実行時に <code class="docutils literal notranslate"><span class="pre">exec()</span></code> される。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># text の例</span>
+<span class="n">bpy</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">primitive_cube_add</span><span class="p">()</span>
+<span class="n">bpy</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="s1">&#39;INVOKE_DEFAULT&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-1" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-1" name="0-1" role="tabpanel" tabindex="0"><p><strong>プロパティウィジェット表示</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">text</span></code> フィールドにプロパティパスを格納。
+UIに直接プロパティウィジェットが描画される。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># text の例</span>
+<span class="n">C</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">render</span><span class="o">.</span><span class="n">engine</span>
+<span class="n">C</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">location</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-2" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-2" name="0-2" role="tabpanel" tabindex="0"><p><strong>サブメニュー参照</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">text</span></code> フィールドにPMEメニュー名を格納。
+<code class="docutils literal notranslate"><span class="pre">&#64;</span></code> プレフィックスで展開表示。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># text の例</span>
+<span class="n">MySubMenu</span>      <span class="c1"># ボタンとして表示</span>
+<span class="nd">@MySubMenu</span>     <span class="c1"># 展開して表示</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-3" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-3" name="0-3" role="tabpanel" tabindex="0"><p><strong>ホットキー実行</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">text</span></code> フィールドにホットキー文字列を格納。
+そのホットキーに紐づくオペレーターを実行。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># text の例</span>
+<span class="n">Ctrl</span><span class="o">+</span><span class="n">Z</span>
+<span class="n">Shift</span><span class="o">+</span><span class="n">D</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-4" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-4" name="0-4" role="tabpanel" tabindex="0"><p><strong>カスタムレイアウト</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">text</span></code> フィールドにレイアウトコードを格納。
+<code class="docutils literal notranslate"><span class="pre">L</span></code> 変数で <code class="docutils literal notranslate"><span class="pre">UILayout</span></code> にアクセス可能。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># text の例</span>
+<span class="n">L</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">object</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span>
+<span class="n">L</span><span class="o">.</span><span class="n">operator</span><span class="p">(</span><span class="s2">&quot;mesh.primitive_cube_add&quot;</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Cube&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-0-0-5" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-5" name="0-5" role="tabpanel" tabindex="0"><p><strong>セパレーター/空スロット</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">text</span></code> で種類を指定：</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code> : セパレーター</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;column&quot;</span></code> : 新しいカラム</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;spacer&quot;</span></code> : スペーサー</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;label&quot;</span></code> : ラベル</p></li>
+</ul>
+</div></div>
+</section>
+<section id="id9">
+<h3>データエンコーディング<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<section id="pmitem-data-url">
+<h4>PMItem.data のURL形式<a class="headerlink" href="#pmitem-data-url" title="Link to this heading">¶</a></h4>
+<p>追加設定は URL クエリパラメータ形式で <code class="docutils literal notranslate"><span class="pre">PMItem.data</span></code> に格納されます：</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># パイメニューの追加設定
+pm?pm_radius=150&amp;pm_threshold=20&amp;pm_flick=True
+
+# ポップアップダイアログの設定
+pd?pd_title=True&amp;pd_box=False&amp;pd_width=300
+
+# スティッキーキーの設定
+sk?sk_block_ui=True
+</pre></div>
+</div>
+</section>
+<section id="pme-py">
+<h4>パース処理（pme.py）<a class="headerlink" href="#pme-py" title="Link to this heading">¶</a></h4>
+<div class="literal-block-wrapper docutils container" id="id59">
+<div class="code-block-caption"><span class="caption-text">pme.py - ParsedData</span><a class="headerlink" href="#id59" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ParsedData</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="c1"># &quot;pm?pm_radius=150&amp;pm_flick=True&quot; を分解</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">)</span>  <span class="c1"># type = &quot;pm&quot;</span>
+
+        <span class="c1"># デフォルト値を設定</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span><span class="o">.</span><span class="n">prop_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+
+        <span class="c1"># クエリパラメータをパース</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&amp;&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">param</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">props</span><span class="o">.</span><span class="n">prop_map</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">props</span><span class="o">.</span><span class="n">prop_map</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">decode_value</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+
+<span class="c1"># 使用例</span>
+<span class="n">prop</span> <span class="o">=</span> <span class="n">pme</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="n">radius</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">pm_radius</span>  <span class="c1"># 150</span>
+<span class="n">flick</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">pm_flick</span>    <span class="c1"># True</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>脆弱性ポイント</p>
+<p>このURL形式には以下の問題があります：</p>
+<ul class="simple">
+<li><p><strong>型安全性がない</strong>: 全て文字列から変換</p></li>
+<li><p><strong>スキーマが明示されていない</strong>: <code class="docutils literal notranslate"><span class="pre">props_map</span></code> で管理</p></li>
+<li><p><strong>バージョン間の互換性維持が手動</strong>: <code class="docutils literal notranslate"><span class="pre">compatibility_fixes.py</span></code> で対応</p></li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id10">
+<h2>実行パイプライン<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<section id="id11">
+<h3>全体フロー<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<pre  class="mermaid">
+        sequenceDiagram
+    participant User as ユーザー
+    participant KM as Blender Keymap
+    participant OP as WM_OT_pme_user_pie_menu_call
+    participant CTX as PMEContext
+    participant Draw as _draw_item
+    participant Exec as exec/eval
+
+    User-&gt;&gt;KM: ホットキーを押す
+    KM-&gt;&gt;OP: invoke() 呼び出し
+    OP-&gt;&gt;OP: pm.poll() チェック
+    OP-&gt;&gt;CTX: pm, event を設定
+    OP-&gt;&gt;Draw: popup_menu_pie() / popup_menu()
+
+    loop 各 PMIItem
+        Draw-&gt;&gt;CTX: pmi, index を設定
+        Draw-&gt;&gt;Draw: pmi.mode に応じてUI生成
+    end
+
+    User-&gt;&gt;OP: アイテムをクリック
+    OP-&gt;&gt;Exec: コマンド実行
+    Exec-&gt;&gt;CTX: gen_globals() で環境構築
+    Exec--&gt;&gt;User: 結果
+    </pre></section>
+<section id="id12">
+<h3>詳細ステップ<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<section id="step-1">
+<h4>Step 1: ホットキー登録<a class="headerlink" href="#step-1" title="Link to this heading">¶</a></h4>
+<p>アドオン起動時、各 <code class="docutils literal notranslate"><span class="pre">PMItem</span></code> のホットキーが登録されます：</p>
+<div class="literal-block-wrapper docutils container" id="id60">
+<div class="code-block-caption"><span class="caption-text">types.py - PMItem.register_hotkey()</span><a class="headerlink" href="#id60" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">register_hotkey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">km_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">pr</span> <span class="o">=</span> <span class="n">get_prefs</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">km_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">km_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_keymap</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">km_name</span> <span class="ow">in</span> <span class="n">km_names</span><span class="p">:</span>
+        <span class="n">pr</span><span class="o">.</span><span class="n">kh</span><span class="o">.</span><span class="n">keymap</span><span class="p">(</span><span class="n">km_name</span><span class="p">)</span>  <span class="c1"># キーマップを選択</span>
+        <span class="n">kmi</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">kh</span><span class="o">.</span><span class="n">operator</span><span class="p">(</span>
+            <span class="n">WM_OT_pme_user_pie_menu_call</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ctrl</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">oskey</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">key_mod</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">any</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">kmi</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">pie_menu_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="c1"># 登録状態を記録</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kmis_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">km_name</span><span class="p">:</span> <span class="n">kmi</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="step-2">
+<h4>Step 2: オペレーター呼び出し<a class="headerlink" href="#step-2" title="Link to this heading">¶</a></h4>
+<p>ホットキーが押されると <code class="docutils literal notranslate"><span class="pre">WM_OT_pme_user_pie_menu_call.invoke()</span></code> が呼ばれます：</p>
+<div class="literal-block-wrapper docutils container" id="id61">
+<div class="code-block-caption"><span class="caption-text">operators.py - invoke() の概要</span><a class="headerlink" href="#id61" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">invoke</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="n">pr</span> <span class="o">=</span> <span class="n">get_prefs</span><span class="p">()</span>
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">pie_menus</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pie_menu_name</span><span class="p">]</span>
+
+    <span class="c1"># Poll チェック</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pm</span><span class="o">.</span><span class="n">poll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;CANCELLED&#39;</span><span class="p">}</span>
+
+    <span class="c1"># PMEContext を設定</span>
+    <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">pm</span> <span class="o">=</span> <span class="n">pm</span>
+    <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">event</span>
+
+    <span class="c1"># メニュータイプに応じて描画</span>
+    <span class="k">if</span> <span class="n">pm</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;PMENU&#39;</span><span class="p">:</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">window_manager</span><span class="o">.</span><span class="n">popup_menu_pie</span><span class="p">(</span>
+            <span class="n">event</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_draw_pm</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">name</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">pm</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;RMENU&#39;</span><span class="p">:</span>
+        <span class="n">context</span><span class="o">.</span><span class="n">window_manager</span><span class="o">.</span><span class="n">popup_menu</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_draw_rm</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">name</span>
+        <span class="p">)</span>
+    <span class="c1"># ... 他のモード</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="step-3">
+<h4>Step 3: アイテム描画<a class="headerlink" href="#step-3" title="Link to this heading">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">_draw_item</span></code> 静的メソッドが各アイテムを描画します：</p>
+<div class="literal-block-wrapper docutils container" id="id62">
+<div class="code-block-caption"><span class="caption-text">operators.py - _draw_item() の概要</span><a class="headerlink" href="#id62" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_draw_item</span><span class="p">(</span><span class="n">pr</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="n">pmi</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+    <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">pmi</span> <span class="o">=</span> <span class="n">pmi</span>
+    <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span>
+
+    <span class="k">if</span> <span class="n">pmi</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;COMMAND&#39;</span><span class="p">:</span>
+        <span class="c1"># オペレーター呼び出しを解析</span>
+        <span class="n">op_bl_idname</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">pos_args</span> <span class="o">=</span> <span class="n">operator_utils</span><span class="o">.</span><span class="n">find_operator</span><span class="p">(</span><span class="n">pmi</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">op_bl_idname</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pos_args</span><span class="p">:</span>
+            <span class="c1"># 直接オペレーターボタンを配置</span>
+            <span class="n">text</span><span class="p">,</span> <span class="n">icon</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">pmi</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">lh</span><span class="o">.</span><span class="n">operator</span><span class="p">(</span><span class="n">op_bl_idname</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">icon</span><span class="p">)</span>
+            <span class="n">operator_utils</span><span class="o">.</span><span class="n">apply_properties</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">pm</span><span class="p">,</span> <span class="n">pmi</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># 汎用コマンド実行ボタン</span>
+            <span class="n">lh</span><span class="o">.</span><span class="n">operator</span><span class="p">(</span>
+                <span class="n">WM_OT_pme_user_command_exec</span><span class="o">.</span><span class="n">bl_idname</span><span class="p">,</span>
+                <span class="n">text</span><span class="p">,</span> <span class="n">icon</span><span class="p">,</span>
+                <span class="n">cmd</span><span class="o">=</span><span class="n">pmi</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>
+                <span class="n">menu</span><span class="o">=</span><span class="n">pm</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">slot</span><span class="o">=</span><span class="n">pmi</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">pmi</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;PROP&#39;</span><span class="p">:</span>
+        <span class="c1"># プロパティウィジェットを配置</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">obj_path</span><span class="p">,</span> <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">globals</span><span class="p">)</span>
+        <span class="n">lh</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">prop_name</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">icon</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">pmi</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;CUSTOM&#39;</span><span class="p">:</span>
+        <span class="c1"># カスタムコードを実行</span>
+        <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">lh</span><span class="o">.</span><span class="n">layout</span>
+        <span class="n">exec_globals</span> <span class="o">=</span> <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">gen_globals</span><span class="p">()</span>
+        <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">exe</span><span class="p">(</span><span class="n">pmi</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">exec_globals</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="step-4">
+<h4>Step 4: コマンド実行<a class="headerlink" href="#step-4" title="Link to this heading">¶</a></h4>
+<p>ユーザーがアイテムをクリックすると、対応するアクションが実行されます：</p>
+<div class="literal-block-wrapper docutils container" id="id63">
+<div class="code-block-caption"><span class="caption-text">operators.py - WM_OT_pme_user_command_exec</span><a class="headerlink" href="#id63" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">WM_OT_pme_user_command_exec</span><span class="p">(</span><span class="n">bpy</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
+    <span class="n">bl_idname</span> <span class="o">=</span> <span class="s2">&quot;wm.pme_user_command_exec&quot;</span>
+
+    <span class="n">cmd</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>
+    <span class="n">menu</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>
+    <span class="n">slot</span><span class="p">:</span> <span class="n">StringProperty</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">exec_operator</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">exec_globals</span> <span class="o">=</span> <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">gen_globals</span><span class="p">()</span>
+        <span class="n">exec_globals</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">menu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">menu</span><span class="p">,</span> <span class="n">slot</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">slot</span><span class="p">)</span>
+
+        <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">exe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">,</span> <span class="n">exec_globals</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">exec_globals</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;return_value&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;FINISHED&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<hr class="docutils" />
+<section id="pmecontext">
+<h2>PMEContext - 実行時コンテキスト<a class="headerlink" href="#pmecontext" title="Link to this heading">¶</a></h2>
+<section id="id13">
+<h3>役割と構造<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">pme.context</span></code> はメニュー描画・コマンド実行時に必要な情報を保持するシングルトンです。</p>
+<div class="literal-block-wrapper docutils container" id="id64">
+<div class="code-block-caption"><span class="caption-text">pme.py - PMEContext</span><a class="headerlink" href="#id64" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PMEContext</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_globals</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">bpy</span><span class="o">=</span><span class="n">bpy</span><span class="p">,</span>
+            <span class="n">pme_context</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">drag_x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">drag_y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># 現在処理中のメニュー/アイテム</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pm</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># 現在の PMItem</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pmi</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1"># 現在の PMIItem</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="kc">None</span>    <span class="c1"># アイテムインデックス</span>
+
+        <span class="c1"># UI描画時の一時情報</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layout</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># UILayout (L でアクセス)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_event</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># Event (E でアクセス)</span>
+
+        <span class="c1"># 実行コンテキスト</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exec_globals</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exec_locals</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exec_user_locals</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id14">
+<h3>グローバル変数の提供<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> の <code class="docutils literal notranslate"><span class="pre">on_context()</span></code> で便利なショートカットが登録されます：</p>
+<div class="literal-block-wrapper docutils container" id="id65">
+<div class="code-block-caption"><span class="caption-text">__init__.py - グローバル変数登録</span><a class="headerlink" href="#id65" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">on_context</span><span class="p">():</span>
+    <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="n">bpy</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>          <span class="c1"># D.objects[&#39;Cube&#39;]</span>
+    <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bpy</span><span class="o">.</span><span class="n">types</span><span class="p">)</span>         <span class="c1"># T.Object</span>
+    <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="n">bpy</span><span class="o">.</span><span class="n">ops</span><span class="p">)</span>           <span class="c1"># O.mesh.primitive_cube_add()</span>
+    <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="n">bpy</span><span class="o">.</span><span class="n">props</span><span class="p">)</span>         <span class="c1"># P.BoolProperty()</span>
+    <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;sys&quot;</span><span class="p">,</span> <span class="n">sys</span><span class="p">)</span>
+
+    <span class="c1"># プロパティ関数のショートカット</span>
+    <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;BoolProperty&quot;</span><span class="p">,</span> <span class="n">bpy</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">BoolProperty</span><span class="p">)</span>
+    <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;IntProperty&quot;</span><span class="p">,</span> <span class="n">bpy</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">IntProperty</span><span class="p">)</span>
+    <span class="c1"># ...</span>
+</pre></div>
+</div>
+</div>
+<p>これにより、ユーザーコードで以下のような短縮形が使えます：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># ユーザーが書くコマンド例</span>
+<span class="n">L</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">object</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span>              <span class="c1"># L = Layout, C = Context</span>
+<span class="n">D</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="s1">&#39;Cube&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">select_set</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>    <span class="c1"># D = bpy.data</span>
+<span class="n">O</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">primitive_cube_add</span><span class="p">()</span>           <span class="c1"># O = bpy.ops</span>
+</pre></div>
+</div>
+</section>
+<section id="gen-globals">
+<h3>gen_globals() メソッド<a class="headerlink" href="#gen-globals" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">exec()</span></code> / <code class="docutils literal notranslate"><span class="pre">eval()</span></code> 用のグローバル辞書を生成します：</p>
+<div class="literal-block-wrapper docutils container" id="id66">
+<div class="code-block-caption"><span class="caption-text">pme.py - gen_globals()</span><a class="headerlink" href="#id66" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">gen_globals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">,</span>           <span class="c1"># 現在のアイテムのテキスト</span>
+        <span class="n">icon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">icon</span><span class="p">,</span>           <span class="c1"># 現在のアイテムのアイコン</span>
+        <span class="n">icon_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">icon_value</span><span class="p">,</span>
+        <span class="n">PME</span><span class="o">=</span><span class="n">temp_prefs</span><span class="p">(),</span>         <span class="c1"># セッション設定</span>
+        <span class="n">PREFS</span><span class="o">=</span><span class="n">get_prefs</span><span class="p">(),</span>        <span class="c1"># 永続設定</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span>
+
+    <span class="n">ret</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exec_user_locals</span><span class="p">)</span>  <span class="c1"># ユーザー定義変数</span>
+    <span class="n">ret</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globals</span><span class="p">)</span>           <span class="c1"># 基本グローバル (D, T, O, etc.)</span>
+
+    <span class="k">return</span> <span class="n">ret</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id15">
+<h2>エディターアーキテクチャ<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h2>
+<section id="editorbase">
+<h3>EditorBase パターン<a class="headerlink" href="#editorbase" title="Link to this heading">¶</a></h3>
+<p>各メニュータイプには専用の「エディター」クラスがあり、
+<code class="docutils literal notranslate"><span class="pre">EditorBase</span></code> を継承しています。</p>
+<pre  class="mermaid">
+        classDiagram
+    class EditorBase {
+        +id: str
+        +icon: str
+        +default_name: str
+        +has_hotkey: bool
+        +supported_slot_modes: set
+        +on_pm_add(pm)
+        +on_pm_rename(pm, new_name)
+        +on_pmi_edit(pm, pmi)
+        +on_pm_enabled(pm, enabled)
+        +draw_items(layout, pm)
+        +init_pm(pm)
+    }
+
+    class EdPieMenu {
+        +id = &quot;PMENU&quot;
+        +on_pm_add(pm)
+        +draw_items(layout, pm)
+    }
+
+    class EdMenu {
+        +id = &quot;RMENU&quot;
+        +on_pm_add(pm)
+        +draw_items(layout, pm)
+    }
+
+    class EdMacro {
+        +id = &quot;MACRO&quot;
+        +on_pm_add(pm)
+        +init_pm(pm)
+    }
+
+    EditorBase &lt;|-- EdPieMenu
+    EditorBase &lt;|-- EdMenu
+    EditorBase &lt;|-- EdMacro
+    </pre></section>
+<section id="id16">
+<h3>エディター登録の仕組み<a class="headerlink" href="#id16" title="Link to this heading">¶</a></h3>
+<p>各エディターモジュールの <code class="docutils literal notranslate"><span class="pre">register()</span></code> 関数で登録されます：</p>
+<div class="literal-block-wrapper docutils container" id="id67">
+<div class="code-block-caption"><span class="caption-text">ed_pie_menu.py - エディター定義例</span><a class="headerlink" href="#id67" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Editor</span><span class="p">(</span><span class="n">EditorBase</span><span class="p">):</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="s1">&#39;PMENU&#39;</span>
+    <span class="n">icon</span> <span class="o">=</span> <span class="s1">&#39;NONE&#39;</span>
+    <span class="n">default_name</span> <span class="o">=</span> <span class="s2">&quot;Pie Menu&quot;</span>
+    <span class="n">has_hotkey</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">supported_slot_modes</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;COMMAND&#39;</span><span class="p">,</span> <span class="s1">&#39;PROP&#39;</span><span class="p">,</span> <span class="s1">&#39;MENU&#39;</span><span class="p">,</span> <span class="s1">&#39;HOTKEY&#39;</span><span class="p">,</span> <span class="s1">&#39;CUSTOM&#39;</span><span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_pm_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;新規パイメニュー作成時: 10個のスロットを初期化&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+            <span class="n">pm</span><span class="o">.</span><span class="n">pmis</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">draw_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layout</span><span class="p">,</span> <span class="n">pm</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;エディターUIにスロット配置を描画&quot;&quot;&quot;</span>
+        <span class="c1"># パイメニュー独自の8方向 + 2追加スロットUI</span>
+        <span class="k">pass</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">():</span>
+    <span class="n">Editor</span><span class="p">()</span>  <span class="c1"># PMEPreferences.editors に登録される</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="preferences-py">
+<h3>preferences.py での利用<a class="headerlink" href="#preferences-py" title="Link to this heading">¶</a></h3>
+<div class="literal-block-wrapper docutils container" id="id68">
+<div class="code-block-caption"><span class="caption-text">preferences.py - エディター利用</span><a class="headerlink" href="#id68" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PMEPreferences</span><span class="p">(</span><span class="n">AddonPreferences</span><span class="p">):</span>
+    <span class="n">editors</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># mode → Editor インスタンス</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;mode からエディターインスタンスを取得&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">editors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_pm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;新しいメニューを追加&quot;&quot;&quot;</span>
+        <span class="n">ed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ed</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+        <span class="n">pm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pie_menus</span><span class="o">.</span><span class="n">add</span><span class="p">()</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="n">pm</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">ed</span><span class="o">.</span><span class="n">default_name</span>
+        <span class="n">ed</span><span class="o">.</span><span class="n">on_pm_add</span><span class="p">(</span><span class="n">pm</span><span class="p">)</span>  <span class="c1"># エディター固有の初期化</span>
+        <span class="k">return</span> <span class="n">pm</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>拡張性</p>
+<p>この設計により、新しいメニュータイプを追加する場合：</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ed_*.py</span></code> を作成</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EditorBase</span></code> を継承</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MODULES</span></code> タプルに追加</p></li>
+</ol>
+<p>これだけで自動的に統合されます。</p>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id17">
+<h2>状態管理<a class="headerlink" href="#id17" title="Link to this heading">¶</a></h2>
+<section id="id18">
+<h3>状態の種類と所在<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
+<p>PMEには3種類の状態があります：</p>
+<div class="sd-card sd-sphinx-override sd-mb-3 sd-shadow-sm sd-border-success docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+永続的な状態</div>
+<p class="sd-card-text"><strong>PMEPreferences</strong> (<code class="docutils literal notranslate"><span class="pre">bpy.context.preferences.addons['pme'].prefs</span></code>)</p>
+<ul class="simple">
+<li><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">pie_menus</span></code>: 全メニューデータ (Collection[PMItem])</p></li>
+<li><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">editors</span></code>: エディターインスタンス (dict[mode, Editor])</p></li>
+<li><p class="sd-card-text">各種ユーザー設定</p></li>
+</ul>
+</div>
+</div>
+<div class="sd-card sd-sphinx-override sd-mb-3 sd-shadow-sm sd-border-warning docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+セッション状態</div>
+<p class="sd-card-text"><strong>WindowManager.pme</strong> (<code class="docutils literal notranslate"><span class="pre">temp_prefs()</span></code>)</p>
+<ul class="simple">
+<li><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">links</span></code>: ツリービュー用リンク (Collection[PMLink])</p></li>
+<li><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">tags</span></code>: タグ一覧 (Collection[Tag])</p></li>
+<li><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">pmi_data</span></code>: 編集中のアイテムデータ</p></li>
+</ul>
+</div>
+</div>
+<div class="sd-card sd-sphinx-override sd-mb-3 sd-shadow-sm sd-border-info docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+実行時状態</div>
+<p class="sd-card-text"><strong>pme.context</strong> (PMEContext singleton)</p>
+<ul class="simple">
+<li><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">pm</span></code>, <code class="docutils literal notranslate"><span class="pre">pmi</span></code>, <code class="docutils literal notranslate"><span class="pre">index</span></code>: 現在処理中の対象</p></li>
+<li><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">layout</span></code>, <code class="docutils literal notranslate"><span class="pre">event</span></code>: Blenderコンテキスト</p></li>
+<li><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">_globals</span></code>: exec用グローバル辞書</p></li>
+</ul>
+<p class="sd-card-text"><strong>PMItem.kmis_map</strong> (class variable)</p>
+<ul class="simple">
+<li><p class="sd-card-text">ホットキー登録状態 <code class="docutils literal notranslate"><span class="pre">{pm_name:</span> <span class="pre">{km_name:</span> <span class="pre">KeymapItem}}</span></code></p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="id19">
+<h3>図解<a class="headerlink" href="#id19" title="Link to this heading">¶</a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>┌─────────────────────────────────────────────────────────────────────┐
+│                         永続的な状態                                 │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │ PMEPreferences (bpy.context.preferences.addons[&#39;pme&#39;].prefs) │   │
+│  │   ├─ pie_menus: Collection[PMItem]  ← 全メニューデータ       │   │
+│  │   ├─ editors: dict[mode, Editor]    ← エディターインスタンス │   │
+│  │   └─ various settings               ← ユーザー設定          │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                      セッション状態 (temp)                           │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │ WindowManager.pme (temp_prefs())                            │   │
+│  │   ├─ links: Collection[PMLink]      ← ツリービュー用        │   │
+│  │   ├─ tags: Collection[Tag]          ← タグ一覧              │   │
+│  │   └─ pmi_data: PMIData              ← 編集中アイテム        │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                     実行時状態 (runtime)                             │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │ pme.context (PMEContext singleton)                          │   │
+│  │   ├─ pm, pmi, index                 ← 現在処理中の対象      │   │
+│  │   ├─ layout, event                  ← Blenderコンテキスト   │   │
+│  │   └─ _globals                       ← exec用グローバル辞書  │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                                                                      │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │ PMItem.kmis_map (class variable)                            │   │
+│  │   └─ {pm_name: {km_name: KeymapItem}}  ← ホットキー登録状態 │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id20">
+<h2>ホットキー管理<a class="headerlink" href="#id20" title="Link to this heading">¶</a></h2>
+<section id="keymaphelper">
+<h3>KeymapHelper<a class="headerlink" href="#keymaphelper" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">keymap_helper.py</span></code> の <code class="docutils literal notranslate"><span class="pre">KeymapHelper</span></code> クラスがホットキー登録を管理します：</p>
+<div class="literal-block-wrapper docutils container" id="id69">
+<div class="code-block-caption"><span class="caption-text">keymap_helper.py - KeymapHelper の概要</span><a class="headerlink" href="#id69" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">KeymapHelper</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keymaps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keymap</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">available</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;キーマップが利用可能かチェック&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">bpy</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">window_manager</span><span class="o">.</span><span class="n">keyconfigs</span><span class="o">.</span><span class="n">addon</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">keymap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;キーマップを選択&quot;&quot;&quot;</span>
+        <span class="n">kc</span> <span class="o">=</span> <span class="n">bpy</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">window_manager</span><span class="o">.</span><span class="n">keyconfigs</span><span class="o">.</span><span class="n">addon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keymap</span> <span class="o">=</span> <span class="n">kc</span><span class="o">.</span><span class="n">keymaps</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">space_type</span><span class="o">=</span><span class="s1">&#39;EMPTY&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keymaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keymap</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">operator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">hotkey</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">ctrl</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">oskey</span><span class="p">,</span> <span class="n">key_mod</span><span class="p">,</span> <span class="nb">any</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;オペレーターをキーマップに登録&quot;&quot;&quot;</span>
+        <span class="n">kmi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keymap</span><span class="o">.</span><span class="n">keymap_items</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">bl_idname</span><span class="p">,</span>
+            <span class="n">key</span><span class="p">,</span> <span class="s1">&#39;PRESS&#39;</span><span class="p">,</span>
+            <span class="n">ctrl</span><span class="o">=</span><span class="n">ctrl</span><span class="p">,</span> <span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">alt</span><span class="o">=</span><span class="n">alt</span><span class="p">,</span> <span class="n">oskey</span><span class="o">=</span><span class="n">oskey</span><span class="p">,</span>
+            <span class="n">key_modifier</span><span class="o">=</span><span class="n">key_mod</span><span class="p">,</span> <span class="nb">any</span><span class="o">=</span><span class="nb">any</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">kmi</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id21">
+<h3>キーマップ待機問題<a class="headerlink" href="#id21" title="Link to this heading">¶</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>脆弱性ポイント</p>
+<p>Blender起動時、全てのキーマップがすぐに利用可能ではありません。
+PMEは <code class="docutils literal notranslate"><span class="pre">PME_OT_wait_keymaps</span></code> オペレーターでタイマー監視を行い、
+キーマップが利用可能になったら登録を試みます。</p>
+</div>
+<div class="literal-block-wrapper docutils container" id="id70">
+<div class="code-block-caption"><span class="caption-text">__init__.py - キーマップ待機</span><a class="headerlink" href="#id70" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">PME_OT_wait_keymaps</span><span class="p">(</span><span class="n">bpy</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Operator</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">modal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;TIMER&#39;</span><span class="p">:</span>
+            <span class="n">init_keymaps</span><span class="p">()</span>  <span class="c1"># 登録を試みる</span>
+
+            <span class="n">pr</span> <span class="o">=</span> <span class="n">get_prefs</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">pr</span><span class="o">.</span><span class="n">missing_kms</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">time_duration</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="c1"># 完了またはタイムアウト</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">remove_timer</span><span class="p">()</span>
+                <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;FINISHED&#39;</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;PASS_THROUGH&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">missing_kms</span></code> は登録できなかったキーマップを追跡する辞書で、
+後でリトライするために使用されます。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id22">
+<h2>セッション復元<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h2>
+<section id="id23">
+<h3>問題の背景<a class="headerlink" href="#id23" title="Link to this heading">¶</a></h3>
+<p>Blenderは新しいファイルを開くとき、一時的に <code class="docutils literal notranslate"><span class="pre">AddonPreferences</span></code> が
+リセットされることがあります（特にBlender 5.0未満）。
+PMEはこれに対処するため、ファイル読み込み前後にハンドラーを設定しています。</p>
+</section>
+<section id="id24">
+<h3>実装詳細<a class="headerlink" href="#id24" title="Link to this heading">¶</a></h3>
+<div class="literal-block-wrapper docutils container" id="id71">
+<div class="code-block-caption"><span class="caption-text">__init__.py - セッション復元</span><a class="headerlink" href="#id71" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@persistent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_pre_handler</span><span class="p">(</span><span class="n">_</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ファイル読み込み前: 設定をバックアップ&quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">tmp_data</span>
+    <span class="k">if</span> <span class="n">APP_VERSION</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">tmp_data</span> <span class="o">=</span> <span class="n">property_utils</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">get_prefs</span><span class="p">())</span>
+
+<span class="nd">@persistent</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_post_handler</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ファイル読み込み後: 必要に応じて復元&quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">tmp_data</span>
+    <span class="k">if</span> <span class="n">APP_VERSION</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">tmp_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">bpy</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">filepath</span><span class="p">:</span>  <span class="c1"># 新規ファイルの場合</span>
+            <span class="n">property_utils</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">get_prefs</span><span class="p">(),</span> <span class="n">tmp_data</span><span class="p">)</span>
+        <span class="n">tmp_data</span> <span class="o">=</span> <span class="kc">None</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>Blender 5.0以降</p>
+<p>Blender 5.0以降ではプリファレンスの永続化方式が変わり、
+このハックは不要になった可能性があります。
+ただし、完全には検証されていません。</p>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id25">
+<h2>動的クラス生成<a class="headerlink" href="#id25" title="Link to this heading">¶</a></h2>
+<section id="id26">
+<h3>なぜ必要か<a class="headerlink" href="#id26" title="Link to this heading">¶</a></h3>
+<p>Blender APIでは <code class="docutils literal notranslate"><span class="pre">Panel</span></code> / <code class="docutils literal notranslate"><span class="pre">Menu</span></code> クラスを事前に定義する必要がありますが、
+PMEはユーザーが任意の数のメニューを作れます。
+この矛盾を解決するため、クラスを実行時に動的生成しています。</p>
+</section>
+<section id="rmenu">
+<h3>通常メニュー（RMENU）の例<a class="headerlink" href="#rmenu" title="Link to this heading">¶</a></h3>
+<div class="literal-block-wrapper docutils container" id="id72">
+<div class="code-block-caption"><span class="caption-text">ui_utils.py - 動的メニュークラス生成</span><a class="headerlink" href="#id72" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pme_menu_classes</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_pme_menu_class</span><span class="p">(</span><span class="n">pm_name</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;PMEメニュー用のMenuクラスを動的生成&quot;&quot;&quot;</span>
+    <span class="n">class_name</span> <span class="o">=</span> <span class="s2">&quot;PME_MT_&quot;</span> <span class="o">+</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\W&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="n">pm_name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">class_name</span> <span class="ow">in</span> <span class="n">pme_menu_classes</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">class_name</span>
+
+    <span class="c1"># 動的にクラスを生成</span>
+    <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span>
+        <span class="n">class_name</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">bpy</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Menu</span><span class="p">,),</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;bl_label&#39;</span><span class="p">:</span> <span class="n">pm_name</span><span class="p">,</span>
+            <span class="s1">&#39;bl_idname&#39;</span><span class="p">:</span> <span class="n">class_name</span><span class="p">,</span>
+            <span class="s1">&#39;draw&#39;</span><span class="p">:</span> <span class="n">gen_draw_func</span><span class="p">(</span><span class="n">pm_name</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="n">bpy</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">register_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+    <span class="n">pme_menu_classes</span><span class="p">[</span><span class="n">class_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+    <span class="k">return</span> <span class="n">class_name</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id27">
+<h3>パネル拡張<a class="headerlink" href="#id27" title="Link to this heading">¶</a></h3>
+<div class="literal-block-wrapper docutils container" id="id73">
+<div class="code-block-caption"><span class="caption-text">ed_base.py - 既存パネルへの追加</span><a class="headerlink" href="#id73" title="Link to this code">¶</a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">EXTENDED_PANELS</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">extend_panel</span><span class="p">(</span><span class="n">pm</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;既存のBlenderパネルにPME描画を追加&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">pm</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">EXTENDED_PANELS</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">tp_name</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">U</span><span class="o">.</span><span class="n">extract_str_flags_b</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">CC</span><span class="o">.</span><span class="n">F_RIGHT</span><span class="p">,</span> <span class="n">CC</span><span class="o">.</span><span class="n">F_PRE</span><span class="p">)</span>
+    <span class="n">tp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">bpy</span><span class="o">.</span><span class="n">types</span><span class="p">,</span> <span class="n">tp_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">tp</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="n">bpy</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Panel</span><span class="p">):</span>
+        <span class="n">draw_func</span> <span class="o">=</span> <span class="n">gen_panel_draw</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">tp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">draw_func</span><span class="p">)</span>  <span class="c1"># 既存パネルに描画関数を追加</span>
+        <span class="n">EXTENDED_PANELS</span><span class="p">[</span><span class="n">pm</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">draw_func</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>注意点</p>
+<p>動的生成されたクラスは適切にアンレジストする必要があります。
+メニュー削除時やアドオン無効化時に忘れるとBlenderがクラッシュする可能性があります。</p>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id28">
+<h2>脆弱性ポイント一覧<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 35.0%" />
+<col style="width: 25.0%" />
+<col style="width: 20.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>領域</p></th>
+<th class="head"><p>脆弱性</p></th>
+<th class="head"><p>影響</p></th>
+<th class="head"><p>優先度</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>セッション復元</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">to_dict/from_dict</span></code> によるデータドリフト</p></td>
+<td><p>設定消失、データ破損</p></td>
+<td><p>高</p></td>
+</tr>
+<tr class="row-odd"><td><p>キーマップ登録</p></td>
+<td><p>タイミング依存、<code class="docutils literal notranslate"><span class="pre">missing_kms</span></code> 管理</p></td>
+<td><p>ホットキー動作せず</p></td>
+<td><p>高</p></td>
+</tr>
+<tr class="row-even"><td><p>URL形式data</p></td>
+<td><p>スキーマなし、型安全性なし</p></td>
+<td><p>パース失敗、デフォルト適用漏れ</p></td>
+<td><p>中</p></td>
+</tr>
+<tr class="row-odd"><td><p>動的クラス生成</p></td>
+<td><p>名前衝突、アンレジスト漏れ</p></td>
+<td><p>Blenderクラッシュ</p></td>
+<td><p>中</p></td>
+</tr>
+<tr class="row-even"><td><p>exec/eval</p></td>
+<td><p>ユーザーコードの例外処理</p></td>
+<td><p>UIフリーズ、エラー表示</p></td>
+<td><p>中</p></td>
+</tr>
+<tr class="row-odd"><td><p>Poll関数</p></td>
+<td><p>動的コンパイル、キャッシュ管理</p></td>
+<td><p>パフォーマンス、メモリリーク</p></td>
+<td><p>低</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="id29">
+<h3>最も危険な箇所<a class="headerlink" href="#id29" title="Link to this heading">¶</a></h3>
+<div class="admonition danger">
+<p class="admonition-title">危険</p>
+<p>PMItem.poll_methods</p>
+<p><code class="docutils literal notranslate"><span class="pre">poll_cmd</span></code> をコンパイルしてキャッシュする仕組みですが、
+メニュー削除時にクリーンアップされない可能性があります。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># types.py</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PMItem</span><span class="p">:</span>
+    <span class="n">poll_methods</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># クラス変数！</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_poll_cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">poll_cmd</span> <span class="o">==</span> <span class="n">CC</span><span class="o">.</span><span class="n">DEFAULT_POLL</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">poll_methods</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">co</span> <span class="o">=</span> <span class="nb">compile</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">poll_methods</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">co</span>
+</pre></div>
+</div>
+<p>メニューをリネームしても古いキーが残る可能性があります。</p>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id30">
+<h2>暗黙の設計哲学<a class="headerlink" href="#id30" title="Link to this heading">¶</a></h2>
+<section id="id31">
+<h3>オリジナル作者から継承されたもの<a class="headerlink" href="#id31" title="Link to this heading">¶</a></h3>
+<section id="id32">
+<h4>1. 「とにかく動かす」優先<a class="headerlink" href="#id32" title="Link to this heading">¶</a></h4>
+<p>型チェックや厳密なバリデーションより、柔軟性と即時動作を優先。
+<code class="docutils literal notranslate"><span class="pre">try/except</span></code> で囲んで <code class="docutils literal notranslate"><span class="pre">print_exc()</span></code> するパターンが多い。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 典型的なパターン</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">globals</span><span class="p">)</span>
+    <span class="n">lh</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">prop_name</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">print_exc</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">lh</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="id33">
+<h4>2. グローバル状態の活用<a class="headerlink" href="#id33" title="Link to this heading">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">pme.context</span></code>, <code class="docutils literal notranslate"><span class="pre">lh</span></code> (LayoutHelper), クラス変数など、
+グローバルにアクセス可能な状態を多用。</p>
+<p><strong>利点</strong>: 短いコードを書ける</p>
+<p><strong>欠点</strong>: テスタビリティを下げる</p>
+</section>
+<section id="blender-api">
+<h4>3. Blender APIへの密結合<a class="headerlink" href="#blender-api" title="Link to this heading">¶</a></h4>
+<p>抽象化レイヤーなしでBlender APIを直接使用。</p>
+<p><strong>利点</strong>: パフォーマンス、実装の簡潔さ</p>
+<p><strong>欠点</strong>: Blenderバージョン変更に脆弱</p>
+</section>
+<section id="id34">
+<h4>4. 「一つのデータ構造で全て表現」<a class="headerlink" href="#id34" title="Link to this heading">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">PMItem</span></code>/<code class="docutils literal notranslate"><span class="pre">PMIItem</span></code> で10種類以上の異なる概念を表現。</p>
+<p><strong>利点</strong>: データモデルがシンプル</p>
+<p><strong>欠点</strong>: 各タイプ固有の制約を表現しにくい</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>これらは「悪い設計」ではない</p>
+<p>単独開発者が機能を素早く追加するには合理的なアプローチでした。
+ただし、チーム開発やメンテナンスフェーズでは課題になります。</p>
+</div>
+</section>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id35">
+<h2>モジュール依存関係<a class="headerlink" href="#id35" title="Link to this heading">¶</a></h2>
+<section id="modules">
+<h3>MODULES順序の意味<a class="headerlink" href="#modules" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> の <code class="docutils literal notranslate"><span class="pre">MODULES</span></code> タプルはインポート順序を定義しており、
+循環参照を避けるために重要です。</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>インポート順序 (依存方向は下→上)
+═══════════════════════════════════════════════════════════════════
+
+[Core Layer]
+addon ─────────────────────── 基本設定、get_prefs(), temp_prefs()
+   │
+pme ───────────────────────── PMEContext, props (データパーサー)
+   │
+constants ─────────────────── 定数、ENUMアイテム
+
+[Utility Layer]
+utils, bl_utils ───────────── 汎用ユーティリティ
+   │
+layout_helper ─────────────── lh シングルトン (UI構築ヘルパー)
+   │
+keymap_helper ─────────────── KeymapHelper, ホットキー管理
+
+[Data Layer]
+types ─────────────────────── PMItem, PMIItem, Tag, PMLink
+   │
+operators ─────────────────── 主要オペレーター群
+
+[Editor Layer]
+ed_base ───────────────────── EditorBase 基底クラス
+   │
+ed_pie_menu, ed_menu, ...  ── 各エディター実装
+
+[UI Layer]
+preferences ───────────────── PMEPreferences, 設定UI
+</pre></div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>循環参照の回避</p>
+<p>この順序は循環インポートを避けるために設計されています。
+例: <code class="docutils literal notranslate"><span class="pre">operators.py</span></code> は <code class="docutils literal notranslate"><span class="pre">types.py</span></code> より後なので、
+<code class="docutils literal notranslate"><span class="pre">types.py</span></code> で operators を import できません。</p>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id36">
+<h2>PME2への提言<a class="headerlink" href="#id36" title="Link to this heading">¶</a></h2>
+<section id="id37">
+<h3>保持すべきもの<a class="headerlink" href="#id37" title="Link to this heading">¶</a></h3>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-border-success docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+統一データモデルのコンセプト</div>
+<p class="sd-card-text">PMItem/PMIItem の「全てはメニューアイテム」という抽象化は強力。
+ただし、型レベルでの制約は追加すべき。</p>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-border-success docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+PMEContextによるグローバル変数提供</div>
+<p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">L</span></code>, <code class="docutils literal notranslate"><span class="pre">C</span></code>, <code class="docutils literal notranslate"><span class="pre">D</span></code> などの短縮形はUXとして優秀。
+ユーザーコードの簡潔さを維持すべき。</p>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-border-success docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+EditorBaseパターン</div>
+<p class="sd-card-text">各メニュータイプごとにエディターを分離する設計は良い。
+Protocol (インターフェース) として明示化するとさらに良い。</p>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-border-success docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+JSON形式のエクスポート/インポート</div>
+<p class="sd-card-text">ポータビリティの確保は重要。
+スキーマバージョン管理を追加すべき。</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="id38">
+<h3>再設計すべきもの<a class="headerlink" href="#id38" title="Link to this heading">¶</a></h3>
+<section id="id39">
+<h4>データエンコーディング<a class="headerlink" href="#id39" title="Link to this heading">¶</a></h4>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
+<div class="sd-col sd-d-flex-column docutils">
+<p><strong>現在:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;pm?pm_radius=150&amp;pm_flick=True&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<p><strong>提案:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PieMenuData</span><span class="p">:</span>
+    <span class="n">radius</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">150</span>
+    <span class="n">threshold</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">flick</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="id40">
+<h4>状態管理<a class="headerlink" href="#id40" title="Link to this heading">¶</a></h4>
+<p>グローバルシングルトンを減らし、明示的な依存性注入へ。
+特に <code class="docutils literal notranslate"><span class="pre">PMItem.kmis_map</span></code> のようなクラス変数は危険。</p>
+</section>
+<section id="id41">
+<h4>セッション復元<a class="headerlink" href="#id41" title="Link to this heading">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">to_dict/from_dict</span></code> パターンは脆弱。
+Blender 5.0+ の新しいプリファレンス永続化を活用すべき。</p>
+</section>
+<section id="id42">
+<h4>エラーハンドリング<a class="headerlink" href="#id42" title="Link to this heading">¶</a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">try/except/print_exc()</span></code> の乱用を減らす。
+Result型やOptional型で明示的なエラー伝播を。</p>
+</section>
+<section id="poll">
+<h4>Poll関数のコンパイル<a class="headerlink" href="#poll" title="Link to this heading">¶</a></h4>
+<p>動的な <code class="docutils literal notranslate"><span class="pre">compile()</span></code> は避け、宣言的なコンテキスト条件システムを検討。</p>
+</section>
+</section>
+<section id="id43">
+<h3>削除を検討すべきもの<a class="headerlink" href="#id43" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 70.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>項目</p></th>
+<th class="head"><p>理由</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">c_utils.py</span></code></p></td>
+<td><p>Blender内部構造体へのアクセスは非常に脆弱</p></td>
+</tr>
+<tr class="row-odd"><td><p>過度なレガシー互換性コード</p></td>
+<td><p>PME2では最低サポートバージョンを上げ、クリーンスタート</p></td>
+</tr>
+<tr class="row-even"><td><p>複雑なセッション復元ロジック</p></td>
+<td><p>Blender 5.0未満のハックは不要になる可能性が高い</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id44">
+<h3>抽象化すべきもの<a class="headerlink" href="#id44" title="Link to this heading">¶</a></h3>
+<section id="id45">
+<h4>Blender API ラッパー<a class="headerlink" href="#id45" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 現在: 直接呼び出し</span>
+<span class="n">bpy</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">window_manager</span><span class="o">.</span><span class="n">keyconfigs</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">keymaps</span>
+
+<span class="c1"># 提案: 抽象化レイヤー</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BlenderKeymapService</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_keymap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Keymap</span><span class="p">]:</span> <span class="o">...</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register_hotkey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">HotkeyConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">[</span><span class="n">KeymapItem</span><span class="p">]:</span> <span class="o">...</span>
+</pre></div>
+</div>
+</section>
+<section id="ui">
+<h4>宣言的UI定義<a class="headerlink" href="#ui" title="Link to this heading">¶</a></h4>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 提案</span>
+<span class="nd">@menu_definition</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyPieMenu</span><span class="p">:</span>
+    <span class="n">slots</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">Slot</span><span class="p">(</span><span class="n">icon</span><span class="o">=</span><span class="s2">&quot;CUBE&quot;</span><span class="p">,</span> <span class="n">command</span><span class="o">=</span><span class="s2">&quot;bpy.ops.mesh.primitive_cube_add()&quot;</span><span class="p">),</span>
+        <span class="n">Slot</span><span class="p">(</span><span class="n">icon</span><span class="o">=</span><span class="s2">&quot;SPHERE&quot;</span><span class="p">,</span> <span class="n">submenu</span><span class="o">=</span><span class="n">MySphereMenu</span><span class="p">),</span>
+        <span class="n">EmptySlot</span><span class="p">(),</span>
+        <span class="c1"># ...</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id46">
+<h2>PME2 アーキテクチャ提案<a class="headerlink" href="#id46" title="Link to this heading">¶</a></h2>
+<section id="id47">
+<h3>レイヤード設計<a class="headerlink" href="#id47" title="Link to this heading">¶</a></h3>
+<pre  class="mermaid">
+        graph TB
+    subgraph Presentation[&quot;Presentation Layer&quot;]
+        EV[EditorViews]
+        MR[MenuRenderer]
+        PP[PrefsPanel]
+    end
+
+    subgraph Application[&quot;Application Layer&quot;]
+        MS[MenuService]
+        KS[KeymapService]
+        ES[ExportService]
+    end
+
+    subgraph Domain[&quot;Domain Layer&quot;]
+        ME[Menu Entity]
+        IE[Item Entity]
+        DE[Domain Events]
+    end
+
+    subgraph Infrastructure[&quot;Infrastructure Layer&quot;]
+        BPA[BlenderPrefs Adapter]
+        BKA[BlenderKeymap Adapter]
+        FSA[FileStorage Adapter]
+    end
+
+    Presentation --&gt; Application
+    Application --&gt; Domain
+    Application --&gt; Infrastructure
+
+    style Presentation fill:#2d5a27,stroke:#3fb950
+    style Application fill:#1a3a5c,stroke:#58a6ff
+    style Domain fill:#5c3a1a,stroke:#d29922
+    style Infrastructure fill:#3a1a3a,stroke:#a371f7
+    </pre><section id="id48">
+<h4>利点<a class="headerlink" href="#id48" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>Blender API変更の影響を局所化</strong>: Infrastructure Layerに閉じ込められる</p></li>
+<li><p><strong>テスト可能</strong>: Domain/Application LayerはBlenderなしでテスト可能</p></li>
+<li><p><strong>保守性</strong>: 責務が明確</p></li>
+</ul>
+</section>
+</section>
+<section id="id49">
+<h3>移行戦略<a class="headerlink" href="#id49" title="Link to this heading">¶</a></h3>
+<pre  class="mermaid">
+        gantt
+    title PME → PME2 移行計画
+    dateFormat  YYYY-MM
+
+    section Phase 1
+    テストの追加         :p1a, 2024-01, 2M
+    型アノテーション追加  :p1b, after p1a, 1M
+    ドキュメント整備     :p1c, after p1a, 1M
+
+    section Phase 2
+    新データモデル定義   :p2a, after p1b, 2M
+    API抽象化レイヤー    :p2b, after p2a, 2M
+    データ変換ロジック   :p2c, after p2a, 1M
+
+    section Phase 3
+    パイメニュー移植     :p3a, after p2b, 2M
+    通常メニュー移植     :p3b, after p3a, 1M
+    その他機能移植       :p3c, after p3b, 2M
+
+    section Phase 4
+    移行ツール作成       :p4a, after p3b, 1M
+    互換性レイヤー       :p4b, after p4a, 1M
+    </pre><div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>推奨アプローチ</p>
+<p>最初から全機能を再実装しようとしないでください。
+コア機能 (パイメニュー) をしっかり作り、順次拡張することをお勧めします。</p>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id50">
+<h2>参照ファイル一覧<a class="headerlink" href="#id50" title="Link to this heading">¶</a></h2>
+<section id="id51">
+<h3>主要ファイルの概要<a class="headerlink" href="#id51" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 50.0%" />
+<col style="width: 10.0%" />
+<col style="width: 15.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ファイル</p></th>
+<th class="head"><p>主要な内容</p></th>
+<th class="head"><p>重要度</p></th>
+<th class="head"><p>行数目安</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pme.py</span></code></p></td>
+<td><p>PMEContext, PMEProps, ParsedData</p></td>
+<td><p>★★★</p></td>
+<td><p>~300</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">types.py</span></code></p></td>
+<td><p>PMItem, PMIItem, PMLink, Tag</p></td>
+<td><p>★★★</p></td>
+<td><p>~900</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">operators.py</span></code></p></td>
+<td><p>WM_OT_pme_user_pie_menu_call, 各種オペレーター</p></td>
+<td><p>★★★</p></td>
+<td><p>~2000</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ed_base.py</span></code></p></td>
+<td><p>EditorBase, 共通オペレーター</p></td>
+<td><p>★★☆</p></td>
+<td><p>~1500</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">preferences.py</span></code></p></td>
+<td><p>PMEPreferences, Import/Export</p></td>
+<td><p>★★☆</p></td>
+<td><p>~1500</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">keymap_helper.py</span></code></p></td>
+<td><p>KeymapHelper, ホットキー管理</p></td>
+<td><p>★★☆</p></td>
+<td><p>~500</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">layout_helper.py</span></code></p></td>
+<td><p>LayoutHelper (lh), UI構築ヘルパー</p></td>
+<td><p>★☆☆</p></td>
+<td><p>~600</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">__init__.py</span></code></p></td>
+<td><p>モジュール読み込み順、セッション復元</p></td>
+<td><p>★☆☆</p></td>
+<td><p>~500</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id52">
+<h3>推奨する読む順序<a class="headerlink" href="#id52" title="Link to this heading">¶</a></h3>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">types.py</span></code> - データ構造を理解</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pme.py</span></code> - 実行コンテキストを理解</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">operators.py</span></code> - 実行フローを理解</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ed_base.py</span></code> - エディターパターンを理解</p></li>
+<li><p>任意の <code class="docutils literal notranslate"><span class="pre">ed_*.py</span></code> - 具体的なエディター実装</p></li>
+</ol>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id53">
+<h2>まとめ<a class="headerlink" href="#id53" title="Link to this heading">¶</a></h2>
+<section id="id54">
+<h3>キーポイント<a class="headerlink" href="#id54" title="Link to this heading">¶</a></h3>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-2 sd-row-cols-xs-2 sd-row-cols-sm-2 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-border-info docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+データ構造</div>
+<ul class="simple">
+<li><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">PMItem</span></code> = メニュー定義</p></li>
+<li><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">PMIItem</span></code> = アイテム定義</p></li>
+<li><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">mode</span></code> で振る舞いを決定</p></li>
+<li><p class="sd-card-text">URL形式のdata拡張</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-border-info docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+実行フロー</div>
+<ul class="simple">
+<li><p class="sd-card-text">Keymap → Operator → Draw → Exec</p></li>
+<li><p class="sd-card-text"><code class="docutils literal notranslate"><span class="pre">pme.context</span></code> で状態共有</p></li>
+<li><p class="sd-card-text">動的クラス生成でUI登録</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-border-warning docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+設計パターン</div>
+<ul class="simple">
+<li><p class="sd-card-text">EditorBase継承パターン</p></li>
+<li><p class="sd-card-text">グローバルシングルトン多用</p></li>
+<li><p class="sd-card-text">try/except防御的プログラミング</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-border-danger docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+脆弱性</div>
+<ul class="simple">
+<li><p class="sd-card-text">セッション復元</p></li>
+<li><p class="sd-card-text">キーマップタイミング</p></li>
+<li><p class="sd-card-text">型安全性の欠如</p></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="id55">
+<h3>最終メッセージ<a class="headerlink" href="#id55" title="Link to this heading">¶</a></h3>
+<div class="tip admonition">
+<p class="admonition-title">PME2に向けて</p>
+<p>PMEは「動くことが正義」の時代に作られた素晴らしいツールです。</p>
+<p>PME2ではその精神を継承しつつ、モダンな設計原則を取り入れることで、
+<strong>より保守しやすく、拡張しやすく、テストしやすい</strong> コードベースを目指しましょう。</p>
+</div>
+<hr class="docutils" />
+<p class="rubric">関連ドキュメント</p>
+<ul class="simple">
+<li><p><span class="xref std std-ref">CLAUDE.md</span> - 開発者向けガイドライン</p></li>
+<li><p><span class="xref std std-ref">User Documentation</span> - ユーザー向けドキュメント</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="data_model.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">データモデル詳解</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../reference/keymap_guide.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Keymapの選び方</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">PME Architecture Deep Dive</a><ul>
+<li><a class="reference internal" href="#pme2">PME2設計のための内部理解ガイド</a></li>
+<li><a class="reference internal" href="#pme">概要：PMEとは何か</a><ul>
+<li><a class="reference internal" href="#id2">本質的な役割</a></li>
+<li><a class="reference internal" href="#id3">PMEが解決している問題</a></li>
+<li><a class="reference internal" href="#id4">サポートされるメニュータイプ</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id5">メンタルモデル</a><ul>
+<li><a class="reference internal" href="#id6">「全てはメニューである」</a></li>
+<li><a class="reference internal" href="#id7">モード駆動型アーキテクチャ</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id8">データモデル詳解</a><ul>
+<li><a class="reference internal" href="#types-py">types.py のコア構造</a><ul>
+<li><a class="reference internal" href="#pmitem">PMItem（メニュー定義）</a></li>
+<li><a class="reference internal" href="#pmiitem">PMIItem（アイテム定義）</a></li>
+<li><a class="reference internal" href="#pmlink">PMLink（ツリービュー用）</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#emode-items">アイテムモード（EMODE_ITEMS）</a></li>
+<li><a class="reference internal" href="#id9">データエンコーディング</a><ul>
+<li><a class="reference internal" href="#pmitem-data-url">PMItem.data のURL形式</a></li>
+<li><a class="reference internal" href="#pme-py">パース処理（pme.py）</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id10">実行パイプライン</a><ul>
+<li><a class="reference internal" href="#id11">全体フロー</a></li>
+<li><a class="reference internal" href="#id12">詳細ステップ</a><ul>
+<li><a class="reference internal" href="#step-1">Step 1: ホットキー登録</a></li>
+<li><a class="reference internal" href="#step-2">Step 2: オペレーター呼び出し</a></li>
+<li><a class="reference internal" href="#step-3">Step 3: アイテム描画</a></li>
+<li><a class="reference internal" href="#step-4">Step 4: コマンド実行</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pmecontext">PMEContext - 実行時コンテキスト</a><ul>
+<li><a class="reference internal" href="#id13">役割と構造</a></li>
+<li><a class="reference internal" href="#id14">グローバル変数の提供</a></li>
+<li><a class="reference internal" href="#gen-globals">gen_globals() メソッド</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id15">エディターアーキテクチャ</a><ul>
+<li><a class="reference internal" href="#editorbase">EditorBase パターン</a></li>
+<li><a class="reference internal" href="#id16">エディター登録の仕組み</a></li>
+<li><a class="reference internal" href="#preferences-py">preferences.py での利用</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id17">状態管理</a><ul>
+<li><a class="reference internal" href="#id18">状態の種類と所在</a></li>
+<li><a class="reference internal" href="#id19">図解</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id20">ホットキー管理</a><ul>
+<li><a class="reference internal" href="#keymaphelper">KeymapHelper</a></li>
+<li><a class="reference internal" href="#id21">キーマップ待機問題</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id22">セッション復元</a><ul>
+<li><a class="reference internal" href="#id23">問題の背景</a></li>
+<li><a class="reference internal" href="#id24">実装詳細</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id25">動的クラス生成</a><ul>
+<li><a class="reference internal" href="#id26">なぜ必要か</a></li>
+<li><a class="reference internal" href="#rmenu">通常メニュー（RMENU）の例</a></li>
+<li><a class="reference internal" href="#id27">パネル拡張</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id28">脆弱性ポイント一覧</a><ul>
+<li><a class="reference internal" href="#id29">最も危険な箇所</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id30">暗黙の設計哲学</a><ul>
+<li><a class="reference internal" href="#id31">オリジナル作者から継承されたもの</a><ul>
+<li><a class="reference internal" href="#id32">1. 「とにかく動かす」優先</a></li>
+<li><a class="reference internal" href="#id33">2. グローバル状態の活用</a></li>
+<li><a class="reference internal" href="#blender-api">3. Blender APIへの密結合</a></li>
+<li><a class="reference internal" href="#id34">4. 「一つのデータ構造で全て表現」</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id35">モジュール依存関係</a><ul>
+<li><a class="reference internal" href="#modules">MODULES順序の意味</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id36">PME2への提言</a><ul>
+<li><a class="reference internal" href="#id37">保持すべきもの</a></li>
+<li><a class="reference internal" href="#id38">再設計すべきもの</a><ul>
+<li><a class="reference internal" href="#id39">データエンコーディング</a></li>
+<li><a class="reference internal" href="#id40">状態管理</a></li>
+<li><a class="reference internal" href="#id41">セッション復元</a></li>
+<li><a class="reference internal" href="#id42">エラーハンドリング</a></li>
+<li><a class="reference internal" href="#poll">Poll関数のコンパイル</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id43">削除を検討すべきもの</a></li>
+<li><a class="reference internal" href="#id44">抽象化すべきもの</a><ul>
+<li><a class="reference internal" href="#id45">Blender API ラッパー</a></li>
+<li><a class="reference internal" href="#ui">宣言的UI定義</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id46">PME2 アーキテクチャ提案</a><ul>
+<li><a class="reference internal" href="#id47">レイヤード設計</a><ul>
+<li><a class="reference internal" href="#id48">利点</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id49">移行戦略</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id50">参照ファイル一覧</a><ul>
+<li><a class="reference internal" href="#id51">主要ファイルの概要</a></li>
+<li><a class="reference internal" href="#id52">推奨する読む順序</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id53">まとめ</a><ul>
+<li><a class="reference internal" href="#id54">キーポイント</a></li>
+<li><a class="reference internal" href="#id55">最終メッセージ</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=c8adcb1d"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/force-light.js?v=3c6bdc37"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+    <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        all_mermaids.forEach((el) => {
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+        await mermaid.run();
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);</script>
+    <script src="../_static/tabs.js?v=3030b3cb"></script>
+    </body>
+</html>
