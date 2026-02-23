@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   deploy:
+    if: false  # Disabled: docs are now built and deployed from pie-menu-editor-fork via docs-deploy.yml
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
