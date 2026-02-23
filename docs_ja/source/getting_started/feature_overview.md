@@ -1,121 +1,87 @@
-# Feature Overview
+# 機能概要
 
 ```{todo}
-Replace images with gifs. Youtube links moved to their own section.
+画像をGIFに置き換える。YouTubeリンクは独自のセクションに移動。
 ```
 
-````{grid} 1
-:gutter: 3
-:class-container: sd-p-4
-
-```{grid-item-card} Pie Menu Editor
+::::{card-carousel} 1
+::: {card} Pie Menu Editor
 :link: ../editors/pie_menu_editor.html
 :class-card: sd-shadow-md sd-rounded-3 feature-card
-:class-header: sd-text-center sd-font-weight-bold
-:class-body: sd-text-left
+:img-top: /_static/images/overview/overview_vid_pie.png
 
-![Pie Menu Demo](/_static/images/overview/overview_vid_pie.png)
+10個のボタンを持つ円形のメニューを作成できます。頻繁に使用するツールへの素早いアクセスに最適です。メニューやパネルを入れ子にすることで、さらに複雑なワークフローを整理することができます。
+:::
 
-Create radial menus with 8+ customizable buttons, perfect for quick access to frequently used tools. Supports nesting menus and display panels to organize complex workflows.
-```
-
-```{grid-item-card} Regular Menu Editor
+::: {card} Regular Menu Editor
 :link: ../editors/regular_menu_editor.html
 :class-card: sd-shadow-md sd-rounded-3 feature-card
-:class-header: sd-text-center sd-font-weight-bold
-:class-body: sd-text-left
+:img-top: /_static/images/overview/overview_vid_menu.png
 
-![Regular Menu Demo](/_static/images/overview/overview_vid_menu.png)
+カスタムメニューを作成できます。ホットキー呼び出し、既存メニューへの追加が可能です。
+:::
 
-Design multi-column dropdown menus that can be triggered by hotkeys or integrated into existing menus. Ideal for grouping related commands and settings.
-```
-
-```{grid-item-card} Pop-up Dialog Editor
+::: {card} Pop-up Dialog Editor
 :link: ../editors/popup_dialog_editor.html
 :class-card: sd-shadow-md sd-rounded-3 feature-card
-:class-header: sd-text-center sd-font-weight-bold
-:class-body: sd-text-left
+:img-top: /_static/images/overview/overview_vid_popup.png
 
-![Popup Dialog Demo](/_static/images/overview/overview_vid_popup.png)
+カスタムパネルを作成できます。ホットキー呼び出し、既存パネルへの追加が可能です。
+:::
 
-Build custom widget layouts that can be displayed anywhere - in menus, dialogs, panels, or toolbars. Seamlessly integrate with Blender's UI system.
-```
-
-```{grid-item-card} Sticky Key Editor
+::: {card} Sticky Key Editor
 :link: ../editors/sticky_key_editor.html
 :class-card: sd-shadow-md sd-rounded-3 feature-card
-:class-header: sd-text-center sd-font-weight-bold
-:class-body: sd-text-left
+:img-top: /_static/images/overview/overview_vid_sticky.png
 
-![Sticky Key Demo](/_static/images/overview/overview_vid_sticky.png)
+ホットキーを押した時と離した時に異なるアクションを設定します。一時的なツール利用、モード切替などに便利です。
+:::
 
-Configure different actions for key press and release events. Essential for temporary tool activation or mode switching during operations.
-```
-
-```{grid-item-card} Stack Key Editor
+::: {card} Stack Key Editor
 :link: ../editors/stack_key_editor.html
 :class-card: sd-shadow-md sd-rounded-3 feature-card
-:class-header: sd-text-center sd-font-weight-bold
-:class-body: sd-text-left
+:img-top: /_static/images/overview/overview_vid_stack.png
 
-![Stack Key Demo](/_static/images/overview/overview_vid_stack.png)
+単一のホットキーに複数のコマンドを割り当て、それらを循環させます。
+:::
 
-Assign multiple commands to a single hotkey and cycle through them. Streamline your workflow by reducing the number of required shortcuts.
-```
-
-```{grid-item-card} Macro Operator Editor
+::: {card} Macro Operator Editor
 :link: ../editors/macro_operator_editor.html
 :class-card: sd-shadow-md sd-rounded-3 feature-card
-:class-header: sd-text-center sd-font-weight-bold
-:class-body: sd-text-left
+:img-top: /_static/images/overview/overview_vid_macro.png
 
-![Macro Operator Demo](/_static/images/overview/overview_vid_macro.png)
+オペレーターを作成できます。既存オペレーターを組み合わせたり、簡単なコマンドを記述できます。
+:::
 
-Create new tools by combining existing Blender operations - no coding required. Automate complex workflows with simple button clicks.
-```
-
-```{grid-item-card} Modal Operator Editor
+::: {card} Modal Operator Editor
 :link: ../editors/modal_operator_editor.html
 :class-card: sd-shadow-md sd-rounded-3 feature-card
-:class-header: sd-text-center sd-font-weight-bold
-:class-body: sd-text-left
+:img-top: /_static/images/overview/overview_vid_modal.png
 
-![Modal Operator Demo](/_static/images/overview/overview_vid_modal.png)
+モーダルオペレーターを作成します。実行後、キー操作やマウス操作によって実行値をインタラクティブに調整できます。
+:::
 
-Develop interactive tools that respond to user input. Perfect for custom manipulation tools and dynamic operations.
-```
-
-```{grid-item-card} Side Panel Editor
+::: {card} Side Panel Editor
 :link: ../editors/side_panel_editor.html
 :class-card: sd-shadow-md sd-rounded-3 feature-card
-:class-header: sd-text-center sd-font-weight-bold
-:class-body: sd-text-left
+:img-top: /_static/images/overview/overview_vid_pg.png
 
-![Side Panel Editor Demo](/_static/images/overview/overview_vid_pg.png)
+パネルグループを作成します。インターフェイスの整理、サイドパネルの拡張に利用できます。
+:::
 
-Organize and customize Blender's interface by grouping and managing panels. Create new tabs or extend existing categories with custom panels.
-```
-
-```{grid-item-card} Hiding Unused Panels
+::: {card} Hiding Unused Panels
 :link: ../editors/hiding_unused_panels.html
 :class-card: sd-shadow-md sd-rounded-3 feature-card
-:class-header: sd-text-center sd-font-weight-bold
-:class-body: sd-text-left
+:img-top: /_static/images/overview/overview_vid_hpg.png
 
-![Hiding Unused Panels Demo](/_static/images/overview/overview_vid_hpg.png)
+不要なパネルを非表示にします。インターフェイスの整理に利用できます。
+:::
 
-Declutter Blender's interface by selectively hiding unwanted panels and groups. Keep your workspace focused and efficient by showing only what you need.
-```
-
-```{grid-item-card} Property Editor
+::: {card} Property Editor
 :link: ../editors/property_editor.html
 :class-card: sd-shadow-md sd-rounded-3 feature-card
-:class-header: sd-text-center sd-font-weight-bold
-:class-body: sd-text-left
+:img-top: /_static/images/overview/overview_vid_property.png
 
-![Property Editor Demo](/_static/images/overview/overview_vid_property.png)
-
-Create and manage custom properties for objects, materials, and more. Extend Blender's property system with your own controls and settings.
-```
-
-````
+カスタムプロパティーを作成できます。Getter/Setterなどの設定が可能です。PME内利用のほか、Blenderの任意のデータブロックへ登録可能です。
+:::
+::::

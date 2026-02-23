@@ -4,7 +4,7 @@
 Replace images with gifs. Youtube links moved to their own section.
 ```
 
-::::{card-carousel} 3
+::::{card-carousel} 1
 
 ::: {card} Pie Menu Editor
 :link: ../editors/pie_menu_editor.html

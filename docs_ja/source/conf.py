@@ -6,10 +6,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Pie Menu Editor (日本語)"
-copyright = "2024, Pluglug and contributors"
+project = "Pie Menu Editor JA"
+copyright = "2025, Pluglug and contributors"
 author = "Pluglug and contributors"
-release = "1.18.8"
+release = "1.19.1"
 master_doc = "index"
 
 # Language settings
@@ -28,6 +28,9 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.todo",
     "sphinx_design",
+    "sphinxcontrib.mermaid",  # Mermaid diagram support
+    "sphinx_copybutton",  # Copy button for code blocks
+    "sphinx_tabs.tabs",  # Tabbed content support
     # 'sphinx_autodoc_typehints'
     # 'sphinx.ext.autosectionlabel',
     # 'sphinxcontrib.menuselection',
@@ -47,6 +50,7 @@ source_suffix = [".rst", ".md"]
 myst_enable_extensions = [
     "colon_fence",
     "deflist",
+    "fieldlist",
     "html_admonition",
     "html_image",
     # 'linkify',  # Temporarily disabled due to dependency issues
@@ -55,6 +59,11 @@ myst_enable_extensions = [
     "substitution",
     "tasklist",
 ]
+
+# -- Mermaid configuration --------------------------------------------------
+mermaid_version = "10.6.1"
+mermaid_cmd = "mmdc"
+mermaid_params = ["-p", "puppeteer-config.json"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -75,7 +84,7 @@ html_theme_options = {
     },
 }
 
-html_title = "PME ドキュメント"
+# html_title = "PME ドキュメント"
 
 
 def setup(app):
