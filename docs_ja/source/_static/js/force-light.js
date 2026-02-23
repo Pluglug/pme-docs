@@ -1,1 +1,0 @@
-(function () { try { localStorage.setItem('theme', 'light'); document.documentElement.setAttribute('data-theme', 'light'); } catch (e) { } })();

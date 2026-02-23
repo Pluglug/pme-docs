@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: PME Addon — Bug Reports & Feature Requests
+    url: https://github.com/Pluglug/pie-menu-editor-fork/issues
+    about: For addon bugs, crashes, and feature requests, please use the main repository.
