@@ -1,0 +1,1013 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="Examples" href="examples.html"><link rel="prev" title="用語集" href="terminology.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>スクリプティング - Pie Menu Editor JA 2.0.0 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=bc6c0a41" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=bc6c0a41" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #4CAF50;
+  --color-brand-content: #4CAF50;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #4CAF50;
+  --color-brand-content: #4CAF50;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Pie Menu Editor JA 2.0.0 ドキュメント</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor JA 2.0.0 ドキュメント</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">はじめる</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">PME のインストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/basic_pie_menu.html">基本的なパイメニューの作成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/popup_dialog_tutorial.html">ポップアップダイアログをパイメニューに追加</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/macro_tutorial.html">マクロで独自機能を作成</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">エディタ</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../editors/pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/popup_dialog_editor.html">Popup Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/editor_common_elements.html">Editor Common Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#hiding-unused-panels">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#menu-panel-extension">Menu/Panel Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#pme-toolbar">PME Toolbar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/property_editor.html">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/custom_icons.html">カスタムアイコン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">参考資料</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">用語集</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">スクリプティング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keymap_guide.html">Keymapの選び方</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">アーキテクチャ（開発者向け）</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture/index.html">PME Architecture Deep Dive</a><input aria-label="Toggle navigation of PME Architecture Deep Dive" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/index.html">PME Architecture Deep Dive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/data_model.html">データモデル詳解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/debugging.html">デバッグガイド</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/extending.html">エディター拡張ガイド</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">サポート</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">Get Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/contribute_to_pme.html">Contribute to PME</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">開発者向け</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="architecture/index.html">PME Architecture Deep Dive</a><input aria-label="Toggle navigation of PME Architecture Deep Dive" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture/index.html">PME Architecture Deep Dive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/data_model.html">データモデル詳解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/debugging.html">デバッグガイド</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/extending.html">エディター拡張ガイド</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/reference/scripting.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="pme-scripting">
+<span id="id1"></span><h1>スクリプティング<a class="headerlink" href="#pme-scripting" title="Link to this heading">¶</a></h1>
+<p>PMEは、Blenderの <a class="reference external" href="https://docs.blender.org/api/current/">Python API</a> を使用した高度なカスタマイズと自動化を可能にします。
+この記事では、PMEのスクリプティング機能の概要と、組み込まれたグローバル変数と関数について説明します。</p>
+<section id="id2">
+<h2>チュートリアル<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>動画</strong>: <a class="reference external" href="https://vimeo.com/28203314">Introduction to Scripting with Python in Blender (vimeo.com)</a></p></li>
+<li><p><strong>動画</strong>: <a class="reference external" href="https://www.youtube.com/watch?v=ZZWSvUgR38Y">Task Automation with Python Scripting in Blender (youtube.com)</a></p></li>
+<li><p><a class="reference external" href="https://wiki.python.org/moin/BeginnersGuide/NonProgrammers">Python for Non-Programmers (python.org)</a></p></li>
+<li><p><a class="reference external" href="https://docs.blender.org/api/current/">Blender Python API</a></p></li>
+<li><p><a class="reference external" href="https://docs.blender.org/api/current/info_quickstart.html">Blender/Python Quickstart</a></p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>グローバル変数<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<p>PMEの各スロットエディタ内で利用できる変数です。</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 75.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><strong>変数</strong></p></th>
+<th class="head"><p><strong>説明</strong></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">menu</span></code></p></td>
+<td><p>アクティブなメニューの名前</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">slot</span></code></p></td>
+<td><p>アクティブなスロットの名前</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">C</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.blender.org/api/current/bpy.context.html">bpy.context</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">D</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.blender.org/api/current/bpy.data.html">bpy.data</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.blender.org/api/current/bpy.ops.html">bpy.ops</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">T</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.blender.org/api/current/bpy.types.html">bpy.types</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.blender.org/api/current/bpy.props.html">bpy.props</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">L</span></code></p></td>
+<td><p>現在の <a class="reference external" href="https://docs.blender.org/api/current/bpy.types.UILayout.html">UILayout</a> オブジェクト</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">box</span><span class="p">()</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;My Label&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">E</span></code></p></td>
+<td><p>現在の <a class="reference external" href="https://docs.blender.org/api/current/bpy.types.Event.html">Event</a> オブジェクト</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">E</span><span class="o">.</span><span class="n">ctrl</span> <span class="ow">and</span> <span class="n">E</span><span class="o">.</span><span class="n">shift</span> <span class="ow">and</span> <span class="n">message_box</span><span class="p">(</span><span class="s2">&quot;Ctrl+Shift Pressed&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">U</span></code></p></td>
+<td><p>ユーザーデータ保存用の <a class="reference external" href="#pme.UserData">pme.UserData</a> インスタンス</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">U</span><span class="o">.</span><span class="n">foo</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+<span class="n">U</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">foo</span><span class="o">=</span><span class="s2">&quot;value1&quot;</span><span class="p">,</span> <span class="n">bar</span><span class="o">=</span><span class="s2">&quot;value2&quot;</span><span class="p">)</span>
+<span class="n">U</span><span class="o">.</span><span class="n">foo</span>
+<span class="n">U</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="s2">&quot;default_value&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="id4">
+<h2>グローバル関数<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<p>PMEのスロットエディタ内で利用できる関数です。コマンドタブとカスタムタブで利用できる関数が異なります。</p>
+<section id="pme-common-functions">
+<span id="id5"></span><h3>共通関数<a class="headerlink" href="#pme-common-functions" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="execute_script">
+<span class="sig-name descname"><span class="pre">execute_script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#execute_script" title="Link to this definition">¶</a></dt>
+<dd><p>外部のPythonスクリプトを実行します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- スクリプトファイルパス。相対パス（<code class="docutils literal notranslate"><span class="pre">pie_menu_editor</span></code> フォルダから、推奨）または絶対パス。</p></li>
+<li><p><strong>kwargs</strong> -- スクリプトに渡される追加のキーワード引数。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>スクリプト内の <code class="docutils literal notranslate"><span class="pre">return_value</span></code> またはデフォルトで <code class="docutils literal notranslate"><span class="pre">True</span></code>。</p>
+</dd>
+</dl>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<ul class="simple">
+<li><p>信頼できるソースのスクリプトのみ配置・実行してください</p></li>
+<li><p>実行前に内容を確認し、必要に応じてバックアップやテスト環境で検証してください</p></li>
+<li><p>ファイル操作や設定変更など、環境に影響する処理が含まれる場合があります</p></li>
+</ul>
+</div>
+<p><strong>スクリプト内で利用可能な変数</strong>：<code class="docutils literal notranslate"><span class="pre">kwargs</span></code>、<code class="docutils literal notranslate"><span class="pre">__file__</span></code>、<code class="docutils literal notranslate"><span class="pre">return_value</span></code>、PMEのすべてのグローバル変数</p>
+<p><strong>使用例</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 基本的な実行と戻り値</span>
+<span class="n">execute_script</span><span class="p">(</span><span class="s2">&quot;scripts/hello_world.py&quot;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Hello World!&quot;</span><span class="p">)</span>
+<span class="n">message_box</span><span class="p">(</span><span class="n">execute_script</span><span class="p">(</span><span class="s2">&quot;scripts/get_message.py&quot;</span><span class="p">))</span>
+
+<span class="c1"># scripts/hello_world.py</span>
+<span class="n">message_box</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;msg&quot;</span><span class="p">])</span>
+
+<span class="c1"># scripts/get_message.py</span>
+<span class="n">return_value</span> <span class="o">=</span> <span class="s2">&quot;Hi!&quot;</span>
+
+<span class="c1"># パラメータを使用した処理</span>
+<span class="c1"># scripts/process_data.py</span>
+<span class="n">kwargs</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;kwargs&quot;</span><span class="p">,</span> <span class="p">{})</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">my_function</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;param1&quot;</span><span class="p">),</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;param2&quot;</span><span class="p">,</span> <span class="s2">&quot;default&quot;</span><span class="p">))</span>
+<span class="n">return_value</span> <span class="o">=</span> <span class="n">result</span>
+
+<span class="c1"># 呼び出し</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">execute_script</span><span class="p">(</span><span class="s2">&quot;scripts/process_data.py&quot;</span><span class="p">,</span> <span class="n">param1</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">param2</span><span class="o">=</span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span>
+
+<span class="c1"># カスタムタブでのUI描画</span>
+<span class="c1"># scripts/custom_ui.py</span>
+<span class="n">msg</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;msg&quot;</span><span class="p">,</span> <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">text</span> <span class="ow">or</span> <span class="s2">&quot;Default Message&quot;</span><span class="p">)</span>
+<span class="n">box</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">box</span><span class="p">()</span>
+<span class="n">box</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">icon</span><span class="p">,</span> <span class="n">icon_value</span><span class="o">=</span><span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">icon_value</span><span class="p">)</span>
+
+<span class="c1"># 呼び出し</span>
+<span class="n">execute_script</span><span class="p">(</span><span class="s2">&quot;scripts/custom_ui.py&quot;</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;カスタムメッセージ&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="props">
+<span class="sig-name descname"><span class="pre">props</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#props" title="Link to this definition">¶</a></dt>
+<dd><p>PMEプロパティの値を取得または設定します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- プロパティの名前。</p></li>
+<li><p><strong>value</strong> -- プロパティの新しい値。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">name</span></code> が <code class="docutils literal notranslate"><span class="pre">None</span></code> の場合はPMEプロパティコンテナ、<code class="docutils literal notranslate"><span class="pre">name</span></code> のみが指定された場合はプロパティ値、値を設定する場合は <code class="docutils literal notranslate"><span class="pre">True</span></code>。</p>
+</dd>
+</dl>
+<p><strong>例</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># 文字列記法を使用してプロパティ値を取得</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">props</span><span class="p">(</span><span class="s2">&quot;MyProperty&quot;</span><span class="p">)</span>
+
+<span class="c1"># 代替: 属性記法を使用してプロパティを取得</span>
+<span class="n">value</span> <span class="o">=</span> <span class="n">props</span><span class="p">()</span><span class="o">.</span><span class="n">MyProperty</span>  <span class="c1"># props()はプロパティコンテナを返す</span>
+
+<span class="c1"># 文字列記法を使用してプロパティ値を設定</span>
+<span class="n">props</span><span class="p">(</span><span class="s2">&quot;MyProperty&quot;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+<span class="c1"># 代替: 属性記法を使用してプロパティを設定</span>
+<span class="n">props</span><span class="p">()</span><span class="o">.</span><span class="n">MyProperty</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># props()はプロパティコンテナを返す</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="paint_settings">
+<span class="sig-name descname"><span class="pre">paint_settings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#paint_settings" title="Link to this definition">¶</a></dt>
+<dd><p>コンテキストに応じたペイント設定を取得します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値<span class="colon">:</span></dt>
+<dd class="field-odd"><p>現在のペイント設定、またはペイントモードでない場合は <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</dd>
+</dl>
+<p><strong>例</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ps</span> <span class="o">=</span> <span class="n">paint_settings</span><span class="p">();</span> <span class="n">ps</span> <span class="ow">and</span> <span class="n">L</span><span class="o">.</span><span class="n">template_ID_preview</span><span class="p">(</span><span class="n">ps</span><span class="p">,</span> <span class="s1">&#39;brush&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="find_by">
+<span class="sig-name descname"><span class="pre">find_by</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#find_by" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">collection</span></code> 内で <code class="docutils literal notranslate"><span class="pre">key</span></code> が <code class="docutils literal notranslate"><span class="pre">value</span></code> と等しい最初のアイテムを検索します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値<span class="colon">:</span></dt>
+<dd class="field-odd"><p>見つかった場合はコレクションアイテム、そうでなければ <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p>
+</dd>
+</dl>
+<p><strong>例</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="n">find_by</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">active_object</span><span class="o">.</span><span class="n">modifiers</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s1">&#39;SUBSURF&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="setattr">
+<span class="sig-name descname"><span class="pre">setattr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#setattr" title="Link to this definition">¶</a></dt>
+<dd><p>Pythonの組み込み <a class="reference internal" href="#setattr" title="setattr"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a> と同じですが、設定後に <code class="docutils literal notranslate"><span class="pre">True</span></code> を返します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="pme-command-tab-functions">
+<span id="id6"></span><h3>コマンドタブ関数<a class="headerlink" href="#pme-command-tab-functions" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="open_menu">
+<span class="sig-name descname"><span class="pre">open_menu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#open_menu" title="Link to this definition">¶</a></dt>
+<dd><p>名前を指定してメニュー、パイメニュー、ポップアップダイアログを開くか、スタックキー、スティッキーキー、モーダルオペレーター、またはマクロオペレーターを実行します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- メニューの名前。</p></li>
+<li><p><strong>slot</strong> -- スタックキー実行のためのスロットのインデックスまたは名前。</p></li>
+<li><p><strong>kwargs</strong> -- ローカル変数として使用されるモーダル/マクロオペレーターの引数。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>メニューが存在する場合は <code class="docutils literal notranslate"><span class="pre">True</span></code>、そうでなければ <code class="docutils literal notranslate"><span class="pre">False</span></code>。</p>
+</dd>
+</dl>
+<p><strong>例</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># アクティブオブジェクトのタイプに応じてメニューを開く:</span>
+<span class="n">open_menu</span><span class="p">(</span><span class="s2">&quot;Lamp Pie Menu&quot;</span> <span class="k">if</span> <span class="n">C</span><span class="o">.</span><span class="n">active_object</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;LAMP&#39;</span> <span class="k">else</span> <span class="s2">&quot;Object Pie Menu&quot;</span><span class="p">)</span>
+
+<span class="c1"># Ctrl修飾キーに応じて&quot;My Stack Key&quot;スロットを呼び出す:</span>
+<span class="n">open_menu</span><span class="p">(</span><span class="s2">&quot;My Stack Key&quot;</span><span class="p">,</span> <span class="s2">&quot;Ctrl slot&quot;</span> <span class="k">if</span> <span class="n">E</span><span class="o">.</span><span class="n">ctrl</span> <span class="k">else</span> <span class="s2">&quot;Shift slot&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="toggle_menu">
+<span class="sig-name descname"><span class="pre">toggle_menu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#toggle_menu" title="Link to this definition">¶</a></dt>
+<dd><p>メニューを有効または無効にします。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- メニューの名前。</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) -- 有効にする場合は <code class="docutils literal notranslate"><span class="pre">True</span></code>、無効にする場合は <code class="docutils literal notranslate"><span class="pre">False</span></code>、トグルする場合は <code class="docutils literal notranslate"><span class="pre">None</span></code>。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>メニューが存在する場合は <code class="docutils literal notranslate"><span class="pre">True</span></code>、そうでなければ <code class="docutils literal notranslate"><span class="pre">False</span></code>。</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tag_redraw">
+<span class="sig-name descname"><span class="pre">tag_redraw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">region</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tag_redraw" title="Link to this definition">¶</a></dt>
+<dd><p>UIエリアまたはリージョンを再描画します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>area</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- 再描画する <a class="reference external" href="https://docs.blender.org/api/current/bpy.types.Area.html#bpy.types.Area.type" title="(in Blender 5.0.1 Python API v5.0)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Area.type</span></code></a>。<code class="docutils literal notranslate"><span class="pre">None</span></code> の場合はすべてのエリアを再描画。</p></li>
+<li><p><strong>region</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- 再描画する <code class="xref py py-attr docutils literal notranslate"><span class="pre">Region.type</span></code>。<code class="docutils literal notranslate"><span class="pre">None</span></code> の場合はすべてのリージョンを再描画。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="close_popups">
+<span class="sig-name descname"><span class="pre">close_popups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#close_popups" title="Link to this definition">¶</a></dt>
+<dd><p>すべてのポップアップダイアログを閉じます。</p>
+<dl class="field-list simple">
+<dt class="field-odd">戻り値<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="overlay">
+<span class="sig-name descname"><span class="pre">overlay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#overlay" title="Link to this definition">¶</a></dt>
+<dd><p>オーバーレイメッセージを描画します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- 表示するメッセージ。</p></li>
+<li><p><strong>kwargs</strong> -- <ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">alignment</span></code>: <code class="docutils literal notranslate"><span class="pre">['TOP',</span> <span class="pre">'TOP_LEFT',</span> <span class="pre">'TOP_RIGHT',</span> <span class="pre">'BOTTOM',</span> <span class="pre">'BOTTOM_LEFT',</span> <span class="pre">'BOTTOM_RIGHT']</span></code> のいずれか。デフォルトは <code class="docutils literal notranslate"><span class="pre">'TOP'</span></code>。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">duration</span></code>: 表示時間（秒）。デフォルトは <code class="docutils literal notranslate"><span class="pre">2.0</span></code>。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">offset_x</span></code>: 水平オフセット。デフォルトは <code class="docutils literal notranslate"><span class="pre">10</span></code> ピクセル。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">offset_y</span></code>: 垂直オフセット。デフォルトは <code class="docutils literal notranslate"><span class="pre">10</span></code> ピクセル。</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+<p><strong>例</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">overlay</span><span class="p">(</span><span class="s1">&#39;Hello PME!&#39;</span><span class="p">,</span> <span class="n">offset_y</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="message_box">
+<span class="sig-name descname"><span class="pre">message_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">icon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'INFO'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Pie</span> <span class="pre">Menu</span> <span class="pre">Editor'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#message_box" title="Link to this definition">¶</a></dt>
+<dd><p>メッセージボックスを表示します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- 表示するメッセージ。</p></li>
+<li><p><strong>icon</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- アイコン名（例: 'INFO', 'ERROR', 'QUESTION' など）。</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- ウィンドウタイトル。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="input_box">
+<span class="sig-name descname"><span class="pre">input_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#input_box" title="Link to this definition">¶</a></dt>
+<dd><p>入力ボックスを表示します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> -- 入力値で呼び出す関数。</p></li>
+<li><p><strong>prop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- 編集するプロパティへのパス。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+<p><strong>例</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># オブジェクトの名前を変更:</span>
+<span class="n">input_box</span><span class="p">(</span><span class="n">prop</span><span class="o">=</span><span class="s2">&quot;C.active_object.name&quot;</span><span class="p">)</span>
+
+<span class="c1"># 入力値を表示:</span>
+<span class="n">input_box</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">value</span><span class="p">:</span> <span class="n">overlay</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+<section id="pme-custom-tab-functions">
+<span id="id7"></span><h3>カスタムタブ関数<a class="headerlink" href="#pme-custom-tab-functions" title="Link to this heading">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="draw_menu">
+<span class="sig-name descname"><span class="pre">draw_menu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#draw_menu" title="Link to this definition">¶</a></dt>
+<dd><p>別のポップアップダイアログまたはパイメニュー内にポップアップダイアログを描画します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- メニュー（ポップアップダイアログ）の名前。</p></li>
+<li><p><strong>frame</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) -- フレームを描画するかどうか。</p></li>
+<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) -- 水平オフセット。</p></li>
+<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) -- 垂直オフセット。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>ポップアップダイアログが存在する場合は <code class="docutils literal notranslate"><span class="pre">True</span></code>、そうでなければ <code class="docutils literal notranslate"><span class="pre">False</span></code>。</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="operator">
+<span class="sig-name descname"><span class="pre">operator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">icon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NONE'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emboss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">icon_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#operator" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://docs.blender.org/api/current/bpy.types.UILayout.html#bpy.types.UILayout.operator" title="(in Blender 5.0.1 Python API v5.0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">UILayout.operator()</span></code></a> と似ていますが、オペレータープロパティの設定が可能です。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layout</strong> -- <a class="reference external" href="https://docs.blender.org/api/current/bpy.types.UILayout.html#bpy.types.UILayout" title="(in Blender 5.0.1 Python API v5.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UILayout</span></code></a> インスタンス。</p></li>
+<li><p><strong>operator</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- オペレーターの識別子。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.blender.org/api/current/bpy.types.OperatorProperties.html#bpy.types.OperatorProperties" title="(in Blender 5.0.1 Python API v5.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperatorProperties</span></code></a> オブジェクト。</p>
+</dd>
+</dl>
+<p><strong>例</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">operator</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="s2">&quot;wm.context_set_int&quot;</span><span class="p">,</span> <span class="s2">&quot;Material Slot 1&quot;</span><span class="p">,</span>
+        <span class="n">data_path</span><span class="o">=</span><span class="s2">&quot;active_object.active_material_index&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1"># 以下と同じ:</span>
+<span class="c1"># op = L.operator(&quot;wm.context_set_int&quot;, text=&quot;Material Slot 1&quot;)</span>
+<span class="c1"># op.data_path = &quot;active_object.active_material_index&quot;</span>
+<span class="c1"># op.value = 0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="custom_icon">
+<span class="sig-name descname"><span class="pre">custom_icon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#custom_icon" title="Link to this definition">¶</a></dt>
+<dd><p>カスタムアイコンに関連付けられた整数値を取得します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- <code class="docutils literal notranslate"><span class="pre">pie_menu_editor/icons/</span></code> にある拡張子なしのアイコンファイル名。</p>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>カスタムアイコンの整数値。</p>
+</dd>
+</dl>
+<p><strong>例</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">&quot;My Custom Icon&quot;</span><span class="p">,</span> <span class="n">icon_value</span><span class="o">=</span><span class="n">custom_icon</span><span class="p">(</span><span class="s2">&quot;p1&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="panel">
+<span class="sig-name descname"><span class="pre">panel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poll</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#panel" title="Link to this definition">¶</a></dt>
+<dd><p>IDによってパネルを描画します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pt</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>Type</em><em>]</em>) -- パネルクラスまたはパネルクラス名の文字列。文字列の場合は、 <code class="docutils literal notranslate"><span class="pre">bpy.types</span></code> から対応するクラスを検索します。</p></li>
+<li><p><strong>frame</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) -- パネルをフレームで囲むかどうかを制御。<code class="docutils literal notranslate"><span class="pre">True</span></code> の場合、<code class="docutils literal notranslate"><span class="pre">layout.box()</span></code> を使用。<code class="docutils literal notranslate"><span class="pre">False</span></code> の場合、<code class="docutils literal notranslate"><span class="pre">layout.column()</span></code> を使用。</p></li>
+<li><p><strong>header</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) -- パネルヘッダーの表示スタイルを制御。</p></li>
+<li><p><strong>expand</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>]</em>) -- パネルの初期展開状態を制御。<code class="docutils literal notranslate"><span class="pre">True</span></code> : 展開された状態で開始、<code class="docutils literal notranslate"><span class="pre">False</span></code> : 折りたたまれた状態で開始、<code class="docutils literal notranslate"><span class="pre">None</span></code> : 前回の状態を保持。</p></li>
+<li><p><strong>poll</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) -- パネルの <code class="docutils literal notranslate"><span class="pre">poll</span></code> メソッドを実行するかどうかを制御。<code class="docutils literal notranslate"><span class="pre">True</span></code> の場合、パネルの表示条件をチェック。</p></li>
+<li><p><strong>layout</strong> (<em>Optional</em><em>[</em><em>Any</em><em>]</em>) -- カスタムレイアウトを指定。</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>True</p>
+</dd>
+<dt class="field-odd">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+<p><strong>例</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">panel</span><span class="p">(</span><span class="s2">&quot;MATERIAL_PT_context_material&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># パネルサイズを変更</span>
+<span class="n">L</span><span class="o">.</span><span class="n">scale_x</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">;</span> <span class="n">panel</span><span class="p">(</span><span class="s2">&quot;USERPREF_PT_interface&quot;</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">box</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+</section>
+<hr class="docutils" />
+<section id="id8">
+<h2>自動実行スクリプト<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h2>
+<p>PMEでは、Blender起動時に自動的に実行されるPythonスクリプトを作成できます。
+この機能を使用するには、以下のいずれかの方法で <code class="docutils literal notranslate"><span class="pre">pie_menu_editor/scripts/autorun</span></code> フォルダにファイルを配置します：</p>
+<ul class="simple">
+<li><p>直接 <code class="docutils literal notranslate"><span class="pre">.py</span></code> ファイル</p></li>
+<li><p>スクリプトを含むフォルダ</p></li>
+<li><p>シンボリックリンク</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<ul class="simple">
+<li><p>信頼できるソースのスクリプトのみ配置・実行してください</p></li>
+<li><p>実行前に内容を確認し、必要に応じてバックアップやテスト環境で検証してください</p></li>
+<li><p>ファイル操作や設定変更など、環境に影響する処理が含まれる場合があります</p></li>
+</ul>
+</div>
+</section>
+<section id="id9">
+<h2>カスタムグローバル関数の追加<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<p>PMEでカスタム関数を使用するには：</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pie_menu_editor/scripts/autorun</span></code> フォルダにスクリプトを配置</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pme.context.add_global()</span></code> を使用して関数を登録</p></li>
+</ol>
+<p>例：</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">hello_world</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello World&quot;</span><span class="p">)</span>
+
+<span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">,</span> <span class="n">hello_world</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>登録された関数 <code class="docutils literal notranslate"><span class="pre">hello()</span></code> は以下で利用可能になります：</p>
+<ul class="simple">
+<li><p>コマンドタブ</p></li>
+<li><p>カスタムタブ</p></li>
+<li><p>外部スクリプト</p></li>
+</ul>
+</section>
+<section id="pme">
+<h2>PMEコンポーネント<a class="headerlink" href="#pme" title="Link to this heading">¶</a></h2>
+<p>PMEは、よく使用される関数、変数、およびユーザー定義の追加項目へのアクセスを提供するグローバルコンテキストを維持します。
+このコンテキストは、2つの主要なインターフェースからアクセス可能です：</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pme.context">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pme.</span></span><span class="sig-name descname"><span class="pre">context</span></span><a class="headerlink" href="#pme.context" title="Link to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="pme.context.globals">
+<span class="sig-name descname"><span class="pre">globals</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></em><a class="headerlink" href="#pme.context.globals" title="Link to this definition">¶</a></dt>
+<dd><p>PMEのグローバルコンテキスト辞書へのアクセス。以下を含みます：</p>
+<ul class="simple">
+<li><p>組み込みショートカット（<code class="docutils literal notranslate"><span class="pre">C</span></code>, <code class="docutils literal notranslate"><span class="pre">D</span></code>, <code class="docutils literal notranslate"><span class="pre">O</span></code>, <code class="docutils literal notranslate"><span class="pre">L</span></code> など）</p></li>
+<li><p>登録されたカスタム関数と値</p></li>
+<li><p>ユーザーデータストレージ（<code class="docutils literal notranslate"><span class="pre">U</span></code>）</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pie_menu_editor</span><span class="w"> </span><span class="kn">import</span> <span class="n">pme</span>
+
+<span class="c1"># 外部スクリプトからグローバルにアクセス</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">globals</span>
+<span class="n">props</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;props&#39;</span><span class="p">)</span>
+<span class="n">user_data</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;U&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pme.context.add_global">
+<span class="sig-name descname"><span class="pre">add_global</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pme.context.add_global" title="Link to this definition">¶</a></dt>
+<dd><p>グローバルコンテキストにカスタム関数または値を登録します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- アイテムにアクセスするための名前</p></li>
+<li><p><strong>value</strong> -- 登録する関数または値</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値の型<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 関数を登録</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">my_tool</span><span class="p">():</span>
+    <span class="n">bpy</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">select_all</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;TOGGLE&#39;</span><span class="p">)</span>
+
+<span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;toggle_select&quot;</span><span class="p">,</span> <span class="n">my_tool</span><span class="p">)</span>
+
+<span class="c1"># 定数を登録</span>
+<span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_global</span><span class="p">(</span><span class="s2">&quot;MAX_ITEMS&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># コマンドタブ経由でPMEメニューからアクセス:</span>
+<span class="c1"># toggle_select()</span>
+<span class="c1"># MAX_ITEMS</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pme.UserData">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pme.</span></span><span class="sig-name descname"><span class="pre">UserData</span></span><a class="headerlink" href="#pme.UserData" title="Link to this definition">¶</a></dt>
+<dd><p>Blenderセッション中に持続するユーザー定義データのための柔軟なストレージ。</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pme.UserData.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pme.UserData.get" title="Link to this definition">¶</a></dt>
+<dd><p>保存された値を取得します。</p>
+<dl class="field-list simple">
+<dt class="field-odd">パラメータ<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) -- データキー</p></li>
+<li><p><strong>default</strong> -- キーが存在しない場合に返す値</p></li>
+</ul>
+</dd>
+<dt class="field-even">戻り値<span class="colon">:</span></dt>
+<dd class="field-even"><p>保存された値またはデフォルト値</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pme.UserData.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pme.UserData.update" title="Link to this definition">¶</a></dt>
+<dd><p>複数の値を一度に更新します。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">U</span> <span class="o">=</span> <span class="n">pme</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">globals</span><span class="p">[</span><span class="s1">&#39;U&#39;</span><span class="p">]</span>  <span class="c1"># UserDataインスタンスを取得</span>
+<span class="n">U</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tool_state</span><span class="o">=</span><span class="s2">&quot;active&quot;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">U</span><span class="o">.</span><span class="n">tool_state</span><span class="p">)</span>  <span class="c1"># &quot;active&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="examples.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Examples</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="terminology.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">用語集</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">スクリプティング</a><ul>
+<li><a class="reference internal" href="#id2">チュートリアル</a></li>
+<li><a class="reference internal" href="#id3">グローバル変数</a></li>
+<li><a class="reference internal" href="#id4">グローバル関数</a><ul>
+<li><a class="reference internal" href="#pme-common-functions">共通関数</a><ul>
+<li><a class="reference internal" href="#execute_script"><code class="docutils literal notranslate"><span class="pre">execute_script()</span></code></a></li>
+<li><a class="reference internal" href="#props"><code class="docutils literal notranslate"><span class="pre">props()</span></code></a></li>
+<li><a class="reference internal" href="#paint_settings"><code class="docutils literal notranslate"><span class="pre">paint_settings()</span></code></a></li>
+<li><a class="reference internal" href="#find_by"><code class="docutils literal notranslate"><span class="pre">find_by()</span></code></a></li>
+<li><a class="reference internal" href="#setattr"><code class="docutils literal notranslate"><span class="pre">setattr()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pme-command-tab-functions">コマンドタブ関数</a><ul>
+<li><a class="reference internal" href="#open_menu"><code class="docutils literal notranslate"><span class="pre">open_menu()</span></code></a></li>
+<li><a class="reference internal" href="#toggle_menu"><code class="docutils literal notranslate"><span class="pre">toggle_menu()</span></code></a></li>
+<li><a class="reference internal" href="#tag_redraw"><code class="docutils literal notranslate"><span class="pre">tag_redraw()</span></code></a></li>
+<li><a class="reference internal" href="#close_popups"><code class="docutils literal notranslate"><span class="pre">close_popups()</span></code></a></li>
+<li><a class="reference internal" href="#overlay"><code class="docutils literal notranslate"><span class="pre">overlay()</span></code></a></li>
+<li><a class="reference internal" href="#message_box"><code class="docutils literal notranslate"><span class="pre">message_box()</span></code></a></li>
+<li><a class="reference internal" href="#input_box"><code class="docutils literal notranslate"><span class="pre">input_box()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pme-custom-tab-functions">カスタムタブ関数</a><ul>
+<li><a class="reference internal" href="#draw_menu"><code class="docutils literal notranslate"><span class="pre">draw_menu()</span></code></a></li>
+<li><a class="reference internal" href="#operator"><code class="docutils literal notranslate"><span class="pre">operator()</span></code></a></li>
+<li><a class="reference internal" href="#custom_icon"><code class="docutils literal notranslate"><span class="pre">custom_icon()</span></code></a></li>
+<li><a class="reference internal" href="#panel"><code class="docutils literal notranslate"><span class="pre">panel()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id8">自動実行スクリプト</a></li>
+<li><a class="reference internal" href="#id9">カスタムグローバル関数の追加</a></li>
+<li><a class="reference internal" href="#pme">PMEコンポーネント</a><ul>
+<li><a class="reference internal" href="#pme.context"><code class="docutils literal notranslate"><span class="pre">pme.context</span></code></a><ul>
+<li><a class="reference internal" href="#pme.context.globals"><code class="docutils literal notranslate"><span class="pre">pme.context.globals</span></code></a></li>
+<li><a class="reference internal" href="#pme.context.add_global"><code class="docutils literal notranslate"><span class="pre">pme.context.add_global()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pme.UserData"><code class="docutils literal notranslate"><span class="pre">pme.UserData</span></code></a><ul>
+<li><a class="reference internal" href="#pme.UserData.get"><code class="docutils literal notranslate"><span class="pre">pme.UserData.get()</span></code></a></li>
+<li><a class="reference internal" href="#pme.UserData.update"><code class="docutils literal notranslate"><span class="pre">pme.UserData.update()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=c8adcb1d"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/js/force-light.js?v=3c6bdc37"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>
