@@ -1,0 +1,115 @@
+(public_api)=
+
+# Public API
+
+PME2 では、外部スクリプトやアドオンから PME の機能を利用するための公開 API を提供しています。
+
+## クイックスタート
+
+```python
+import pme
+
+# メニューを探す
+pm = pme.find_pm("My Pie Menu")
+pm = pme.find_pm(uid="pm_9f7c2k3h")
+
+# メニューを呼び出す
+pme.invoke_pm("My Pie Menu")
+pme.invoke_pm(uid="pm_9f7c2k3h")
+
+# メニュー一覧
+all_menus = pme.list_pms()
+pie_menus = pme.list_pms(mode="PMENU", enabled_only=True)
+tags = pme.list_tags()
+
+# コード実行
+result = pme.execute("bpy.ops.mesh.primitive_cube_add()")
+print(result.ok, result.error)
+
+# 式評価
+value = pme.evaluate("len(C.selected_objects)")
+
+# JSON 検証
+result = pme.validate_json(json_string)
+for err in result.errors:
+    print(err.code, err.message)
+```
+
+## PME1 からの変更点
+
+| 観点 | PME1 | PME2 |
+|------|------|------|
+| インポート | `from pie_menu_editor import pme` | `import pme` |
+| 設計 | 内部モジュールの露出 | 公開 API ファサード |
+| メニュー呼び出し | `pme.context.open_menu(name)` | `pme.invoke_pm(name)` / `pme.invoke_pm(uid=...)` |
+| コード実行 | `pme.context.exe(code)` | `pme.execute(code)` → `ExecuteResult` |
+| メニュー検索 | なし | `pme.find_pm()`, `pme.list_pms()` |
+| JSON 検証 | なし | `pme.validate_json()` |
+| 型・定数 | なし | `pme.types`, `pme.constants` |
+
+## API リファレンス
+
+### メニュー操作
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - 関数
+  - 説明
+* - `find_pm(name=None, *, uid=None)`
+  - 名前または uid でメニューを検索。見つからなければ `None`
+* - `invoke_pm(pm_or_name=None, *, name=None, uid=None)`
+  - メニューを呼び出す。成功時 `True`
+* - `list_pms(mode=None, *, enabled_only=False)`
+  - メニュー一覧を `PMHandle` のリストで返す
+* - `list_tags()`
+  - 使用中のタグ一覧を返す
+```
+
+### コード実行
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - 関数
+  - 説明
+* - `execute(code, *, extra_globals=None)`
+  - コードを実行し `ExecuteResult` を返す
+* - `evaluate(expr, *, extra_globals=None)`
+  - 式を評価して結果を返す。失敗時は例外
+* - `check_syntax(code, *, mode="exec")`
+  - 構文チェックのみ。`SyntaxResult` を返す
+```
+
+### 検証
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - 関数
+  - 説明
+* - `validate_json(json_string, *, strict=False, check_references=True)`
+  - JSON Schema v2 に対する検証。`ValidationResult` を返す
+* - `validate_uid(uid)`
+  - uid 文字列のフォーマットを検証
+```
+
+### 後方互換
+
+PME1 の `pme.context` / `pme.props` は引き続き利用可能です。既存の Command タブ内のスクリプトはそのまま動作します。
+
+```python
+# これらは PME2 でもそのまま使える
+pme.context.open_menu("My Menu")
+pme.context.event.mouse_x
+pme.context.add_global("my_var", value)
+```
+
+新規コードでは `pme.execute()` / `pme.invoke_pm()` の利用を推奨します。
+
+```{note}
+Public API は現在 **Experimental** です。基本的なインターフェースは安定していますが、細部は今後のバージョンで変更される可能性があります。
+```

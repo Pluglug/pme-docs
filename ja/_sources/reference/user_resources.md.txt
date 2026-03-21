@@ -1,0 +1,59 @@
+(user_resources)=
+
+# User Resources
+
+PME2 では、ユーザーが作成・蓄積するファイル（スクリプト、アイコン、バックアップ、エクスポートなど）をアドオン内部や Blender の設定フォルダから分離し、専用のディレクトリで管理します。
+
+## なぜ分離したのか
+
+PME1 では、ユーザーのスクリプトやアイコンがアドオンフォルダ内に保存されていました。アドオンを更新するとこれらが上書きされるリスクがあり、Blender のメジャーアップグレード時にもファイルを手動で移す必要がありました。
+
+PME2 では、ユーザーデータをアドオンの外に置くことで、**アドオンの更新でも Blender のバージョンアップでもファイルがそのまま残る**ようにしています。
+
+## デフォルトの保存先
+
+| OS | パス |
+|----|------|
+| Windows | `%USERPROFILE%\Documents\Pie Menu Editor\` |
+| macOS | `~/Documents/Pie Menu Editor/` |
+| Linux | `$XDG_DOCUMENTS_DIR/Pie Menu Editor/`（fallback: `~/Documents/Pie Menu Editor/`） |
+
+## フォルダ構成
+
+```
+Pie Menu Editor/
+├── scripts/                    # ユーザースクリプト
+│   ├── autorun/                # PME 起動時に自動実行されるスクリプト
+│   └── examples/               # バンドル済みテンプレートからコピーされた例
+│       ├── command_*.py
+│       └── custom_*.py
+├── icons/                      # カスタムアイコン（更新で上書きされない）
+├── backups/                    # 自動バックアップ
+│   └── backup_YYYY.MM.DD_HH.MM.SS.json
+├── exports/
+│   └── examples/               # 初回起動時にコピーされるプリセット例
+│       ├── 3d_view_numpad_pie.json
+│       ├── mesh_select_mode_pie.json
+│       └── ...
+└── logs/                       # ログファイル
+```
+
+## 保存先の変更
+
+**Preferences → Settings → Resources** から、リソースのルートディレクトリを変更できます。
+
+パスを変更すると、PME は新しいディレクトリを参照するようになります。既存ファイルの移動は手動で行ってください。
+
+## 複数端末での共有
+
+リソースフォルダは Blender やアドオンから独立しているため、Syncthing・Dropbox・Git などで複数端末と共有できます。
+
+```{note}
+メニュー定義そのものは Blender の `userpref.blend` に保存されています。メニュー設定も含めて同期したい場合は、Blender の設定ファイルも対象に含めてください。
+```
+
+## メニュー定義の保存先について
+
+PME のメニュー定義（Pie Menu、Popup Dialog などの設定データ）は、スタンドアロンの JSON ファイルとしては保存されません。Blender 標準の設定ファイル（`userpref.blend`）にアドオン設定の一部として保存されます。
+
+JSON ファイルとして扱いたい場合は、**Export** 機能を使ってください。JSON Schema v2 形式でエクスポートすれば、Git 管理や他の人との共有に適した形で書き出せます。
