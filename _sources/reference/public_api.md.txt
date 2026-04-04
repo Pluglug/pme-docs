@@ -1,0 +1,120 @@
+(public_api)=
+
+# Public API
+
+PME2 provides a public API for external scripts and other addons.
+
+## Quick Start
+
+```python
+import pme
+
+# Find a menu
+pm = pme.find_pm("My Pie Menu")
+pm = pme.find_pm(uid="pm_9f7c2k3h")
+
+# Invoke a menu
+pme.invoke_pm("My Pie Menu")
+pme.invoke_pm(uid="pm_9f7c2k3h")
+
+# List menus
+all_menus = pme.list_pms()
+pie_menus = pme.list_pms(mode="PMENU", enabled_only=True)
+tags = pme.list_tags()
+
+# Execute code
+result = pme.execute("bpy.ops.mesh.primitive_cube_add()")
+print(result.ok, result.error)
+
+# Evaluate an expression
+value = pme.evaluate("len(C.selected_objects)")
+
+# Validate JSON
+result = pme.validate_json(json_string)
+for err in result.errors:
+    print(err.code, err.message)
+```
+
+## Changes from PME1
+
+| Topic | PME1 | PME2 |
+|------|------|------|
+| Import | `from pie_menu_editor import pme` | `import pme` |
+| Design | Exposed internal module | Public API facade |
+| Menu invocation | `pme.context.open_menu(name)` | `pme.invoke_pm(name)` / `pme.invoke_pm(uid=...)` |
+| Code execution | `pme.context.exe(code)` | `pme.execute(code)` -> `ExecuteResult` |
+| Menu lookup | None | `pme.find_pm()`, `pme.list_pms()` |
+| JSON validation | None | `pme.validate_json()` |
+| Types and constants | None | `pme.types`, `pme.constants` |
+
+## API Reference
+
+### Menu operations
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - Function
+  - Description
+* - `find_pm(name=None, *, uid=None)`
+  - Find a menu by name or uid. Returns `None` when not found
+* - `invoke_pm(pm_or_name=None, *, name=None, uid=None)`
+  - Invoke a menu. Returns `True` on success
+* - `list_pms(mode=None, *, enabled_only=False)`
+  - Return a list of menus as `PMHandle`
+* - `list_tags()`
+  - Return the list of tags currently in use
+```
+
+### Code execution
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - Function
+  - Description
+* - `execute(code, *, extra_globals=None)`
+  - Execute code and return `ExecuteResult`
+* - `evaluate(expr, *, extra_globals=None)`
+  - Evaluate an expression and return the result. Raises on failure
+* - `check_syntax(code, *, mode="exec")`
+  - Syntax-check only. Returns `SyntaxResult`
+```
+
+### Validation
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - Function
+  - Description
+* - `validate_json(json_string, *, strict=False, check_references=True)`
+  - Validate against JSON Schema v2. Returns `ValidationResult`
+* - `validate_uid(uid)`
+  - Validate a uid string format
+```
+
+### Backward compatibility
+
+PME1's `pme.context` and `pme.props` remain available.
+Existing scripts inside PME command slots continue to work.
+
+```python
+# These still work in PME2
+pme.context.open_menu("My Menu")
+pme.context.event.mouse_x
+pme.context.add_global("my_var", value)
+```
+
+Prefer `pme.execute()` and `pme.invoke_pm()` for new code.
+
+```{note}
+The public API is currently **Experimental**. The basic interface is intended to stay stable, but smaller details may change in future versions.
+```
+
+```{seealso}
+You must enable `import pme` before using this API. See [Boot Options](boot_options).
+```

@@ -1,0 +1,209 @@
+(installation)=
+
+# Installation & Updates
+
+This page covers fresh installation, updates, and migration from PME1.
+
+```{important}
+1.19.2 supports Blender 3.2 through 4.5.
+
+2.0.0 and later require Blender 5.0 or newer.
+```
+
+## Which procedure should I follow?
+
+First time installing PME
+: Go to [Fresh Install](#install-fresh).
+
+Already using PME2
+: Go to [Updates](#install-update).
+
+Migrating from PME1
+: Complete [Pre-Migration Backup](#migration-prep) first, then go to [Clean Install](#install-clean).
+
+Something broke after an update
+: A [Clean Install](#install-clean) often resolves the issue.
+
+---
+
+(install-fresh)=
+## Fresh Install
+
+1. Download the PME `.zip` file from the sales platform.
+2. Open Blender and go to {guilabel}`Edit` > {guilabel}`Preferences`.
+3. Open the {guilabel}`Add-ons` tab.
+4. Click {guilabel}`Add-ons Settings` ({octicon}`chevron-down` button) in the top-right, then choose {guilabel}`Install from Disk...`.
+5. Select the downloaded `.zip` file.
+6. Optionally enable {guilabel}`Enable on Install`.
+7. Enable PME.
+8. Restart Blender.
+
+```{tip}
+Since Blender 4.3, you can drag & drop the `.zip` file onto the Blender window to install.
+```
+
+---
+
+(install-update)=
+## Updates (PME 2.0+)
+
+1. Back up your current menus via {guilabel}`Export` > {guilabel}`Backup Now`.
+2. Download the new PME `.zip`.
+3. Go to {guilabel}`Preferences` > {guilabel}`Add-ons` > {guilabel}`Add-ons Settings` > {guilabel}`Install from Disk...`.
+4. Select the new `.zip` and install.
+5. Keep {guilabel}`Overwrite` **enabled**.
+6. Restart Blender.
+
+```{tip}
+Since Blender 4.3, you can drag & drop the `.zip` file onto the Blender window to install.
+```
+```{note}
+Disabling {guilabel}`Overwrite` will **abort** installation if any file or folder with the same name already exists. This is not an option for side-by-side installation.
+```
+
+---
+
+(migration-prep)=
+## Pre-Migration Backup (PME1 Users)
+
+PME2 includes automatic migration from PME1, but **the safest path is a clean install + JSON re-import**.
+Complete the following before migrating.
+
+### Export your menus as JSON
+
+In PME1 Preferences, click {guilabel}`Export` > {guilabel}`All Menus`.
+Save the JSON file to a location you can easily find.
+
+```{tip}
+{guilabel}`Backup Now` in the {guilabel}`Export` menu also saves all menus, but you cannot choose the save location.
+```
+
+```{admonition} Should I use compatible JSON?
+:class: note
+
+No. Use the regular JSON export for migration.
+{guilabel}`compatible JSON` omits some information (disabled state, drag direction, etc.) and is not suitable for PME1 to PME2 migration.
+```
+
+### Back up user resources
+
+In PME1, user resources are stored inside or next to the add-on directory.
+**Overwriting or removing the add-on may delete these files.**
+Check the following locations and copy any needed files to a safe place.
+
+| Resource | Location |
+|----------|----------|
+| Custom scripts | `pie_menu_editor/scripts/` |
+| Custom icons | `pie_menu_editor/icons/` |
+| Backups | `scripts/addons/pie_menu_editor_data/backups/` |
+
+### Preserving disabled menu states
+
+Older versions of PME1 do not include the enabled/disabled state in JSON exports.
+To preserve this, export from **PME1 v1.19.0 or later**.
+
+If unsure, **update to v1.19.2 before exporting**.
+
+```{note}
+This is not required. If you don't need to preserve disabled states, you can proceed as-is.
+```
+
+---
+
+(install-clean)=
+## Clean Install
+
+Remove the existing PME and install from scratch.
+Useful for migrating from PME1, or when issues persist after an update.
+
+```{tip}
+If migrating from PME1, complete [Pre-Migration Backup](#migration-prep) first.
+```
+
+1. Save your current menus via {guilabel}`Export` > {guilabel}`All Menus`.
+2. In {guilabel}`Preferences` > {guilabel}`Add-ons`, expand PME and click {guilabel}`Uninstall`.
+3. Save Blender Preferences.
+4. Restart Blender.
+5. Install the new PME `.zip` via {guilabel}`Install from Disk...`.
+6. Enable PME.
+7. Import the saved JSON via {guilabel}`Import`.
+8. For name conflicts, choose {guilabel}`Skip` or {guilabel}`Replace`.
+9. Check the items in [Post-Install Verification](#post-install-check).
+
+---
+
+(post-install-check)=
+## Post-Install Verification
+
+Installation is complete when all of the following are true:
+
+1. The PME panel opens in {guilabel}`Preferences`
+2. Pie Menus invoke normally
+3. Keymaps work as expected
+4. Settings persist after restarting Blender
+
+If you see a `See System Console` message, an error has occurred.
+Open the system console to check the details.
+
+:::{admonition} How to open the system console
+:class: tip
+
+- **Windows**: {guilabel}`Window` > {guilabel}`Toggle System Console` in the Blender menu bar.
+- **macOS / Linux**: Launch Blender from a terminal to see console output.
+:::
+
+```{tip}
+If things are unstable right after migration or an update, restart Blender before investigating further.
+```
+
+---
+
+## PME2 Resource Directory
+
+```{versionchanged} 2.0.0
+Scripts, icons, backups, and export data are now stored in a dedicated directory, separate from the add-on.
+```
+
+Default locations:
+
+Windows
+: `%USERPROFILE%\Documents\Pie Menu Editor\`
+
+macOS
+: `~/Documents/Pie Menu Editor/`
+
+Linux
+: `$XDG_DOCUMENTS_DIR/Pie Menu Editor/` (fallback: `~/Documents/Pie Menu Editor/`)
+
+```{seealso}
+For directory structure and how to change the location, see {ref}`user_resources`.
+```
+
+---
+
+## FAQ
+
+### Can I install PME2 on top of PME1 without uninstalling?
+
+Yes, this path is supported by design.
+PME2 detects PME1 data on startup and runs migration automatically.
+However, Blender's lifecycle can sometimes cause instability, so **the safest approach is to export JSON and do a clean install**.
+
+### Do I need to restart Blender after updating?
+
+Yes. Always restart Blender after an update or migration.
+
+### Blender shows "Legacy Add-on" — is this a problem?
+
+No. Since Blender 4.2, this label distinguishes traditional add-ons from the new Extensions system.
+PME uses the traditional `bl_info` format, but there is no difference in functionality.
+
+---
+
+## Next Steps
+
+New to PME
+: Try {doc}`quick_tutorial` to get started.
+
+Migrated or updated
+: Check the {doc}`../support_community/changelog` for what's new.

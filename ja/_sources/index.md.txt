@@ -1,0 +1,130 @@
+![Pie Menu Editor Logo](/_static/images/original/pme_logo.webp)
+
+---
+
+# PMEドキュメントへようこそ
+
+Pie Menu Editor (PME) は、2016年にroaoaoが開発したBlenderアドオンです。パイメニュー、通常メニュー、ポップアップダイアログ、マクロ、カスタムパネルなどをコーディング不要で作成でき、Blenderのインターフェースを自由にカスタマイズできます。
+
+```{admonition} お知らせ
+:class: note
+
+このドキュメントは現在整理・更新中です。
+一部のページは未整備、または旧バージョン時点の記述を含む場合があります。
+
+不明点がある場合は、[Blender Artists Forum](http://blenderartists.org/forum/showthread.php?392910) をご利用ください。
+```
+
+```{include} getting_started/feature_overview.md
+:start-after: <!-- feature-overview-body:start -->
+```
+
+```{admonition} プログラミングの知識は必要ですか？
+:class: hint
+いいえ、PMEはプログラミングなしでも使えます。
+Pythonを使えばさらに柔軟なカスタマイズが可能です。
+```
+
+## 入手方法
+
+Pie Menu Editor Forkは Gumroad で販売しています。Blender 5.0以降に対応しています。
+
+```{button-link} https://pluglug.gumroad.com/l/pie-menu-editor-fork
+:color: primary
+:shadow:
+Pie Menu Editor Fork を購入
+```
+
+最新の更新内容は [更新履歴](support_community/changelog.md) をご覧ください。
+
+## コミュニティ
+
+- [Blender Artists Forum](https://blenderartists.org/t/pie-menu-editor-1-18-8/662456): 質問、バグ報告、カスタマイズ例の共有
+
+---
+
+```{admonition} 関連リンク
+:class: seealso
+
+:::{hlist}
+:columns: 3
+
+* [Blender](https://www.blender.org/)
+* [Blender Development Fund](https://fund.blender.org/)
+* [Blender Manual](https://docs.blender.org/manual/en/latest/)
+* [Blender Python API](https://docs.blender.org/api/current/)
+* [PME Original Documentation](https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/)
+:::
+```
+
+---
+
+```{toctree}
+:maxdepth: 1
+:caption: はじめる
+
+getting_started/installation
+getting_started/basic_pie_menu
+getting_started/popup_dialog_tutorial
+getting_started/macro_tutorial
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: エディタ
+:hidden:
+
+editors/pie_menu_editor
+editors/regular_menu_editor
+editors/popup_dialog_editor
+editors/sticky_key_editor
+editors/stack_key_editor
+editors/macro_operator_editor
+editors/modal_operator_editor
+editors/editor_common_elements
+editors/ui_customization
+editors/property_editor
+editors/context_menu
+editors/custom_icons
+editors/settings
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: 参考資料
+:hidden:
+
+reference/file_locations
+reference/boot_options
+reference/terminology
+reference/scripting
+reference/examples
+reference/keymap_guide
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: アーキテクチャ（開発者向け）
+:hidden:
+
+architecture/index
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: サポート
+:hidden:
+
+support_community/faq
+support_community/get_support
+support_community/changelog
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: 開発者向け
+:hidden:
+
+reference/developer_options
+reference/architecture/index
+```

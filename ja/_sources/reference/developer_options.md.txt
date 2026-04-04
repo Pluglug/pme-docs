@@ -1,0 +1,150 @@
+(developer_options)=
+
+# 開発者オプション
+
+```{versionadded} 2.0.3
+```
+
+開発者オプションです。
+仕様は予告なく変更される可能性があります。
+
+---
+
+## boot_config.json
+
+Blender の CONFIG ディレクトリ配下に置かれる、起動前に読む外部設定ファイルです。
+アドオンの `register()` よりも前に読み込まれます。
+
+### 設定項目
+
+| キー | 型 | デフォルト | 説明 |
+|------|----|-----------|------|
+| `enable_public_api_alias` | bool | `false` | `import pme` エイリアスを `sys.modules` に登録する |
+| `init_log_enabled` | bool | `false` | 起動時の初期化ログを有効にする |
+| `persistence_backend` | string | `"prefs"` | データ永続化バックエンド（現在は `"prefs"` のみ） |
+| `dev.use_loader_manifest` | bool | `true` | `loader_manifest.json` を使って起動する |
+| `dev.auto_generate_candidate` | bool | `false` | 起動成功後、PME のアドオンパッケージ内に `loader_manifest_candidate.json` を自動作成する |
+
+### 読み込み優先順位
+
+```
+コマンドライン引数  >  boot_config.json  >  既定値
+```
+
+```{tip}
+`--pme-log-init` フラグがあれば `init_log_enabled` の値に関係なくログが有効になります。
+```
+
+### ファイル形式
+
+```json
+{
+  "version": 1,
+  "enable_public_api_alias": false,
+  "init_log_enabled": false,
+  "persistence_backend": "prefs",
+  "dev": {
+    "use_loader_manifest": true,
+    "auto_generate_candidate": false
+  }
+}
+```
+
+### 更新・上書きポリシー
+
+- アドオンの更新では **上書きされない**
+- ファイルが存在しない場合、デフォルト値で自動生成される
+- ファイルが壊れている場合、デフォルト値で起動を続行する
+- 削除すると次回起動時にデフォルトで再生成される
+
+---
+
+## loader_manifest.json
+
+アドオンに同梱される、モジュール読み込み順を定義したファイルです。
+
+### 役割
+
+- リリース用ビルドに含まれる静的ファイル
+- 起動時のモジュール読み込み順を素早く確定するために使う
+- 通常はユーザーが直接編集しない
+
+### ファイル形式
+
+```json
+{
+  "version": 1,
+  "module_order": [
+    "core.namespace",
+    "infra.logging",
+    "infra.boot_config",
+    "..."
+  ]
+}
+```
+
+### フォールバック
+
+`loader_manifest.json` が見つからない、または壊れている場合は、依存関係ベースの動的探索に戻ります。
+
+### モジュール読み込み順の決定順
+
+1. `--pme-use-candidate-loader-manifest`
+2. `--pme-use-loader-manifest` / `--pme-no-loader-manifest`
+3. `boot_config.dev.use_loader_manifest`
+4. `loader_manifest.json`
+5. 依存関係ベースの動的探索
+
+- 通常起動では、`loader_manifest.json` を使います
+- `dev.use_loader_manifest = false` の場合は、依存関係ベースの動的探索で起動します
+- 検証用 manifest は開発用の補助経路であり、この設定だけで直接採用されることはありません
+- 検証用 manifest または `loader_manifest.json` が使えない場合は、動的探索に戻ります
+
+---
+
+## 検証用 loader manifest (`loader_manifest_candidate.json`)
+
+`loader_manifest_candidate.json` は、開発中の確認に使う検証用 loader manifest です。
+
+### 作成場所
+
+- `loader_manifest_candidate.json` は PME のアドオンパッケージ内に作成されます
+
+### 役割
+
+- 起動成功時に観測されたモジュール読み込み順を記録する
+- `loader_manifest.json` へ反映する前の比較や確認に使う
+- {guilabel}`Use Bundled Loader Manifest` の ON/OFF だけでは自動採用されない
+
+### 作成される条件
+
+次の条件をすべて満たしたときだけ `loader_manifest_candidate.json` が作成されます。
+
+- `boot_config.dev.auto_generate_candidate == true`
+- 起動処理が成功している
+- 保存先へ書き込める
+
+### `loader_manifest.json` への反映
+
+検証用 manifest から `loader_manifest.json` への反映は、通常起動の途中では行われません。
+次のどちらかの明示操作でのみ反映されます。
+
+- `python3 tools/promote_loader_manifest.py`
+- {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Developer` の {guilabel}`Promote Candidate to Bundled`
+
+---
+
+## Settings > Developer UI
+
+{guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Developer` タブで、`boot_config.json` を編集することができます。
+
+- 変更した値は `boot_config.json` にすぐ書き戻されます
+- 起動時には `boot_config.json` の内容が UI に反映されます
+- `import pme` と初期化ログのような起動前設定は、**次回起動から有効** です
+- {guilabel}`Use Bundled Loader Manifest` は、`loader_manifest.json` で起動するか、動的探索で起動するかを切り替えます
+- {guilabel}`Auto-Save Candidate on Startup` は、起動成功後に `loader_manifest_candidate.json` を作成します
+- {guilabel}`Promote Candidate to Bundled` は、検証用 manifest の内容を `loader_manifest.json` に反映する操作です
+
+```{note}
+`dev` namespace の設定は、同一 Blender プロファイル上にある全ての PME インストールに影響します。
+```

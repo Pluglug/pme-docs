@@ -1,0 +1,131 @@
+# 機能概要
+
+<!-- feature-overview-body:start -->
+
+## Menus & Dialogs
+
+必要な操作を、呼び出しやすく整理します。
+
+```{grid} 1 1 2 2
+:gutter: 2
+
+::::{grid-item-card} Pie Menu Editor
+:link: ../editors/pie_menu_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_pie.png
+
+頻繁に使う操作を円形メニューにまとめます。メニューやパネルの入れ子にも対応します。
+::::
+
+::::{grid-item-card} Regular Menu Editor
+:link: ../editors/regular_menu_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_menu.png
+
+ドロップダウンメニューを作成します。ホットキー呼び出しや既存メニューへの追加に向いています。
+::::
+
+::::{grid-item-card} Pop-up Dialog Editor
+:link: ../editors/popup_dialog_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_popup.png
+
+ウィジェットレイアウトを作成します。メニュー、ダイアログ、パネル、ツールバーに表示できます。
+::::
+
+::::{grid-item-card} Floating Panel Editor
+:link: ../editors/popup_dialog_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_popup.png
+
+作業中に開いたまま使えるフローティングパネルを作成します。Pop-up Dialog と同じスロット構造を共有するベータ機能です。
+::::
+```
+
+## Keys & Shortcuts
+
+少ないキーで、より多くの操作を扱えるようにします。
+
+```{grid} 1 1 2 2
+:gutter: 2
+
+::::{grid-item-card} Sticky Key Editor
+:link: ../editors/sticky_key_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_sticky.png
+
+キーを押した時と離した時で別の動作を設定します。一時ツールやモード切り替えに向いています。
+::::
+
+::::{grid-item-card} Stack Key Editor
+:link: ../editors/stack_key_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_stack.png
+
+1 つのホットキーに複数のコマンドを割り当て、押すたびに順番に切り替えます。
+::::
+```
+
+## Operators & Automation
+
+繰り返し操作を、素早く再利用できる形にします。
+
+```{grid} 1 1 2 2
+:gutter: 2
+
+::::{grid-item-card} Macro Operator Editor
+:link: ../editors/macro_operator_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_macro.png
+
+既存オペレーターを組み合わせて新しい操作を作成します。定型作業の自動化に向いています。
+::::
+
+::::{grid-item-card} Modal Operator Editor
+:link: ../editors/modal_operator_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_modal.png
+
+実行中のキー入力やマウス操作で値を調整する、対話型のオペレーターを作成します。
+::::
+```
+
+## Interface & Properties
+
+Blender の UI とデータを、扱いやすく整理します。
+
+```{grid} 1 1 2 2
+:gutter: 2
+
+::::{grid-item-card} Menu/Panel Extension
+:link: ../editors/ui_customization.html#pme-menu-panel-extension
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_pg.png
+
+既存の Blender メニューやパネルに、自分のメニューを差し込めます。表示位置や順序も調整できます。
+::::
+
+::::{grid-item-card} Property Editor
+:link: ../editors/property_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_property.png
+
+独自プロパティを定義できます。Getter / Setter を持たせて Blender の任意のデータブロックへ登録できます。
+::::
+
+::::{grid-item-card} Side Panel Editor
+:link: ../editors/side_panel_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_pg.png
+
+サイドパネルのタブやパネル構成を整理します。独自カテゴリの追加や既存 UI の拡張に使えます。
+::::
+
+::::{grid-item-card} Hiding Unused Panels
+:link: ../editors/hiding_unused_panels.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_hpg.png
+
+不要なパネルやグループを非表示にして、作業画面をすっきり保てます。
+::::
+```

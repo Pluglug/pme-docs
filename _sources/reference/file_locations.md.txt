@@ -1,0 +1,109 @@
+(user_resources)=
+
+# Scripts & Data Location
+
+PME stores user-created files in a dedicated directory.
+Scripts, icons, backups, and export data are all kept here.
+
+## Default Location
+
+| OS | Path |
+|----|------|
+| Windows | `%USERPROFILE%\Documents\Pie Menu Editor\` |
+| macOS | `~/Documents/Pie Menu Editor/` |
+| Linux | `$XDG_DOCUMENTS_DIR/Pie Menu Editor/` (fallback: `~/Documents/Pie Menu Editor/`) |
+
+These directories are independent of the add-on and Blender's config folder.
+Updating the add-on or upgrading Blender will not affect these files.
+
+## Directory Structure
+
+```
+Pie Menu Editor/
+├── scripts/                    # User scripts
+│   ├── autorun/                # Scripts that run automatically on PME startup
+│   └── examples/               # Copied from bundled templates
+│       ├── command_*.py
+│       └── custom_*.py
+├── icons/                      # Custom icons
+├── backups/                    # Automatic backups
+│   └── backup_YYYY.MM.DD_HH.MM.SS.json
+├── exports/
+│   └── examples/               # Preset examples copied on first launch
+│       ├── 3d_view_numpad_pie.json
+│       ├── mesh_select_mode_pie.json
+│       └── ...
+└── logs/                       # Log files
+```
+
+## Changing the Location
+
+You can change the root directory from {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Resources`.
+
+```{note}
+After changing the path, PME will reference the new directory. Existing files are not moved automatically — copy them manually.
+```
+
+## Sharing Across Machines
+
+The resource folder is independent of Blender and the add-on, so you can sync it across machines using Syncthing, Dropbox, Git, etc.
+
+## Menu Definition Storage
+
+Menu definitions (Pie Menus, Popup Dialogs, etc.) are stored in Blender's settings file (`userpref.blend`), not in this resource directory.
+
+To share or back up menu definitions as files, use {guilabel}`Export` > {guilabel}`All Menus` to write them as JSON.
+
+```{seealso}
+See the Changelog for details on the JSON Schema v2 export format.
+```
+
+---
+
+:::{dropdown} File Layout (1.19.2 and earlier)
+
+In PME 1.19.2 and earlier, user resources were stored inside or adjacent to the add-on directory.
+Overwriting or removing the add-on could delete scripts and icons.
+
+### Directory Structure
+
+```text
+addons/
+├── pie_menu_editor/              # Add-on package
+│   ├── scripts/
+│   │   ├── autorun/              # Auto-run scripts on startup
+│   │   │   └── functions.py      # System file
+│   │   └── ...
+│   ├── icons/                    # Custom icons (PNG)
+│   ├── examples/                 # Example configurations
+│   ├── __init__.py
+│   └── ...
+└── pie_menu_editor_data/         # User data (separate from add-on)
+    └── backups/                  # Automatic backups
+```
+
+### Folder Roles
+
+`pie_menu_editor/scripts/autorun/`
+: Scripts that run automatically when PME starts. `functions.py` is a system file.
+
+`pie_menu_editor/icons/`
+: Custom icons (PNG format). Located inside the add-on directory, so may be lost on overwrite updates.
+
+`pie_menu_editor_data/backups/`
+: Automatic backup storage. Located in a separate directory from the add-on, so preserved during overwrite updates.
+
+### Blender Add-on Directory Locations
+
+The `addons/` directory above is located at:
+
+| OS | Path |
+|----|------|
+| Windows | `%APPDATA%\Blender Foundation\Blender\<version>\scripts\addons\` |
+| macOS | `~/Library/Application Support/Blender/<version>/scripts/addons/` |
+| Linux | `~/.config/blender/<version>/scripts/addons/` |
+
+```{seealso}
+For migration steps to PME2, see {ref}`installation`.
+```
+:::
