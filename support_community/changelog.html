@@ -1,0 +1,1268 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="prev" title="Support" href="get_support.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>Change Log - Pie Menu Editor 2.0.2.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9f9c40c1" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9f9c40c1" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+      }
+    }
+  }
+</style>
+
+<script type="text/javascript">
+    (function () {
+        if (window.__PMEBeaconInitialized) {
+            return;
+        }
+
+        window.__PMEBeaconInitialized = true;
+
+        !function(e,t,n){function a(){var e=t.getElementsByTagName("script")[0],n=t.createElement("script");n.type="text/javascript",n.async=!0,n.src="https://beacon-v2.helpscout.net",e.parentNode.insertBefore(n,e)}if(e.Beacon=n=function(t,n,a){e.Beacon.readyQueue.push({method:t,options:n,data:a})},n.readyQueue=[],"complete"===t.readyState)return a();e.attachEvent?e.attachEvent("onload",a):e.addEventListener("load",a,!1)}(window,document,window.Beacon||function(){});
+        window.Beacon('init', 'e458ab6a-6436-4e96-a0b6-038336504b24');
+        window.Beacon('config', {
+            display: {
+                style: 'manual'
+            }
+        });
+
+        window.PMEDocs = window.PMEDocs || {};
+        window.PMEDocs.beaconPrefillTemplates = {
+            supportRequest: [
+                'Summary:',
+                '- What went wrong',
+                '',
+                'Steps to reproduce:',
+                '1.',
+                '2.',
+                '3.',
+                '',
+                'What happened:',
+                '- Describe the actual result.',
+                '',
+                'Environment:',
+                '- Blender version:',
+                '- PME version:',
+                '- OS:',
+                '',
+                'Attachments:',
+                '- PME setup JSON:',
+                '- Console output / screenshot:',
+                '- Small .blend file (if relevant):',
+                '',
+                'Additional notes:',
+                '- Anything else that may help.'
+            ].join('\n')
+        };
+
+        window.PMEDocs.openSupportBeacon = function (event, templateName) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            if (typeof window.Beacon === 'function') {
+                const prefillText = window.PMEDocs.beaconPrefillTemplates[templateName];
+                if (prefillText) {
+                    window.Beacon('prefill', {
+                        text: prefillText
+                    });
+                }
+
+                window.Beacon('open');
+                window.Beacon('navigate', '/ask/message/');
+                return false;
+            }
+
+            return true;
+        };
+
+        document.addEventListener('click', function (event) {
+            const trigger = event.target.closest('[data-beacon-open]');
+            if (!trigger) {
+                return;
+            }
+
+            window.PMEDocs.openSupportBeacon(event, trigger.dataset.beaconTemplate);
+        });
+    }());
+</script></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Pie Menu Editor 2.0.2.3 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor 2.0.2.3 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation &amp; Updates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/quick_tutorial.html">Quick Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Editors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../editors/pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/popup_dialog_editor.html">Pop-up Dialog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/editor_common_elements.html">Editor Common Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#hiding-unused-panels">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#menu-panel-extension">Menu/Panel Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#pme-toolbar">PME Toolbar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/property_editor.html">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/custom_icons.html">Custom Icons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/file_locations.html">Scripts &amp; Data Location</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/boot_options.html">Boot Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/terminology.html">Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/public_api.html">Public API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/scripting.html">Scripting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/examples.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">For Developers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/developer_options.html">Developer Options</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Support &amp; Community</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html#known-issues">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="get_support.html">Support</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Change Log</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/support_community/changelog.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="change-log">
+<span id="changelog"></span><h1>Change Log<a class="headerlink" href="#change-log" title="Link to this heading">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>PME uses <code class="docutils literal notranslate"><span class="pre">major.minor.patch.hotfix</span></code> versioning.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">major</span></code>: product generation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">minor</span></code>: milestone / release train</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">patch</span></code>: feature release within that train</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">hotfix</span></code>: follow-up build on the same patch line</p></li>
+</ul>
+</div>
+<section id="in-development">
+<span id="changelog-2-0-3"></span><h2>2.0.3 (In Development)<a class="headerlink" href="#in-development" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pme</span></code> is now opt-in</strong> — The <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pme</span></code> alias is no longer always on. If you already use <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pme</span></code> in existing scripts or companion addons, turn on <span class="guilabel">Enable import pme Alias</span> in <span class="guilabel">Settings &gt; Developer</span> and restart Blender once.</p></li>
+<li><p><strong>Better operator capture display names</strong> — Blender’s Python API usually does not expose the exact UI label that was drawn for a button. Because of that, captured operators often fell back to generic names like <code class="docutils literal notranslate"><span class="pre">Add</span> <span class="pre">Node</span></code>, making it hard to tell what kind of slot had just been added. PME2 now uses dynamically resolved item names as the slot name when the operator family provides enough information to recover a meaningful display label at capture time.</p></li>
+<li><p><strong>Expanded supported operator families</strong> — Dynamic name recovery currently covers:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">node.add_node</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">object.modifier_add</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">object.constraint_add</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pose.constraint_add</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">object.shaderfx_add</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sequencer.strip_modifier_add</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wm.tool_set_by_id</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">brush.asset_activate</span></code>
+This does not apply to every operator, but the supported ones now produce much more practical auto-generated names during capture. This improvement only affects naming at capture time; direct Slot editing still uses the existing generic naming behavior.</p></li>
+</ul>
+</li>
+<li><p><strong>Improved GPULayout sliders and numeric fields</strong> — GPULayout numeric sliders and numeric input fields now follow Blender’s effective UI ranges more closely. In addition to Shape Keys, some Constraint / Particle / Modifier properties now show more natural limits and slider fill behavior based on the current settings. The handling of instance-specific UI ranges was also tightened up.</p></li>
+<li><p><strong>Improved floating panel and subpanel redraw updates</strong> — Custom UI inside floating panels, as well as subpanels such as the color picker, now update their panel drawing more appropriately when the selection changes or when related properties are modified elsewhere. When the UI structure depends on the current context, the layout is rebuilt; when a subpanel is still showing the same property, it can stay open and refresh in place; and when the displayed target changes, only the contents are swapped out.</p></li>
+<li><p><strong>Bug report workflow</strong> — Added a dedicated <a class="reference internal" href="get_support.html"><span class="doc std std-doc">bug report page</span></a> to the documentation site and a link button in Preferences.</p></li>
+<li><p><strong>Boot options</strong> — PME now supports external startup options that are evaluated before addon startup. This gives startup-only settings a proper home and lays the groundwork for more flexible external configuration later. See <a class="reference internal" href="../reference/boot_options.html"><span class="std std-doc">Boot Options</span></a> and <a class="reference internal" href="../reference/developer_options.html"><span class="std std-doc">Developer Options</span></a>.</p></li>
+<li><p><strong>Loader manifest support</strong> — PME now includes <code class="docutils literal notranslate"><span class="pre">loader_manifest.json</span></code>, a bundled module-load-order file used during startup. When <span class="guilabel">Use Bundled Loader Manifest</span> is on, PME starts from that file. If the option is off, or if the file cannot be used, PME falls back to dependency-based dynamic discovery.</p></li>
+<li><p><strong>Improved startup diagnostics</strong> — As part of the foundation work that supports PME’s long-term development and verifiability, startup observation, candidate loader manifests, and pre-startup options have been cleaned up. When enabled, PME now creates <code class="docutils literal notranslate"><span class="pre">loader_manifest_candidate.json</span></code>, and that candidate can be explicitly promoted into <code class="docutils literal notranslate"><span class="pre">loader_manifest.json</span></code> from the Developer tab or from the command line. Normal startup never rewrites <code class="docutils literal notranslate"><span class="pre">loader_manifest.json</span></code> automatically. Because startup now uses <code class="docutils literal notranslate"><span class="pre">loader_manifest.json</span></code> and init logging is opt-in, normal startup is also slightly lighter. If startup trouble occurs, you can enable init logging for the next run or turn it on directly by editing <code class="docutils literal notranslate"><span class="pre">boot_config.json</span></code>. See <a class="reference internal" href="../reference/developer_options.html"><span class="std std-doc">Developer Options</span></a> and <a class="reference internal" href="../reference/boot_options.html"><span class="std std-doc">Boot Options</span></a>.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+<section id="changelog-2-0-2-3">
+<span id="id1"></span><h2>2.0.2.3 (2026.03.28)<a class="headerlink" href="#changelog-2-0-2-3" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Blender 5.1 / macOS enable crash fix</strong> — Investigating a crash that killed Blender on addon enable revealed that the notification and update storage structure sat in a part of Blender’s registration path that doesn’t play well with certain environments. Rather than patching around it, the storage design was reworked from scratch.</p></li>
+<li><p><strong>Notification and update state externalized</strong> — Read/dismiss state and update check results have been moved out of Blender’s internal preferences tree into a JSON file managed by PME itself. This makes the data stable across Blender’s startup and shutdown cycles — and because it’s a plain text file living outside Blender, it can be read directly by external tools. In the longer term, diagnostic information about your menus and slots is planned to live here too, opening the door to smarter troubleshooting support.</p></li>
+<li><p><strong>Update source safety</strong> — A maintenance path for switching the update source was added. When a non-official source is active, a persistent warning is displayed. Update notifications from custom sources never show external URL actions; instead, the referenced source and download URL are stated in the notification body.</p></li>
+<li><p><strong>Multi-line notification messages</strong> — Notification bodies can now render multi-line text directly, making it easier to communicate warnings and supplementary information.</p></li>
+<li><p><strong>Missing operator fallback for older menus</strong> — Since Blender 5.1, PME fallback could fail for slots containing older menu commands or unresolved operators, making the whole pie look broken. Missing operators now return to PME’s own error slot, helping preserve the overall pie shape in older menus.</p></li>
+<li><p><strong>Legacy JSON import stability</strong> — Post-import internal references and compatibility handling were tightened for some older JSON v1 menu packs, making legacy imports more stable overall.</p></li>
+<li><p><strong>Note</strong> — This update changes how notification and update state is stored. Read, dismissed, and update cache state from previous <code class="docutils literal notranslate"><span class="pre">2.0.2.x</span></code> builds will be reset on first launch. Update check results will be re-fetched automatically.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+<section id="changelog-2-0-2-2">
+<span id="id2"></span><h2>2.0.2.2 (2026.03.15)<a class="headerlink" href="#changelog-2-0-2-2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Editor command stability fix</strong> — Tracking down one hang report revealed the real cause wasn’t a single command but the PMI text classification itself. Escalated from hotfix to redesign, tightening the problematic parsing paths at their root.</p></li>
+<li><p><strong>Scanner-first PMI classification</strong> — A lightweight scanner now triages PMI text before expensive regex paths are reached, significantly reducing backtracking risk while keeping normal command entry permissive.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+<section id="changelog-2-0-2-1">
+<span id="id3"></span><h2>2.0.2.1 (2026.03.15)<a class="headerlink" href="#changelog-2-0-2-1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Hotkey runtime state isolation</strong> — Tightened the hotkey recovery flow to prevent startup and runtime state cross-talk.</p></li>
+<li><p><strong>Property capture follow-up</strong> — Hardened the render and capture paths for the right-click property capture introduced in 2.0.2.</p></li>
+<li><p><strong>Four-part hotfix versioning</strong> — Hotfix builds like <code class="docutils literal notranslate"><span class="pre">2.0.2</span></code>, <code class="docutils literal notranslate"><span class="pre">2.0.2.1</span></code>, and <code class="docutils literal notranslate"><span class="pre">2.0.2.2</span></code> are now accurately distinguished by the notification system.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+<section id="changelog-2-0-2">
+<span id="id4"></span><h2>2.0.2 (2026.03.14)<a class="headerlink" href="#changelog-2-0-2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Major right-click property capture upgrade</strong> — Many buttons that used to show “Can’t Add This Widget” can now be captured. Theme colors, addon preferences, and deeply nested properties are all supported. Custom properties (<code class="docutils literal notranslate"><span class="pre">[&quot;prop&quot;]</span></code> format) can be captured as-is, and when capture still isn’t possible, you’ll see feedback explaining why. The captured paths are also improved: previously, paths often fell back to <code class="docutils literal notranslate"><span class="pre">bpy.data</span></code>-based absolute references, producing commands that only worked for one specific object or data block. PME2 now prioritizes <code class="docutils literal notranslate"><span class="pre">bpy.context</span></code>-relative paths, so your commands naturally apply to the active object, the current brush, or whatever the context calls for.</p></li>
+<li><p><strong>Sidearea open/close commands</strong> — <code class="docutils literal notranslate"><span class="pre">pme.sidearea_toggle</span></code> now accepts <code class="docutils literal notranslate"><span class="pre">open_cmd</span></code> and <code class="docutils literal notranslate"><span class="pre">close_cmd</span></code> parameters, letting you bundle initialization and cleanup logic into the same toggle call.</p></li>
+<li><p><strong>Notification system</strong> — A badge appears on the Settings tab when a new version of PME is available. Checks run quietly at startup; you can also refresh manually or skip a specific version. Currently limited to release notifications, but the system is designed with broader use in mind.</p></li>
+<li><p><strong>Tree Mode search reveal</strong> — Even when your customizations grow and groups are deeply nested, search automatically expands collapsed groups and scrolls to the target menu. No more getting lost among hundreds of menus.</p></li>
+<li><p><strong>Hotkey recovery on startup</strong> — Hotkeys that could not be registered at addon enable time are now queued and retried automatically, fixing cases where hotkeys disappeared after a Blender restart.</p></li>
+<li><p><strong>GPU floating panel fixes</strong> — Embedded Blender panel lists (UV Maps, Shape Keys, etc.) render more reliably in GPU floating panels.</p></li>
+<li><p><strong>Blender 5.1 support</strong> — Verified compatible with Blender 5.1.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+<section id="changelog-2-0-1">
+<span id="id5"></span><h2>2.0.1 (2026.03.04)<a class="headerlink" href="#changelog-2-0-1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Browsable hotkey key menus</strong> — Hotkey and chord-key fields now use hierarchical browse menus. Special keys like <code class="docutils literal notranslate"><span class="pre">F13</span></code> through <code class="docutils literal notranslate"><span class="pre">F24</span></code> and modifier combinations that previously had to be typed in manually can now be assigned with a simple menu selection.</p></li>
+<li><p><strong>Per-slot COMMAND Undo option</strong> — Individual COMMAND slots can now enable Undo independently. Control the undo stack precisely based on each command’s purpose. Toggle visibility in <code class="docutils literal notranslate"><span class="pre">Settings</span> <span class="pre">&gt;</span> <span class="pre">General</span> <span class="pre">&gt;</span> <span class="pre">Show</span> <span class="pre">Command</span> <span class="pre">Undo</span></code>.</p></li>
+<li><p><strong>Stronger startup hotkey recovery</strong> — Startup hotkey registration is more resilient, with clearer reporting when some keys cannot be restored.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+<section id="changelog-2-0-0">
+<span id="id6"></span><h2>2.0.0 (2026.02.20)<a class="headerlink" href="#changelog-2-0-0" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>PME2 stable release</strong> — PME2 is now available as a stable release for Blender 5.0+. This release is not about keeping an aging codebase on life support. It is a foundation rebuild, meant to move PME forward so it can continue evolving as a platform for a wide range of creative work.</p></li>
+<li><p><strong>PME1 data compatibility</strong> — PME2’s internals have changed significantly, but it supports importing PME 1.18.x JSON and backup files, as well as direct migration from data stored in <code class="docutils literal notranslate"><span class="pre">userpref.blend</span></code>. Legacy array format conversion, automatic uid generation, menu mode recovery from enum index drift, prefix standardization, Extend Panel schema migration — each migration path was built through careful validation of Blender’s internal data structures. If a migration error occurs, it automatically retries on the next startup.</p></li>
+<li><p><strong>JSON Schema v2</strong> — The export format has been rebuilt from the ground up. In PME1, data lived in positional arrays — you needed the source code to know what index 5 meant. In v2, every field has a name, a type, and a description, all self-documented via a <a class="reference external" href="https://pluglug.github.io/pme-docs/schema/pme2-2.0.json">public JSON Schema</a>. Menus now carry uid, descriptions, poll conditions, and tags; items carry typed actions and descriptions. Each menu and button can express not just <em>what it does</em>, but <em>how it looks</em> and <em>when it’s available</em>. This is a structural upgrade designed for the future. This schema is built to handle whatever you throw at it for the next decade.</p></li>
+<li><p><strong>GPU Layout System</strong> — A custom GPU rendering engine designed for UILayout compatibility. The same draw code runs on both Blender’s standard UILayout and GPU panels without modification. Supports 2-pass layout, theme integration, reactive property binding, and operator invocation from within modal handlers.</p></li>
+<li><p><strong>Floating Panel</strong> — A new menu mode built on the GPU Layout System. Panels stay in your area, blend into the Blender theme, and let you place your own controls wherever you want. Position, size, and opacity persist across the session. Joins Pie Menu and Popup-Dialog as a first-class PME menu mode.</p></li>
+<li><p><strong>UID-based references</strong> — Every menu now has a stable unique ID. Rename freely — references won’t break. But that’s just the start. Tracking dependencies between menus, pinpointing what’s broken, surviving Blender upgrades, managing JSON in Git, safely updating shared presets — uid is the foundation for all of it. Floating Panel position persistence already runs on this system.</p></li>
+<li><p><strong>Extend Panel redesign</strong> — The system for injecting your menus into Blender’s built-in panels and menus has been rebuilt. In PME1, the extend target was tied to the menu’s display name, and only one menu could extend a given target. PME2 manages target, position, and order through dedicated properties. Stack multiple menus on the same panel, toggle them with poll conditions, reorder at will. No name collisions when importing shared menus.</p></li>
+<li><p><strong>Descriptions and tooltips</strong> — Custom macros, complex commands — forgetting what you built is a rite of passage in PME1. In PME2, you can attach descriptions to menus and individual slots. Plain text or dynamic Python expressions. Even without writing anything, tooltips now auto-display the referenced menu name. Know your setup; communicate your intent when sharing.</p></li>
+<li><p><strong>User Resources</strong> — Scripts, icons, backups, and exports now live in their own directory, outside both the addon and Blender’s config folder. <code class="docutils literal notranslate"><span class="pre">~/Documents/Pie</span> <span class="pre">Menu</span> <span class="pre">Editor/</span></code> keeps your files safe through addon updates and Blender upgrades alike. The path is configurable in Settings → Resources, and works with Syncthing, Git, or any sync tool you prefer.</p></li>
+<li><p><strong>Public API</strong> — A new public API <code class="docutils literal notranslate"><span class="pre">pme</span></code> makes PME’s capabilities available to external scripts and other addons. Type <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pme</span></code> in Blender’s console and you’re off. Search menus, invoke them, execute code — all through a stable interface. Integration with other addons, scripted automation — this is PME’s door to the outside world. Currently Experimental, with more features and stability improvements planned.</p></li>
+<li><p><strong>Side area stabilization</strong> — Width memory, N-Panel tab restoration, FILE_BROWSER crash avoidance, sidebar closed-state recovery — a batch of quality-of-life fixes for the part of PME you use every day.</p></li>
+<li><p><strong>PM mode persistence</strong> — Mode values are now decoupled from enum ordering, with a stable mode table and migration/backfill. More resilient when upgrading from PME1 with mode-index drift.</p></li>
+<li><p><strong>PROPERTY / mode settings cleanup</strong> — Cleaned up how per-mode settings are stored, removing legacy ambiguities. Not a flashy feature, but a meaningful step toward internal consistency.</p></li>
+<li><p><strong>Settings UI and logging</strong> — Settings reorganized into icon-based tabs (GPU Layout, Developer, Resources, etc.). Logging now has per-category control in the preferences UI, with cleaner init-time log handling.</p></li>
+<li><p><strong>Other improvements</strong> — Removed the beta banner and init hooks, and suppressed dev logs by default. Also enabled the COMMAND fallback Undo wrapper by default, fixed stale labels in the PMI editor, and improved path/error handling around <code class="docutils literal notranslate"><span class="pre">execute_script</span></code>.</p></li>
+<li><p><strong>Long-term development foundation</strong> — PME2’s internals have been shaped for confident long-term maintenance. At the core is a dynamic module loader, battle-tested in a separate project before being brought to PME. It auto-discovers modules by pattern, resolves dependencies via topological sort, and handles class registration automatically. PME1 had a loader too, but it relied on a hand-maintained list with fixed ordering. Combined with the 6-layer architecture, package restructuring, and legacy dual-loader removal, adding a new file just works.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+<section id="changelog-1-19-2">
+<span id="id7"></span><h2>1.19.2 (2026.01.11)<a class="headerlink" href="#changelog-1-19-2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Final stable PME-F v1.x release</strong> — This build was intended as the last stable release of the v1.x line before development focus moved to PME2.</p></li>
+<li><p><strong>Side area width clamp fix</strong> — Toggling side areas no longer corrupts layouts when widths become extreme or edge-case values slip through.</p></li>
+<li><p><strong>Better main/side View3D detection</strong> — PME now prefers the current area when resolving the main View3D, and closing from the side context works more reliably when both areas use the expected keymap setup.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+<section id="changelog-1-19-1">
+<span id="id8"></span><h2>1.19.1 (2025.11.24)<a class="headerlink" href="#changelog-1-19-1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>CHORDS stability fixes</strong> — Improved reliability under rapid repeated input, fixed a freeze caused by overlapping modal timers, added a PRESS fallback on chord timeout, and fixed chord hints in the header.</p></li>
+<li><p><strong>Side area and screen-layout fixes</strong> — Vertical side areas now close more consistently, use Blender 4.3+ <code class="docutils literal notranslate"><span class="pre">area_join()</span></code> correctly, and preserve dimensions more reliably during toggles.</p></li>
+<li><p><strong>Blender 5.x compatibility follow-ups</strong> — Preference restore paths that could drift on Blender 5.x were disabled, property serialization was updated, custom icons are more stable, and risky toolbar layout hacks are disabled on Blender 5.0+.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+<section id="changelog-1-19-0">
+<span id="id9"></span><h2>1.19.0 (2025.10.25)<a class="headerlink" href="#changelog-1-19-0" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Blender 5.0 compatibility refresh</strong> — PME-F updated several core property and preference paths for Blender 5.0, removed older compatibility layers, and fixed related API regressions.</p></li>
+<li><p><strong>New click-style hotkey modes</strong> — Added experimental <code class="docutils literal notranslate"><span class="pre">Click</span></code> and <code class="docutils literal notranslate"><span class="pre">Click</span> <span class="pre">Drag</span></code> activation modes, including click-drag direction options.</p></li>
+<li><p><strong>Import, tags, and JSON improvements</strong> — Import became more stable, export gained a compatibility-oriented JSON mode, and tag filters now stay in sync more reliably when menus are renamed or duplicated.</p></li>
+<li><p><strong>Side area and area-type improvements</strong> — Added <code class="docutils literal notranslate"><span class="pre">TOP</span></code> / <code class="docutils literal notranslate"><span class="pre">BOTTOM</span></code> side area support and improved dynamic area-type detection for side-area workflows.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+<section id="changelog-1-18-9">
+<span id="id10"></span><h2>1.18.9 (2025.07.21)<a class="headerlink" href="#changelog-1-18-9" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Blender 4.5 compatibility</strong> — PME-F was updated for Blender 4.5 while keeping support for Blender 3.2 and newer.</p></li>
+<li><p><strong>Side area toggle fixes</strong> — Side area toggle now works correctly with Blender 4.5’s drawing system and high-DPI displays.</p></li>
+<li><p><strong>Popup, toolbar, and panel fixes</strong> — Popup area size control was restored, panel attribute errors were fixed, and unnecessary toolbar memory access was removed.</p></li>
+<li><p><strong>Missing icon error cleanup</strong> — Missing icons no longer spam <code class="docutils literal notranslate"><span class="pre">TypeError</span></code> messages.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+<section id="changelog-1-18-8">
+<span id="id11"></span><h2>1.18.8 (2025.01.05)<a class="headerlink" href="#changelog-1-18-8" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Safer context overrides</strong> — Major override flows were migrated from legacy context dictionaries to <code class="docutils literal notranslate"><span class="pre">temp_override</span></code>, with stronger validation via <code class="docutils literal notranslate"><span class="pre">ContextOverride</span></code>.</p></li>
+<li><p><strong>Better error visibility</strong> — PME now exposes PMI-related errors more clearly and adds <code class="docutils literal notranslate"><span class="pre">Settings</span> <span class="pre">&gt;</span> <span class="pre">General</span> <span class="pre">&gt;</span> <span class="pre">Show</span> <span class="pre">Error</span> <span class="pre">Trace</span></code> for console traceback output.</p></li>
+<li><p><strong>UI and menu stability improvements</strong> — Legacy icons were refreshed, unstable <code class="docutils literal notranslate"><span class="pre">c_last_btn</span></code> access was removed, <code class="docutils literal notranslate"><span class="pre">bpy.context.area</span> <span class="pre">is</span> <span class="pre">None</span></code> cases were handled more safely, and side area detection was improved.</p></li>
+<li><p><strong>Compatibility cleanup</strong> — Minimum supported Blender version is now 3.2, deprecated <code class="docutils literal notranslate"><span class="pre">blf.size(...,</span> <span class="pre">dpi=72)</span></code> usage was removed, and examples/docs were updated around <code class="docutils literal notranslate"><span class="pre">bpy.ops.pme.exec_override()</span></code>.</p></li>
+<li><p><strong>New documentation site</strong> — PME documentation moved to the new docs site.</p></li>
+</ul>
+<hr class="docutils" />
+</section>
+<section id="changelog-1-18-7">
+<span id="id12"></span><h2>1.18.7 (2023.04.11)<a class="headerlink" href="#changelog-1-18-7" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Blender 3.6.0 Alpha Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-18-6">
+<span id="id13"></span><h2>1.18.6 (2022.08.13)<a class="headerlink" href="#changelog-1-18-6" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fixed Click Drag and Hold hotkey modes in Blender 3.2.0+</p></li>
+</ul>
+</section>
+<section id="changelog-1-18-5">
+<span id="id14"></span><h2>1.18.5 (2022.05.02)<a class="headerlink" href="#changelog-1-18-5" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Header Tools</p></li>
+</ul>
+</section>
+<section id="changelog-1-18-4">
+<span id="id15"></span><h2>1.18.4 (2021.11.11)<a class="headerlink" href="#changelog-1-18-4" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Toggle side-area operator fix for recent Blender builds.</p></li>
+</ul>
+</section>
+<section id="changelog-1-18-3">
+<span id="id16"></span><h2>1.18.3 (2021.06.28)<a class="headerlink" href="#changelog-1-18-3" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Support Blender 3 Alpha</p></li>
+</ul>
+</section>
+<section id="changelog-1-18-2">
+<span id="id17"></span><h2>1.18.2 (2021.04.24)<a class="headerlink" href="#changelog-1-18-2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Bug Fix for Panel Groups in Blender 2.93</p></li>
+</ul>
+</section>
+<section id="changelog-1-18-1">
+<span id="id18"></span><h2>1.18.1 (2021.03.12)<a class="headerlink" href="#changelog-1-18-1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Blender 2.93 Alpha Support</p></li>
+</ul>
+</section>
+<section id="changelog-1-18-0">
+<span id="id19"></span><h2>1.18.0 (2020.10.30)<a class="headerlink" href="#changelog-1-18-0" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Key Chords</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-17-5">
+<span id="id20"></span><h2>1.17.5 (2020.09.23)<a class="headerlink" href="#changelog-1-17-5" title="Link to this heading">¶</a></h2>
+<ul>
+<li><p>Blender 2.91 Support</p></li>
+<li><p>Customizable number of menu list rows</p></li>
+<li><p>New global variable for scripts to store user data:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">U</span><span class="o">.</span><span class="n">foo</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+<span class="n">U</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">foo</span><span class="o">=</span><span class="s2">&quot;value1&quot;</span><span class="p">,</span> <span class="n">bar</span><span class="o">=</span><span class="s2">&quot;value2&quot;</span><span class="p">)</span>  
+<span class="n">U</span><span class="o">.</span><span class="n">foo</span>
+<span class="n">U</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="s2">&quot;default_value&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-17-3">
+<span id="id21"></span><h2>1.17.3 (2020.07.20)<a class="headerlink" href="#changelog-1-17-3" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Option to use check-boxes instead of toggle-buttons.</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-17-2">
+<span id="id22"></span><h2>1.17.2 (2020.05.12)<a class="headerlink" href="#changelog-1-17-2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>PME Preferences in 3D View area</p></li>
+<li><p>Pie extra slot gap size</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-17-1">
+<span id="id23"></span><h2>1.17.1 (2020.04.27)<a class="headerlink" href="#changelog-1-17-1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>New backup folder: <code class="docutils literal notranslate"><span class="pre">scripts/addons/pie_menu_editor_data/backups</span></code></p></li>
+<li><p>Support keymaps with commas</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-17-0">
+<span id="id24"></span><h2>1.17.0 (2020.03.27)<a class="headerlink" href="#changelog-1-17-0" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>10 Pie Slots</p></li>
+<li><p>Sub-panels</p></li>
+<li><p>Wider Popups</p></li>
+</ul>
+</section>
+<section id="changelog-1-16-4">
+<span id="id25"></span><h2>1.16.4 (2019.10.13)<a class="headerlink" href="#changelog-1-16-4" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Blender 2.81 Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-16-2">
+<span id="id26"></span><h2>1.16.2 (2019.09.21)<a class="headerlink" href="#changelog-1-16-2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Blender 2.81 Support</p></li>
+<li><p>Auto-backups (pie_menu_editor/data/backup folder)</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-16-0">
+<span id="id27"></span><h2>1.16.0 (2019.08.09)<a class="headerlink" href="#changelog-1-16-0" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Remember StackKey State</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-23">
+<span id="id28"></span><h2>1.15.23 (2019.06.26)<a class="headerlink" href="#changelog-1-15-23" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-22">
+<span id="id29"></span><h2>1.15.22 (2019.06.09)<a class="headerlink" href="#changelog-1-15-22" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-21">
+<span id="id30"></span><h2>1.15.21 (2019.06.04)<a class="headerlink" href="#changelog-1-15-21" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Toggle-able menu slots</p></li>
+<li><p>Add existing menus to pies, menus, or popups</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-20">
+<span id="id31"></span><h2>1.15.20 (2019.04.11)<a class="headerlink" href="#changelog-1-15-20" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-19">
+<span id="id32"></span><h2>1.15.19 (2019.03.25)<a class="headerlink" href="#changelog-1-15-19" title="Link to this heading">¶</a></h2>
+<p>Bug Fixes</p>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="fix-1-2019-03-24">
+<span id="changelog-1-15-18-fix-1"></span><h2>1.15.18 fix 1 (2019.03.24)<a class="headerlink" href="#fix-1-2019-03-24" title="Link to this heading">¶</a></h2>
+</section>
+<section id="changelog-1-15-18">
+<span id="id33"></span><h2>1.15.18 (2019.03.21)<a class="headerlink" href="#changelog-1-15-18" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-17">
+<span id="id34"></span><h2>1.15.17 (2019.03.12)<a class="headerlink" href="#changelog-1-15-17" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Beta Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="fix-1-2019-03-07">
+<span id="changelog-1-15-16-fix-1"></span><h2>1.15.16 fix 1 (2019.03.07)<a class="headerlink" href="#fix-1-2019-03-07" title="Link to this heading">¶</a></h2>
+</section>
+<section id="changelog-1-15-16">
+<span id="id35"></span><h2>1.15.16 (2019.02.14)<a class="headerlink" href="#changelog-1-15-16" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-15">
+<span id="id36"></span><h2>1.15.15 (2019.02.13)<a class="headerlink" href="#changelog-1-15-15" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-14">
+<span id="id37"></span><h2>1.15.14 (2019.01.21)<a class="headerlink" href="#changelog-1-15-14" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="fix-1-2019-01-15">
+<span id="changelog-1-15-13-fix-1"></span><h2>1.15.13 fix 1 (2019.01.15)<a class="headerlink" href="#fix-1-2019-01-15" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fix for multi-column Regular Menus</p></li>
+<li><p>Multi-column fix</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-13">
+<span id="id38"></span><h2>1.15.13 (2019.01.14)<a class="headerlink" href="#changelog-1-15-13" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Beta Support</p></li>
+</ul>
+</section>
+<section id="fix-2-2019-01-11">
+<span id="changelog-1-15-12-fix-2"></span><h2>1.15.12 fix 2 (2019.01.11)<a class="headerlink" href="#fix-2-2019-01-11" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fixes for Blender 2.8 Beta</p></li>
+<li><p>New Python API changes.</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-12">
+<span id="id39"></span><h2>1.15.12 (2019.01.07)<a class="headerlink" href="#changelog-1-15-12" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Beta Support</p></li>
+</ul>
+</section>
+<section id="fix-7-2019-01-05">
+<span id="changelog-1-15-11-fix-7"></span><h2>1.15.11 fix 7 (2019.01.05)<a class="headerlink" href="#fix-7-2019-01-05" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fixes for Blender 2.8 Beta</p></li>
+</ul>
+</section>
+<section id="fix-4-2018-12-28">
+<span id="changelog-1-15-11-fix-4"></span><h2>1.15.11 fix 4 (2018.12.28)<a class="headerlink" href="#fix-4-2018-12-28" title="Link to this heading">¶</a></h2>
+</section>
+<section id="fix-3-2018-12-28">
+<span id="changelog-1-15-11-fix-3"></span><h2>1.15.11 fix 3 (2018.12.28)<a class="headerlink" href="#fix-3-2018-12-28" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fixes for PME 1.15.11</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-11">
+<span id="id40"></span><h2>1.15.11 (2018.12.23)<a class="headerlink" href="#changelog-1-15-11" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Beta Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="fix-1-2018-12-15">
+<span id="changelog-1-15-10-fix-1"></span><h2>1.15.10 fix 1 (2018.12.15)<a class="headerlink" href="#fix-1-2018-12-15" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Some Fixes for Blender 2.8 builds</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-10">
+<span id="id41"></span><h2>1.15.10 (2018.12.10)<a class="headerlink" href="#changelog-1-15-10" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-9">
+<span id="id42"></span><h2>1.15.9 (2018.12.10)<a class="headerlink" href="#changelog-1-15-9" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="fix-3-2018-12-06">
+<span id="changelog-1-15-8-fix-3-2018-12-06"></span><h2>1.15.8 fix 3 (2018.12.06)<a class="headerlink" href="#fix-3-2018-12-06" title="Link to this heading">¶</a></h2>
+</section>
+<section id="fix-3-2018-12-04">
+<span id="changelog-1-15-8-fix-3-2018-12-04"></span><h2>1.15.8 fix 3 (2018.12.04)<a class="headerlink" href="#fix-3-2018-12-04" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Some Fixes for Blender 2.8 builds</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-8">
+<span id="id43"></span><h2>1.15.8 (2018.12.03)<a class="headerlink" href="#changelog-1-15-8" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Beta Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="fix-3-2018-11-20">
+<span id="changelog-1-15-7-fix-3"></span><h2>1.15.7 fix 3 (2018.11.20)<a class="headerlink" href="#fix-3-2018-11-20" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Fix for the latest Blender 2.8 builds</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-7">
+<span id="id44"></span><h2>1.15.7 (2018.11.08)<a class="headerlink" href="#changelog-1-15-7" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Latest Blender 2.8 Builds Support</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-6">
+<span id="id45"></span><h2>1.15.6 (2018.10.10)<a class="headerlink" href="#changelog-1-15-6" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Latest Blender 2.8 Builds Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-5">
+<span id="id46"></span><h2>1.15.5 (2018.09.13)<a class="headerlink" href="#changelog-1-15-5" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Alpha Support</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-4">
+<span id="id47"></span><h2>1.15.4 (2018.08.27)<a class="headerlink" href="#changelog-1-15-4" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Blender 2.8 Alpha Support</p></li>
+<li><p>Python 3.7 Support</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-3">
+<span id="id48"></span><h2>1.15.3 (2018.06.25)<a class="headerlink" href="#changelog-1-15-3" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Show/Hide/Toggle Side Area</p></li>
+<li><p>Show/Hide/Toggle Sidebar</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-2">
+<span id="id49"></span><h2>1.15.2 (2018.05.16)<a class="headerlink" href="#changelog-1-15-2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#../Editors/Property#Storing_Values"><span class="xref myst">Store Property Values in <code class="docutils literal notranslate"><span class="pre">.blend</span></code> Files</span></a></p></li>
+<li><p><a class="reference internal" href="#../Editors/Property#Functions"><span class="xref myst">On Property Init Function</span></a></p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-1">
+<span id="id50"></span><h2>1.15.1 (2018.05.09)<a class="headerlink" href="#changelog-1-15-1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://blenderartists.org/t/addon-pie-menu-editor-1-15-0/662456/1261?u=roaoao">Context Sensitive Buttons</a></p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-15-0">
+<span id="id51"></span><h2>1.15.0 (2018.05.08)<a class="headerlink" href="#changelog-1-15-0" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#../Editors/Property"><span class="xref myst">Property Editor</span></a></p></li>
+<li><p><a class="reference internal" href="#../Panels#Extending_Panels"><span class="xref myst">Extending Panels</span></a></p></li>
+<li><p><a class="reference external" href="https://i.imgur.com/Hwrs49a.mp4">Tag/Untag Group of Menus</a></p></li>
+<li><p><a class="reference external" href="https://i.imgur.com/jKvxCLg.mp4">Save/Restore Tree View State</a></p></li>
+<li><p><a class="reference external" href="https://i.imgur.com/bsaKFdq.mp4">Select Menu by Name or Hotkey</a></p></li>
+<li><p><a class="reference internal" href="#../Scripting#Auto-run_Scripts"><span class="xref myst">Auto-run Python Script Files</span></a></p></li>
+<li><p><a class="reference internal" href="#../Scripting#Custom_Global_Functions"><span class="xref myst">Custom Global Functions</span></a></p></li>
+<li><p><a class="reference internal" href="#../Scripting#Global_Variables"><span class="xref myst">New Global Variables: menu, slot</span></a></p></li>
+<li><p><a class="reference internal" href="#../Scripting#Common_Functions"><span class="xref myst">New Function: props(name)</span></a></p></li>
+<li><p><a class="reference internal" href="#../Scripting#Command_Tab_Functions"><span class="xref myst">Updated Function: open_menu(menu, slot, **kwargs)</span></a></p></li>
+<li><p>Blender 2.8 Support</p></li>
+</ul>
+</section>
+<section id="changelog-1-14-15">
+<span id="id52"></span><h2>1.14.15 (2018.04.06)<a class="headerlink" href="#changelog-1-14-15" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://i.imgur.com/oV5lASt.mp4">Move Edge Script</a> (idea by <a class="reference external" href="https://blenderartists.org/forum/showthread.php?392910&amp;amp;p=3299258&amp;amp;viewfull=1#post3299258">MickHanks</a>)</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-14-13">
+<span id="id53"></span><h2>1.14.13 (2018.02.14)<a class="headerlink" href="#changelog-1-14-13" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://i.imgur.com/zpCo97J.mp4">Call Pie Menus from Other Add-ons</a></p></li>
+</ul>
+</section>
+<section id="changelog-1-14-9">
+<span id="id54"></span><h2>1.14.9 (2017.10.24)<a class="headerlink" href="#changelog-1-14-9" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/7/7f/Pme1.14.9_modal_hide_hotkey.png">Option to Hide Modal Sub-Hotkey</a></p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-14-7">
+<span id="id55"></span><h2>1.14.7 (2017.10.15)<a class="headerlink" href="#changelog-1-14-7" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/c/cd/Pme1.14.7_modal_adv_settings.png">New Modal Operator Options</a></p></li>
+<li><p><a class="reference external" href="https://i.imgur.com/Q1nlcm5.mp4">Customizable Modal Overlay Text</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">custom_icon()</span></code> Function</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> for <a class="reference internal" href="#../Scripting#Command_Tab_Functions"><span class="xref myst">open_menu()</span></a> Function</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-14-6">
+<span id="id56"></span><h2>1.14.6 (2017.10.07)<a class="headerlink" href="#changelog-1-14-6" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://youtu.be/-RQFK1kqqVw">Macro Operator Tutorial</a> by <a class="reference external" href="https://blenderartists.org/forum/member.php?104883-jimpaw80">Jimmy Livefjord</a></p></li>
+<li><p>Fixed Hotkey tab</p></li>
+</ul>
+</section>
+<section id="changelog-1-14-3">
+<span id="id57"></span><h2>1.14.3 (2017.09.27)<a class="headerlink" href="#changelog-1-14-3" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="http://i.imgur.com/Gu3nRSV.mp4">Popup Area’s On-Open command</a></p></li>
+<li><p>Modal Operators:</p>
+<ul>
+<li><p>Angle properties support</p></li>
+<li><p><a class="reference external" href="http://i.imgur.com/ekVYd6y.mp4">Cursor is locked in the current area</a></p></li>
+<li><p><a class="reference external" href="http://i.imgur.com/xB3H3Ll.mp4">Panning</a> (unlocks the cursor)</p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="https://youtu.be/-rknBwAPypk">Stack Key Tutorial</a> by <a class="reference external" href="https://blenderartists.org/forum/member.php?104883-jimpaw80">Jimmy Livefjord</a></p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-14-2">
+<span id="id58"></span><h2>1.14.2 (2017.09.22)<a class="headerlink" href="#changelog-1-14-2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="http://i.imgur.com/rumYTRt.gifv">Popup Area</a></p></li>
+<li><p><a class="reference internal" href="#../Examples#Modal_Subsurf_Modifier"><span class="xref myst">Modal Subsurf Modifier Example</span></a></p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-14-1">
+<span id="id59"></span><h2>1.14.1 (2017.09.19)<a class="headerlink" href="#changelog-1-14-1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#../Editors/Popup_Dialog#Button_Hotkeys"><span class="xref myst">Copy/Paste Item hotkeys</span></a></p></li>
+<li><p>Maximize Button</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-14-0">
+<span id="id60"></span><h2>1.14.0 (2017.09.17)<a class="headerlink" href="#changelog-1-14-0" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#../Editors/Modal_Operator"><span class="xref myst">Modal Operator Editor</span></a></p></li>
+<li><p><a class="reference internal" href="#../Toolbars"><span class="xref myst">Toolbars</span></a></p></li>
+<li><p>[Tweak Hotkeys](…/#Hotkey Mode)</p></li>
+<li><p><a class="reference internal" href="#../Examples#1_Hotkey_-_3_Pie_Menus"><span class="xref myst">1 Hotkey - 3 Pie Menus</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'Any'</span></code> Hotkey Modifier</p></li>
+<li><p><a class="reference internal" href="#../#RMB_Context_Menu"><span class="xref myst">RMB Context Menu Entry</span></a></p></li>
+<li><p>Blender 2.8 Support</p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/e/ef/Pme1.14.0_pm_title.png">Hide Pie Menu Title</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/b/b7/Pme1.14.0_expand_item_menu.gif">Expand Item Menu</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/6/60/Pme1.14.0_group_by.png">Group Menus by Type/Hotkey</a></p></li>
+<li><p><a class="reference internal" href="#../Scripting#Global_Functions"><span class="xref myst">New Global Functions</span></a></p></li>
+<li><p><strong>Pop-up Dialog Editor</strong>:</p>
+<ul>
+<li><p><a class="reference internal" href="#../Editors/Popup_Dialog#Mode"><span class="xref myst">‘Pop-up’ Mode</span></a></p></li>
+<li><p><a class="reference internal" href="#../Editors/Popup_Dialog#Alignment"><span class="xref myst">Alignment tools</span></a></p></li>
+<li><p><a class="reference internal" href="#../Editors/Popup_Dialog#Hotkeys"><span class="xref myst">Hotkeys</span></a></p></li>
+<li><p><a class="reference internal" href="#../Editors/Popup_Dialog#Expand_Layout"><span class="xref myst">New way to expand popup dialogs</span></a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/9/99/Pme1.14.0_resize_all.png">Resize All Rows</a></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="changelog-1-13-6">
+<span id="id61"></span><h2>1.13.6 (2017.06.10)<a class="headerlink" href="#changelog-1-13-6" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/b/b9/Pme1.13.5_popup.png">Open existing panel in a popup</a></p></li>
+<li><p>Bug fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-13-4">
+<span id="id62"></span><h2>1.13.4 (2017.04.09)<a class="headerlink" href="#changelog-1-13-4" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/4/4d/Pme1.13.4_tags.png">Group and filter menus by custom tags</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/b/bf/Pme1.13.4_block_ui.png">Block UI</a> option for Sticky Keys</p></li>
+</ul>
+</section>
+<section id="changelog-1-13-1">
+<span id="id63"></span><h2>1.13.1 (2017.02.23)<a class="headerlink" href="#changelog-1-13-1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/e/e2/Pme1.13.1_fixed_columns.gif">Columns with Fixed Width</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/0/0d/Pme1.13.1_dummy_modal.gif">Dummy Modal operator</a><br />
+Can be used to pause Macro Operator (press Enter or LMB to resume)</p></li>
+<li><p>Removed unstable <a class="reference external" href="https://wiki.blender.org/uploads/e/ea/Pme1.13.0_adv_options.png">Auto-Close Popup Dialog</a> option</p></li>
+<li><p>Bug Fixes</p></li>
+</ul>
+</section>
+<section id="changelog-1-13-0">
+<span id="id64"></span><h2>1.13.0 (2017.02.19)<a class="headerlink" href="#changelog-1-13-0" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.youtube.com/watch?v=x4HhN4aHCxg">Macro Operator Editor</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/f/f4/Pme_item_edit.png">Command Generator</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/e/ea/Pme1.13.0_adv_options.png">Poll method</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/e/ea/Pme1.13.0_adv_options.png">Auto-Close Popup Dialog</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/9/9d/Pme_tree.png">Updated tree view &amp; new Show Only New Menus filter</a></p></li>
+<li><p>Compatibility with Blender Tabs Interface add-on</p></li>
+</ul>
+</section>
+<section id="changelog-1-12-1">
+<span id="id65"></span><h2>1.12.1 (2016.12.12)<a class="headerlink" href="#changelog-1-12-1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://youtu.be/pcFOPWnHC7U">Sticky Key Editor</a></p></li>
+<li><p><a class="reference external" href="https://s3.amazonaws.com/markets-rails/uploads%2F1480675508687-pme1.12.0_confirm_on_release.png">Option to disable ‘Confirm on Release’ feature for pie menus</a></p></li>
+</ul>
+</section>
+<section id="changelog-1-11-4">
+<span id="id66"></span><h2>1.11.4 (2016.11.13)<a class="headerlink" href="#changelog-1-11-4" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://static-2.gumroad.com/res/gumroad/1512858036361/asset_previews/38ea290af3476c74fd8b832e4b4351de/retina/pme1.11.3_copy.gif">Adding command using context menu</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/BGs0de6ZYdw">Side panel editor</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/z19c6b7XOWo">Hiding unused panels</a></p></li>
+<li><p><a class="reference external" href="https://cgcookiemarkets.com/app/uploads/edd/2016/10/pme1.11.0_mouse_pos.jpg">Restoring mouse position for pie menus</a></p></li>
+<li><p><a class="reference external" href="https://cgcookiemarkets.com/app/uploads/edd/2016/10/pme1.11.0_expand_pd.jpg">Using popup dialogs inside popup dialogs</a></p></li>
+</ul>
+</section>
+<section id="changelog-1-10-1">
+<span id="id67"></span><h2>1.10.1 (2016.07.30)<a class="headerlink" href="#changelog-1-10-1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://youtu.be/4wZKiyKE_P4">Stack Keys</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/9cGWQF6L4o4">Ability to use mouse buttons as a hotkey modifier</a></p></li>
+<li><p><a class="reference external" href="https://cgcookiemarkets.com/app/uploads/edd/2016/07/pme1.10.1_sk_settings.png">Displaying the name of the last stack key command</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/m8pCPZdK_qc">Context sensitive menus examples</a></p></li>
+</ul>
+</section>
+<section id="changelog-1-9-2">
+<span id="id68"></span><h2>1.9.2 (2016.05.17)<a class="headerlink" href="#changelog-1-9-2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://youtu.be/A81jLLynssk">Script editor</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/8XUvscCCviA">Double click mode</a></p></li>
+<li><p><a class="reference external" href="https://cgcookiemarkets.com/app/uploads/edd/2016/04/pme1.9.0_prefs_settings.png">Customizable Ctrl+Shift+` hotkey</a></p></li>
+<li><p>Hotkeys to confirm (Enter) and cancel (Esc) item/icon editing</p></li>
+</ul>
+</section>
+<section id="changelog-1-8-3">
+<span id="id69"></span><h2>1.8.3 (2016.04.08)<a class="headerlink" href="#changelog-1-8-3" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://youtu.be/-fhI2imoo4U">Panel mode and Panels</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/5zDp586Uy2w?t=57">Sticky Keys</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/5zDp586Uy2w">Threshold and Confirm Threshold for Pie Menus</a></p></li>
+<li><p><a class="reference external" href="https://wiki.blender.org/uploads/9/9d/Pme_tree.png">Tree view</a></p></li>
+<li><p>Customizable width of the list/tree</p></li>
+</ul>
+</section>
+<section id="changelog-1-7-0">
+<span id="id70"></span><h2>1.7.0 (2016.02.16)<a class="headerlink" href="#changelog-1-7-0" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://youtu.be/sF10rVDVo-k">Custom layout using python code</a></p></li>
+</ul>
+</section>
+<section id="changelog-1-6-0">
+<span id="id71"></span><h2>1.6.0 (2016.01.19)<a class="headerlink" href="#changelog-1-6-0" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Multi-column regular menus</p></li>
+<li><p>Open regular menu on mouse over</p></li>
+</ul>
+</section>
+<section id="changelog-1-5-2">
+<span id="id72"></span><h2>1.5.2 (2016.01.11)<a class="headerlink" href="#changelog-1-5-2" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Copy/Paste Row (Popup dialog)</p></li>
+<li><p>Preview of the menus</p></li>
+<li><p>External python scripts as a command</p></li>
+</ul>
+</section>
+<section id="changelog-1-4-1">
+<span id="id73"></span><h2>1.4.1 (2015.12.09)<a class="headerlink" href="#changelog-1-4-1" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Popup dialog editor</p></li>
+<li><p>Pie menus with more than 8 buttons</p></li>
+</ul>
+</section>
+<section id="changelog-1-3-0">
+<span id="id74"></span><h2>1.3.0 (2015.11.28)<a class="headerlink" href="#changelog-1-3-0" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Custom icons</p></li>
+<li><p>Hotkey as a command</p></li>
+</ul>
+</section>
+<section id="changelog-1-2-0">
+<span id="id75"></span><h2>1.2.0 (2015.10.26)<a class="headerlink" href="#changelog-1-2-0" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Regular menu editor</p></li>
+<li><p>Multiple keymap names</p></li>
+<li><p>New icon selection mode</p></li>
+</ul>
+</section>
+<section id="changelog-1-1-5">
+<span id="id76"></span><h2>1.1.5 (2015.10.15)<a class="headerlink" href="#changelog-1-1-5" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Pie Menu Editor</p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="get_support.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Support</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Change Log</a><ul>
+<li><a class="reference internal" href="#in-development">2.0.3 (In Development)</a></li>
+<li><a class="reference internal" href="#changelog-2-0-2-3">2.0.2.3 (2026.03.28)</a></li>
+<li><a class="reference internal" href="#changelog-2-0-2-2">2.0.2.2 (2026.03.15)</a></li>
+<li><a class="reference internal" href="#changelog-2-0-2-1">2.0.2.1 (2026.03.15)</a></li>
+<li><a class="reference internal" href="#changelog-2-0-2">2.0.2 (2026.03.14)</a></li>
+<li><a class="reference internal" href="#changelog-2-0-1">2.0.1 (2026.03.04)</a></li>
+<li><a class="reference internal" href="#changelog-2-0-0">2.0.0 (2026.02.20)</a></li>
+<li><a class="reference internal" href="#changelog-1-19-2">1.19.2 (2026.01.11)</a></li>
+<li><a class="reference internal" href="#changelog-1-19-1">1.19.1 (2025.11.24)</a></li>
+<li><a class="reference internal" href="#changelog-1-19-0">1.19.0 (2025.10.25)</a></li>
+<li><a class="reference internal" href="#changelog-1-18-9">1.18.9 (2025.07.21)</a></li>
+<li><a class="reference internal" href="#changelog-1-18-8">1.18.8 (2025.01.05)</a></li>
+<li><a class="reference internal" href="#changelog-1-18-7">1.18.7 (2023.04.11)</a></li>
+<li><a class="reference internal" href="#changelog-1-18-6">1.18.6 (2022.08.13)</a></li>
+<li><a class="reference internal" href="#changelog-1-18-5">1.18.5 (2022.05.02)</a></li>
+<li><a class="reference internal" href="#changelog-1-18-4">1.18.4 (2021.11.11)</a></li>
+<li><a class="reference internal" href="#changelog-1-18-3">1.18.3 (2021.06.28)</a></li>
+<li><a class="reference internal" href="#changelog-1-18-2">1.18.2 (2021.04.24)</a></li>
+<li><a class="reference internal" href="#changelog-1-18-1">1.18.1 (2021.03.12)</a></li>
+<li><a class="reference internal" href="#changelog-1-18-0">1.18.0 (2020.10.30)</a></li>
+<li><a class="reference internal" href="#changelog-1-17-5">1.17.5 (2020.09.23)</a></li>
+<li><a class="reference internal" href="#changelog-1-17-3">1.17.3 (2020.07.20)</a></li>
+<li><a class="reference internal" href="#changelog-1-17-2">1.17.2 (2020.05.12)</a></li>
+<li><a class="reference internal" href="#changelog-1-17-1">1.17.1 (2020.04.27)</a></li>
+<li><a class="reference internal" href="#changelog-1-17-0">1.17.0 (2020.03.27)</a></li>
+<li><a class="reference internal" href="#changelog-1-16-4">1.16.4 (2019.10.13)</a></li>
+<li><a class="reference internal" href="#changelog-1-16-2">1.16.2 (2019.09.21)</a></li>
+<li><a class="reference internal" href="#changelog-1-16-0">1.16.0 (2019.08.09)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-23">1.15.23 (2019.06.26)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-22">1.15.22 (2019.06.09)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-21">1.15.21 (2019.06.04)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-20">1.15.20 (2019.04.11)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-19">1.15.19 (2019.03.25)</a></li>
+<li><a class="reference internal" href="#fix-1-2019-03-24">1.15.18 fix 1 (2019.03.24)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-18">1.15.18 (2019.03.21)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-17">1.15.17 (2019.03.12)</a></li>
+<li><a class="reference internal" href="#fix-1-2019-03-07">1.15.16 fix 1 (2019.03.07)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-16">1.15.16 (2019.02.14)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-15">1.15.15 (2019.02.13)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-14">1.15.14 (2019.01.21)</a></li>
+<li><a class="reference internal" href="#fix-1-2019-01-15">1.15.13 fix 1 (2019.01.15)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-13">1.15.13 (2019.01.14)</a></li>
+<li><a class="reference internal" href="#fix-2-2019-01-11">1.15.12 fix 2 (2019.01.11)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-12">1.15.12 (2019.01.07)</a></li>
+<li><a class="reference internal" href="#fix-7-2019-01-05">1.15.11 fix 7 (2019.01.05)</a></li>
+<li><a class="reference internal" href="#fix-4-2018-12-28">1.15.11 fix 4 (2018.12.28)</a></li>
+<li><a class="reference internal" href="#fix-3-2018-12-28">1.15.11 fix 3 (2018.12.28)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-11">1.15.11 (2018.12.23)</a></li>
+<li><a class="reference internal" href="#fix-1-2018-12-15">1.15.10 fix 1 (2018.12.15)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-10">1.15.10 (2018.12.10)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-9">1.15.9 (2018.12.10)</a></li>
+<li><a class="reference internal" href="#fix-3-2018-12-06">1.15.8 fix 3 (2018.12.06)</a></li>
+<li><a class="reference internal" href="#fix-3-2018-12-04">1.15.8 fix 3 (2018.12.04)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-8">1.15.8 (2018.12.03)</a></li>
+<li><a class="reference internal" href="#fix-3-2018-11-20">1.15.7 fix 3 (2018.11.20)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-7">1.15.7 (2018.11.08)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-6">1.15.6 (2018.10.10)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-5">1.15.5 (2018.09.13)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-4">1.15.4 (2018.08.27)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-3">1.15.3 (2018.06.25)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-2">1.15.2 (2018.05.16)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-1">1.15.1 (2018.05.09)</a></li>
+<li><a class="reference internal" href="#changelog-1-15-0">1.15.0 (2018.05.08)</a></li>
+<li><a class="reference internal" href="#changelog-1-14-15">1.14.15 (2018.04.06)</a></li>
+<li><a class="reference internal" href="#changelog-1-14-13">1.14.13 (2018.02.14)</a></li>
+<li><a class="reference internal" href="#changelog-1-14-9">1.14.9 (2017.10.24)</a></li>
+<li><a class="reference internal" href="#changelog-1-14-7">1.14.7 (2017.10.15)</a></li>
+<li><a class="reference internal" href="#changelog-1-14-6">1.14.6 (2017.10.07)</a></li>
+<li><a class="reference internal" href="#changelog-1-14-3">1.14.3 (2017.09.27)</a></li>
+<li><a class="reference internal" href="#changelog-1-14-2">1.14.2 (2017.09.22)</a></li>
+<li><a class="reference internal" href="#changelog-1-14-1">1.14.1 (2017.09.19)</a></li>
+<li><a class="reference internal" href="#changelog-1-14-0">1.14.0 (2017.09.17)</a></li>
+<li><a class="reference internal" href="#changelog-1-13-6">1.13.6 (2017.06.10)</a></li>
+<li><a class="reference internal" href="#changelog-1-13-4">1.13.4 (2017.04.09)</a></li>
+<li><a class="reference internal" href="#changelog-1-13-1">1.13.1 (2017.02.23)</a></li>
+<li><a class="reference internal" href="#changelog-1-13-0">1.13.0 (2017.02.19)</a></li>
+<li><a class="reference internal" href="#changelog-1-12-1">1.12.1 (2016.12.12)</a></li>
+<li><a class="reference internal" href="#changelog-1-11-4">1.11.4 (2016.11.13)</a></li>
+<li><a class="reference internal" href="#changelog-1-10-1">1.10.1 (2016.07.30)</a></li>
+<li><a class="reference internal" href="#changelog-1-9-2">1.9.2 (2016.05.17)</a></li>
+<li><a class="reference internal" href="#changelog-1-8-3">1.8.3 (2016.04.08)</a></li>
+<li><a class="reference internal" href="#changelog-1-7-0">1.7.0 (2016.02.16)</a></li>
+<li><a class="reference internal" href="#changelog-1-6-0">1.6.0 (2016.01.19)</a></li>
+<li><a class="reference internal" href="#changelog-1-5-2">1.5.2 (2016.01.11)</a></li>
+<li><a class="reference internal" href="#changelog-1-4-1">1.4.1 (2015.12.09)</a></li>
+<li><a class="reference internal" href="#changelog-1-3-0">1.3.0 (2015.11.28)</a></li>
+<li><a class="reference internal" href="#changelog-1-2-0">1.2.0 (2015.10.26)</a></li>
+<li><a class="reference internal" href="#changelog-1-1-5">1.1.5 (2015.10.15)</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=ce25ea0a"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

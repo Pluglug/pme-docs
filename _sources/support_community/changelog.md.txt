@@ -1,0 +1,576 @@
+(changelog)=
+
+# Change Log
+
+```{note}
+PME uses `major.minor.patch.hotfix` versioning.
+
+- `major`: product generation
+- `minor`: milestone / release train
+- `patch`: feature release within that train
+- `hotfix`: follow-up build on the same patch line
+```
+
+(changelog-2-0-3)=
+## 2.0.3 (In Development)
+
+- **`import pme` is now opt-in** — The `import pme` alias is no longer always on. If you already use `import pme` in existing scripts or companion addons, turn on {guilabel}`Enable import pme Alias` in {guilabel}`Settings > Developer` and restart Blender once.
+- **Better operator capture display names** — Blender's Python API usually does not expose the exact UI label that was drawn for a button. Because of that, captured operators often fell back to generic names like `Add Node`, making it hard to tell what kind of slot had just been added. PME2 now uses dynamically resolved item names as the slot name when the operator family provides enough information to recover a meaningful display label at capture time.
+- **Expanded supported operator families** — Dynamic name recovery currently covers:
+  - `node.add_node`
+  - `object.modifier_add`
+  - `object.constraint_add`
+  - `pose.constraint_add`
+  - `object.shaderfx_add`
+  - `sequencer.strip_modifier_add`
+  - `wm.tool_set_by_id`
+  - `brush.asset_activate`
+  This does not apply to every operator, but the supported ones now produce much more practical auto-generated names during capture. This improvement only affects naming at capture time; direct Slot editing still uses the existing generic naming behavior.
+- **Improved GPULayout sliders and numeric fields** — GPULayout numeric sliders and numeric input fields now follow Blender's effective UI ranges more closely. In addition to Shape Keys, some Constraint / Particle / Modifier properties now show more natural limits and slider fill behavior based on the current settings. The handling of instance-specific UI ranges was also tightened up.
+- **Improved floating panel and subpanel redraw updates** — Custom UI inside floating panels, as well as subpanels such as the color picker, now update their panel drawing more appropriately when the selection changes or when related properties are modified elsewhere. When the UI structure depends on the current context, the layout is rebuilt; when a subpanel is still showing the same property, it can stay open and refresh in place; and when the displayed target changes, only the contents are swapped out.
+- **Bug report workflow** — Added a dedicated [bug report page](get_support) to the documentation site and a link button in Preferences.
+- **Boot options** — PME now supports external startup options that are evaluated before addon startup. This gives startup-only settings a proper home and lays the groundwork for more flexible external configuration later. See [Boot Options](../reference/boot_options.md) and [Developer Options](../reference/developer_options.md).
+- **Loader manifest support** — PME now includes `loader_manifest.json`, a bundled module-load-order file used during startup. When {guilabel}`Use Bundled Loader Manifest` is on, PME starts from that file. If the option is off, or if the file cannot be used, PME falls back to dependency-based dynamic discovery.
+- **Improved startup diagnostics** — As part of the foundation work that supports PME's long-term development and verifiability, startup observation, candidate loader manifests, and pre-startup options have been cleaned up. When enabled, PME now creates `loader_manifest_candidate.json`, and that candidate can be explicitly promoted into `loader_manifest.json` from the Developer tab or from the command line. Normal startup never rewrites `loader_manifest.json` automatically. Because startup now uses `loader_manifest.json` and init logging is opt-in, normal startup is also slightly lighter. If startup trouble occurs, you can enable init logging for the next run or turn it on directly by editing `boot_config.json`. See [Developer Options](../reference/developer_options.md) and [Boot Options](../reference/boot_options.md).
+
+---
+
+(changelog-2-0-2-3)=
+## 2.0.2.3 (2026.03.28)
+
+- **Blender 5.1 / macOS enable crash fix** — Investigating a crash that killed Blender on addon enable revealed that the notification and update storage structure sat in a part of Blender's registration path that doesn't play well with certain environments. Rather than patching around it, the storage design was reworked from scratch.
+- **Notification and update state externalized** — Read/dismiss state and update check results have been moved out of Blender's internal preferences tree into a JSON file managed by PME itself. This makes the data stable across Blender's startup and shutdown cycles — and because it's a plain text file living outside Blender, it can be read directly by external tools. In the longer term, diagnostic information about your menus and slots is planned to live here too, opening the door to smarter troubleshooting support.
+- **Update source safety** — A maintenance path for switching the update source was added. When a non-official source is active, a persistent warning is displayed. Update notifications from custom sources never show external URL actions; instead, the referenced source and download URL are stated in the notification body.
+- **Multi-line notification messages** — Notification bodies can now render multi-line text directly, making it easier to communicate warnings and supplementary information.
+- **Missing operator fallback for older menus** — Since Blender 5.1, PME fallback could fail for slots containing older menu commands or unresolved operators, making the whole pie look broken. Missing operators now return to PME's own error slot, helping preserve the overall pie shape in older menus.
+- **Legacy JSON import stability** — Post-import internal references and compatibility handling were tightened for some older JSON v1 menu packs, making legacy imports more stable overall.
+- **Note** — This update changes how notification and update state is stored. Read, dismissed, and update cache state from previous `2.0.2.x` builds will be reset on first launch. Update check results will be re-fetched automatically.
+
+---
+
+(changelog-2-0-2-2)=
+## 2.0.2.2 (2026.03.15)
+
+- **Editor command stability fix** — Tracking down one hang report revealed the real cause wasn't a single command but the PMI text classification itself. Escalated from hotfix to redesign, tightening the problematic parsing paths at their root.
+- **Scanner-first PMI classification** — A lightweight scanner now triages PMI text before expensive regex paths are reached, significantly reducing backtracking risk while keeping normal command entry permissive.
+
+---
+
+(changelog-2-0-2-1)=
+## 2.0.2.1 (2026.03.15)
+
+- **Hotkey runtime state isolation** — Tightened the hotkey recovery flow to prevent startup and runtime state cross-talk.
+- **Property capture follow-up** — Hardened the render and capture paths for the right-click property capture introduced in 2.0.2.
+- **Four-part hotfix versioning** — Hotfix builds like `2.0.2`, `2.0.2.1`, and `2.0.2.2` are now accurately distinguished by the notification system.
+
+---
+
+(changelog-2-0-2)=
+## 2.0.2 (2026.03.14)
+
+- **Major right-click property capture upgrade** — Many buttons that used to show "Can't Add This Widget" can now be captured. Theme colors, addon preferences, and deeply nested properties are all supported. Custom properties (`["prop"]` format) can be captured as-is, and when capture still isn't possible, you'll see feedback explaining why. The captured paths are also improved: previously, paths often fell back to `bpy.data`-based absolute references, producing commands that only worked for one specific object or data block. PME2 now prioritizes `bpy.context`-relative paths, so your commands naturally apply to the active object, the current brush, or whatever the context calls for.
+- **Sidearea open/close commands** — `pme.sidearea_toggle` now accepts `open_cmd` and `close_cmd` parameters, letting you bundle initialization and cleanup logic into the same toggle call.
+- **Notification system** — A badge appears on the Settings tab when a new version of PME is available. Checks run quietly at startup; you can also refresh manually or skip a specific version. Currently limited to release notifications, but the system is designed with broader use in mind.
+- **Tree Mode search reveal** — Even when your customizations grow and groups are deeply nested, search automatically expands collapsed groups and scrolls to the target menu. No more getting lost among hundreds of menus.
+- **Hotkey recovery on startup** — Hotkeys that could not be registered at addon enable time are now queued and retried automatically, fixing cases where hotkeys disappeared after a Blender restart.
+- **GPU floating panel fixes** — Embedded Blender panel lists (UV Maps, Shape Keys, etc.) render more reliably in GPU floating panels.
+- **Blender 5.1 support** — Verified compatible with Blender 5.1.
+
+---
+
+(changelog-2-0-1)=
+## 2.0.1 (2026.03.04)
+
+- **Browsable hotkey key menus** — Hotkey and chord-key fields now use hierarchical browse menus. Special keys like `F13` through `F24` and modifier combinations that previously had to be typed in manually can now be assigned with a simple menu selection.
+- **Per-slot COMMAND Undo option** — Individual COMMAND slots can now enable Undo independently. Control the undo stack precisely based on each command's purpose. Toggle visibility in `Settings > General > Show Command Undo`.
+- **Stronger startup hotkey recovery** — Startup hotkey registration is more resilient, with clearer reporting when some keys cannot be restored.
+
+---
+
+(changelog-2-0-0)=
+## 2.0.0 (2026.02.20)
+
+- **PME2 stable release** — PME2 is now available as a stable release for Blender 5.0+. This release is not about keeping an aging codebase on life support. It is a foundation rebuild, meant to move PME forward so it can continue evolving as a platform for a wide range of creative work.
+- **PME1 data compatibility** — PME2's internals have changed significantly, but it supports importing PME 1.18.x JSON and backup files, as well as direct migration from data stored in `userpref.blend`. Legacy array format conversion, automatic uid generation, menu mode recovery from enum index drift, prefix standardization, Extend Panel schema migration — each migration path was built through careful validation of Blender's internal data structures. If a migration error occurs, it automatically retries on the next startup.
+- **JSON Schema v2** — The export format has been rebuilt from the ground up. In PME1, data lived in positional arrays — you needed the source code to know what index 5 meant. In v2, every field has a name, a type, and a description, all self-documented via a [public JSON Schema](https://pluglug.github.io/pme-docs/schema/pme2-2.0.json). Menus now carry uid, descriptions, poll conditions, and tags; items carry typed actions and descriptions. Each menu and button can express not just *what it does*, but *how it looks* and *when it's available*. This is a structural upgrade designed for the future. This schema is built to handle whatever you throw at it for the next decade.
+- **GPU Layout System** — A custom GPU rendering engine designed for UILayout compatibility. The same draw code runs on both Blender's standard UILayout and GPU panels without modification. Supports 2-pass layout, theme integration, reactive property binding, and operator invocation from within modal handlers.
+- **Floating Panel** — A new menu mode built on the GPU Layout System. Panels stay in your area, blend into the Blender theme, and let you place your own controls wherever you want. Position, size, and opacity persist across the session. Joins Pie Menu and Popup-Dialog as a first-class PME menu mode.
+- **UID-based references** — Every menu now has a stable unique ID. Rename freely — references won't break. But that's just the start. Tracking dependencies between menus, pinpointing what's broken, surviving Blender upgrades, managing JSON in Git, safely updating shared presets — uid is the foundation for all of it. Floating Panel position persistence already runs on this system.
+- **Extend Panel redesign** — The system for injecting your menus into Blender's built-in panels and menus has been rebuilt. In PME1, the extend target was tied to the menu's display name, and only one menu could extend a given target. PME2 manages target, position, and order through dedicated properties. Stack multiple menus on the same panel, toggle them with poll conditions, reorder at will. No name collisions when importing shared menus.
+- **Descriptions and tooltips** — Custom macros, complex commands — forgetting what you built is a rite of passage in PME1. In PME2, you can attach descriptions to menus and individual slots. Plain text or dynamic Python expressions. Even without writing anything, tooltips now auto-display the referenced menu name. Know your setup; communicate your intent when sharing.
+- **User Resources** — Scripts, icons, backups, and exports now live in their own directory, outside both the addon and Blender's config folder. `~/Documents/Pie Menu Editor/` keeps your files safe through addon updates and Blender upgrades alike. The path is configurable in Settings → Resources, and works with Syncthing, Git, or any sync tool you prefer.
+- **Public API** — A new public API `pme` makes PME's capabilities available to external scripts and other addons. Type `import pme` in Blender's console and you're off. Search menus, invoke them, execute code — all through a stable interface. Integration with other addons, scripted automation — this is PME's door to the outside world. Currently Experimental, with more features and stability improvements planned.
+- **Side area stabilization** — Width memory, N-Panel tab restoration, FILE_BROWSER crash avoidance, sidebar closed-state recovery — a batch of quality-of-life fixes for the part of PME you use every day.
+- **PM mode persistence** — Mode values are now decoupled from enum ordering, with a stable mode table and migration/backfill. More resilient when upgrading from PME1 with mode-index drift.
+- **PROPERTY / mode settings cleanup** — Cleaned up how per-mode settings are stored, removing legacy ambiguities. Not a flashy feature, but a meaningful step toward internal consistency.
+- **Settings UI and logging** — Settings reorganized into icon-based tabs (GPU Layout, Developer, Resources, etc.). Logging now has per-category control in the preferences UI, with cleaner init-time log handling.
+- **Other improvements** — Removed the beta banner and init hooks, and suppressed dev logs by default. Also enabled the COMMAND fallback Undo wrapper by default, fixed stale labels in the PMI editor, and improved path/error handling around `execute_script`.
+- **Long-term development foundation** — PME2's internals have been shaped for confident long-term maintenance. At the core is a dynamic module loader, battle-tested in a separate project before being brought to PME. It auto-discovers modules by pattern, resolves dependencies via topological sort, and handles class registration automatically. PME1 had a loader too, but it relied on a hand-maintained list with fixed ordering. Combined with the 6-layer architecture, package restructuring, and legacy dual-loader removal, adding a new file just works.
+
+---
+
+(changelog-1-19-2)=
+## 1.19.2 (2026.01.11)
+
+- **Final stable PME-F v1.x release** — This build was intended as the last stable release of the v1.x line before development focus moved to PME2.
+- **Side area width clamp fix** — Toggling side areas no longer corrupts layouts when widths become extreme or edge-case values slip through.
+- **Better main/side View3D detection** — PME now prefers the current area when resolving the main View3D, and closing from the side context works more reliably when both areas use the expected keymap setup.
+
+---
+
+(changelog-1-19-1)=
+## 1.19.1 (2025.11.24)
+
+- **CHORDS stability fixes** — Improved reliability under rapid repeated input, fixed a freeze caused by overlapping modal timers, added a PRESS fallback on chord timeout, and fixed chord hints in the header.
+- **Side area and screen-layout fixes** — Vertical side areas now close more consistently, use Blender 4.3+ `area_join()` correctly, and preserve dimensions more reliably during toggles.
+- **Blender 5.x compatibility follow-ups** — Preference restore paths that could drift on Blender 5.x were disabled, property serialization was updated, custom icons are more stable, and risky toolbar layout hacks are disabled on Blender 5.0+.
+
+---
+
+(changelog-1-19-0)=
+## 1.19.0 (2025.10.25)
+
+- **Blender 5.0 compatibility refresh** — PME-F updated several core property and preference paths for Blender 5.0, removed older compatibility layers, and fixed related API regressions.
+- **New click-style hotkey modes** — Added experimental `Click` and `Click Drag` activation modes, including click-drag direction options.
+- **Import, tags, and JSON improvements** — Import became more stable, export gained a compatibility-oriented JSON mode, and tag filters now stay in sync more reliably when menus are renamed or duplicated.
+- **Side area and area-type improvements** — Added `TOP` / `BOTTOM` side area support and improved dynamic area-type detection for side-area workflows.
+
+---
+
+(changelog-1-18-9)=
+## 1.18.9 (2025.07.21)
+
+- **Blender 4.5 compatibility** — PME-F was updated for Blender 4.5 while keeping support for Blender 3.2 and newer.
+- **Side area toggle fixes** — Side area toggle now works correctly with Blender 4.5's drawing system and high-DPI displays.
+- **Popup, toolbar, and panel fixes** — Popup area size control was restored, panel attribute errors were fixed, and unnecessary toolbar memory access was removed.
+- **Missing icon error cleanup** — Missing icons no longer spam `TypeError` messages.
+
+---
+
+(changelog-1-18-8)=
+## 1.18.8 (2025.01.05)
+
+- **Safer context overrides** — Major override flows were migrated from legacy context dictionaries to `temp_override`, with stronger validation via `ContextOverride`.
+- **Better error visibility** — PME now exposes PMI-related errors more clearly and adds `Settings > General > Show Error Trace` for console traceback output.
+- **UI and menu stability improvements** — Legacy icons were refreshed, unstable `c_last_btn` access was removed, `bpy.context.area is None` cases were handled more safely, and side area detection was improved.
+- **Compatibility cleanup** — Minimum supported Blender version is now 3.2, deprecated `blf.size(..., dpi=72)` usage was removed, and examples/docs were updated around `bpy.ops.pme.exec_override()`.
+- **New documentation site** — PME documentation moved to the new docs site.
+
+---
+
+(changelog-1-18-7)=
+## 1.18.7 (2023.04.11)
+- Blender 3.6.0 Alpha Support
+- Bug Fixes
+
+(changelog-1-18-6)=
+## 1.18.6 (2022.08.13)
+- Fixed Click Drag and Hold hotkey modes in Blender 3.2.0+
+
+(changelog-1-18-5)=
+## 1.18.5 (2022.05.02)
+- Header Tools
+
+(changelog-1-18-4)=
+## 1.18.4 (2021.11.11)
+- Toggle side-area operator fix for recent Blender builds.
+
+(changelog-1-18-3)=
+## 1.18.3 (2021.06.28)
+- Support Blender 3 Alpha
+
+(changelog-1-18-2)=
+## 1.18.2 (2021.04.24)
+- Bug Fix for Panel Groups in Blender 2.93
+
+(changelog-1-18-1)=
+## 1.18.1 (2021.03.12)
+- Blender 2.93 Alpha Support
+
+(changelog-1-18-0)=
+## 1.18.0 (2020.10.30)
+- Key Chords
+- Bug Fixes
+
+(changelog-1-17-5)=
+## 1.17.5 (2020.09.23)
+- Blender 2.91 Support  
+- Customizable number of menu list rows  
+- New global variable for scripts to store user data:
+
+    ```python
+    U.foo = "value"
+    U.update(foo="value1", bar="value2")  
+    U.foo
+    U.get("foo", "default_value")
+    ```
+
+- Bug Fixes
+
+(changelog-1-17-3)=
+## 1.17.3 (2020.07.20)
+- Option to use check-boxes instead of toggle-buttons.
+- Bug Fixes
+
+(changelog-1-17-2)=
+## 1.17.2 (2020.05.12)
+- PME Preferences in 3D View area
+- Pie extra slot gap size
+- Bug Fixes
+
+(changelog-1-17-1)=
+## 1.17.1 (2020.04.27)
+- New backup folder: `scripts/addons/pie_menu_editor_data/backups`  
+- Support keymaps with commas
+- Bug Fixes
+
+(changelog-1-17-0)=
+## 1.17.0 (2020.03.27)
+- 10 Pie Slots
+- Sub-panels
+- Wider Popups
+
+(changelog-1-16-4)=
+## 1.16.4 (2019.10.13)
+- Blender 2.81 Support
+- Bug Fixes
+
+(changelog-1-16-2)=
+## 1.16.2 (2019.09.21)
+- Blender 2.81 Support
+- Auto-backups (pie_menu_editor/data/backup folder)
+- Bug Fixes
+
+(changelog-1-16-0)=
+## 1.16.0 (2019.08.09)
+- Remember StackKey State
+- Bug Fixes
+
+(changelog-1-15-23)=
+## 1.15.23 (2019.06.26)
+- Bug Fixes
+
+(changelog-1-15-22)=
+## 1.15.22 (2019.06.09)
+- Bug Fixes
+
+(changelog-1-15-21)=
+## 1.15.21 (2019.06.04)
+- Toggle-able menu slots
+- Add existing menus to pies, menus, or popups
+- Bug Fixes
+
+(changelog-1-15-20)=
+## 1.15.20 (2019.04.11)
+- Bug Fixes
+
+(changelog-1-15-19)=
+## 1.15.19 (2019.03.25)
+Bug Fixes
+- Bug Fixes
+
+(changelog-1-15-18-fix-1)=
+## 1.15.18 fix 1 (2019.03.24)
+
+(changelog-1-15-18)=
+## 1.15.18 (2019.03.21)
+- Bug Fixes
+
+(changelog-1-15-17)=
+## 1.15.17 (2019.03.12)
+- Blender 2.8 Beta Support
+- Bug Fixes
+
+(changelog-1-15-16-fix-1)=
+## 1.15.16 fix 1 (2019.03.07)
+
+(changelog-1-15-16)=
+## 1.15.16 (2019.02.14)
+- Bug Fixes
+
+(changelog-1-15-15)=
+## 1.15.15 (2019.02.13)
+- Bug Fixes
+
+(changelog-1-15-14)=
+## 1.15.14 (2019.01.21)
+- Bug Fixes
+
+(changelog-1-15-13-fix-1)=
+## 1.15.13 fix 1 (2019.01.15)
+- Fix for multi-column Regular Menus
+
+- Multi-column fix
+
+(changelog-1-15-13)=
+## 1.15.13 (2019.01.14)
+- Blender 2.8 Beta Support
+
+(changelog-1-15-12-fix-2)=
+## 1.15.12 fix 2 (2019.01.11)
+- Fixes for Blender 2.8 Beta
+- New Python API changes.
+
+(changelog-1-15-12)=
+## 1.15.12 (2019.01.07)
+- Blender 2.8 Beta Support
+
+(changelog-1-15-11-fix-7)=
+## 1.15.11 fix 7 (2019.01.05)
+- Fixes for Blender 2.8 Beta
+
+(changelog-1-15-11-fix-4)=
+## 1.15.11 fix 4 (2018.12.28)
+
+(changelog-1-15-11-fix-3)=
+## 1.15.11 fix 3 (2018.12.28)
+- Fixes for PME 1.15.11
+
+(changelog-1-15-11)=
+## 1.15.11 (2018.12.23)
+- Blender 2.8 Beta Support
+- Bug Fixes
+
+(changelog-1-15-10-fix-1)=
+## 1.15.10 fix 1 (2018.12.15)
+- Some Fixes for Blender 2.8 builds
+
+(changelog-1-15-10)=
+## 1.15.10 (2018.12.10)
+- Bug Fixes
+
+(changelog-1-15-9)=
+## 1.15.9 (2018.12.10)
+- Bug Fixes
+
+(changelog-1-15-8-fix-3-2018-12-06)=
+## 1.15.8 fix 3 (2018.12.06)
+
+(changelog-1-15-8-fix-3-2018-12-04)=
+## 1.15.8 fix 3 (2018.12.04)
+- Some Fixes for Blender 2.8 builds
+
+(changelog-1-15-8)=
+## 1.15.8 (2018.12.03)
+- Blender 2.8 Beta Support
+- Bug Fixes
+
+(changelog-1-15-7-fix-3)=
+## 1.15.7 fix 3 (2018.11.20)
+- Fix for the latest Blender 2.8 builds
+
+(changelog-1-15-7)=
+## 1.15.7 (2018.11.08)
+- Latest Blender 2.8 Builds Support
+
+(changelog-1-15-6)=
+## 1.15.6 (2018.10.10)
+- Latest Blender 2.8 Builds Support
+- Bug Fixes
+
+(changelog-1-15-5)=
+## 1.15.5 (2018.09.13)
+- Blender 2.8 Alpha Support
+- Bug Fixes
+
+(changelog-1-15-4)=
+## 1.15.4 (2018.08.27)
+- Blender 2.8 Alpha Support
+- Python 3.7 Support
+
+(changelog-1-15-3)=
+## 1.15.3 (2018.06.25)
+- Show/Hide/Toggle Side Area
+- Show/Hide/Toggle Sidebar
+- Bug Fixes
+
+(changelog-1-15-2)=
+## 1.15.2 (2018.05.16)
+- [Store Property Values in `.blend` Files](../Editors/Property#Storing_Values)
+- [On Property Init Function](../Editors/Property#Functions)
+- Bug Fixes
+
+(changelog-1-15-1)=
+## 1.15.1 (2018.05.09)
+- [Context Sensitive Buttons](https://blenderartists.org/t/addon-pie-menu-editor-1-15-0/662456/1261?u=roaoao)
+- Bug Fixes
+
+(changelog-1-15-0)=
+## 1.15.0 (2018.05.08)
+- [Property Editor](../Editors/Property)
+- [Extending Panels](../Panels#Extending_Panels)
+- [Tag/Untag Group of Menus](https://i.imgur.com/Hwrs49a.mp4)
+- [Save/Restore Tree View State](https://i.imgur.com/jKvxCLg.mp4)
+- [Select Menu by Name or Hotkey](https://i.imgur.com/bsaKFdq.mp4)
+- [Auto-run Python Script Files](../Scripting#Auto-run_Scripts)
+- [Custom Global Functions](../Scripting#Custom_Global_Functions)
+- [New Global Variables: menu, slot](../Scripting#Global_Variables)
+- [New Function: props(name)](../Scripting#Common_Functions)
+- [Updated Function: open_menu(menu, slot, **kwargs)](../Scripting#Command_Tab_Functions)
+- Blender 2.8 Support
+
+(changelog-1-14-15)=
+## 1.14.15 (2018.04.06)
+- [Move Edge Script](https://i.imgur.com/oV5lASt.mp4) (idea by [MickHanks](https://blenderartists.org/forum/showthread.php?392910&p=3299258&viewfull=1#post3299258))
+- Bug Fixes
+
+(changelog-1-14-13)=
+## 1.14.13 (2018.02.14)
+- [Call Pie Menus from Other Add-ons](https://i.imgur.com/zpCo97J.mp4)
+
+(changelog-1-14-9)=
+## 1.14.9 (2017.10.24)
+- [Option to Hide Modal Sub-Hotkey](https://wiki.blender.org/uploads/7/7f/Pme1.14.9_modal_hide_hotkey.png)
+- Bug Fixes
+
+(changelog-1-14-7)=
+## 1.14.7 (2017.10.15)
+- [New Modal Operator Options](https://wiki.blender.org/uploads/c/cd/Pme1.14.7_modal_adv_settings.png)
+- [Customizable Modal Overlay Text](https://i.imgur.com/Q1nlcm5.mp4)
+- `custom_icon()` Function
+- `**kwargs` for [open_menu()](../Scripting#Command_Tab_Functions) Function
+- Bug Fixes
+
+(changelog-1-14-6)=
+## 1.14.6 (2017.10.07)
+- [Macro Operator Tutorial](https://youtu.be/-RQFK1kqqVw) by [Jimmy Livefjord](https://blenderartists.org/forum/member.php?104883-jimpaw80)
+- Fixed Hotkey tab
+
+(changelog-1-14-3)=
+## 1.14.3 (2017.09.27)
+- [Popup Area's On-Open command](http://i.imgur.com/Gu3nRSV.mp4)
+- Modal Operators:
+  - Angle properties support
+  - [Cursor is locked in the current area](http://i.imgur.com/ekVYd6y.mp4)
+  - [Panning](http://i.imgur.com/xB3H3Ll.mp4) (unlocks the cursor)
+- [Stack Key Tutorial](https://youtu.be/-rknBwAPypk) by [Jimmy Livefjord](https://blenderartists.org/forum/member.php?104883-jimpaw80)
+- Bug Fixes
+
+(changelog-1-14-2)=
+## 1.14.2 (2017.09.22)
+- [Popup Area](http://i.imgur.com/rumYTRt.gifv)
+- [Modal Subsurf Modifier Example](../Examples#Modal_Subsurf_Modifier)
+- Bug Fixes
+
+(changelog-1-14-1)=
+## 1.14.1 (2017.09.19)
+- [Copy/Paste Item hotkeys](../Editors/Popup_Dialog#Button_Hotkeys)
+- Maximize Button
+- Bug Fixes
+
+(changelog-1-14-0)=
+## 1.14.0 (2017.09.17)
+- [Modal Operator Editor](../Editors/Modal_Operator)
+- [Toolbars](../Toolbars)
+- [Tweak Hotkeys](../#Hotkey Mode)
+- [1 Hotkey - 3 Pie Menus](../Examples#1_Hotkey_-_3_Pie_Menus)
+- `'Any'` Hotkey Modifier
+- [RMB Context Menu Entry](../#RMB_Context_Menu)
+- Blender 2.8 Support
+- [Hide Pie Menu Title](https://wiki.blender.org/uploads/e/ef/Pme1.14.0_pm_title.png)
+- [Expand Item Menu](https://wiki.blender.org/uploads/b/b7/Pme1.14.0_expand_item_menu.gif)
+- [Group Menus by Type/Hotkey](https://wiki.blender.org/uploads/6/60/Pme1.14.0_group_by.png)
+- [New Global Functions](../Scripting#Global_Functions)
+- **Pop-up Dialog Editor**:
+  - ['Pop-up' Mode](../Editors/Popup_Dialog#Mode)
+  - [Alignment tools](../Editors/Popup_Dialog#Alignment)
+  - [Hotkeys](../Editors/Popup_Dialog#Hotkeys)
+  - [New way to expand popup dialogs](../Editors/Popup_Dialog#Expand_Layout)
+  - [Resize All Rows](https://wiki.blender.org/uploads/9/99/Pme1.14.0_resize_all.png)
+
+(changelog-1-13-6)=
+## 1.13.6 (2017.06.10)
+- [Open existing panel in a popup](https://wiki.blender.org/uploads/b/b9/Pme1.13.5_popup.png)
+- Bug fixes
+
+(changelog-1-13-4)=
+## 1.13.4 (2017.04.09)
+- [Group and filter menus by custom tags](https://wiki.blender.org/uploads/4/4d/Pme1.13.4_tags.png)
+- [Block UI](https://wiki.blender.org/uploads/b/bf/Pme1.13.4_block_ui.png) option for Sticky Keys
+
+(changelog-1-13-1)=
+## 1.13.1 (2017.02.23)
+- [Columns with Fixed Width](https://wiki.blender.org/uploads/e/e2/Pme1.13.1_fixed_columns.gif)
+- [Dummy Modal operator](https://wiki.blender.org/uploads/0/0d/Pme1.13.1_dummy_modal.gif)  
+  Can be used to pause Macro Operator (press Enter or LMB to resume)
+- Removed unstable [Auto-Close Popup Dialog](https://wiki.blender.org/uploads/e/ea/Pme1.13.0_adv_options.png) option
+- Bug Fixes
+
+(changelog-1-13-0)=
+## 1.13.0 (2017.02.19)
+- [Macro Operator Editor](https://www.youtube.com/watch?v=x4HhN4aHCxg)
+- [Command Generator](https://wiki.blender.org/uploads/f/f4/Pme_item_edit.png)
+- [Poll method](https://wiki.blender.org/uploads/e/ea/Pme1.13.0_adv_options.png)
+- [Auto-Close Popup Dialog](https://wiki.blender.org/uploads/e/ea/Pme1.13.0_adv_options.png)
+- [Updated tree view & new Show Only New Menus filter](https://wiki.blender.org/uploads/9/9d/Pme_tree.png)
+- Compatibility with Blender Tabs Interface add-on
+
+(changelog-1-12-1)=
+## 1.12.1 (2016.12.12)
+- [Sticky Key Editor](https://youtu.be/pcFOPWnHC7U)
+- [Option to disable 'Confirm on Release' feature for pie menus](https://s3.amazonaws.com/markets-rails/uploads%2F1480675508687-pme1.12.0_confirm_on_release.png)
+
+(changelog-1-11-4)=
+## 1.11.4 (2016.11.13)
+- [Adding command using context menu](https://static-2.gumroad.com/res/gumroad/1512858036361/asset_previews/38ea290af3476c74fd8b832e4b4351de/retina/pme1.11.3_copy.gif)
+- [Side panel editor](https://youtu.be/BGs0de6ZYdw)
+- [Hiding unused panels](https://youtu.be/z19c6b7XOWo)
+- [Restoring mouse position for pie menus](https://cgcookiemarkets.com/app/uploads/edd/2016/10/pme1.11.0_mouse_pos.jpg)
+- [Using popup dialogs inside popup dialogs](https://cgcookiemarkets.com/app/uploads/edd/2016/10/pme1.11.0_expand_pd.jpg)
+
+(changelog-1-10-1)=
+## 1.10.1 (2016.07.30)
+- [Stack Keys](https://youtu.be/4wZKiyKE_P4)
+- [Ability to use mouse buttons as a hotkey modifier](https://youtu.be/9cGWQF6L4o4)
+- [Displaying the name of the last stack key command](https://cgcookiemarkets.com/app/uploads/edd/2016/07/pme1.10.1_sk_settings.png)
+- [Context sensitive menus examples](https://youtu.be/m8pCPZdK_qc)
+
+(changelog-1-9-2)=
+## 1.9.2 (2016.05.17)
+- [Script editor](https://youtu.be/A81jLLynssk)
+- [Double click mode](https://youtu.be/8XUvscCCviA)
+- [Customizable Ctrl+Shift+` hotkey](https://cgcookiemarkets.com/app/uploads/edd/2016/04/pme1.9.0_prefs_settings.png)
+- Hotkeys to confirm (Enter) and cancel (Esc) item/icon editing
+
+(changelog-1-8-3)=
+## 1.8.3 (2016.04.08)
+- [Panel mode and Panels](https://youtu.be/-fhI2imoo4U)
+- [Sticky Keys](https://youtu.be/5zDp586Uy2w?t=57)
+- [Threshold and Confirm Threshold for Pie Menus](https://youtu.be/5zDp586Uy2w)
+- [Tree view](https://wiki.blender.org/uploads/9/9d/Pme_tree.png)
+- Customizable width of the list/tree
+
+(changelog-1-7-0)=
+## 1.7.0 (2016.02.16)
+- [Custom layout using python code](https://youtu.be/sF10rVDVo-k)
+
+(changelog-1-6-0)=
+## 1.6.0 (2016.01.19)
+- Multi-column regular menus
+- Open regular menu on mouse over
+
+(changelog-1-5-2)=
+## 1.5.2 (2016.01.11)
+- Copy/Paste Row (Popup dialog)
+- Preview of the menus
+- External python scripts as a command
+
+(changelog-1-4-1)=
+## 1.4.1 (2015.12.09)
+- Popup dialog editor
+- Pie menus with more than 8 buttons
+
+(changelog-1-3-0)=
+## 1.3.0 (2015.11.28)
+- Custom icons
+- Hotkey as a command
+
+(changelog-1-2-0)=
+## 1.2.0 (2015.10.26)
+- Regular menu editor
+- Multiple keymap names
+- New icon selection mode
+
+(changelog-1-1-5)=
+## 1.1.5 (2015.10.15)
+- Pie Menu Editor

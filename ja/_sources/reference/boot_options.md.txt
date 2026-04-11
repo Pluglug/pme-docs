@@ -1,0 +1,130 @@
+(boot_options)=
+
+# 起動オプション
+
+```{versionadded} 2.0.3
+```
+
+PME には、Blender の起動時に読み込まれる設定ファイル `boot_config.json` があります。
+通常の Preferences とは別に管理され、**アドオンの登録処理よりも前に** 読み込まれます。
+
+```{note}
+ここで変更した設定は **次回の Blender 起動から** 有効になります。
+```
+
+## 設定の場所
+
+{guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Developer` タブから設定できます。
+
+```{tip}
+{guilabel}`Open Boot Config Folder` ボタンで、`boot_config.json` があるフォルダを直接開けます。
+```
+
+| OS | boot_config.json の場所 |
+|----|-------------------------|
+| Windows | `%APPDATA%\Blender Foundation\Blender\<version>\config\pie_menu_editor\` |
+| macOS | `~/Library/Application Support/Blender/<version>/config/pie_menu_editor/` |
+| Linux | `~/.config/blender/<version>/config/pie_menu_editor/` |
+
+このファイルはアドオンの更新では上書きされません。
+[ユーザーリソース](user_resources) とも独立した保存先です。
+
+---
+
+## `import pme` を有効にする
+
+外部スクリプトやアドオンから [Public API](public_api) を `import pme` で利用するには、明示的な有効化が必要です。
+
+### 手順
+
+1. {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Developer` を開く
+2. {guilabel}`Enable import pme Alias` を ON にする
+3. Blender を再起動する
+
+```python
+# 有効化後、外部スクリプトから利用可能
+import pme
+pme.invoke_pm("My Pie Menu")
+```
+
+### なぜ明示的に有効化が必要なのか
+
+`import pme` は内部的に `sys.modules` へのエイリアス登録で実現されています。
+この仕組みは将来の Blender Extensions API（`blender_manifest.toml`）のパッケージ分離ポリシーと
+互換性の問題が生じる可能性があります。
+
+そのため、PME では意図的にオプトイン方式を採用しています。
+必要なユーザーだけが明示的に有効化することで、将来の互換性リスクを最小限に抑えます。
+
+```{seealso}
+[Public API リファレンス](public_api) — `import pme` で利用できる関数の一覧
+```
+
+---
+
+## 初期化ログを有効にする
+
+PME の起動時に問題が発生した場合、初期化ログを有効にすると原因の特定に役立ちます。
+
+### Settings から有効にする（推奨）
+
+1. {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Developer` を開く
+2. {guilabel}`Enable Init Log` を ON にする
+3. Blender を再起動する
+4. {guilabel}`Window` > {guilabel}`Toggle System Console`（Windows）またはターミナルからの起動（macOS/Linux）でコンソール出力を確認する
+
+### `boot_config.json` を直接編集して有効にする
+
+起動トラブルで Preferences から設定できない場合や、外部ファイルから次回起動用の設定を切り替えたい場合は、`boot_config.json` を直接編集できます。
+
+```json
+{
+  "version": 1,
+  "enable_public_api_alias": false,
+  "init_log_enabled": true,
+  "persistence_backend": "prefs",
+  "dev": {
+    "use_loader_manifest": true,
+    "auto_generate_candidate": false
+  }
+}
+```
+
+既存の `boot_config.json` がある場合は、`init_log_enabled` を `true` に変更してください。
+変更は次回の Blender 起動から有効になります。
+
+### コマンドラインで 1 回だけ有効にする
+
+設定を変更せず、1 回だけ初期化ログを出力したい場合:
+
+```bash
+# macOS / Linux
+blender --python-expr "import sys; sys.argv.append('--pme-log-init')" --
+
+# Windows
+blender.exe --python-expr "import sys; sys.argv.append('--pme-log-init')" --
+```
+
+```{tip}
+コマンドライン引数 `--pme-log-init` は Settings の設定より優先されます。
+boot_config.json を変更せずに一時的にログを取りたいときに便利です。
+```
+
+### ログの確認方法
+
+初期化ログは以下の場所で確認できます:
+
+- **Blender のシステムコンソール** — 起動直後のログがリアルタイムで表示されます
+- **Preferences のログビューア** — {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Log` タブで、ring buffer に保存されたログを確認できます
+
+---
+
+## 設定のリセット
+
+起動オプションをすべて初期状態に戻すには、`boot_config.json` を削除してください。
+次回の Blender 起動時にデフォルト値で自動的に再生成されます。
+
+```{warning}
+`boot_config.json` が壊れている場合も、PME はデフォルト値で起動を続行します。
+PME が起動できなくなることはありません。
+```

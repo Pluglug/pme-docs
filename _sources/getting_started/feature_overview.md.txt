@@ -1,0 +1,131 @@
+# Feature Overview
+
+<!-- feature-overview-body:start -->
+
+## Menus & Dialogs
+
+Keep essential actions easy to open and easy to reach.
+
+```{grid} 1 1 2 2
+:gutter: 2
+
+::::{grid-item-card} Pie Menu Editor
+:link: ../editors/pie_menu_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_pie.png
+
+Group frequently used actions into a radial menu. Nested menus and embedded panels are also supported.
+::::
+
+::::{grid-item-card} Regular Menu Editor
+:link: ../editors/regular_menu_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_menu.png
+
+Create dropdown menus for hotkey access or integration into existing Blender menus.
+::::
+
+::::{grid-item-card} Pop-up Dialog Editor
+:link: ../editors/popup_dialog_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_popup.png
+
+Build widget layouts that can appear in menus, dialogs, panels, or toolbars.
+::::
+
+::::{grid-item-card} Floating Panel Editor
+:link: ../editors/popup_dialog_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_popup.png
+
+Create floating panels that stay open while you work. This beta mode shares the same slot structure as Pop-up Dialog.
+::::
+```
+
+## Keys & Shortcuts
+
+Get more range out of fewer keys.
+
+```{grid} 1 1 2 2
+:gutter: 2
+
+::::{grid-item-card} Sticky Key Editor
+:link: ../editors/sticky_key_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_sticky.png
+
+Assign different actions to key press and key release. Useful for temporary tools and mode switching.
+::::
+
+::::{grid-item-card} Stack Key Editor
+:link: ../editors/stack_key_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_stack.png
+
+Assign multiple commands to one hotkey and cycle through them with repeated presses.
+::::
+```
+
+## Operators & Automation
+
+Turn repeated steps into actions you can reuse quickly.
+
+```{grid} 1 1 2 2
+:gutter: 2
+
+::::{grid-item-card} Macro Operator Editor
+:link: ../editors/macro_operator_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_macro.png
+
+Combine existing Blender operators into a new action. Well suited for recurring workflows.
+::::
+
+::::{grid-item-card} Modal Operator Editor
+:link: ../editors/modal_operator_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_modal.png
+
+Create interactive operators that adjust values while they run in response to keys and mouse input.
+::::
+```
+
+## Interface & Properties
+
+Organize Blender's UI and data into a shape that fits your work.
+
+```{grid} 1 1 2 2
+:gutter: 2
+
+::::{grid-item-card} Menu/Panel Extension
+:link: ../editors/ui_customization.html#pme-menu-panel-extension
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_pg.png
+
+Insert your own menus into existing Blender menus and panels. You can also control placement and order.
+::::
+
+::::{grid-item-card} Property Editor
+:link: ../editors/property_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_property.png
+
+Define custom properties with Getter and Setter support, and register them on any Blender data block.
+::::
+
+::::{grid-item-card} Side Panel Editor
+:link: ../editors/side_panel_editor.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_pg.png
+
+Reorganize side panel tabs and panel structure. Useful for custom categories and extending existing UI.
+::::
+
+::::{grid-item-card} Hiding Unused Panels
+:link: ../editors/hiding_unused_panels.html
+:class-card: sd-shadow-sm sd-rounded-3 feature-card feature-card-compact
+:img-top: /_static/images/overview/overview_vid_hpg.png
+
+Hide unused panels and groups to keep your workspace clean and focused.
+::::
+```

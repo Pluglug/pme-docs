@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "channel": "stable",
+  "latest_version": "2.0.2.3",
+  "published_at": "2026-03-28T00:00:00Z",
+  "minimum_blender": "4.5.0",
+  "release_notes_url": "https://pluglug.github.io/pme-docs/support_community/changelog.html",
+  "action_url": "https://pluglug.gumroad.com/l/pie-menu-editor-fork",
+  "action_label": "Get Update",
+  "message": "Redesign notification/update state storage and improve Blender 5.1 stability"
+}

@@ -1,0 +1,109 @@
+(user_resources)=
+
+# 保存先とフォルダ構成
+
+PME は、ユーザーが作成・蓄積するファイルを専用のディレクトリで管理します。
+スクリプト、アイコン、バックアップ、エクスポートデータなどがここに保存されます。
+
+## デフォルトの保存先
+
+| OS | パス |
+|----|------|
+| Windows | `%USERPROFILE%\Documents\Pie Menu Editor\` |
+| macOS | `~/Documents/Pie Menu Editor/` |
+| Linux | `$XDG_DOCUMENTS_DIR/Pie Menu Editor/`（fallback: `~/Documents/Pie Menu Editor/`） |
+
+これらのディレクトリはアドオン本体や Blender の設定フォルダとは独立しています。
+アドオンの更新や Blender のバージョンアップでファイルが失われることはありません。
+
+## フォルダ構成
+
+```
+Pie Menu Editor/
+├── scripts/                    # ユーザースクリプト
+│   ├── autorun/                # PME 起動時に自動実行されるスクリプト
+│   └── examples/               # バンドル済みテンプレートからコピーされた例
+│       ├── command_*.py
+│       └── custom_*.py
+├── icons/                      # カスタムアイコン
+├── backups/                    # 自動バックアップ
+│   └── backup_YYYY.MM.DD_HH.MM.SS.json
+├── exports/
+│   └── examples/               # 初回起動時にコピーされるプリセット例
+│       ├── 3d_view_numpad_pie.json
+│       ├── mesh_select_mode_pie.json
+│       └── ...
+└── logs/                       # ログファイル
+```
+
+## 保存先の変更
+
+{guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Resources` から、リソースのルートディレクトリを変更できます。
+
+```{note}
+パスを変更すると、PME は新しいディレクトリを参照するようになります。既存ファイルは自動では移動されないため、手動でコピーしてください。
+```
+
+## 複数端末での共有
+
+リソースフォルダは Blender やアドオンから独立しているため、Syncthing・Dropbox・Git などで複数端末と共有できます。
+
+## メニュー定義の保存先
+
+メニュー定義（Pie Menu、Popup Dialog などの設定データ）は、このリソースディレクトリではなく Blender の設定ファイル（`userpref.blend`）に保存されます。
+
+メニュー設定も含めて同期や共有をしたい場合は、{guilabel}`Export` > {guilabel}`All Menus` で JSON ファイルとして書き出してください。
+
+```{seealso}
+JSON Schema v2 形式でのエクスポートについては、Changelog を参照してください。
+```
+
+---
+
+:::{dropdown} リソース配置（1.19.2 以前）
+
+PME 1.19.2 以前では、ユーザーリソースがアドオン本体の内部や隣接ディレクトリに保存されていました。
+アドオンを上書きまたは削除すると、スクリプトやアイコンが失われる構造です。
+
+### ディレクトリ構成
+
+```text
+addons/
+├── pie_menu_editor/              # アドオン本体
+│   ├── scripts/
+│   │   ├── autorun/              # 起動時に自動実行されるスクリプト
+│   │   │   └── functions.py      # システムファイル
+│   │   └── ...
+│   ├── icons/                    # カスタムアイコン（PNG）
+│   ├── examples/                 # カスタマイズ例
+│   ├── __init__.py
+│   └── ...
+└── pie_menu_editor_data/         # ユーザーデータ保護領域
+    └── backups/                  # 自動バックアップ
+```
+
+### 各フォルダの役割
+
+`pie_menu_editor/scripts/autorun/`
+: PME 起動時に自動実行されるスクリプトの配置場所です。`functions.py` はシステムファイルです。
+
+`pie_menu_editor/icons/`
+: カスタムアイコン（PNG 形式）の配置場所です。アドオン本体内にあるため、上書きアップデートで消える可能性があります。
+
+`pie_menu_editor_data/backups/`
+: 自動バックアップの保存先です。アドオン本体とは別ディレクトリにあるため、上書きアップデートでは保持されます。
+
+### Blender のアドオンディレクトリの場所
+
+上記の `addons/` は、OS ごとに以下のパスにあります。
+
+| OS | パス |
+|----|------|
+| Windows | `%APPDATA%\Blender Foundation\Blender\<version>\scripts\addons\` |
+| macOS | `~/Library/Application Support/Blender/<version>/scripts/addons/` |
+| Linux | `~/.config/blender/<version>/scripts/addons/` |
+
+```{seealso}
+PME2 への移行手順は {ref}`installation` を参照してください。
+```
+:::
