@@ -1,0 +1,125 @@
+![Pie Menu Editor Logo](/_static/images/pme_logo.webp)
+
+---
+
+# Welcome to PME Documentation
+
+Pie Menu Editor (PME) is a Blender add-on originally created by roaoao in 2016. It lets you build pie menus, regular menus, pop-up dialogs, macros, and custom panels without writing code, so you can customize Blender's interface freely.
+
+```{admonition} Note
+:class: note
+
+This documentation is currently being updated.
+Some pages may still be incomplete or contain information from older versions.
+
+If anything is unclear, please use the [Blender Artists Forum](http://blenderartists.org/forum/showthread.php?392910).
+```
+
+```{include} getting_started/feature_overview.md
+:start-after: <!-- feature-overview-body:start -->
+```
+
+```{admonition} Do I need programming knowledge?
+:class: hint
+No. PME can be used without programming.
+If you use Python, you can customize it even further.
+```
+
+## Where to Get It
+
+Pie Menu Editor Fork is available on Gumroad and Lemon Squeezy. It supports Blender 5.0 and later.
+
+```{button-link} https://pluglug.gumroad.com/l/pie-menu-editor-fork
+:color: primary
+:shadow:
+Buy on Gumroad
+```
+
+```{button-link} https://pluglug.lemonsqueezy.com/checkout/buy/9d63c2a5-2fea-4b9f-90e4-a48b613f9e3e?logo=0
+:color: primary
+:shadow:
+Buy on Lemon Squeezy
+```
+
+For recent changes, see the [changelog](support_community/changelog.md).
+
+## Community
+
+- [Blender Artists Forum](https://blenderartists.org/t/pie-menu-editor-1-18-8/662456): Questions, bug reports, and customization examples
+
+---
+
+```{admonition} Related Links
+:class: seealso
+
+:::{hlist}
+:columns: 3
+
+* [Blender](https://www.blender.org/)
+* [Blender Development Fund](https://fund.blender.org/)
+* [Blender Manual](https://docs.blender.org/manual/en/latest/)
+* [Blender Python API](https://docs.blender.org/api/current/)
+* [PME Original Documentation](https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/)
+:::
+```
+
+---
+
+```{toctree}
+:maxdepth: 1
+:caption: Getting Started
+
+getting_started/installation
+getting_started/quick_tutorial
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Editors
+:hidden:
+
+editors/pie_menu_editor
+editors/regular_menu_editor
+editors/popup_dialog_editor
+editors/sticky_key_editor
+editors/stack_key_editor
+editors/macro_operator_editor
+editors/modal_operator_editor
+editors/editor_common_elements
+editors/ui_customization
+editors/property_editor
+editors/custom_icons
+editors/settings
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Reference
+:hidden:
+
+reference/file_locations
+reference/boot_options
+reference/terminology
+reference/keymap_duplicates
+reference/public_api
+reference/scripting
+reference/examples
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: For Developers
+:hidden:
+
+reference/developer_options
+```
+
+```{toctree}
+:maxdepth: 2
+:caption: Support & Community
+:hidden:
+
+support_community/faq
+support_community/get_support
+support_community/changelog
+```

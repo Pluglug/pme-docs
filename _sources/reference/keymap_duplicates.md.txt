@@ -1,0 +1,21 @@
+(keymap-duplicates)=
+
+# Persistent PME Keymap Duplicates (Placeholder)
+
+```{warning}
+This page is a placeholder.
+The Japanese version is currently ahead and documents why duplicate or ghost PME keymap items can remain after removal, plus recovery and prevention guidance.
+```
+
+## Planned coverage
+
+- Why duplicate or empty PME keymap items can appear
+- How Blender keyconfig export/import can flatten addon keymaps into active presets
+- How to recover safely
+- How to avoid reintroducing the issue
+
+## Temporary note
+
+If you need the full explanation right now, refer to the Japanese documentation page
+`docs/ja/source/reference/keymap_duplicates.md` in the repository until the English
+version is written.
