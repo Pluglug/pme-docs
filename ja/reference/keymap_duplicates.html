@@ -1,0 +1,743 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="Poll Method の基礎" href="poll_method.html"><link rel="prev" title="BlenderのKeymapとPME" href="keymap_and_pme.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>削除したはずのPMEキーマップが残り続ける(重複・ゴーストキーマップ) - Pie Menu Editor JA 2.0.4 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c621e55a" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c621e55a" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+      }
+    }
+  }
+</style>
+
+<script type="text/javascript">
+    (function () {
+        if (window.__PMEBeaconInitialized) {
+            return;
+        }
+
+        window.__PMEBeaconInitialized = true;
+
+        !function(e,t,n){function a(){var e=t.getElementsByTagName("script")[0],n=t.createElement("script");n.type="text/javascript",n.async=!0,n.src="https://beacon-v2.helpscout.net",e.parentNode.insertBefore(n,e)}if(e.Beacon=n=function(t,n,a){e.Beacon.readyQueue.push({method:t,options:n,data:a})},n.readyQueue=[],"complete"===t.readyState)return a();e.attachEvent?e.attachEvent("onload",a):e.addEventListener("load",a,!1)}(window,document,window.Beacon||function(){});
+        window.Beacon('init', 'e458ab6a-6436-4e96-a0b6-038336504b24');
+        window.Beacon('config', {
+            display: {
+                style: 'manual'
+            }
+        });
+
+        window.PMEDocs = window.PMEDocs || {};
+        window.PMEDocs.beaconPrefillTemplates = {
+            supportRequest: [
+                'Summary:',
+                '- What went wrong?',
+                '',
+                'Steps to reproduce:',
+                '1.',
+                '2.',
+                '3.',
+                '',
+                'What happened:',
+                '- Describe the actual result.',
+                '',
+                'Environment:',
+                '- Blender version:',
+                '- PME version:',
+                '- OS:',
+                '',
+                'Attachments:',
+                '- PME setup JSON:',
+                '- Console output / screenshot:',
+                '- Small .blend file (if relevant):',
+                '',
+                'Additional notes:',
+                '- Anything else that may help.'
+            ].join('\n')
+        };
+
+        window.PMEDocs.openSupportBeacon = function (event, templateName) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            if (typeof window.Beacon === 'function') {
+                const prefillText = window.PMEDocs.beaconPrefillTemplates[templateName];
+                if (prefillText) {
+                    window.Beacon('prefill', {
+                        text: prefillText
+                    });
+                }
+
+                window.Beacon('open');
+                window.Beacon('navigate', '/ask/message/');
+                return false;
+            }
+
+            return true;
+        };
+
+        document.addEventListener('click', function (event) {
+            const trigger = event.target.closest('[data-beacon-open]');
+            if (!trigger) {
+                return;
+            }
+
+            window.PMEDocs.openSupportBeacon(event, trigger.dataset.beaconTemplate);
+        });
+    }());
+</script></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Pie Menu Editor JA 2.0.4 ドキュメント</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor JA 2.0.4 ドキュメント</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">はじめる</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">インストール・アップデート</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/basic_pie_menu.html">基本的なパイメニューの作成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/popup_dialog_tutorial.html">ポップアップダイアログをパイメニューに追加</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/macro_tutorial.html">マクロで独自機能を作成</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">エディタ</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../editors/pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/popup_dialog_editor.html">Popup Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/editor_common_elements.html">Editor Common Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#hiding-unused-panels">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#menu-panel-extension">Menu/Panel Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html#pme-toolbar">PME Toolbar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/property_editor.html">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/context_menu.html">コンテキストメニュー</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/custom_icons.html">カスタムアイコン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">参考資料</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="file_locations.html">保存先とフォルダ構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boot_options.html">起動オプション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">用語集</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keymap_and_pme.html">BlenderのKeymapとPME</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">削除したはずのPMEキーマップが残り続ける(重複・ゴーストキーマップ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="poll_method.html">Poll Method の基礎</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scripting.html">スクリプティング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keymap_guide.html">Keymapの選び方</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">アーキテクチャ（開発者向け）</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../architecture/index.html">PME Architecture Deep Dive</a><input aria-label="Toggle navigation of PME Architecture Deep Dive" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/index.html">PME Architecture Deep Dive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/data_model.html">データモデル詳解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/debugging.html">デバッグガイド</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../architecture/extending.html">エディター拡張ガイド</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">サポート</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">サポート</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">開発者向け</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="developer_options.html">開発者オプション</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="architecture/index.html">PME Architecture Deep Dive</a><input aria-label="Toggle navigation of PME Architecture Deep Dive" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture/index.html">PME Architecture Deep Dive</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/data_model.html">データモデル詳解</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/debugging.html">デバッグガイド</a></li>
+<li class="toctree-l2"><a class="reference internal" href="architecture/extending.html">エディター拡張ガイド</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/reference/keymap_duplicates.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="pme">
+<span id="keymap-duplicates"></span><h1>削除したはずのPMEキーマップが残り続ける(重複・ゴーストキーマップ)<a class="headerlink" href="#pme" title="Link to this heading">¶</a></h1>
+<div class="admonition important">
+<p class="admonition-title">重要</p>
+<ul class="simple">
+<li><p>「削除したはずのPMEキーマップが、Blender再起動後に戻ってくる」</p></li>
+<li><p>「PMEをアンインストールしたのに、空のPMEエントリが残っている」</p></li>
+<li><p>「Keymap設定に <code class="docutils literal notranslate"><span class="pre">Call</span> <span class="pre">Menu</span> <span class="pre">(PME)</span></code> が何重にも並んでいる」</p></li>
+</ul>
+<p>これらの症状は<strong>PME単独の不具合ではなく、BlenderのKeymap Export/Importが層構造を
+潰すという上流の仕様</strong>が原因で起きます。キーマップを多く登録する性質上、PMEで
+表面化しやすくなっています。</p>
+<p>掃除したいだけなら <a class="reference internal" href="#keymap-duplicates-recovery">復旧</a> を、再発を避けるには
+<a class="reference internal" href="#keymap-duplicates-prevention">予防</a> を参照してください。</p>
+</div>
+<section id="id1">
+<h2>こんな症状はありませんか？<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>次のいずれかに当てはまる場合、このページが扱う現象です。</p>
+<ul class="simple">
+<li><p><strong>Preferences &gt; Keymap</strong> を開くと、同じホットキーの <code class="docutils literal notranslate"><span class="pre">Call</span> <span class="pre">Menu</span> <span class="pre">(PME)</span></code> が何行も並んでいる</p></li>
+<li><p>重複行を手で削除しても、<strong>Blender再起動後または設定保存時に復活する</strong></p></li>
+<li><p><strong>PMEアドオン自体を無効化・削除しても、空のPMEエントリが残り続ける</strong></p></li>
+<li><p>キーマップを触った覚えがないのに、<strong>他のアドオン・標準機能のホットキーがPMEに奪われたように動かなくなった</strong></p></li>
+<li><p>Keymap Editorで、パイメニュー名などの情報が空欄になっている「空のPMEエントリ」がある</p></li>
+</ul>
+<p>コミュニティでは “ghost keymaps” と呼ばれ、長く議論されてきた現象です。</p>
+</section>
+<section id="id2">
+<h2>これはPME固有の不具合ではありません<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<p>同じ仕組みでキーマップを登録するアドオンなら同様に起きうる、<strong>Blender側の
+キーマップシステムの設計に由来する問題</strong>です。PMEはパイメニュー・ポップアップなど
+多数のキーマップを扱うため、他のアドオンより症状が目立ちやすくなっています。</p>
+</section>
+<section id="id3">
+<h2>なぜ起きるのか<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<section id="blenderkeymap4">
+<h3>BlenderのKeymapは4層構造<a class="headerlink" href="#blenderkeymap4" title="Link to this heading">¶</a></h3>
+<p>BlenderはKeymapを4つの層で管理しています。</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 21.2%" />
+<col style="width: 61.2%" />
+<col style="width: 17.6%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>層</p></th>
+<th class="head"><p>役割</p></th>
+<th class="head"><p>保存される?</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>default</strong></p></td>
+<td><p>工場出荷時の設定(リセット時の復元先)</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>active</strong></p></td>
+<td><p>現在のプリセット(<code class="docutils literal notranslate"><span class="pre">userpref.blend</span></code> に保存)</p></td>
+<td><p>✅</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>addon</strong></p></td>
+<td><p>アドオンが登録するキーマップ。Blender起動ごとに再構築される</p></td>
+<td><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>user</strong></p></td>
+<td><p>UIに見えるもの = active + addon を合成した結果。<br>ユーザー編集は<strong>差分</strong>として保存され、起動時に再合成される</p></td>
+<td><p>(差分のみ)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>この層構造があるからこそ、「アドオンのキーマップ」「ユーザーのカスタマイズ」
+「工場出荷状態へのリセット」を共存させられます。</p>
+</section>
+<section id="export-import">
+<h3>Export/Importがこの層構造を潰す<a class="headerlink" href="#export-import" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">Preferences</span> <span class="pre">&gt;</span> <span class="pre">Keymap</span></code> の <strong>Export Key Configuration</strong> / <strong>Import Key Configuration</strong>、
+および <strong>Save as Preset</strong>(プリセット保存)を実行すると、Blender は内部的に次の処理を行います。</p>
+<ol class="arabic simple">
+<li><p><strong>user</strong>層で <strong>どれか1つでも編集されているKeyMap</strong>(<code class="docutils literal notranslate"><span class="pre">km.is_user_modified</span> <span class="pre">=</span> <span class="pre">True</span></code>)を
+ピックアップする</p></li>
+<li><p>そのKeyMapに含まれる<strong>すべての項目をコピー</strong>する(アドオン由来の項目も区別なく)</p></li>
+<li><p>コピーを <strong>active</strong>層に焼き付ける</p></li>
+</ol>
+<p>問題は <strong>2</strong> です。フラグはKeyMap単位で立つので、<strong>たった1つのキーを編集しただけで、
+そのKeyMap内のアドオン登録項目もまとめて「ユーザー設定」として保存</strong>されてしまいます。</p>
+</section>
+<section id="id4">
+<h3>再起動のたびに重複が積み上がる<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<p>アドオン(PMEを含む)は、Blender起動時に自分のキーマップを <strong>addon</strong>層に登録し直します。
+しかし上の手順で焼き付けられたコピーは、すでに <strong>active</strong>層に残っています。</p>
+<p>結果として同じキーマップ項目が <code class="docutils literal notranslate"><span class="pre">active</span></code> と <code class="docutils literal notranslate"><span class="pre">addon</span></code> の<strong>両方に存在</strong>し、
+<code class="docutils literal notranslate"><span class="pre">user</span></code> 層の見た目で<strong>重複</strong>として現れます。Export/Import やプリセット切り替えを繰り返すと、
+この重複がさらに積み重なります。</p>
+</section>
+<section id="id5">
+<h3>ゴースト(空の項目)はなぜ消せないのか<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<p>PMEは自分で登録したキーマップを削除するとき、<code class="docutils literal notranslate"><span class="pre">idname</span></code> とプロパティ値の組み合わせで
+対象を識別しています。ところがExport/Importを経由すると、<strong>プロパティ情報が欠落して
+<code class="docutils literal notranslate"><span class="pre">is_property_set()</span></code> が機能しない項目</strong>が生まれることがあります。</p>
+<p>この状態になると、PMEはその項目を「自分が登録したもの」と認識できず、自動削除の対象に
+なりません。これが「PMEアドオンを外してもゴーストだけが残る」理由です。</p>
+</section>
+</section>
+<section id="keymap-duplicates-recovery">
+<span id="id6"></span><h2>復旧<a class="headerlink" href="#keymap-duplicates-recovery" title="Link to this heading">¶</a></h2>
+<section id="id7">
+<h3>ステップ1: PME内蔵のメンテナンス機能でスキャンする<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<p>PME 2.0.3 以降では、<strong>Preferences &gt; Settings &gt; Hotkeys &gt; Maintenance</strong> に
+空のPMEキーマップ項目と、<code class="docutils literal notranslate"><span class="pre">active</span></code> keyconfig に混入した PME 項目を観測する機能があります。</p>
+<p>まずは <strong>Scan User Keymaps</strong> を実行してください。</p>
+<p>検出結果は次のように表示されます。</p>
+<ul class="simple">
+<li><p>空のPME項目の総数</p></li>
+<li><p>影響を受けているキーマップ数</p></li>
+<li><p>どの layer に存在するか</p></li>
+<li><p>件数が多いキーマップ名</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">active</span></code> keyconfig に PME 項目が存在するか</p></li>
+</ul>
+<p>必要なら <strong>Copy Summary</strong> で匿名化済みの概要をクリップボードへコピーし、
+<strong>Open Report Folder</strong> で提出用レポートの保存場所を開けます。</p>
+<div class="admonition important">
+<p class="admonition-title">重要</p>
+<p>問題の切り分けに役立つので、可能なら <strong>Clean Up Empty Items</strong> を押す前に
+summary や report を support / forum へ提出してください。</p>
+</div>
+</section>
+<section id="clean-up-empty-items">
+<h3>ステップ2: <code class="docutils literal notranslate"><span class="pre">Clean</span> <span class="pre">Up</span> <span class="pre">Empty</span> <span class="pre">Items</span></code> で削除する<a class="headerlink" href="#clean-up-empty-items" title="Link to this heading">¶</a></h3>
+<p>スキャン結果で空のPME項目が見つかったら、<strong>Clean Up Empty Items</strong> を実行します。</p>
+<p>この操作は、<strong>プロパティが空だと断言できる <code class="docutils literal notranslate"><span class="pre">wm.pme_user_pie_menu_call</span></code> 項目だけ</strong>を
+保守的に削除します。通常のPMEホットキーや、意味の読み取れる項目までは触れません。</p>
+<p>過去の事例では、1回の cleanup で<strong>279件</strong>の空PME項目が削除された報告があります。
+症状が軽いうちは数件、放置した環境では数百件になることがあります。</p>
+</section>
+<section id="id8">
+<h3>ステップ3: 変更を定着させる<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<p>cleanup で削除した結果は、<strong>保存しないと再起動時に戻ってくる</strong>ことがあります。
+まずは次を試してください。</p>
+<ul class="simple">
+<li><p><strong>Preferences</strong> &gt; 左下のハンバーガーメニュー &gt; <strong>Save Preferences</strong></p></li>
+</ul>
+<p>これで定着すれば完了です。</p>
+<div class="admonition caution">
+<p class="admonition-title">注意</p>
+<p>もし Save Preferences では再起動時に元に戻ってしまう場合、ユーザー報告では
+<strong>一度だけ Export → Import を行う</strong>ことで定着したケースがあります。</p>
+<p>ただし Export/Import はこの問題の<strong>原因でもある</strong>ので、掃除直後のワンショットに
+限定し、以降は使わないでください。</p>
+</div>
+</section>
+<section id="id9">
+<h3>ステップ4: それでも解決しないとき<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<p>重複が深く絡み合っている場合、設定フォルダをクリーンにする方が早いことがあります。</p>
+<ol class="arabic simple">
+<li><p>PMEの設定をPME側のエクスポート機能でバックアップする</p></li>
+<li><p>Blenderを終了する</p></li>
+<li><p>Blenderの <strong>config</strong> フォルダを別名に退避(またはバックアップしてから削除)</p></li>
+<li><p>Blenderを起動してクリーン状態から再セットアップ</p></li>
+<li><p>必要な設定をインポートし直す</p></li>
+</ol>
+<p>設定フォルダの場所は、<code class="docutils literal notranslate"><span class="pre">File</span> <span class="pre">&gt;</span> <span class="pre">Defaults</span> <span class="pre">&gt;</span> <span class="pre">Show</span> <span class="pre">Preferences</span> <span class="pre">Location</span></code> などで確認できます。</p>
+</section>
+<section id="pme-legacy-script">
+<h3>古いPMEを使っている場合: legacy script を使う<a class="headerlink" href="#pme-legacy-script" title="Link to this heading">¶</a></h3>
+<p>PME にまだ Maintenance セクションが無い版では、以前の救済スクリプト
+<code class="docutils literal notranslate"><span class="pre">pme_keymap_cleaner.py</span></code> を使う方法があります。</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://gist.github.com/Pluglug/d4246140ab5689373becc11d5353221a">https://gist.github.com/Pluglug/d4246140ab5689373becc11d5353221a</a></p></li>
+</ul>
+<p>このスクリプトは PME 内部ユーティリティを使うため、<strong>PMEがインストール・有効化されている
+状態で実行</strong>してください。PMEを先にアンインストールしてしまった場合は、一度再インストール
+してから実行する必要があります。</p>
+</section>
+</section>
+<section id="keymap-duplicates-prevention">
+<span id="id10"></span><h2>予防<a class="headerlink" href="#keymap-duplicates-prevention" title="Link to this heading">¶</a></h2>
+<p>一度掃除したら、再発させないための運用に切り替えるのが重要です。</p>
+<section id="blenderkeymap-export-import">
+<h3>1. BlenderのKeymap Export/Importを原則使わない<a class="headerlink" href="#blenderkeymap-export-import" title="Link to this heading">¶</a></h3>
+<p>最大の予防策は、<strong>Blender標準の Keymap Export / Import を使わない</strong>ことです。
+<strong>Save as Preset</strong>(プリセット保存)も同じ仕組みで動作するため、同様に避けてください。</p>
+<p>一度実行すると、以降の起動ごとに重複が発生し続ける可能性があります。</p>
+</section>
+<section id="id11">
+<h3>2. どうしてもエクスポートしたいとき: アドオンを一時的に無効化する<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<p>環境の引っ越しなどで本当にKeymapをエクスポートしたい場合は、<strong>PMEと、キーマップを
+登録する他のアドオンを一時的に無効化してから</strong>エクスポートしてください。</p>
+<p>こうすることで、アドオン由来のキーマップが <code class="docutils literal notranslate"><span class="pre">active</span></code> 層に焼き付くのを防げます。
+インポート先でも同様に、アドオンを有効化する前にインポートしてください。</p>
+</section>
+<section id="id12">
+<h3>3. PMEのマクロを「ショートカット管理の窓口」にする<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<p>作者が推奨する運用として、<strong>PMEのマクロ機能を代理キーマップ(Proxy Keymap)として
+使う</strong>方法があります。</p>
+<ul class="simple">
+<li><p>Blender標準のKeymapを直接編集するのではなく、<strong>PMEのマクロとしてショートカットを定義</strong>する</p></li>
+<li><p>そのマクロに PME 側でホットキーを割り当てる</p></li>
+<li><p>Blenderの Keymap 設定はほとんど触らないまま運用する</p></li>
+</ul>
+<p>この運用にすると、環境を移行するときも <strong>PMEの設定だけをエクスポート</strong>すれば
+済むため、Blender側のKeymap Export/Importを回避できます。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>代理キーマップは PME の処理が挟まるので、呼び出しごとに微小なオーバーヘッドが
+発生します。パフォーマンスが厳しい操作には、カスタムアドオンとして実装するなど
+別の手段を検討してください。</p>
+</div>
+</section>
+<section id="ui">
+<h3>4. アドオンのホットキーをUIから削除しない<a class="headerlink" href="#ui" title="Link to this heading">¶</a></h3>
+<p>これは別の落とし穴ですが、同じ文脈でよく踏まれるので記載します。</p>
+<p>Keymap Editorからアドオン登録のホットキーを削除すると、Blenderは**「削除した」
+という差分を永続保存**します。</p>
+<p>このため、次のような不思議な現象が起きます。</p>
+<ol class="arabic simple">
+<li><p>アドオンが同じホットキーを3つ登録</p></li>
+<li><p>UIから3つとも削除する</p></li>
+<li><p>Blender再起動</p></li>
+<li><p>アドオンが同じホットキーを3つ登録 — <strong>どれもKeymap Editorに現れない</strong>(削除差分が残っているため)</p></li>
+<li><p>同じホットキーを4つ目として登録 — ようやく現れる</p></li>
+</ol>
+<p>不要なアドオンホットキーは<strong>削除せず、チェックを外して無効化</strong>するのが安全です。</p>
+</section>
+</section>
+<section id="id13">
+<h2>関連<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="keymap_and_pme.html"><span class="std std-doc">BlenderのKeymapとPME</span></a> — Keymapの選び方と探索順の基本</p></li>
+<li><p><a class="reference internal" href="keymap_guide.html"><span class="std std-doc">Keymapの選び方</span></a> — Keymap階層の概観</p></li>
+<li><p><a class="reference external" href="https://gist.github.com/Pluglug/d4246140ab5689373becc11d5353221a"><code class="docutils literal notranslate"><span class="pre">pme_keymap_cleaner.py</span></code> (Gist)</a></p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="poll_method.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Poll Method の基礎</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="keymap_and_pme.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">BlenderのKeymapとPME</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">削除したはずのPMEキーマップが残り続ける(重複・ゴーストキーマップ)</a><ul>
+<li><a class="reference internal" href="#id1">こんな症状はありませんか？</a></li>
+<li><a class="reference internal" href="#id2">これはPME固有の不具合ではありません</a></li>
+<li><a class="reference internal" href="#id3">なぜ起きるのか</a><ul>
+<li><a class="reference internal" href="#blenderkeymap4">BlenderのKeymapは4層構造</a></li>
+<li><a class="reference internal" href="#export-import">Export/Importがこの層構造を潰す</a></li>
+<li><a class="reference internal" href="#id4">再起動のたびに重複が積み上がる</a></li>
+<li><a class="reference internal" href="#id5">ゴースト(空の項目)はなぜ消せないのか</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#keymap-duplicates-recovery">復旧</a><ul>
+<li><a class="reference internal" href="#id7">ステップ1: PME内蔵のメンテナンス機能でスキャンする</a></li>
+<li><a class="reference internal" href="#clean-up-empty-items">ステップ2: <code class="docutils literal notranslate"><span class="pre">Clean</span> <span class="pre">Up</span> <span class="pre">Empty</span> <span class="pre">Items</span></code> で削除する</a></li>
+<li><a class="reference internal" href="#id8">ステップ3: 変更を定着させる</a></li>
+<li><a class="reference internal" href="#id9">ステップ4: それでも解決しないとき</a></li>
+<li><a class="reference internal" href="#pme-legacy-script">古いPMEを使っている場合: legacy script を使う</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#keymap-duplicates-prevention">予防</a><ul>
+<li><a class="reference internal" href="#blenderkeymap-export-import">1. BlenderのKeymap Export/Importを原則使わない</a></li>
+<li><a class="reference internal" href="#id11">2. どうしてもエクスポートしたいとき: アドオンを一時的に無効化する</a></li>
+<li><a class="reference internal" href="#id12">3. PMEのマクロを「ショートカット管理の窓口」にする</a></li>
+<li><a class="reference internal" href="#ui">4. アドオンのホットキーをUIから削除しない</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id13">関連</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=34dcd1ba"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

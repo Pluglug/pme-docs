@@ -1,0 +1,153 @@
+(developer_options)=
+
+# Developer Options
+
+```{versionadded} 2.0.3
+```
+
+Advanced startup options for troubleshooting and loader validation.
+
+These developer-facing details may change without notice.
+
+---
+
+## boot_config.json
+
+`boot_config.json` is an external config file read before addon startup.
+It lives under Blender's CONFIG directory.
+
+### Keys
+
+| Key | Type | Default | Meaning |
+|-----|------|---------|---------|
+| `enable_public_api_alias` | bool | `false` | Register the `import pme` alias in `sys.modules` |
+| `init_log_enabled` | bool | `false` | Enable init logging during startup |
+| `persistence_backend` | string | `"prefs"` | Persistence backend (currently only `"prefs"`) |
+| `dev.use_loader_manifest` | bool | `true` | Start with `loader_manifest.json` |
+| `dev.auto_generate_candidate` | bool | `false` | Automatically create `loader_manifest_candidate.json` in the PME addon package after successful startup |
+
+### Priority
+
+```
+command-line flags  >  boot_config.json  >  defaults
+```
+
+```{tip}
+`--pme-log-init` overrides `init_log_enabled`.
+```
+
+### Shape
+
+```json
+{
+  "version": 1,
+  "enable_public_api_alias": false,
+  "init_log_enabled": false,
+  "persistence_backend": "prefs",
+  "dev": {
+    "use_loader_manifest": true,
+    "auto_generate_candidate": false
+  }
+}
+```
+
+### Update behavior
+
+- addon updates do not overwrite it
+- it is created automatically if missing
+- if it is broken, PME falls back to defaults
+
+---
+
+## loader_manifest.json
+
+`loader_manifest.json` defines the module load order used during startup.
+
+### Role
+
+- bundled static file included in release builds
+- used to resolve module load order quickly during startup
+- not normally edited directly by users
+
+### Shape
+
+```json
+{
+  "version": 1,
+  "module_order": [
+    "core.namespace",
+    "infra.logging",
+    "infra.boot_config",
+    "..."
+  ]
+}
+```
+
+### Fallback
+
+If `loader_manifest.json` is missing or invalid, PME falls back to dependency-based dynamic discovery.
+
+### Module order resolution
+
+1. `--pme-use-candidate-loader-manifest`
+2. `--pme-use-loader-manifest` / `--pme-no-loader-manifest`
+3. `boot_config.dev.use_loader_manifest`
+4. `loader_manifest.json`
+5. dynamic discovery
+
+- normal startup uses `loader_manifest.json`
+- `dev.use_loader_manifest = false` switches startup to dynamic discovery
+- the candidate manifest is a developer-facing helper path and is not selected by this toggle
+- if a candidate manifest or `loader_manifest.json` cannot be used, PME falls back to dynamic discovery
+
+---
+
+## loader_manifest_candidate.json
+
+`loader_manifest_candidate.json` is a developer-facing candidate manifest used for validation runs.
+
+### Location
+
+- `loader_manifest_candidate.json` is created in the PME addon package
+
+### Role
+
+- stores the observed `loaded module order` from a successful startup
+- used for review and comparison before promotion into `loader_manifest.json`
+- not part of the `Use Bundled Loader Manifest` toggle contract
+
+### Creation
+
+PME only creates `loader_manifest_candidate.json` when all of the following are true:
+
+- `boot_config.dev.auto_generate_candidate == true`
+- or {guilabel}`Save Candidate Loader Manifest` is run from the Developer UI
+- startup completed successfully
+- startup used dynamic discovery, not a bundled or candidate manifest
+- the staging path is writable
+
+### Promotion to `loader_manifest.json`
+
+Startup never writes back to `loader_manifest.json`.
+Promotion only happens through an explicit action:
+
+- `python3 tools/promote_loader_manifest.py`
+- {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Developer` → {guilabel}`Promote Candidate to Bundled`
+
+---
+
+## Settings > Developer
+
+{guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Developer` is the editing surface for `boot_config.json`.
+
+- changes are written back to `boot_config.json`
+- the UI reflects the current `boot_config.json` values
+- boot-time flags such as `import pme` and init logging apply on the next startup
+- {guilabel}`Use Bundled Loader Manifest` switches between `loader_manifest.json` startup and dynamic discovery
+- {guilabel}`Auto-Save Candidate on Startup` creates `loader_manifest_candidate.json` after successful startup
+- {guilabel}`Save Candidate Loader Manifest` writes the current dynamic startup order to `loader_manifest_candidate.json`
+- {guilabel}`Promote Candidate to Bundled` copies the candidate manifest content into `loader_manifest.json`
+
+```{note}
+`dev` settings affect every PME install that shares the same Blender profile.
+```

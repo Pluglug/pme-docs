@@ -1,0 +1,123 @@
+(boot_options)=
+
+# Boot Options
+
+```{versionadded} 2.0.3
+```
+
+PME supports an external startup config file named `boot_config.json`.
+It is read before addon registration begins.
+
+```{note}
+Changes made here take effect on the next Blender startup.
+```
+
+## Where to edit it
+
+You can edit these options in {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Developer`.
+
+```{tip}
+Use {guilabel}`Open Boot Config Folder` to open the folder that contains `boot_config.json`.
+```
+
+| OS | `boot_config.json` location |
+|----|-----------------------------|
+| Windows | `%APPDATA%\Blender Foundation\Blender\<version>\config\pie_menu_editor\` |
+| macOS | `~/Library/Application Support/Blender/<version>/config/pie_menu_editor/` |
+| Linux | `~/.config/blender/<version>/config/pie_menu_editor/` |
+
+This file is not overwritten by addon updates.
+
+---
+
+## Enable `import pme`
+
+If you want to use PME from external scripts or other addons via `import pme`, you must enable it explicitly.
+
+### Steps
+
+1. Open {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Developer`
+2. Turn on {guilabel}`Enable import pme Alias`
+3. Restart Blender
+
+```python
+import pme
+pme.invoke_pm("My Pie Menu")
+```
+
+### Why is this opt-in?
+
+`import pme` is implemented through a `sys.modules` alias.
+That may become sensitive to future Blender Extensions packaging rules, so PME keeps it opt-in on purpose.
+
+If you already use `import pme` in existing scripts, turn this option on once and restart Blender.
+
+```{seealso}
+See [Public API](public_api) for the current API reference.
+```
+
+---
+
+## Enable init logging
+
+If PME has trouble during startup, init logging can help show where initialization stopped.
+
+### Enable it from Settings
+
+1. Open {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Developer`
+2. Turn on {guilabel}`Enable Init Log`
+3. Restart Blender
+4. Check Blender's system console on Windows, or launch Blender from a terminal on macOS/Linux to see the startup log
+
+### Enable it by editing `boot_config.json`
+
+If startup trouble prevents you from opening Preferences, or if you want to control the next startup from an external file, you can edit `boot_config.json` directly.
+
+```json
+{
+  "version": 1,
+  "enable_public_api_alias": false,
+  "init_log_enabled": true,
+  "persistence_backend": "prefs",
+  "dev": {
+    "use_loader_manifest": true,
+    "auto_generate_candidate": false
+  }
+}
+```
+
+If you already have a `boot_config.json`, change `init_log_enabled` to `true`.
+The change takes effect on the next Blender startup.
+
+### Enable it once from the command line
+
+If you want init logging for a single run without changing your saved settings:
+
+```bash
+# macOS / Linux
+blender --python-expr "import sys; sys.argv.append('--pme-log-init')" --
+
+# Windows
+blender.exe --python-expr "import sys; sys.argv.append('--pme-log-init')" --
+```
+
+```{tip}
+The `--pme-log-init` flag takes priority over the stored setting.
+Use it when you want temporary startup logs without editing `boot_config.json`.
+```
+
+### Where to read the log
+
+- Blender system console
+- {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Log`
+
+---
+
+## Reset
+
+To reset all boot options, delete `boot_config.json`.
+It will be recreated with default values on the next startup.
+
+```{warning}
+If `boot_config.json` is broken, PME still starts with defaults instead of failing startup.
+```

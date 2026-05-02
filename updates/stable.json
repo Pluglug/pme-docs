@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "channel": "stable",
+  "latest_version": "2.0.4",
+  "published_at": "2026-05-02T00:00:00Z",
+  "minimum_blender": "5.0.0",
+  "release_notes_url": "https://pluglug.github.io/pme-docs/support_community/changelog.html#changelog-2-0-4",
+  "action_url": "https://pluglug.gumroad.com/l/pie-menu-editor-fork",
+  "action_label": "Get Update",
+  "message": "FloatingPanel buttons can now have background colors.\nAdds GPULayout Square (SV + H) color picker support, fixes Modal Operator bugs, and includes other improvements."
+}

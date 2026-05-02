@@ -1,0 +1,87 @@
+(poll-method-guide)=
+
+# Poll Method の基礎
+
+```{warning}
+このページは作成中です。今回はPoll Methodの入口だけを整理し、詳細な実践例は後から追加します。
+```
+
+## Pollとは？
+
+PMEのPoll Methodは、**今のBlenderの状態でそのメニューやボタンを使ってよいか**
+を判定するためのPythonコードです。
+
+- `True` を返す
+  - 表示や実行の候補になります
+- `False` を返す
+  - スキップされます
+
+たとえば、メッシュオブジェクトがアクティブなときだけ使いたい場合は、次のように書けます。
+
+```python
+ao = C.active_object; return ao and ao.type == 'MESH'
+```
+
+## 先に覚えておくとよいこと
+
+- Pollは「何を実行するか」ではなく、「いつ使えるか」を決めます
+- Blenderの `Context` を読むことが中心になります
+- `True` / `False` の判定が分かれば、実用的なPollはかなり書けます
+- 同じホットキーを条件で使い分けたいときにも役立ちます
+
+## このページで今後扱う予定の内容
+
+- PollとContextの関係
+- `True` / `False` と `return` の基本
+- 比較演算子
+- `and` / `or` / `not` の使い方
+- `C.mode`、`C.area`、`C.active_object` を使う定番パターン
+- 安全に書くためのガード
+- よく使う実践例
+- デバッグ方法とよくある失敗
+
+<!--
+TODO: Poll Method page outline
+
+1. Pollとは何か
+   - operator/panel poll との共通点
+   - PMEでの役割
+
+2. 最低限必要なPython
+   - True / False
+   - return
+   - ==, !=, <, >, in
+   - and / or / not
+
+3. Contextの読み方
+   - C.mode
+   - C.active_object
+   - C.area.type
+   - C.space_data
+
+4. 安全な書き方
+   - Noneチェック
+   - ao = C.active_object; return ao and ...
+   - attribute accessで落とさない
+
+5. 実践レシピ
+   - Object Mode限定
+   - Edit Mesh限定
+   - 特定オブジェクトタイプ限定
+   - 特定Area限定
+   - 選択状態による切り替え
+
+6. Keymapと併用する考え方
+   - 同じキーを文脈で切り替える
+   - Keymapを細かくしすぎない代わりにPollで絞る
+
+7. デバッグ
+   - まずContextをprintする
+   - 条件を段階的に分解する
+   - 一行で詰め込みすぎない
+-->
+
+## 関連ページ
+
+- [BlenderのKeymapとPME](keymap_and_pme.md)
+- [用語集](terminology.md)
