@@ -1,0 +1,212 @@
+(installation)=
+
+# インストール・アップデート
+
+このページでは、PME2の新規インストール、アップデート、PME1からの移行手順を説明します。
+
+```{important}
+1.19.2 はBlender 3.2 から 4.5までをサポートしています。
+
+現在の PME2 リリース方針では、サポート中の Blender LTS と、PME 側で検証済みの新しい Blender を対象にします。
+2.0.4 の準備時点では Blender 4.2 LTS が 2026年7月まで upstream support 中で、その後は Blender 4.5 LTS が LTS 下限になります。
+```
+
+## どの手順を使えばよいですか？
+
+初めて PME を入れる
+: 「[新規インストール](#install-fresh)」へ進んでください。
+
+すでに PME2 を使っている
+: 「[PME2 のアップデート](#install-update)」へ進んでください。
+
+PME1 から移行したい
+: 先に「[移行前のバックアップ作業](#migration-prep)」を済ませてから、「[クリーンインストール](#install-clean)」へ進んでください。
+
+アップデート後に動作がおかしい
+: 「[クリーンインストール](#install-clean)」で入れ直すと解消することがあります。
+
+---
+
+(install-fresh)=
+## 新規インストール
+
+1. 販売プラットフォームから PME の `.zip` ファイルをダウンロードします。
+2. Blender を開き、{guilabel}`Edit` > {guilabel}`Preferences` を開きます。
+3. {guilabel}`Add-ons` タブを開きます。
+4. 右上の {guilabel}`Add-ons Settings`({octicon}`chevron-down` ボタン) から {guilabel}`Install from Disk...` を選びます。
+5. ダウンロードした `.zip` ファイルを選択します。
+6. 必要に応じて {guilabel}`Enable on Install` を有効にします。
+7. PME を有効化します。
+8. Blender を再起動します。
+
+```{tip}
+Blender 4.3以降、`.zip` ファイルを Blender ウィンドウへドラッグ＆ドロップしてもインストールできます。
+```
+
+---
+
+(install-update)=
+## アップデート (PME2.0+)
+
+1. 安全のために、{guilabel}`Export` >  {guilabel}`Backup Now` で 現在のカスタマイズをバックアップしてください。
+2. 新しい PME2 の `.zip` をダウンロードします。
+3. {guilabel}`Preferences` > {guilabel}`Add-ons` > {guilabel}`Add-ons Settings` > {guilabel}`Install from Disk...` を開きます。
+4. 新しい `.zip` を選択してインストールします。
+5. {guilabel}`Overwrite` は**有効のまま**にします。
+6. Blender を再起動します。
+
+```{tip}
+Blender 4.3以降、`.zip` ファイルを Blender ウィンドウへドラッグ＆ドロップしてもインストールできます。
+```
+```{note}
+{guilabel}`Overwrite` を無効にすると、既存の同名ファイルやフォルダが見つかった時点でインストールが**中止**されます。
+別名で共存させるためのオプションではありません。
+```
+---
+
+(migration-prep)=
+## 移行前のバックアップ作業（PME1 ユーザー向け）
+
+PME2 には PME1 からの自動マイグレーション が実装されていますが、**最も安全なのは クリーンインストール + JSON 再インポート**です。
+移行を始める前に、以下の準備を済ませてください。
+
+### JSON の書き出し
+
+PME1 の Preferences で {guilabel}`Export` > {guilabel}`All Menus` を押下してください。
+ファイルブラウザで、JSON ファイルをわかりやすい場所に保存しましょう。
+
+```{tip}
+{guilabel}`Export` メニュー内の {guilabel}`Backup Now` でも全メニューを保存できますが、保存先を指定できません！
+```
+
+```{admonition} エクスポート時に compatible JSON は使うべきですか？
+:class: note
+
+いいえ、PME2への移行用途では、通常の JSON を使ってください。
+{guilabel}`compatible JSON` は一部の情報（無効状態、ドラッグ方向など）を省略するため、PME1 から PME2 への移行には向きません。
+```
+
+### ユーザーリソースの退避
+
+PME1 では、スクリプトやアイコンなどのユーザーリソースがアドオン本体の近くに保存されています。
+**アドオンを上書きまたは削除すると、これらのファイルが失われる可能性があります。**
+移行前に以下の場所を確認し、必要なファイルを別の場所へコピーしてください。
+
+| リソース | 保存場所 |
+|----------|---------|
+| カスタムスクリプト | `pie_menu_editor/scripts/` |
+| カスタムアイコン | `pie_menu_editor/icons/` |
+| バックアップ | `scripts/addons/pie_menu_editor_data/backups/` |
+
+### disabled なメニューも引き継ぎたい場合
+
+PME1 の古いバージョンでは、無効化したメニューの状態が JSON に含まれません。
+有効/無効の状態も引き継ぎたい場合は、**PME1 v1.19.0 以降**で JSON を書き出してください。
+
+迷う場合は、いったん **v1.19.2 に更新してから Export** するのが確実です。
+
+```{note}
+これは必須ではありません。
+無効状態の保持が不要であれば、そのまま移行して問題ありません。
+```
+
+---
+
+(install-clean)=
+## クリーンインストール
+
+既存の PME を一度削除してから入れ直す手順です。
+PME1 からの移行や、アップデート後に不具合が解消しない場合に有効です。
+
+```{tip}
+PME1 から移行する方は、先に「[移行前のバックアップ作業](#migration-prep)」を済ませてください。
+```
+
+1. {guilabel}`Export` > {guilabel}`All Menus` で現在のメニューを JSON に保存します。
+2. {guilabel}`Preferences` > {guilabel}`Add-ons` で PME の詳細を開き、{guilabel}`Uninstall` を押します。
+3. Blender の Preferences を保存します。
+4. Blender を再起動します。
+5. 新しい PME の `.zip` を {guilabel}`Install from Disk...` でインストールします。
+6. PME を有効化します。
+7. {guilabel}`Import` から、保存しておいた JSON を読み込みます。
+8. 既存名の扱いは {guilabel}`Skip` もしくは {guilabel}`Replace` を選択してください。
+9. 「[インストール後の確認](#post-install-check)」の項目をチェックします。
+
+---
+
+(post-install-check)=
+## インストール後の確認
+
+以下の状態になっていれば、インストールは完了です。
+
+1. {guilabel}`Preferences` の PME パネルが開く
+2. Pie Menu を通常通り呼び出せる
+3. キーマップが期待通りに動く
+4. Blender を再起動しても設定が残る
+
+もし `See System Console` というメッセージが表示された場合は、何らかのエラーが発生しています。
+システムコンソールを開いて内容を確認してください。
+
+:::{admonition} システムコンソールの開き方
+:class: tip
+
+- **Windows**: Blender のメニューから {guilabel}`Window` > {guilabel}`Toggle System Console` を選択します。
+- **macOS / Linux**: ターミナルから Blender を起動すると、コンソール出力を確認できます。
+:::
+
+```{tip}
+移行直後やアップデート直後に動作が不安定な場合は、まず Blender を再起動してから再確認してください。
+```
+
+---
+
+## PME2 のリソース保存先
+
+```{versionchanged} 2.0.0
+スクリプト・アイコン・バックアップ・エクスポートデータがアドオン本体から分離され、専用のユーザーリソースディレクトリに保存されるようになりました。
+```
+
+デフォルトの保存先は以下のとおりです。
+
+Windows
+: `%USERPROFILE%\Documents\Pie Menu Editor\`
+
+macOS
+: `~/Documents/Pie Menu Editor/`
+
+Linux
+: `$XDG_DOCUMENTS_DIR/Pie Menu Editor/`（fallback: `~/Documents/Pie Menu Editor/`）
+
+```{seealso}
+保存先の変更方法やディレクトリ構成の詳細は {ref}`user_resources` を参照してください。
+```
+
+---
+
+## よくある質問
+
+### PME1 の上にそのまま PME2 を入れてもいいですか？
+
+はい、その経路も設計上サポートされています。
+PME2 は起動時に PME1 のデータを自動検出し、migration を実行します。
+ただし、Blender のライフサイクルに起因する不安定さが残る可能性があるため、**最も安全なのは JSON を書き出してからクリーンインストールする方法**です。
+
+### 更新後に Blender の再起動は必要ですか？
+
+はい。アップデート後と移行後は、必ず Blender を再起動してください。
+
+### Blender で「Legacy Add-on」と表示されますが、問題ですか？
+
+問題ありません。
+Blender 4.2 以降では、新しい Extensions システムと従来のアドオン形式を区別するためにこのラベルが表示されます。
+PME は従来の `bl_info` ベースのアドオンですが、機能に違いや制限はありません。
+
+---
+
+## 次のステップ
+
+初めて PME を使う方
+: {doc}`basic_pie_menu` で、最初の Pie Menu を作ってみましょう。
+
+PME1 から移行・アップデートした方
+: {doc}`../support_community/changelog` で、新バージョンの変更点を確認できます。

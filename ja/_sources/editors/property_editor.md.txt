@@ -1,0 +1,240 @@
+(property-editor)=
+
+# Property Editor
+
+Property Editor は、コードを書かずに新しい Blender Property を登録するためのエディターです。  
+トグル、数値、文字列、Enum、ベクトル値などを作成し、PME のメニュー、ダイアログ、Custom タブから通常の Blender プロパティのように利用できます。
+
+## 対応しているプロパティ型
+
+- `BoolProperty`
+- `IntProperty`
+- `FloatProperty`
+- `StringProperty`
+- `EnumProperty`
+- ベクトルプロパティ
+
+## 使い方
+
+<div class="video-container">
+   <iframe src="https://www.youtube.com/embed/xQ-ETd8xacA" frameborder="0" allowfullscreen></iframe>
+</div>
+
+## 値の保存先
+
+既定では、Property の値は PME の Add-on Preferences に保存されます。  
+`.blend` に保存したい場合は、`Store in ...` で保存先の型を指定します。
+
+たとえば `Store in Object Instances` にすると、その Property は各 Object に保存されます。
+
+::::{image} /_static/images/original/props/pme_prop_storing.png
+:alt: Property storing example
+:align: center
+::::
+
+この場合、その Property は Object の通常のプロパティと同じように使えます。
+
+```python
+C.object.MyProperty = True
+```
+
+## `self` と `menu`
+
+`GET` / `SET` / `UPDATE` / `INIT` に渡される `self` は、その Property の所有者です。
+
+- `Store in Addon Preferences` の場合: PME 側の保存コンテナ
+- `Store in Object Instances` の場合: その Object
+- 他の型を選んだ場合: その型のインスタンス
+
+`menu` は PM 名を表す**文字列**です。  
+既定のサンプルでは、この文字列を保存キーとして使っています。
+
+```python
+return self.get(menu, False)
+self[menu] = value
+```
+
+これは「PM 名をキーにして保存・読込する」という最小構成です。  
+固定キーや既存データを使いたい場合は、`menu` を使う必要はありません。
+
+```python
+return self.get("my_key", False)
+self["my_key"] = value
+```
+
+```python
+return bool(self.hide_viewport) if self else False
+if self: self.hide_viewport = bool(value)
+```
+
+## 既定で入る関数
+
+関数を追加すると、初期状態では次のコードが入ります。
+
+### Getter
+
+```python
+return self.get(menu, False)
+```
+
+`self` の内部辞書から `menu` というキーで値を読み、存在しない場合は `False` を返します。
+
+### Setter
+
+```python
+self[menu] = value
+```
+
+新しい値 `value` を、`menu` というキーで `self` に保存します。
+
+### On Update
+
+```python
+print('On Update', menu, '=', repr(props(menu)))
+```
+
+値が更新されたときに呼ばれます。  
+これは動作確認用のサンプルで、`props(menu)` の値をコンソールに表示するだけです。
+
+### On Init
+
+```python
+print('On Init', menu, '=', repr(props(menu)))
+```
+
+Property の初期化時に呼ばれます。  
+これも動作確認用のサンプルです。
+
+## `props()` と `self`
+
+`props()` は PME の Add-on Preferences 側の保存領域を扱います。
+
+```python
+value = props("MyProperty")
+value = props().MyProperty
+props("MyProperty", 10)
+props().MyProperty = 10
+```
+
+`self` は現在の Property の所有者を表します。  
+`Store in` の設定に応じて、Add-on Preferences、Object、その他の Blender 型インスタンスを指します。
+
+`props()` は PME 側の共通保存領域、`self` は現在の保存先、と考えてください。
+
+## Functions
+
+::::{image} /_static/images/original/props/pme_prop_funcs.png
+:alt: Property functions
+:align: center
+::::
+
+## Script の注意点
+
+:::{important}
+Property Editor の `GET` / `SET` / `UPDATE` / `INIT` は 1 行で書く前提です。  
+複数の処理を書く場合は、三項演算子、短絡評価、補助関数の呼び出しなどで 1 行に収めてください。
+:::
+
+:::{important}
+`GET` は常に Property Type に一致する値を返す必要があります。  
+`FLOAT` なら `float`、`INT` なら `int`、`BOOL` なら `bool`、`STRING` なら `str` を返してください。`None` は返せません。
+:::
+
+:::{tip}
+返せない場合は `None` ではなくフォールバック値を返します。
+
+- `BOOL` → `False`
+- `INT` → `0`
+- `FLOAT` → `0.0` または意味のある既定値
+- `STRING` → `""`
+- `ENUM` → 有効な項目
+:::
+
+`Store in Object Instances` などで外部値のプロキシとして使う場合も、`GET` は型一致の値を返してください。
+
+悪い例:
+
+```python
+return bpy.context.active_object.location.x if bpy.context.active_object else None
+```
+
+良い例:
+
+```python
+return float(self.location.x) if self else 0.0
+```
+
+`bpy.context` を参照するコードも書けますが、Property の評価は PME メニュー表示時に限りません。  
+再描画や RNA アクセスでも呼ばれるため、context 依存コードには必ずフォールバック値を用意してください。
+
+## Restore Default Value
+
+`Store in Addon Preferences` のときだけ表示されます。  
+このオプションを有効にすると、保存済みの値を使わず、初期化時にデフォルト値へ戻します。
+
+前回の値を保持したい場合は無効のまま使ってください。
+
+## Scripting
+
+Property 名から値を取得するには `props()` を使います。
+
+```python
+value = props("MyProperty")
+value = props().MyProperty
+```
+
+値を設定するには次のように書きます。
+
+```python
+props("MyProperty", value)
+props().MyProperty = value
+```
+
+Custom タブから使う例:
+
+```python
+L.prop(props(), "MyBoolProperty", text=slot, icon='COLOR_GREEN' if props("MyBoolProperty") else 'COLOR_RED')
+```
+
+## Examples
+
+### Slider
+
+::::{image} /_static/images/original/props/pme_prop_slider.png
+:alt: Slider property example
+:align: center
+::::
+
+### Color Widget
+
+::::{image} /_static/images/original/props/pme_prop_color.png
+:alt: Color widget example
+:align: center
+::::
+
+### Direction Widget
+
+::::{image} /_static/images/original/props/pme_prop_direction.png
+:alt: Direction widget example
+:align: center
+::::
+
+### Icon-Only Tab Bar
+
+::::{image} /_static/images/original/props/pme_prop_tabbar.png
+:alt: Icon-only tab bar example
+:align: center
+::::
+
+### Directory Path
+
+::::{image} /_static/images/original/props/pme_prop_path.png
+:alt: Directory path example
+:align: center
+::::
+
+## 参考
+
+- [Editor Common Elements](./editor_common_elements.md)
+- [Slot Type: Property](./common/slot_types/property.md)
+- [Blender Python API: bpy.props](https://docs.blender.org/api/current/bpy.props.html)
