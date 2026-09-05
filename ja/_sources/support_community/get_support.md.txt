@@ -1,0 +1,63 @@
+(get-support)=
+
+# サポート
+
+## 質問・カスタマイズ例の共有
+
+PME に関する質問、カスタマイズ例の共有、機能提案は Blender Artists Forum で受け付けています。
+
+- [Blender Artists Forum](http://blenderartists.org/forum/showthread.php?392910)
+
+## バグ報告
+
+<div style="margin: 1.5em 0 1em; line-height: 1.8;">
+  <span style="opacity: 0.5;">&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;. *&ensp;. ˚&ensp; ✦&ensp;.&ensp;˚</span><br>
+  ✨ <b>Nice Bug Hunting!</b> ✨<br>
+  <span style="opacity: 0.5;">&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;˚&ensp;.&ensp;✦&ensp; * .&ensp;˚&ensp;.</span>
+</div>
+
+バグ報告は常に歓迎します。
+
+バグ報告は、PME をより良くするための大切な貢献です。  
+ひとつの報告が、問題の修正だけでなく、将来の設計改善や他のユーザーの助けにつながることがあります。
+
+問題の再現に必要な情報が揃っていれば、原因を特定しやすくなり、より正確に対応できます。
+
+### 送ってほしい情報
+
+- 症状の短い要約
+- 再現手順
+- Blender のバージョン
+- PME のバージョン
+- OS
+- PME 設定 JSON
+- System Console のエラー出力
+- 症状を説明するスクリーンショット
+
+<div class="support-actions">
+  <a class="support-button support-button-primary" href="#support-contact" data-beacon-open="true" data-beacon-template="supportRequest">バグを報告する</a>
+</div>
+
+<!-- ボタンが使えない場合は、以下のメールリンクからも報告できます。 -->
+
+<!-- - <a href="mailto:support@pie-menu-editor.com?subject=PME%20Support%20Request&amp;body=Please%20fill%20in%20as%20much%20as%20you%20can.%20If%20something%20is%20unclear%2C%20you%20can%20skip%20it.%0A%0ASummary%3A%0A-%20What%20went%20wrong%0A%0ASteps%20to%20reproduce%3A%0A1.%0A2.%0A3.%0A%0AWhat%20happened%3A%0A-%20Describe%20the%20actual%20result.%0A%0AEnvironment%3A%0A-%20Blender%20version%3A%0A-%20PME%20version%3A%0A-%20OS%3A%0A%0AAttachments%3A%0A-%20PME%20setup%20JSON%3A%0A-%20Console%20output%20%2F%20screenshot%3A%0A-%20Small%20.blend%20file%20%28if%20relevant%29%3A%0A%0AAdditional%20notes%3A%0A-%20Anything%20else%20that%20may%20help.">メールを作成する</a> -->
+
+```{admonition} 添付ファイル
+:class: important
+スクリーンショットや小さな JSON ファイルは、できるだけメール添付で送ってください。  
+大きなファイルや動画は、Google Drive または Dropbox の共有リンクを使用してください。  
+一時的なファイル共有サービスや、確認しづらい外部ホスティング先は避けてください。  
+共有リンクは、追加ログインなしでアクセスできる設定にしてください。
+```
+
+```{admonition} この方法では十分にサポートできません
+:class: error
+次のような方法では、必要な情報の確認や追加のやり取りが難しく、問題の調査が進まないことがあります。
+
+- SNS で不具合を報告する
+- 販売サイトのレビュー欄で不具合を報告する
+- 一時的なファイル共有サービスや、確認しづらい外部ホスティング先のみでの報告
+
+これらの方法では、再現手順、JSON、エラー出力などの確認が不十分になりやすく、結果として解決まで遠回りになります。  
+不具合報告は、Blender Artists Forum またはサポートメールから送ってください。
+```

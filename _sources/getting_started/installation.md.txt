@@ -1,0 +1,176 @@
+(installation)=
+
+(installation-2-1)=
+
+# Installation
+
+PME 2.1 and later are installed as an **Extension**.
+Do not enable the PME 2.0 Legacy Add-on and PME 2.1 Extension at the same time.
+
+## Supported Blender Versions
+
+PME 2.1 supports **Blender 4.5 through 5.2**.
+
+<span id="install-fresh"></span><span id="install-update"></span><span id="migration-prep"></span><span id="install-clean"></span><span id="post-install-check"></span>
+
+For PME 2.0 and earlier, see the [Legacy Add-on installation archive](installation_legacy.md).
+
+::::::{tab-set}
+
+:::::{tab-item} Fresh Install
+
+(install-2-1-fresh)=
+
+### 1. Get Access Information
+
+```{include} _repository_access.inc
+```
+
+### 2. Add the Repository
+
+```{include} _repository_add.inc
+```
+
+### 3. Install PME
+
+1. Return to {guilabel}`Get Extensions` and sync the PME Repository.
+   If the list does not update, run {guilabel}`Refresh Remote`.
+2. Search for {guilabel}`Pie Menu Editor Fork`, then click {guilabel}`Install`.
+3. If PME is disabled, enable it under {guilabel}`Preferences` > {guilabel}`Add-ons`.
+
+:::::
+
+:::::{tab-item} Migrate from an Earlier Version
+
+(install-2-1-migrate)=
+
+This procedure covers migration from PME 1.18.x, 1.19.x, or 2.0.5.x to PME 2.1.
+
+### 1. Back Up the Earlier Version and Exit
+
+::::{important}
+**If you use PME 1.18.x or 1.19.x, back up your user resources first.**
+
+PME 1 stores scripts, icons, and other resources inside or next to the old add-on folder.
+Before uninstalling the old version, copy the files you use to a safe location.
+
+:::{dropdown} Backup locations
+
+Open the standard `addons` folder for the Blender version you use.
+`<version>` is the Blender version number, such as `4.2`.
+
+| OS | `addons` folder |
+|---|---|
+| Windows | `%APPDATA%\Blender Foundation\Blender\<version>\scripts\addons\` |
+| macOS | `~/Library/Application Support/Blender/<version>/scripts/addons/` |
+| Linux | `~/.config/blender/<version>/scripts/addons/` |
+
+Copy the following folders to a location that will not be deleted when PME is uninstalled.
+
+| Resource | Path relative to the `addons` folder |
+|---|---|
+| Custom scripts | `pie_menu_editor/scripts/` |
+| Custom icons | `pie_menu_editor/icons/` |
+| Backups | `pie_menu_editor_data/backups/` |
+
+To carry over the enabled or disabled state of menus, export JSON with PME 1.19.0 or later.
+Earlier PME 1 versions do not include disabled states in JSON.
+
+:::
+::::
+
+PME 2.0.5.x stores user resources outside the add-on itself in the
+[user resource folder](../reference/file_locations.md).
+Uninstalling versions from 2.0.0 onward does not delete these resources.
+
+1. Open the earlier PME Preferences and use {guilabel}`Export` >
+   {guilabel}`All Menus` to export your menus to a JSON file.
+2. Uninstall the earlier PME from {guilabel}`Preferences` > {guilabel}`Add-ons`.
+3. Exit Blender.
+
+### 2. Get Access Information
+
+```{include} _repository_access.inc
+```
+
+### 3. Add the Repository
+
+```{include} _repository_add.inc
+```
+
+### 4. Install PME and Import Your Settings
+
+1. Return to {guilabel}`Get Extensions` and sync the PME Repository.
+   If the list does not update, run {guilabel}`Refresh Remote`.
+2. Search for {guilabel}`Pie Menu Editor Fork`, then click {guilabel}`Install`.
+3. If PME is disabled, enable it under {guilabel}`Preferences` > {guilabel}`Add-ons`.
+4. When migrating from PME 1, copy your backed-up custom scripts into `scripts/`
+   and custom icons into `icons/` under the
+   [user resource folder](../reference/file_locations.md).
+   Do not overwrite PME 2.1 files with system files from the earlier version.
+5. Open {guilabel}`Import Menus` in PME 2.1 and import the saved JSON file with
+   {guilabel}`Rename if exists`.
+
+{guilabel}`compatible JSON` omits some information and should not be used for migration to PME 2.1.
+
+- **Settings loaded from JSON**
+  - PME menus
+  - Hotkeys assigned to PME menus
+- **Items to configure again in PME 2.1**
+  - General PME settings
+  - The Global Hotkey used to open PME
+  - Current values stored in User Properties
+  - Custom user resource folder settings
+  - Enablement settings for `boot_config` and `import pme`
+
+:::::
+
+:::::{tab-item} Update
+
+(install-2-1-update)=
+
+PME installed from the PME Repository is updated through Blender's Extensions system.
+
+1. Open {guilabel}`Edit` > {guilabel}`Preferences` > {guilabel}`Get Extensions`.
+2. Run {guilabel}`Refresh Remote` if needed.
+3. Run {guilabel}`Install Available Updates`.
+4. Confirm that the displayed PME version has changed.
+5. Save your work and restart Blender.
+
+```{important}
+After updating, restart Blender before using PME again.
+
+Although the Extension files have been updated, state from the previous PME version may
+remain in the same Blender session. Continuing to use PME in the session immediately
+after an update is not supported.
+```
+
+:::::
+
+::::::
+
+## Q&A
+
+An error says that an earlier PME version is still installed
+: Uninstall the earlier PME, restart Blender, then enable PME 2.1.
+
+The UI or Hotkeys still behave incorrectly after restarting
+: Check {guilabel}`Preferences` > {guilabel}`Add-ons` for an earlier PME version.
+  If one remains, uninstall it and restart Blender.
+  If the problem continues, report the error message using the instructions below.
+
+Imported menus disappeared after restarting
+: Check whether {guilabel}`Auto-Save Preferences` is disabled.
+  If it is disabled, run {guilabel}`Save Preferences` after importing.
+
+An error message or `See System Console` appears
+: Include the displayed message and System Console output when reporting the problem through the
+  [Support page](../support_community/get_support.md).
+  On Windows, open the System Console from {guilabel}`Window` >
+  {guilabel}`Toggle System Console`.
+
+---
+
+[Return to PME 2.0.5.x](rollback_to_2_0.md)
+
+[Installation for PME 2.0 and Earlier (Archive)](installation_legacy.md)

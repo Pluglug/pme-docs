@@ -1,0 +1,223 @@
+(editor-common-elements)=
+
+# エディターの共通要素
+
+PME には Pie Menu / Pop-up Dialog / Regular Menu / Modal Operator / Macro Operator / Stack Key / Sticky Key / Property Editor といった複数のエディターがあります。
+役割や見た目は違っても、**PME のエディターは画面の構成と編集の流れがおおむね共通**です。
+このページはその共通部分を 1 か所にまとめた**基準ページ**です。各エディターの専用ページは、ここで説明した共通要素を前提に、固有の振る舞いだけを書きます。
+
+```{admonition} このページを読む場面
+:class: hint
+
+- 初めて PME のエディターを開いたとき、画面のどこに何があるかを把握したい
+- 別のエディターを使うときに、前と何が同じで何が違うのかを確認したい
+- ホットキーやスロットといった基本要素を 1 度だけまとめて読んでおきたい
+```
+
+---
+
+## PME のエディターはおおむねこういう構成です
+
+どのエディターを開いても、画面上から下へ次の要素が並んでいます。
+
+1. **トップバー** — 有効/無効、プレビュー、メニュー選択、メニュー名、被参照、Tag、ドキュメント、詳細設定トグル
+2. **Hotkey 設定** — このメニューをどのキー操作で呼び出すか
+3. **スロット一覧** — そのメニューの中身（コマンド・プロパティ・サブメニュー …の並び）
+4. **スロットエディタ** — 各スロットの中身を編集するためのサブ画面
+5. **詳細設定** — Description、Poll、そしてエディターごとの追加オプション
+
+エディターによって一部の要素は省かれます。たとえば Modal Operator・Macro Operator・Stack Key にはプレビューがありません。Property Editor はやや特殊で、別の起動方法を持ちます。**そうした差はそれぞれのエディターの専用ページに書きます**。共通要素そのものの説明は、このページが正本です。
+
+---
+
+## トップバー
+
+:::{image} /_static/images/editors/pie_menu/pie_ui_top.png
+:class: img-shadow
+:alt: エディター トップバー（Pie Menu Editor の例）
+:width: 100%
+:align: center
+:::
+
+```{include} common/topbar.md
+```
+
+---
+
+(hotkey-editor)=
+
+## Hotkey 設定
+
+PME メニューを呼び出すホットキーの設定です。**ほぼ全てのエディターで UI が共通**です（Property Editor のみ別の起動方法を持ちます）。
+
+```{include} common/hotkey_settings.md
+```
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [Blender の Keymap と PME](../reference/keymap_and_pme.md) — Keymap の階層と、PME のホットキーがその中でどう解決されるか
+- [Keymap の重複の確認](../reference/keymap_duplicates.md) — 既存のホットキーと衝突したときの調べ方
+```
+
+---
+
+(slot-list)=
+
+## スロット一覧
+
+**スロット**は「メニューを構成する 1 つ 1 つの項目」です。たとえば Pie Menu の 8 方向それぞれや、Pop-up Dialog のボタン 1 つ 1 つはすべて 1 スロットです。
+
+スロットの並びはエディターによって少しずつ意味が違います。
+
+- **数が固定されているもの**: Pie Menu は 10 スロット（8 方向 + 上 + 下）、Sticky Key は 2 スロット（On Press と On Release）
+- **数を自由に増減できるもの**: Pop-up Dialog、Regular Menu、Stack Key、Macro Operator、Modal Operator
+- **並びそのものに意味があるもの**: Macro Operator はスロットの順序が実行順になります。Modal Operator は「呼び出された時」「確定時」「取消時」といったタイミング用のスロットを混在させます。
+
+具体的な並びと意味は、各エディターの専用ページを参照してください。
+
+各スロットには共通して次の操作が用意されています。
+
+1. **スロット編集ボタン** — スロットエディタを開いて中身を設定します
+2. **アイコン** — スロットに表示するアイコンを選択します
+3. **表示名** — スロットのラベルテキストを設定します
+4. **詳細設定** — スロットごとの追加オプション
+
+::::{admonition} Expansion Tool
+:class: seealso
+
+Settings > General > **Expand Slot Tools** を有効にすると、詳細設定メニューのボタンが拡張されて、よく使う操作が直接並びます。
+
+:::{image} /_static/images/editors/common/slot_tools.png
+:class: img-shadow
+:alt: スロットツール拡張
+:align: center
+:width: 80%
+:::
+::::
+
+---
+
+(slot-editor)=
+
+## スロットエディタ
+
+スロット編集ボタンを押すと、**スロットエディタ**が開きます。
+**この画面の構成はどのエディターでもほぼ同じ**で、上部の共通操作と、中央のタブ（スロットタイプの切り替え）で構成されます。
+
+:::{image} /_static/images/editors/common/slot_editor.png
+:class: img-shadow
+:alt: スロットエディタ
+:align: center
+:width: 100%
+:::
+
+<div style="margin: 1.5rem 0;"></div>
+
+### 上部の共通操作
+
+- **アイコン**: スロットに表示するアイコンを選びます。Custom Icon を使う場合は [Custom Icons](custom_icons.md) を参照してください。
+- **表示名**: スロットのラベルテキストです。{octicon}`arrow-left` を押すと、現在の設定から候補名（Suggested name）を自動的に当てはめます。
+- **OK / Cancel**: スロットの編集を確定 / 取消します。{kbd}`Enter` / {kbd}`Escape` キーでも同じ操作ができます。
+
+(slot-types)=
+
+### スロットタイプ
+
+スロットには **5 種類のタイプ**があり、何を行うスロットかをタイプで決めます。
+**そのエディターが対応しているタイプだけ**がタブとして表示されるので、たとえば Modal Operator では Custom タブは出ません。各エディターで何が使えるかは、それぞれの専用ページに書いてあります。
+
+ここでは 5 種類すべての**正本の説明**を置いておきます。各エディターの専用ページのタブにも同じ説明が表示されます。
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
+```
+:::
+
+:::{tab-item} Property
+:sync: property
+
+```{include} common/slot_types/property.md
+```
+:::
+
+:::{tab-item} Menu
+:sync: menu
+
+```{include} common/slot_types/menu.md
+```
+:::
+
+:::{tab-item} Hotkey
+:sync: hotkey
+
+```{include} common/slot_types/hotkey.md
+```
+:::
+
+:::{tab-item} Custom
+:sync: custom
+
+```{include} common/slot_types/custom.md
+```
+:::
+::::
+
+(how-to-add-widgets)=
+
+### スロットを追加する（プリセット）
+
+```{include} common/slot_types/examples.md
+```
+
+---
+
+(editor-extra-settings)=
+
+## 詳細設定
+
+トップバーの詳細設定トグルから開くパネルです。**Description（説明文）と Poll（実行可否）はほぼ全エディターに共通**で、その後にエディターごとの追加オプションが並びます（Pie Menu の Radius、Modal Operator の Confirm on Release、Stack Key の Remember Slot / Advance On など）。
+
+```{include} common/description.md
+```
+
+(poll-method)=
+
+```{include} common/poll.md
+```
+
+固有オプションの説明は各エディターの専用ページにあります。
+
+---
+
+## このページに含まれない要素
+
+次のものは「共通要素」ではなく**各エディター固有の機能**です。それぞれのエディターの専用ページに書きます。
+
+- Pie Menu の **Radius** / **Threshold** / **Confirm Threshold** / Flick モード
+- Pop-up Dialog のレイアウト（行・列・サブ行）、Pie / Dialog / Popup のモード、固定列、配置
+- Modal Operator の **On Invoke / On Confirm / On Cancel / On Update** スロット、Confirm on Release、Block UI、Lock
+- Macro Operator のサブメニュー指定（Stack Key / Macro / Modal の入れ子）、診断表示
+- Stack Key の **Remember Slot** / **Advance On** (Every Press / Quick Repeat) / **Repeat Timeout** / **Undo Previous Command**
+- Sticky Key の On Press / On Release ペア、**Save and Restore Previous Value** ジェネレータ
+- Property Editor のプロパティパス記法、配列インデックス指定
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [Pie Menu Editor](pie_menu_editor.md)
+- [Pop-up Dialog Editor](popup_dialog_editor.md)
+- [Regular Menu Editor](regular_menu_editor.md)
+- [Modal Operator Editor](modal_operator_editor.md)
+- [Macro Operator Editor](macro_operator_editor.md)
+- [Stack Key Editor](stack_key_editor.md)
+- [Sticky Key Editor](sticky_key_editor.md)
+- [Property Editor](property_editor.md)
+- [用語集](../reference/terminology.md)
+```

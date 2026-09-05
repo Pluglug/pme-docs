@@ -1,0 +1,846 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="Property Editor" href="property_editor.html"><link rel="prev" title="Macro Operator Editor" href="macro_operator_editor.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>Modal Operator Editor - Pie Menu Editor JA 2.0.5.5 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c621e55a" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c621e55a" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+      }
+    }
+  }
+</style>
+
+<script type="text/javascript">
+    (function () {
+        if (window.__PMEBeaconInitialized) {
+            return;
+        }
+
+        window.__PMEBeaconInitialized = true;
+
+        !function(e,t,n){function a(){var e=t.getElementsByTagName("script")[0],n=t.createElement("script");n.type="text/javascript",n.async=!0,n.src="https://beacon-v2.helpscout.net",e.parentNode.insertBefore(n,e)}if(e.Beacon=n=function(t,n,a){e.Beacon.readyQueue.push({method:t,options:n,data:a})},n.readyQueue=[],"complete"===t.readyState)return a();e.attachEvent?e.attachEvent("onload",a):e.addEventListener("load",a,!1)}(window,document,window.Beacon||function(){});
+        window.Beacon('init', 'e458ab6a-6436-4e96-a0b6-038336504b24');
+        window.Beacon('config', {
+            display: {
+                style: 'manual'
+            }
+        });
+
+        window.PMEDocs = window.PMEDocs || {};
+        window.PMEDocs.beaconPrefillTemplates = {
+            supportRequest: [
+                'Summary:',
+                '- What went wrong?',
+                '',
+                'Steps to reproduce:',
+                '1.',
+                '2.',
+                '3.',
+                '',
+                'What happened:',
+                '- Describe the actual result.',
+                '',
+                'Environment:',
+                '- Blender version:',
+                '- PME version:',
+                '- OS:',
+                '',
+                'Attachments:',
+                '- PME setup JSON:',
+                '- Console output / screenshot:',
+                '- Small .blend file (if relevant):',
+                '',
+                'Additional notes:',
+                '- Anything else that may help.'
+            ].join('\n')
+        };
+
+        window.PMEDocs.openSupportBeacon = function (event, templateName) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            if (typeof window.Beacon === 'function') {
+                const prefillText = window.PMEDocs.beaconPrefillTemplates[templateName];
+                if (prefillText) {
+                    window.Beacon('prefill', {
+                        text: prefillText
+                    });
+                }
+
+                window.Beacon('open');
+                window.Beacon('navigate', '/ask/message/');
+                return false;
+            }
+
+            return true;
+        };
+
+        document.addEventListener('click', function (event) {
+            const trigger = event.target.closest('[data-beacon-open]');
+            if (!trigger) {
+                return;
+            }
+
+            window.PMEDocs.openSupportBeacon(event, trigger.dataset.beaconTemplate);
+        });
+    }());
+</script></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Pie Menu Editor JA 2.0.5.5 ドキュメント</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor JA 2.0.5.5 ドキュメント</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">はじめる</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/basic_pie_menu.html">基本的なパイメニューの作成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/popup_dialog_tutorial.html">ポップアップダイアログをパイメニューに追加</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/macro_tutorial.html">マクロで独自機能を作成</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">エディタ</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="popup_dialog_editor.html">Pop-up Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property_editor.html">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="side_panel_editor.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hiding_unused_panels.html">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interactive_panels.html">Interactive Panels と Extend Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editor_common_elements.html">エディターの共通要素</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#hiding-unused-panels">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#menu-panel-extension">Menu/Panel Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#pme-toolbar">PME Toolbar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context_menu.html">コンテキストメニュー</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_icons.html">カスタムアイコン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">参考資料</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/file_locations.html">保存先とフォルダ構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/boot_options.html">起動オプション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/terminology.html">用語集</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_and_pme.html">BlenderのKeymapとPME</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_duplicates.html">削除したはずのPMEキーマップが残り続ける(重複・ゴーストキーマップ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/poll_method.html">Poll Method の基礎</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/scripting.html">スクリプティング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_guide.html">Keymapの選び方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/developer_options.html">開発者オプション</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">サポート</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">サポート</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/editors/modal_operator_editor.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="modal-operator-editor">
+<span id="id1"></span><h1>Modal Operator Editor<a class="headerlink" href="#modal-operator-editor" title="Link to this heading">¶</a></h1>
+<p><strong>Modal Operator</strong> は、hotkey を押してから確定 / 取消するまで Blender を一時的に専用モードに固定する対話ツールを作成するエディターです。マウス移動・マウスホイール・サブホットキーを入力として、連続的にプロパティを変更したり処理を呼び出したりします。</p>
+<hr class="docutils" />
+<section id="id2">
+<h2>構成<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>項目</p></th>
+<th class="head"><p>値</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>スロット数</p></td>
+<td><p>任意</p></td>
+</tr>
+<tr class="row-odd"><td><p>スロットタイプ</p></td>
+<td><p>Command / Property / On Invoke / On Confirm / On Cancel / On Update</p></td>
+</tr>
+<tr class="row-even"><td><p>Hotkey 設定</p></td>
+<td><p>あり（モーダルの起動キー）</p></td>
+</tr>
+<tr class="row-odd"><td><p>サブホットキー</p></td>
+<td><p>あり（スロットごと）</p></td>
+</tr>
+<tr class="row-even"><td><p>プレビュー</p></td>
+<td><p>なし</p></td>
+</tr>
+<tr class="row-odd"><td><p>詳細設定</p></td>
+<td><p>Description / Poll / Confirm on Release / Block UI / Lock</p></td>
+</tr>
+<tr class="row-even"><td><p>Blender への登録</p></td>
+<td><p>名前付きオペレーター</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<hr class="docutils" />
+<section id="id3">
+<h2>モーダルオペレーターのしくみ<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<p>Modal Operator は、起動 hotkey から確定 / 取消までの間、次の順序で動作します。</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[起動 hotkey]
+   ↓
+On Invoke          ← モーダル開始時に 1 回だけ走る
+   ↓
+[サブホットキー押下 / マウス操作のたびに繰り返し]
+   On Update       ← 何か操作されるたびに走る
+   Command/Property ← 対応するサブホットキー / マウス操作が来たときに走る
+   ↓
+[ユーザーが確定 or 取消]
+   ↓
+On Confirm  または  On Cancel
+   ↓
+[モーダル終了]
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="id4">
+<h2>エディター画面<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<a class="img-shadow reference internal image-reference" href="../_images/modal_editor_ui.png"><img alt="Modal Operator Editor" class="img-shadow align-center" src="../_images/modal_editor_ui.png" style="width: 100%;" />
+</a>
+<section id="id5">
+<h3>トップバー<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<p>エディター画面の最上段、メニュー名の左右に並ぶ操作です。画面の見た目はエディターによって少し違いますが、項目の意味は共通です。</p>
+<dl class="myst field-list simple">
+<dt class="field-odd">有効/無効<span class="colon">:</span></dt>
+<dd class="field-odd"><p>メニュー全体を有効化/無効化します。無効化すると hotkey だけでなく、<code class="docutils literal notranslate"><span class="pre">open_menu()</span></code> / <code class="docutils literal notranslate"><span class="pre">pme.invoke_pm()</span></code> などのスクリプト経路、登録済みメニューやパネル経路（Extend Panel / Side Panel / Hidden Panel Group）からも実行されなくなります。<br />
+hotkey だけを外したい場合は、メニューを無効化するのではなく <a class="reference internal" href="editor_common_elements.html#hotkey-editor"><span class="std std-ref">Hotkey 設定</span></a> を編集してください。</p>
+</dd>
+<dt class="field-even">プレビュー<span class="colon">:</span></dt>
+<dd class="field-even"><p>メニューをその場で表示して、レイアウトや並びを確認します。プレビュー中は実際の context でコマンドは実行されません。プレビューが用意されているエディター（Pie Menu / Pop-up Dialog / Regular Menu）でのみ表示されます。</p>
+</dd>
+<dt class="field-odd">メニュー選択<span class="colon">:</span></dt>
+<dd class="field-odd"><p>編集対象のメニューを切り替えます。アイコンは現在のメニュー種別（Pie / Popup / Regular / Modal …）を示します。検索や種別フィルターで絞り込んだ一覧が出ます。</p>
+</dd>
+<dt class="field-even">メニュー名<span class="colon">:</span></dt>
+<dd class="field-even"><p>メニューの名前です。表示用ラベルであると同時に、他のメニューや Python コードからこのメニューを呼び出すときの識別子になります。<code class="docutils literal notranslate"><span class="pre">open_menu(&quot;名前&quot;)</span></code> で呼び出す場合も、ここで設定した名前を使います。<br />
+PME2 では MENU スロット経由のメニュー間参照に <strong>uid</strong> を持たせるようになり、MENU スロットや Pop-up Dialog / Floating Panel の Dialog リンクは名前を変えても壊れません。一方で、<strong>COMMAND / CUSTOM タブ内で <code class="docutils literal notranslate"><span class="pre">open_menu(&quot;名前&quot;)</span></code> / <code class="docutils literal notranslate"><span class="pre">draw_menu(&quot;名前&quot;)</span></code> のように名前文字列で呼び出している箇所は、現状まだ名前ベース</strong>です。この経路の uid 化は開発中で、いまは PME 側で参照を追跡できないので、メニュー名を変更したらこれらのコードも合わせて直してください。</p>
+</dd>
+<dt class="field-odd">被参照ボタン<span class="colon">:</span></dt>
+<dd class="field-odd"><p>このメニューを参照している別のメニューがある場合に表示されます。クリックすると参照元の一覧が出て、そこからジャンプできます。Macro から別の Stack Key を呼んでいる、Regular Menu のスロットから Pop-up Dialog を呼んでいる、といった依存関係を追うときに使います。</p>
+</dd>
+<dt class="field-even">Tag<span class="colon">:</span></dt>
+<dd class="field-even"><p>メニューの分類・検索用ラベルです。クリックするとタグ編集ポップアップが開き、複数のタグを付けられます。<br />
+Tag を付けておくと、Pie Menu Editor の一覧画面で <strong>絞り込み</strong>・<strong>グループ表示</strong>ができ、<code class="docutils literal notranslate"><span class="pre">pm_enable_by_tag(&quot;名前&quot;,</span> <span class="pre">True)</span></code> でセット単位での有効化にも使えます。<span class="guilabel">Settings &gt; General &gt; Auto-Tag New Menus</span> を有効にすると、現在のタグフィルタで新規メニューに自動でタグが付きます。</p>
+</dd>
+<dt class="field-odd">ドキュメント<span class="colon">:</span></dt>
+<dd class="field-odd"><p>PME のオンラインドキュメント（このサイト）の該当ページを開きます。</p>
+</dd>
+<dt class="field-even">詳細設定トグル<span class="colon">:</span></dt>
+<dd class="field-even"><p>Description（説明文）・Poll（実行可否）・そしてエディターごとの追加オプションのパネルを開閉します。詳細設定を持たないエディター（Hidden Panel Group）もあります。</p>
+</dd>
+</dl>
+</section>
+<section id="hotkey">
+<h3>Hotkey 設定（モーダルの起動キー）<a class="headerlink" href="#hotkey" title="Link to this heading">¶</a></h3>
+<a class="img-shadow reference internal image-reference" href="../_images/hotkey.png"><img alt="Hotkey Settings" class="img-shadow align-center" src="../_images/hotkey.png" style="width: 100%;" />
+</a>
+<div style="margin: 1.5rem 0;"></div>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-3 sd-g-2 sd-g-xs-2 sd-g-sm-2 sd-g-md-2 sd-g-lg-2 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm ex-card ex-card-keymap docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+キーマップ</div>
+<p class="sd-card-text">Blenderのキーマップは階層構造です。PMEのホットキーもその中で解決されるため、どのKeymapに置くかで挙動が変わります。既存のホットキーのKeymapやアクションを調べるには、エディタの<code class="docutils literal notranslate"><span class="pre">+</span></code>ボタンを使用してください。</p>
+<ul class="simple">
+<li><p class="sd-card-text">参考: <a class="reference internal" href="../reference/keymap_and_pme.html"><span class="std std-doc">BlenderのKeymapとPME</span></a></p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm ex-card ex-card-hotkey docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+ホットキーモード</div>
+<ul class="simple">
+<li><p class="sd-card-text"><strong>Press</strong>: キーを押す</p></li>
+<li><p class="sd-card-text"><strong>Hold</strong>: キーを押し続ける</p></li>
+<li><p class="sd-card-text"><strong>Tweak</strong>: キーを押しながらマウスを動かす</p></li>
+<li><p class="sd-card-text"><strong>Double Click</strong>: キーをダブルクリックする</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm ex-card ex-card-modifier docutils">
+<div class="sd-card-body docutils">
+<div class="sd-card-title sd-font-weight-bold docutils">
+モディファイア</div>
+<p class="sd-card-text"><strong>Any modifier</strong> は Ctrl / Shift / Alt / OSKey の任意の組み合わせです。コンテキスト感応ツールの作成に使えます。</p>
+<p class="sd-card-text">このアドオンではマウスボタンをモディファイアとして使えます（例: LMB+Tab / RMB+Tab / MMB+Tab）。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"Ctrl is pressed"</span> <span class="k">if</span> <span class="n">E</span><span class="o">.</span><span class="n">ctrl</span> <span class="k">else</span> <span class="s2">"Ctrl isn't pressed"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="docutils">
+</div>
+<p>ここで設定するのはモーダル全体を起動する hotkey です。サブホットキーは各スロット側で個別に設定します。</p>
+</section>
+<section id="id6">
+<h3>メニュースロット<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p>スロットは「実行ルール」として上から順に並びます。各スロットは次の情報を持ちます。</p>
+<ul class="simple">
+<li><p>タイプ（Command / Property / On Invoke / On Confirm / On Cancel / On Update）</p></li>
+<li><p>トリガー（サブホットキー / マウス移動 / マウスホイール / lifecycle イベント）</p></li>
+<li><p>実行内容（Python コードまたはプロパティパス）</p></li>
+</ul>
+<p>スロットの追加・削除・並び替え・無効化はすべて可能です。</p>
+<section id="on-update">
+<h4>On Update の配置位置による対象<a class="headerlink" href="#on-update" title="Link to this heading">¶</a></h4>
+<p>On Update は配置位置によって対象が変わります。</p>
+<ul class="simple">
+<li><p>すべてのサブホットキーの前に置いた場合 — どのサブホットキーが押されてもその On Update が走ります。</p></li>
+<li><p>特定のサブホットキー（Command / Property）の直後に置いた場合 — そのサブホットキーが押されたときだけ On Update が走ります。</p></li>
+</ul>
+</section>
+</section>
+<section id="id7">
+<h3>詳細設定<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<dl class="myst field-list">
+<dt class="field-odd">Description<span class="colon">:</span></dt>
+<dd class="field-odd"><p>自作のマクロや複雑なコマンドを後で見返したとき、何のために作ったか分からなくなる。PME ではメニューにもスロットにも説明文を残せます。<br />
+右のスクリプトトグル <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-code" viewBox="0 0 16 16" aria-hidden="true"><path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"></path></svg> を ON にすると、Description は <strong>Python 式</strong>として扱われ、毎回評価された戻り値が表示されます。現在のモードや選択数を反映した動的な説明文にできます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="sa">f</span><span class="s2">"Active: </span><span class="si">{</span><span class="n">C</span><span class="o">.</span><span class="n">active_object</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">C</span><span class="o">.</span><span class="n">active_object</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'(none)'</span><span class="si">}</span><span class="s2">"</span>
+</pre></div>
+</div>
+<p>説明文を書いていないメニューでも、tooltip は参照先のメニュー名を自動で表示します。書いておくと、その内容で上書きされます。共有時に意図が伝わる、後から見返したときに迷子にならない、というのが Description の目的です。</p>
+</dd>
+</dl>
+<dl class="myst field-list">
+<dt class="field-odd">Poll<span class="colon">:</span></dt>
+<dd class="field-odd"><p>「今の Blender の状態で、このメニューを実行してよいか」を Python の式で判定する仕組みです。式の戻り値が <code class="docutils literal notranslate"><span class="pre">True</span></code> ならメニューが実行され、<code class="docutils literal notranslate"><span class="pre">False</span></code> なら hotkey や UI から呼ばれてもスキップされます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ao</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">active_object</span><span class="p">;</span> <span class="k">return</span> <span class="n">ao</span> <span class="ow">and</span> <span class="n">ao</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">'MESH'</span>
+</pre></div>
+</div>
+<p>Poll は hotkey 経由の呼び出しだけでなく、HOLD / TWEAK / CHORD、<code class="docutils literal notranslate"><span class="pre">open_menu()</span></code> / <code class="docutils literal notranslate"><span class="pre">pme.invoke_pm()</span></code> などのスクリプト経路、editor preview、Popup Dialog や通常メニューの描画、Macro / Modal / Sticky / Floating Panel からの呼び出しでも確認されます。設定しておけば、現在の context では使えないメニューが別経路から実行されてしまうケースを防げます。</p>
+<p>右の <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-plus" viewBox="0 0 16 16" aria-hidden="true"><path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"></path></svg> から、よく使う条件をその場で追加できる Poll 補助メニューが開きます（モード判定・空 Poll の挿入・Cut / Copy / Paste など）。条件の書き方の入口は <a class="reference internal" href="../reference/poll_method.html"><span class="std std-doc">Poll Method の基礎</span></a> にまとめてあります。</p>
+</dd>
+</dl>
+<dl class="myst field-list">
+<dt class="field-odd">Confirm on Release<span class="colon">:</span></dt>
+<dd class="field-odd"><p>起動 hotkey を離した瞬間に On Confirm を実行してモーダルを終了します。</p>
+</dd>
+<dt class="field-even">Block UI<span class="colon">:</span></dt>
+<dd class="field-even"><p>モーダル中、画面の他の UI（ボタン、メニューなど）への操作をブロックします。</p>
+</dd>
+<dt class="field-odd">Lock<span class="colon">:</span></dt>
+<dd class="field-odd"><p>モーダルが起動した area / region に処理を固定します。マウスが別の area に乗っても、モーダルは元の area の context で動き続けます。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 2.0.4: </span>Lock 有効時のマウス移動でプロパティを編集している間、カーソルが起動元エリア内へ戻りやすくなりました。</p>
+</div>
+</dd>
+</dl>
+</section>
+</section>
+<hr class="docutils" />
+<section id="modal">
+<h2>スロットタイプ（Modal 固有）<a class="headerlink" href="#modal" title="Link to this heading">¶</a></h2>
+<section id="command">
+<h3>Command<a class="headerlink" href="#command" title="Link to this heading">¶</a></h3>
+<p>サブホットキーが押されたときに実行する Python コードを書きます。スロットエディタ内でこのスロット用のサブホットキーを 1 つ割り当てます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bpy</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="s1">'INVOKE_DEFAULT'</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">C</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">tool_settings</span><span class="o">.</span><span class="n">use_proportional_edit</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">C</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">tool_settings</span><span class="o">.</span><span class="n">use_proportional_edit</span>
+</pre></div>
+</div>
+</section>
+<section id="property">
+<h3>Property<a class="headerlink" href="#property" title="Link to this heading">¶</a></h3>
+<p>プロパティへのパスを指定し、どの入力で変えるかを選びます。Property タブの中で入力モードを 3 つから選択します。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>入力モード</p></th>
+<th class="head"><p>挙動</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Hotkey</strong></p></td>
+<td><p>サブホットキーを押している間、マウス移動で値が変わります。</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Mouse Move</strong></p></td>
+<td><p>サブホットキーは使わず、マウス移動だけで値が変わります。他のサブホットキーを塞ぐため、Confirm on Release と組み合わせて確定経路を確保します。</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Mouse Wheel</strong></p></td>
+<td><p>マウスホイールの上下で値を増減します。列挙型 / 離散値向きです。</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="on-invoke">
+<h3>On Invoke<a class="headerlink" href="#on-invoke" title="Link to this heading">¶</a></h3>
+<p>モーダルが起動した瞬間に 1 回だけ実行する Python コードを書きます。初期値の保存、オーバーレイ描画の開始、起動時 context の記録などに使います。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pme</span><span class="o">.</span><span class="n">start_size</span> <span class="o">=</span> <span class="n">paint_settings</span><span class="p">()</span><span class="o">.</span><span class="n">brush</span><span class="o">.</span><span class="n">size</span>
+</pre></div>
+</div>
+</section>
+<section id="on-confirm">
+<h3>On Confirm<a class="headerlink" href="#on-confirm" title="Link to this heading">¶</a></h3>
+<p>ユーザーが確定したとき（Enter キー / Confirm on Release / <code class="docutils literal notranslate"><span class="pre">confirm()</span></code> 関数）に実行する Python コードを書きます。</p>
+</section>
+<section id="on-cancel">
+<h3>On Cancel<a class="headerlink" href="#on-cancel" title="Link to this heading">¶</a></h3>
+<p>ユーザーが取消したとき（Escape キー / 右クリック / <code class="docutils literal notranslate"><span class="pre">cancel()</span></code> 関数）に実行する Python コードを書きます。</p>
+</section>
+<section id="id8">
+<h3>On Update<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<p>モーダル中に何かが起きるたびに走る Python コードを書きます。配置位置による対象の違いは「メニュースロット」節を参照してください。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="python">
+<h2>Python から確定・取消する<a class="headerlink" href="#python" title="Link to this heading">¶</a></h2>
+<p>Command スロットや On Update の中から、Modal を Python で終了させる関数が使えます。</p>
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">confirm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Modal Operator を確定して終了します。On Confirm が走ります。</p>
+<dl class="myst field-list simple">
+<dt class="field-odd">戻り値<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">cancel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><p>Modal Operator を取消して終了します。On Cancel が走ります。</p>
+<dl class="myst field-list simple">
+<dt class="field-odd">戻り値<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">condition_met</span><span class="p">:</span>
+    <span class="n">confirm</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">invalid_input</span><span class="p">:</span>
+    <span class="n">cancel</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="id9">
+<h2>応用的な使い方<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<section id="id10">
+<h3>マウス移動でブラシサイズを連続調整<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<p>Property スロットでブラシサイズをバインドし、入力モードを <strong>Mouse Move</strong>、起動キー設定で <strong>Confirm on Release</strong> を有効にすると、押している間マウス移動で値が変わり、離すと確定する操作になります。</p>
+</section>
+<section id="id11">
+<h3>軸ごとのサブホットキーで対象を切り替える<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<p>複数の Property スロットを並べ、それぞれに別のサブホットキー（<code class="docutils literal notranslate"><span class="pre">X</span></code> / <code class="docutils literal notranslate"><span class="pre">Y</span></code> / <code class="docutils literal notranslate"><span class="pre">Z</span></code> など）を割り当てます。モーダル中にどのキーを押すかで調整対象が切り替わります。</p>
+</section>
+<section id="id12">
+<h3>マウスホイールで列挙プロパティを巡回<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<p>Property スロットで列挙型プロパティ（<code class="docutils literal notranslate"><span class="pre">C.space_data.shading.type</span></code> など）を指定し、入力モードを <strong>Mouse Wheel</strong> にします。ホイールを回すと値が次々と切り替わります。</p>
+</section>
+<section id="macro">
+<h3>Macro の途中で対話的な調整を入れる<a class="headerlink" href="#macro" title="Link to this heading">¶</a></h3>
+<p>Macro Operator の Menu スロットに Modal Operator を指定すると、Macro の途中でユーザー入力を待つ調整ステップを挟めます。確定するまで次のスロットには進みません。</p>
+</section>
+<section id="on-invoke-on-cancel">
+<h3>On Invoke / On Cancel で「キャンセルしたら元に戻す」<a class="headerlink" href="#on-invoke-on-cancel" title="Link to this heading">¶</a></h3>
+<p>On Invoke で現在値を <code class="docutils literal notranslate"><span class="pre">pme</span></code> 名前空間に保存し、On Cancel でその値に戻すパターンです。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pme</span><span class="o">.</span><span class="n">start_size</span> <span class="o">=</span> <span class="n">paint_settings</span><span class="p">()</span><span class="o">.</span><span class="n">brush</span><span class="o">.</span><span class="n">size</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">paint_settings</span><span class="p">()</span><span class="o">.</span><span class="n">brush</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">pme</span><span class="o">.</span><span class="n">start_size</span>
+</pre></div>
+</div>
+</section>
+<section id="release-confirm-blender-modal">
+<h3><code class="docutils literal notranslate"><span class="pre">release_confirm</span></code> を渡す Blender ネイティブ Modal の呼び出し<a class="headerlink" href="#release-confirm-blender-modal" title="Link to this heading">¶</a></h3>
+<p>Blender の Transform 系のように、ネイティブ側にも <code class="docutils literal notranslate"><span class="pre">release_confirm</span></code> がある operator は、Command スロットから直接呼び出して PME 側の確定挙動と揃えられます。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bpy</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">transform</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="s1">'INVOKE_DEFAULT'</span><span class="p">,</span> <span class="n">release_confirm</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="note admonition">
+<p class="admonition-title">Blender の Modal Map との違い</p>
+<p>Modal Operator Editor は、Blender 内部の <strong>modal keymap</strong>（Transform や Knife ツール内のキー割り当て表）を直接編集する機能ではありません。PME が用意する Modal 風ミニツールを構築する仕組みです。</p>
+</div>
+<hr class="docutils" />
+<div class="seealso admonition">
+<p class="admonition-title">関連ページ</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="editor_common_elements.html"><span class="std std-doc">エディターの共通要素</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/poll_method.html"><span class="std std-doc">Poll Method の基礎</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/keymap_and_pme.html"><span class="std std-doc">Blender の Keymap と PME</span></a></p></li>
+</ul>
+</div>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="property_editor.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Property Editor</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="macro_operator_editor.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Macro Operator Editor</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Modal Operator Editor</a><ul>
+<li><a class="reference internal" href="#id2">構成</a></li>
+<li><a class="reference internal" href="#id3">モーダルオペレーターのしくみ</a></li>
+<li><a class="reference internal" href="#id4">エディター画面</a><ul>
+<li><a class="reference internal" href="#id5">トップバー</a></li>
+<li><a class="reference internal" href="#hotkey">Hotkey 設定（モーダルの起動キー）</a></li>
+<li><a class="reference internal" href="#id6">メニュースロット</a><ul>
+<li><a class="reference internal" href="#on-update">On Update の配置位置による対象</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id7">詳細設定</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#modal">スロットタイプ（Modal 固有）</a><ul>
+<li><a class="reference internal" href="#command">Command</a></li>
+<li><a class="reference internal" href="#property">Property</a></li>
+<li><a class="reference internal" href="#on-invoke">On Invoke</a></li>
+<li><a class="reference internal" href="#on-confirm">On Confirm</a></li>
+<li><a class="reference internal" href="#on-cancel">On Cancel</a></li>
+<li><a class="reference internal" href="#id8">On Update</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#python">Python から確定・取消する</a></li>
+<li><a class="reference internal" href="#id9">応用的な使い方</a><ul>
+<li><a class="reference internal" href="#id10">マウス移動でブラシサイズを連続調整</a></li>
+<li><a class="reference internal" href="#id11">軸ごとのサブホットキーで対象を切り替える</a></li>
+<li><a class="reference internal" href="#id12">マウスホイールで列挙プロパティを巡回</a></li>
+<li><a class="reference internal" href="#macro">Macro の途中で対話的な調整を入れる</a></li>
+<li><a class="reference internal" href="#on-invoke-on-cancel">On Invoke / On Cancel で「キャンセルしたら元に戻す」</a></li>
+<li><a class="reference internal" href="#release-confirm-blender-modal"><code class="docutils literal notranslate"><span class="pre">release_confirm</span></code> を渡す Blender ネイティブ Modal の呼び出し</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=b695b4be"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

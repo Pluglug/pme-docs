@@ -1,0 +1,268 @@
+(property-editor)=
+
+# Property Editor
+
+**Property Editor** は、PME 独自のプロパティを定義するエディターです。登録したプロパティはトグル / 数値 / 文字列 / 列挙 / ベクトルとして、Blender 標準のプロパティと同じ感覚で PME のメニュー / Pop-up Dialog / Custom スロットから利用できます。
+
+<div class="video-container">
+   <iframe src="https://www.youtube.com/embed/xQ-ETd8xacA" frameborder="0" allowfullscreen></iframe>
+</div>
+
+---
+
+## 構成
+
+| 項目 | 値 |
+|---|---|
+| スロット数 | 任意（1 行 ＝ 1 プロパティ + 付随関数の集まり） |
+| スロットタイプ | Command（Getter / Setter / On Update / On Init 用の 1 行コード専用） |
+| 対応するプロパティ型 | `BoolProperty` / `IntProperty` / `FloatProperty` / `StringProperty` / `EnumProperty` / ベクトル |
+| Hotkey 設定 | なし |
+| プレビュー | なし |
+| 詳細設定 | Description / Poll |
+| 値の保存先 | Addon Preferences / Scene / Object / その他の Blender 型 |
+
+---
+
+## エディター画面
+
+### トップバー
+
+```{include} common/topbar.md
+```
+
+### 詳細設定
+
+```{include} common/description.md
+```
+
+```{include} common/poll.md
+```
+
+### プロパティ型
+
+各プロパティ行で次の Blender API 型のいずれかを選びます。
+
+- `BoolProperty`
+- `IntProperty`
+- `FloatProperty`
+- `StringProperty`
+- `EnumProperty`
+- ベクトルプロパティ
+
+### 値の保存先（Store in）
+
+各プロパティの保存先を `Store in ...` で選びます。既定では PME の Addon Preferences に保存されます。
+
+::::{image} /_static/images/original/props/pme_prop_storing.png
+:alt: Property storing example
+:align: center
+::::
+
+| Store in | 値の所有者 | 用途 |
+|---|---|---|
+| Addon Preferences | PME 側の保存コンテナ | アドオン共通の保存値 |
+| Scene Instances | 各 Scene | `.blend` ごとに分けたい値 |
+| Object Instances | 各 Object | オブジェクト単位の値 |
+| その他の型 | その型のインスタンス | Material / Brush / Node など |
+
+`Store in Object Instances` を選んだ場合、そのプロパティは通常の Object プロパティと同様に扱えます。
+
+```python
+C.object.MyProperty = True
+```
+
+### Restore Default Value
+
+`Store in Addon Preferences` のときだけ表示されます。有効にすると、保存済みの値ではなくデフォルト値で初期化されます。
+
+### 関数
+
+::::{image} /_static/images/original/props/pme_prop_funcs.png
+:alt: Property functions
+:align: center
+::::
+
+各プロパティに次の 1 行関数を割り当てます。
+
+| 関数 | 呼び出されるタイミング | 戻り値 |
+|---|---|---|
+| **Getter** | UI が値を読むとき | プロパティ型に一致する値 |
+| **Setter** | UI が値を書き込むとき | なし |
+| **On Update** | 値が変更された後 | なし |
+| **On Init** | プロパティの初期化時 | なし |
+
+関数を追加すると、初期状態では次のコードが入ります。
+
+**Getter**
+
+```python
+return self.get(menu, False)
+```
+
+**Setter**
+
+```python
+self[menu] = value
+```
+
+**On Update**
+
+```python
+print('On Update', menu, '=', repr(props(menu)))
+```
+
+**On Init**
+
+```python
+print('On Init', menu, '=', repr(props(menu)))
+```
+
+---
+
+## 関数仕様
+
+### `self` と `menu`
+
+関数に渡される `self` はプロパティの所有者で、`Store in` の設定に応じて指す対象が変わります。
+
+- `Store in Addon Preferences` — PME 側の保存コンテナ
+- `Store in Object Instances` — その Object
+- 他の型を選んだ場合 — その型のインスタンス
+
+`menu` はプロパティ名を表す文字列です。既定のサンプルではこの文字列を保存キーとして使います。
+
+```python
+return self.get(menu, False)
+self[menu] = value
+```
+
+固定キーや別データを使う場合は `menu` を使わない書き方も可能です。
+
+```python
+return self.get("my_key", False)
+self["my_key"] = value
+```
+
+```python
+return bool(self.hide_viewport) if self else False
+if self: self.hide_viewport = bool(value)
+```
+
+### `props()`
+
+`props()` は PME の Addon Preferences 側の保存領域を扱うヘルパーです。`self` は現在の保存先、`props()` は PME 共通の保存領域、として区別されます。
+
+```python
+value = props("MyProperty")
+value = props().MyProperty
+props("MyProperty", 10)
+props().MyProperty = 10
+```
+
+Custom スロットからの使用例:
+
+```python
+L.prop(props(), "MyBoolProperty", text=slot, icon='COLOR_GREEN' if props("MyBoolProperty") else 'COLOR_RED')
+```
+
+### スクリプト規約
+
+:::{important}
+Getter / Setter / On Update / On Init は 1 行で記述します。複数の処理が必要な場合は、三項演算子・短絡評価・補助関数の呼び出しで 1 行に収めます。
+:::
+
+:::{important}
+Getter は常に Property Type に一致する値を返す必要があります。
+
+- `BOOL` → `bool`
+- `INT` → `int`
+- `FLOAT` → `float`
+- `STRING` → `str`
+- `ENUM` → 有効な enum 項目
+
+`None` は返せません。値が無い場合は型ごとのフォールバックを返します（`False` / `0` / `0.0` / `""` / 有効な enum 項目）。
+:::
+
+Getter は PME メニュー表示時に限らず、Blender の再描画 / RNA アクセスでも呼び出されます。`bpy.context` 依存のコードを書く場合はフォールバック値の用意が必要です。
+
+```python
+return float(self.location.x) if self else 0.0
+```
+
+---
+
+## 応用的な使い方
+
+### 既存 Blender プロパティをそのまま並べる
+
+新規プロパティを定義せず、`C.space_data.overlay.show_floor` のような既存プロパティを直接 UI として並べたい場合は、Property Editor ではなく **スロットタイプ Property** を任意のエディターで使います。Property Editor は PME 独自プロパティの登録専用です。
+
+### Boolean トグルでメニュー間の状態を共有する
+
+`BoolProperty` を 1 つ定義し、複数のメニューから `props("MyToggle")` で読み書きすると、メニュー間で状態を共有できます。Stack Key や Command スロットの分岐条件に利用できます。
+
+```python
+open_menu("Tab Bar Commands", props(menu))
+```
+
+### Custom スロットで色付きトグルを描く
+
+Custom スロットの `L.prop` で、定義した BoolProperty に状態連動アイコンを付けて描画できます。
+
+```python
+L.prop(props(), "MyBoolProperty", text=slot, icon='COLOR_GREEN' if props("MyBoolProperty") else 'COLOR_RED')
+```
+
+### Slider
+
+::::{image} /_static/images/original/props/pme_prop_slider.png
+:alt: Slider property example
+:align: center
+::::
+
+### Color Widget
+
+::::{image} /_static/images/original/props/pme_prop_color.png
+:alt: Color widget example
+:align: center
+::::
+
+### Direction Widget
+
+::::{image} /_static/images/original/props/pme_prop_direction.png
+:alt: Direction widget example
+:align: center
+::::
+
+### Icon-Only Tab Bar
+
+::::{image} /_static/images/original/props/pme_prop_tabbar.png
+:alt: Icon-only tab bar example
+:align: center
+::::
+
+### Directory Path
+
+::::{image} /_static/images/original/props/pme_prop_path.png
+:alt: Directory path example
+:align: center
+::::
+
+### Object Instances にデータを持たせる
+
+`Store in Object Instances` を選ぶと、プロパティは各 Object に保存されます。Object 自身の属性として読み書きできます。
+
+```python
+C.object.MyProperty = True
+```
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [スロットタイプ: Property](./common/slot_types/property.md)
+- [Blender Python API: bpy.props](https://docs.blender.org/api/current/bpy.props.html)
+```

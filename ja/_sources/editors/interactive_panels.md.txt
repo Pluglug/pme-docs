@@ -1,0 +1,137 @@
+(interactive-panels)=
+
+# Interactive Panels と Extend Panel
+
+**Interactive Panels** は、Blender 画面上のパネル / メニュー / ヘッダーを PME が認識する形で可視化し、そこから PME メニューに取り込んだり、既存パネルの上下に自分のメニューを差し込んだりするための一時モードです。
+
+**Extend Panel / Extend Menu / Extend Header** は、既存の Blender UI に PME のメニューを差し込む機能で、Pop-up Dialog と Regular Menu が対象です。
+
+```{versionadded} 2.0.0
+差し込み先 (Target) / 位置 (Side) / 順序 (Order) を専用のプロパティで管理する形に再設計しました。同じ Target に複数のメニューを重ねて Poll で出し分け、Order で並び順を入れ替えられます。1.x の「差し込み先がメニューの表示名に縛られる」「同じ対象に 1 つしか差し込めない」という制約を解消しました。
+```
+
+---
+
+## 構成
+
+| 項目 | 値 |
+|---|---|
+| モード | 一時モード（PME 全体で共有のトグル） |
+| Interactive Panels の起動点 | Settings の上部ツールバー / Side Panel Editor / Pop-up Dialog / Regular Menu / Hidden Panel Group の各エディター内 |
+| Extend 対応エディター | Pop-up Dialog（Panel / Header） / Regular Menu（Menu） |
+| Extend のプロパティ | Extend Target / Side / Order / R（TOPBAR_HT_ のみ） |
+
+---
+
+## 有効化
+
+Settings の上部ツールバーに **`{octicon}`window` Interactive Panels`** のトグルがあります。有効にすると、Blender の **ヘッダー** / **メニュー** / **パネル** に PME の「**PME Tools**」ボタン（赤いハイライト付き）が差し込まれます。
+
+このトグルは PME 全体で共有されます。Side Panel Editor / Pop-up Dialog / Regular Menu / Hidden Panel Group の各エディター内にも同じトグルがあります。
+
+---
+
+## PME Tools メニューの中身
+
+PME Tools をクリックすると、マウスが指している対象がヘッダー / メニュー / パネルのどれかに応じて項目が変わります。共通の終端には **Copy Menu ID** / **Copy Panel ID** があり、ID 文字列をクリップボードに取得できます。
+
+### パネル（`*_PT_*`）
+
+| 項目 | 内容 |
+|---|---|
+| **Hide Panel** | このパネルを Hidden Panel Group に追加して隠す |
+| **Add as Button to '〈現在のメニュー〉'** | 現在のメニューに **Command スロット**として `bpy.ops.pme.popup_panel(...)` を生成 |
+| **Add as Popover to '〈現在のメニュー〉'** | 現在のメニューに **Custom スロット**として `L.popover(panel='...', ...)` を生成 |
+| **Add as Panel to '〈現在のメニュー〉'** | Side Panel Editor / Pop-up Dialog / Pie Menu に応じた形でパネルとして取り込み |
+| **Extend Panel ▲ / ▼** | 既存パネルの上 / 下に差し込む Pop-up Dialog を新規作成 |
+| **Copy Panel ID** | クラス名（例: `VIEW3D_PT_view3d_cursor`）をクリップボードへ |
+
+### メニュー（`*_MT_*`）
+
+| 項目 | 内容 |
+|---|---|
+| **Add as Menu to '〈現在のメニュー〉'** | 現在のメニューに **Custom スロット**として `L.menu(menu='...', ...)` を生成 |
+| **Extend Menu ▲ / ▼** | 既存メニューの上 / 下に差し込む Regular Menu を新規作成 |
+| **Copy Menu ID** | メニュークラス名をクリップボードへ |
+
+### ヘッダー（`*_HT_*`）
+
+| 項目 | 内容 |
+|---|---|
+| **Extend Header ◀ / ▶** | ヘッダー領域の左 / 右に差し込む Pop-up Dialog を新規作成 |
+| **Copy Menu ID** | ヘッダークラス名をクリップボードへ |
+
+### Add as と Extend の違い
+
+- **Add as ...** — 既存パネル / メニューを取り込み、現在編集中のメニュー内の 1 スロットとして配置します。
+- **Extend ...** — 既存パネル / メニューに自分のメニューを差し込みます。元の UI はそのまま残り、その前後に PME メニューが描画されます。
+
+---
+
+## Extend Target / Side / Order
+
+Extend Panel / Extend Menu / Extend Header のメニュー項目を選ぶと、Target / Side が設定済みの状態で新しいメニューが作成されます。各エディター画面のトップバー直下に Extend 行が表示されます。
+
+| 入力欄 | 役割 |
+|---|---|
+| **Extend Target**（検索付きテキスト） | 差し込み先のクラス ID。`prop_search` の候補補完あり。**Copy Panel ID** / **Copy Menu ID** で取得した文字列を貼り付け可能 |
+| **Side（▲▼ または ◀▶）** | `prepend`（上 / 左）か `append`（下 / 右）。Header は ◀▶ で表示 |
+| **Order**（数値） | 同じ Target に複数のメニューが乗っているときの並び順。値が小さいほど先に描画 |
+| **R**（TOPBAR_HT_ のときだけ） | TOPBAR ヘッダーの右リージョンに差し込むかの切替（Pop-up Dialog） |
+
+---
+
+## 取り込み手順（Add as ...）
+
+1. PME Editor で取り込み先のメニューを選択し、編集状態にする。
+2. ツールバーから Interactive Panels を有効化する。
+3. Blender 画面上で、取り込みたいメニュー / パネル / 個別ボタンを表示する。
+4. 表示された PME Tools をクリックする。
+5. **Add as Button** / **Add as Popover** / **Add as Menu** / **Add as Panel** のいずれかを選ぶ。
+6. Pie Menu の場合、表示位置（10 方向のどこに置くか）を選択する。
+7. Interactive Panels を無効化する。
+
+---
+
+## 差し込み手順（Extend ...）
+
+1. PME Editor で Interactive Panels を有効化する。
+2. 拡張したいメニュー / パネル / ヘッダーを表示する。
+3. PME Tools をクリックし、**Extend Panel ▲ / ▼**、**Extend Menu ▲ / ▼**、**Extend Header ◀ / ▶** のいずれかを選ぶ。
+4. Extend Target が設定された状態で、新しい Pop-up Dialog（Panel / Header の場合）または Regular Menu（Menu の場合）が作成される。
+5. スロットを追加して中身を構成する。
+6. Interactive Panels を無効化する。
+
+Pop-up Dialog / Regular Menu のエディター画面の Extend Target 行から、Target / Side / Order はいつでも変更できます。
+
+---
+
+## 対応エディター
+
+| エディター | Extend 対応 | 役割 |
+|---|---|---|
+| **Pop-up Dialog** | あり（Panel / Header / TOPBAR_HT_） | パネル / ヘッダーに自前のウィジェット群を差し込む |
+| **Regular Menu** | あり（Menu） | 既存メニュー（ドロップダウン / コンテキストメニュー）に項目を差し込む |
+| **Pie Menu** | なし | Interactive Panels から Add as ... の取り込み先として使用 |
+| **Side Panel Editor** | なし | N-Panel に新しいタブ / グループとして並べる形式 |
+
+---
+
+## 制約
+
+- Interactive Panels が有効な間、Blender のあちこちが赤くハイライトされます。編集後はモードを無効に戻します。
+- すべての Blender パネルが Extend に対応するわけではありません。Add as Panel で取り込めても、draw コードが内部 context を要求して描画失敗する場合があります。
+- Blender のバージョン更新で対象クラス名が変わる場合があります。`prop_search` で候補が出ない場合、Blender 側でクラス ID が変わっている可能性があります。
+- Extend 機能は Pop-up Dialog（`pd_`）または Regular Menu（`rm_`）のメニューデータに保存され、エクスポートした JSON にも含まれます。
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [Popup Dialog Editor](./popup_dialog_editor.md)
+- [Regular Menu Editor](./regular_menu_editor.md)
+- [Side Panel Editor](./side_panel_editor.md)
+- [Hiding Unused Panels](./hiding_unused_panels.md)
+- [Changelog 2.0.0](../support_community/changelog.md)
+```

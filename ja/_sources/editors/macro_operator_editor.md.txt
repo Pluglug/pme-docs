@@ -1,0 +1,168 @@
+(macro-operator-editor)=
+
+# Macro Operator Editor
+
+**Macro Operator** は、複数の操作を 1 回の実行でまとめて順次実行するエディターです。登録した Macro は名前付きのオペレーターとして Blender に組み込まれ、hotkey や他の PME メニュー、Python から呼び出されます。
+
+---
+
+## 構成
+
+| 項目 | 値 |
+|---|---|
+| スロット数 | 任意（上から順に実行） |
+| スロットタイプ | Command / Menu |
+| Hotkey 設定 | あり |
+| プレビュー | なし |
+| 詳細設定 | Description / Poll |
+| Blender への登録 | 名前付きオペレーター（`bpy.ops.pme.macro_<Name>`） |
+| 診断メッセージ | あり（スロット行に警告アイコン） |
+
+---
+
+## エディター画面
+
+:::{image} /_static/images/editors/macro_editor_ui.png
+:class: img-shadow
+:alt: Macro Operator Editor
+:width: 100%
+:align: center
+:::
+
+### トップバー
+
+```{include} common/topbar.md
+```
+
+### Hotkey 設定
+
+```{include} common/hotkey_settings.md
+```
+
+Macro は Blender にオペレーターとして登録されるため、hotkey が未設定でも、メニュー経由 / `open_menu()` / `bpy.ops.pme.invoke_macro(...)` などから呼び出せます。
+
+```{versionadded} 2.0.5
+スクリプトやカスタム UI から PME Macro を呼び出すための `bpy.ops.pme.invoke_macro(...)` を追加しました。呼び出し側で Macro 内の全スロット引数を渡さなくても、PME 側の Macro 定義をそのまま使えます。
+```
+
+### メニュースロット
+
+スロットは上から順に実行されます。Stack Key のように「次の押下まで待つ」挙動はありません。
+
+- スロットの追加・削除・並び替えが可能です。
+- 個別スロットの有効化/無効化ができます。
+- スロットタイプは Command / Menu の 2 種です。
+- Menu スロットでは PME の **Stack Key / Macro Operator / Modal Operator** を呼び出せます。Pop-up Dialog / Pie Menu のような対話 UI は Macro の途中から呼び出す対象には適しません。
+
+#### 診断メッセージ
+
+スロットで指定したオペレーターやサブメニューが見つからない、Blender 側で無効化されている、`poll()` を満たせない、といった理由で実行できない見込みがある場合、該当スロット行にエラーアイコンが表示されます。クリックすると詳細メッセージが表示されます。
+
+```{versionadded} 2.0.5
+現在の Blender 環境で見つからない operator が Macro に含まれている場合、Blender の native Macro 実行に入る前に PME 側で検出し、Macro 全体を安全に停止するようになりました。古い設定、無効化されたアドオン、名前が変わった operator が原因で Blender ごと落ちることがあった既知の問題への対策です。
+```
+
+### 詳細設定
+
+```{include} common/description.md
+```
+
+```{include} common/poll.md
+```
+
+Macro の Poll は「この Macro 全体を実行してよいか」の判定として評価されます。
+
+---
+
+## スロットエディタ
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
+```
+:::
+
+:::{tab-item} Menu
+:sync: menu
+
+```{include} common/slot_types/menu.md
+```
+:::
+
+::::
+
+---
+
+## 応用的な使い方
+
+### 連続操作をまとめる
+
+スロット 1（Command）:
+
+```python
+bpy.ops.object.mode_set(mode='EDIT')
+```
+
+スロット 2（Command）:
+
+```python
+bpy.ops.mesh.select_all(action='SELECT')
+```
+
+### 同じオペレーターを違うパラメータで実行する
+
+各スロットを独立したステップとして並べられるため、Blender 標準の Macro では同じオペレーターを 2 回入れにくいケースを回避できます。
+
+```python
+bpy.ops.mesh.inset(thickness=0.02)
+```
+
+```python
+bpy.ops.mesh.inset(thickness=0.05)
+```
+
+### Stack Key の各スロットを複数ステップにする
+
+Stack Key の Command スロットから Macro を呼び出すと、巡回する各ステップが複数操作を持てる構成になります。
+
+```python
+open_menu("My Macro Operator")
+```
+
+または `bpy.ops.pme.invoke_macro` を使う形：
+
+```python
+bpy.ops.pme.invoke_macro(name="My Macro Operator")
+```
+
+### 別の Macro / Stack Key / Modal を呼ぶ
+
+Macro の Menu スロットで PME の他エディターを指定すると、そのオペレーターを Macro の 1 ステップとして組み込めます。複雑な処理を小さな Macro / Stack Key へ分割して名前を付ける運用が可能です。
+
+### `INVOKE` でインタラクティブな操作を含める
+
+Transform 系のように、ユーザーのマウス入力を待つオペレーターは `'INVOKE_DEFAULT'` を渡して呼びます。インタラクティブな操作を Macro の途中に挟むと、その操作が確定するまで次のスロットへ進めません。
+
+```python
+bpy.ops.transform.resize('INVOKE_DEFAULT')
+```
+
+### context / area の事前設定
+
+Macro はスロットごとに context が必要なため、mode switch / area focus / operator poll の影響を受けます。`focus_area` / `override_context` などの補助ヘルパーで前提を整えてから本処理に入る構成が使われます。
+
+```python
+focus_area('VIEW_3D')
+```
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+```

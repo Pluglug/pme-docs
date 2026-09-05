@@ -1,0 +1,162 @@
+(sticky-key-editor)=
+
+# Sticky Key Editor
+
+**Sticky Key** は、キーを押している間だけ別の状態に切り替え、離したら元に戻すエディターです。On Press / On Release の固定 2 スロット構成で、押下解放のペアとして動作します。
+
+---
+
+## 構成
+
+| 項目 | 値 |
+|---|---|
+| スロット数 | 2 個固定（On Press / On Release） |
+| スロットタイプ | Command / Hotkey |
+| スロットの並び替え・追加・削除・無効化 | なし |
+| Hotkey 設定 | あり |
+| プレビュー | なし |
+| 詳細設定 | Description / Poll / Block UI |
+| Save and Restore Previous Value | あり |
+
+---
+
+## エディター画面
+
+:::{image} /_static/images/editors/sticky_key_editor_ui.png
+:class: img-shadow
+:alt: Sticky Key Editor
+:width: 100%
+:align: center
+:::
+
+### トップバー
+
+```{include} common/topbar.md
+```
+
+### Hotkey 設定
+
+```{include} common/hotkey_settings.md
+```
+
+Sticky Key は押された瞬間と離した瞬間の両方を受け取って動作します。Ctrl / Alt / Shift 単独や OS レベルの予約キーは、プラットフォームや Blender の Keymap 優先順位の影響を受ける場合があります。詳細は [Blender の Keymap と PME](../reference/keymap_and_pme.md) を参照してください。
+
+### メニュースロット
+
+Sticky Key は固定 2 スロットで、それぞれの役割は決まっています。
+
+| 順序 | スロット | 役割 |
+|---|---|---|
+| 1 | **On Press** | 押した瞬間に走る処理（一時状態への切り替え） |
+| 2 | **On Release** | 離した瞬間に走る処理（元の状態への復帰） |
+
+スロットの並び替え・追加・削除・無効化はできません。
+
+#### Save and Restore Previous Value
+
+On Press スロットの右側にあるボタンで、押下時点のプロパティ値を保存し、On Release に復元コードを自動生成する機能です。実行内容は次のとおりです。
+
+1. 現在のプロパティ値を読み取る
+2. On Press 側にその値を保存するコードを生成する
+3. On Release 側に元の値へ戻すコードを生成する
+
+たとえば On Press スロットに次のコードを書いてから Save and Restore を押すと、On Release への復元コードが挿入されます。
+
+```python
+C.space_data.overlay.show_floor = False
+```
+
+### 詳細設定
+
+```{include} common/description.md
+```
+
+```{include} common/poll.md
+```
+
+:Block UI:
+  押下中、画面の UI 操作を一時的にブロックします。デフォルト: 無効。
+
+---
+
+## スロットエディタ
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
+```
+:::
+
+:::{tab-item} Hotkey
+:sync: hotkey
+
+```{include} common/slot_types/hotkey.md
+```
+:::
+
+::::
+
+---
+
+## 応用的な使い方
+
+### ブラシの一時切り替え
+
+押している間だけ別のブラシに切り替え、離すと元のブラシに戻ります。`pme` 名前空間にユーザー値を保存する PME 慣例の形です。
+
+**On Press:**
+
+```python
+pme.temp_brush = paint_settings().brush
+paint_settings().brush = D.brushes["Draw"]
+```
+
+**On Release:**
+
+```python
+paint_settings().brush = pme.temp_brush
+```
+
+### アクティブツールの一時切り替え
+
+**On Press:**
+
+```python
+pme.prev_tool = C.workspace.tools.from_space_view3d_mode(C.mode).idname
+bpy.ops.wm.tool_set_by_id(name="builtin.select_box")
+```
+
+**On Release:**
+
+```python
+bpy.ops.wm.tool_set_by_id(name=pme.prev_tool)
+```
+
+### ビューポートオーバーレイの一時切り替え
+
+On Press スロットに次のコードを書き、Save and Restore を押します。On Release への復元コードは自動挿入されます。
+
+```python
+C.space_data.overlay.show_floor = False
+```
+
+### シェーディングモードの一時切り替え
+
+```python
+C.space_data.shading.type = 'WIREFRAME'
+```
+
+Save and Restore で On Release に元のシェーディングへ戻すコードが挿入されます。
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+- [Blender の Keymap と PME](../reference/keymap_and_pme.md)
+```

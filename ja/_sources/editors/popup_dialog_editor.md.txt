@@ -1,0 +1,303 @@
+(popup-dialog-editor)=
+
+# Pop-up Dialog Editor
+
+**Pop-up Dialog** は、ボタン・プロパティ・スライダー・チェックボックスを行と列で組み立てた小さな UI パネルを、その場でポップアップとして表示するエディターです。Pie Menu や Regular Menu と異なり、レイアウトを自分で構成できます。
+
+<div class="video-container">
+   <iframe src="https://www.youtube.com/embed/JdbmDSV9wIU" frameborder="0" allowfullscreen></iframe>
+</div>
+
+---
+
+## 構成
+
+| 項目 | 値 |
+|---|---|
+| スロット数 | 任意（行・列・サブ列・サブ行で階層化） |
+| スロットタイプ | Command / Property / Menu / Hotkey / Custom |
+| Hotkey 設定 | あり |
+| プレビュー | あり |
+| 詳細設定 | Description / Poll / Mode / Layout / Fixed Columns / Alignment |
+| Extend Target | あり（Blender 既存パネル / ヘッダーへの差し込み） |
+| インライン編集ホットキー | あり |
+
+---
+
+## エディター画面
+
+:::{image} /_static/images/editors/popup_dialog_editor_ui.png
+:class: img-shadow
+:alt: Pop-up Dialog Editor
+:width: 100%
+:align: center
+:::
+
+### トップバー
+
+```{include} common/topbar.md
+```
+
+### Hotkey 設定
+
+```{include} common/hotkey_settings.md
+```
+
+### Extend Target 行
+
+トップバー直下にあり、Blender の既存パネル / ヘッダーにこの Pop-up Dialog を差し込むための行です。
+
+```{versionadded} 2.0.0
+Extend Panel / Extend Header を再設計し、同じ Target に複数の Pop-up Dialog / Regular Menu を重ねられるようになりました。
+```
+
+:Extend Target:
+  差し込み先の Blender クラス ID。検索付きで、Interactive Panels の **Copy Panel ID** で取得した文字列をそのまま貼り付けできます。未指定の場合は通常の hotkey 呼び出し型として動作します。
+
+:Side:
+  差し込み位置。**▲** は Prepend（先頭）、**▼** は Append（末尾）。
+
+:R:
+  Target が `TOPBAR_HT_` の場合に限り表示され、TOPBAR ヘッダーの右リージョンに差し込むかを切り替えます。
+
+:Order:
+  同じ Target に複数のメニューが差し込まれている場合の表示順。値が小さいほど先に描画されます。
+
+差し込み手順の詳細は [Interactive Panels と Extend Panel](./interactive_panels.md) を参照してください。
+
+### メニュースロット
+
+スロットはそのままレイアウト上のウィジェットになります。
+
+- スロットの並びは「**行**を基本単位とし、**列**で分け、必要に応じて **サブ列** / **サブ行** でさらに細かく階層化する」構造で管理されます。
+- スロットの追加・削除・並び替えがそのままポップアップの見た目に反映されます。
+
+### 詳細設定
+
+```{include} common/description.md
+```
+
+```{include} common/poll.md
+```
+
+Pop-up Dialog 固有の主要オプション（モード / レイアウト / 配置）は、以下の各節で扱います。
+
+---
+
+## レイアウト
+
+Blender の行と列のレイアウトシステムをそのまま使い、Pop-up Dialog の UI を組み立てます。
+
+![レイアウトのデモンストレーション](/_static/images/original/popup/pme_layout.gif)
+
+<style>
+.layout-colors span {
+    padding: 0 4px;
+    border-radius: 3px;
+    color: white;
+}
+</style>
+
+<div class="layout-colors">
+    <p>
+    エディタ上では、<span style="background-color:rgb(213, 77, 77)">行</span>に対して列を設定し、必要に応じて<span style="background-color:rgb(45, 100, 178)">サブ列</span>と<span style="background-color:rgb(65, 178, 42)">サブ行</span>を追加していきます。
+    </p>
+</div>
+
+サブ列を追加するには、いずれかのボタンで {kbd}`LMB` を押してメニューを開き、*Column* セパレータを選択します。サブ列にさらにサブ行を追加するには、メニューにある *Begin Subrow* と *End Subrow* を使います。
+
+Custom スロットで Python のレイアウト API を直接書けば、デフォルトのボタンの代わりに任意のウィジェットを描画できます。
+
+### レイアウトを親ポップアップに展開する
+
+![レイアウト展開設定](/_static/images/original/popup/pme1.14.0_pd_expand.png)
+
+別の Pie Menu や Pop-up Dialog のスロットからこの Pop-up Dialog を呼んだとき、独立ポップアップとして開くか、呼び出し元のメニューにレイアウトを展開するかを選べます。呼び出し元側で *Menu* タブの **Expand Popup Dialog** を有効にすると、展開動作になります。
+
+### 固定列
+
+![固定列のデモンストレーション](/_static/images/original/popup/pme_layout_fixed_columns.png)
+
+**Fixed Columns** を有効にすると、列幅の自動調整を停止し、列幅が固定されます。
+
+### 配置
+
+![配置のデモンストレーション](/_static/images/original/popup/pme_layout_alignment.gif)
+
+行に列がない（行を分割していない）場合、その行内のボタンの水平方向の配置を左寄せ / 中央 / 右寄せから選べます。
+
+---
+
+## モード
+
+![ポップアップダイアログのモード設定](/_static/images/original/popup/pme_popup_mode.png)
+
+ポップアップの見た目と閉じ方を 3 つのモードから選びます。
+
+:::{table} モード比較
+:widths: 50 50 50 50
+:align: left
+
+| モード | Pie | Dialog | Popup |
+|:------|:-------:|:-------:|:-------:|
+| マウスをポップアップ外に移動すると閉じる | ❌ | ❌ | ✅ |
+| ポップアップ内のウィジェットを操作すると閉じる | ✅ | ❌ | ❌ |
+| OK ボタン | ❌ | ✅ | ❌ |
+| 移動可能 | ❌ | ✅ | ✅ |
+| 幅をカスタマイズ可能 | ❌ | ✅ | ✅ |
+:::
+
+---
+
+## スロットエディタ
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
+```
+:::
+
+:::{tab-item} Property
+:sync: property
+
+```{include} common/slot_types/property.md
+```
+:::
+
+:::{tab-item} Menu
+:sync: menu
+
+```{include} common/slot_types/menu.md
+```
+:::
+
+:::{tab-item} Hotkey
+:sync: hotkey
+
+```{include} common/slot_types/hotkey.md
+```
+:::
+
+:::{tab-item} Custom
+:sync: custom
+
+```{include} common/slot_types/custom.md
+```
+:::
+
+::::
+
+### スロットを追加する（プリセット）
+
+```{include} common/slot_types/examples.md
+```
+
+---
+
+## インライン編集ホットキー
+
+プレビュー画面や、エディタ起動中に開かれた Pop-up Dialog 上で直接ボタンや行を編集するためのホットキーです。
+
+### ボタン操作
+
+:::{table} ボタン操作のホットキー
+:widths: 30 15 15 15 15 15
+:align: left
+
+| 機能 | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | {kbd}`Alt` | {kbd}`OS` |
+|------|:---:|:---:|:---:|:---:|:---:|
+| メニューを開く | {kbd}`LMB` | | | | |
+| ボタンを編集 | {kbd}`LMB` | | {kbd}`Shift` | | |
+| 右にボタンを追加 | {kbd}`LMB` | {kbd}`Ctrl` | | | |
+| 左にボタンを追加 | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | | |
+| ボタンを削除 | {kbd}`LMB` | {kbd}`Ctrl` | | {kbd}`Alt` | |
+| アイコンを変更 | {kbd}`LMB` | | | {kbd}`Alt` | |
+| アイコンをクリア | {kbd}`LMB` | | | {kbd}`Alt` | {kbd}`OS` |
+| テキストを非表示 | {kbd}`LMB` | | {kbd}`Shift` | {kbd}`Alt` | |
+| スペーサーを切り替え | {kbd}`LMB` | | | | {kbd}`OS` |
+| ボタンをコピー | {kbd}`LMB` | {kbd}`Ctrl` | | | {kbd}`OS` |
+| ボタンを貼り付け | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | | {kbd}`OS` |
+:::
+
+### 行の管理
+
+:::{table} 行の管理操作
+:widths: 30 20 20 20 10
+:align: left
+
+| 機能 | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | {kbd}`OS` |
+|------|:---:|:---:|:---:|:---:|
+| メニューを開く | {kbd}`LMB` | | | |
+| 下に行を追加 | {kbd}`LMB` | {kbd}`Ctrl` | | |
+| 上に行を追加 | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | |
+| 行サイズを切り替え | {kbd}`LMB` | | {kbd}`Shift` | |
+| 行スペーサーを切り替え | {kbd}`LMB` | | | {kbd}`OS` |
+:::
+
+---
+
+## 応用的な使い方
+
+### N パネル代替としての一時パネル
+
+普段は閉じておきたい設定群を Pop-up Dialog にまとめ、hotkey で呼び出すと、N パネルに常駐させずに同等の操作面を確保できます。Property スロットや Custom スロットに Blender 標準のウィジェットをそのまま並べられます。
+
+### Pie Menu の 1 スロットから詳細パネルを開く
+
+Pie Menu の Menu スロットからこの Pop-up Dialog を指定すると、Pie に収まらない詳細設定をその場で開けます。**Expand Popup Dialog** を有効にしておくと、独立ポップアップではなく Pie のスロット領域内にレイアウトを展開します。
+
+### `draw_menu()` で別レイアウトに描き込む
+
+`open_menu()` が Pop-up Dialog を独立ポップアップとして開くのに対し、`draw_menu()` は **現在の layout にその中身を描画する**ヘルパーです。Panel Group や別の Pop-up Dialog から、既存の Pop-up Dialog レイアウトを再利用できます。
+
+```python
+draw_menu("Popup Dialog Name")
+draw_menu("Popup Dialog Name", frame=True, dx=10, dy=10)
+```
+
+### Blender の既存パネルを Custom スロットで描く
+
+Custom スロットの Python レイアウトから `panel()` ヘルパーで Blender ネイティブのパネルを直接埋め込めます。`template_*` 系のウィジェットも同様に使えます。
+
+```python
+panel("VIEW3D_PT_view3d_properties", frame=True, header=True)
+```
+
+```python
+L.template_list("UI_UL_list", "", D, "brushes", C.scene.tool_settings.image_paint, "active_index")
+```
+
+```{versionadded} 2.0.5
+Pop-up Dialog / Floating Panel の中に別の Pop-up Dialog / Floating Panel を折りたたみパネルとして配置できるようになりました（`UILayout.panel()` を利用、Blender 4.2 以降）。
+```
+
+### Extend Panel / Extend Header による差し込み
+
+Extend Target を設定すると、Blender の既存パネルやヘッダーにこの Pop-up Dialog の中身がそのまま差し込まれます。詳細は [Interactive Panels と Extend Panel](./interactive_panels.md) を参照してください。
+
+### `popup_area` で Blender エディタ領域を開く
+
+`popup_area` は Pop-up Dialog Editor とは別機能で、Blender のエディタ領域そのもの（Properties、Outliner、Asset Browser など）を一時的なポップアップウィンドウとして開きます。レイアウトを自分で組まずに、既存のエディタ画面をそのまま使いたい場合の経路です。
+
+```python
+bpy.ops.pme.popup_area(area='PROPERTIES', width=600, height=800)
+```
+
+```python
+bpy.ops.pme.popup_area(area='ASSETS', width=1000, center=False, height=800)
+```
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Interactive Panels と Extend Panel](interactive_panels.md)
+- [Custom Icons](custom_icons.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+- [Blender の Keymap と PME](../reference/keymap_and_pme.md)
+```

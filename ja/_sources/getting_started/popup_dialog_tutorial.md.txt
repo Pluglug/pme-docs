@@ -1,0 +1,26 @@
+(popup-dialog-tutorial)=
+
+# ポップアップダイアログをパイメニューに追加
+
+```{admonition} このページについて (WIP)
+:class: note
+
+このチュートリアルは現在書き直し中です。  
+Pop-up Dialog の機能と画面構成は [Popup Dialog Editor](../editors/popup_dialog_editor.md) を、エディター画面の共通要素は [エディターの共通要素](../editors/editor_common_elements.md) を参照してください。
+
+完成した Pop-up Dialog を Pie Menu の 1 スロットから呼び出す方法は、近日追記予定です。
+```
+
+## このチュートリアルで扱う予定の内容
+
+- Pop-up Dialog の新規作成と命名
+- スロットを **Row / Column** で組み合わせたレイアウトの作り方
+- Pie Menu の **Menu スロット**から Pop-up Dialog を呼び出す導線
+- 完成した Pop-up Dialog の動作確認とサイズ調整
+
+## さしあたって参照できるページ
+
+- [Popup Dialog Editor](../editors/popup_dialog_editor.md) — エディター本体の機能解説
+- [Pie Menu Editor](../editors/pie_menu_editor.md) — 呼び出し側の Pie の作り方
+- [基本的なパイメニューの作成](basic_pie_menu.md) — Pie の作成手順（こちらは完成済み）
+- [スロットタイプ: Menu](../editors/common/slot_types/menu.md) — メニューを呼び出すスロットの基本

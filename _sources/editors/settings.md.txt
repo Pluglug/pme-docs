@@ -1,0 +1,51 @@
+(settings)=
+
+# Settings
+
+(WIP)
+
+(setting-preserve-side-area-space-state)=
+
+## Preserve Side Area State
+
+Toggle Side Area can retain one working history per supported base editor type during the
+current Blender session. The setting is off by default. Outliner, Properties, and Node Editor
+are supported on Blender 4.5 through 5.2. On Blender 5.2, Text Editor also restores its current
+Text, scroll, display, and search settings. Dope Sheet, Timeline, and Action restore their mode,
+filters, channel selection, and supported view position. F-Curve and Drivers restore their mode,
+filters, display, cursor, pivot, and supported view position. NLA Editor restores its display,
+filter, and supported view position. Console restores its command history, scrollback, line
+cursors/types, and font size. Spreadsheet restores its pin flag, Mesh display/filter settings,
+and row filters. Video Sequence Editor restores the tested Timeline, Preview Image, or Combined
+Histogram display/overlay/cursor settings and visible timeline/preview view position. Movie Clip
+Editor restores the tested Clip, Graph, or Dope Sheet view's direct settings and visible
+clip/preview view position. Image Editor and UV Editor restore a generated pinned Image, mode,
+cursor, pivot, overlay, UV and scope-display settings, zoom, and the visible Window position.
+Preferences restores the Display Filter text and Navigation region visibility.
+The Blender 5.2 additions were validated on the Windows build `fbe6228777e7`.
+
+:::{warning}
+This Expert setting uses Blender internals and may destabilize Blender.
+:::
+
+Dope Sheet, Timeline, and Action share one base-editor history; they are not stored as three
+independent histories. A saved Dope Sheet history is not replaced by opening an unmanaged
+Timeline before requesting the Dope Sheet again.
+F-Curve and Drivers likewise share one Graph Editor history. Opening an unmanaged Drivers
+editor does not replace a saved F-Curve history.
+Image Editor and UV Editor likewise share one `SpaceImage` history. Opening an unmanaged UV
+Editor does not replace a saved Image Editor history.
+
+This does not guarantee every RNA property, active modal state, draw/runtime caches, a Main and
+Side Area with the same base editor type, File Browser or Asset Browser state, persistence
+across add-on reloads or Blender restarts, or the Blender 5.2 Text/Dope Sheet/Graph/NLA/Console/
+Spreadsheet/Sequencer/Movie Clip/Image-UV/Preferences additions on Blender 4.5, 5.0, or 5.1. Sequencer Region
+alignment,
+combined-divider geometry, media/job/cache state, and the Channels Region's raw Y View2D state are
+also outside the tested state. Movie Clip view-specific history, cross-view viewport state,
+tracking/solve/prefetch/proxy jobs, modal operations, and scope/runtime caches are also outside the
+tested state. Separate Image/UV histories, cross-mode viewport state, inactive Region proxies,
+`ui_mode`, Render Result or file/viewer images, paint/mask/modal/job state, computed scopes/caches,
+and arbitrary existing workspaces are also outside the tested state. General Sidebar-tab memory
+is outside this setting. The selected Preferences category, derived search results, Extensions or
+Add-ons work, Preferences view position, and an active file selector are not restored guarantees.

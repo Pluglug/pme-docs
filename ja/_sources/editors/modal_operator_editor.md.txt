@@ -1,0 +1,236 @@
+(modal-operator-editor)=
+
+# Modal Operator Editor
+
+**Modal Operator** は、hotkey を押してから確定 / 取消するまで Blender を一時的に専用モードに固定する対話ツールを作成するエディターです。マウス移動・マウスホイール・サブホットキーを入力として、連続的にプロパティを変更したり処理を呼び出したりします。
+
+---
+
+## 構成
+
+| 項目 | 値 |
+|---|---|
+| スロット数 | 任意 |
+| スロットタイプ | Command / Property / On Invoke / On Confirm / On Cancel / On Update |
+| Hotkey 設定 | あり（モーダルの起動キー） |
+| サブホットキー | あり（スロットごと） |
+| プレビュー | なし |
+| 詳細設定 | Description / Poll / Confirm on Release / Block UI / Lock |
+| Blender への登録 | 名前付きオペレーター |
+
+---
+
+## モーダルオペレーターのしくみ
+
+Modal Operator は、起動 hotkey から確定 / 取消までの間、次の順序で動作します。
+
+```text
+[起動 hotkey]
+   ↓
+On Invoke          ← モーダル開始時に 1 回だけ走る
+   ↓
+[サブホットキー押下 / マウス操作のたびに繰り返し]
+   On Update       ← 何か操作されるたびに走る
+   Command/Property ← 対応するサブホットキー / マウス操作が来たときに走る
+   ↓
+[ユーザーが確定 or 取消]
+   ↓
+On Confirm  または  On Cancel
+   ↓
+[モーダル終了]
+```
+
+---
+
+## エディター画面
+
+:::{image} /_static/images/editors/modal_editor_ui.png
+:class: img-shadow
+:alt: Modal Operator Editor
+:width: 100%
+:align: center
+:::
+
+### トップバー
+
+```{include} common/topbar.md
+```
+
+### Hotkey 設定（モーダルの起動キー）
+
+```{include} common/hotkey_settings.md
+```
+
+ここで設定するのはモーダル全体を起動する hotkey です。サブホットキーは各スロット側で個別に設定します。
+
+### メニュースロット
+
+スロットは「実行ルール」として上から順に並びます。各スロットは次の情報を持ちます。
+
+- タイプ（Command / Property / On Invoke / On Confirm / On Cancel / On Update）
+- トリガー（サブホットキー / マウス移動 / マウスホイール / lifecycle イベント）
+- 実行内容（Python コードまたはプロパティパス）
+
+スロットの追加・削除・並び替え・無効化はすべて可能です。
+
+#### On Update の配置位置による対象
+
+On Update は配置位置によって対象が変わります。
+
+- すべてのサブホットキーの前に置いた場合 — どのサブホットキーが押されてもその On Update が走ります。
+- 特定のサブホットキー（Command / Property）の直後に置いた場合 — そのサブホットキーが押されたときだけ On Update が走ります。
+
+### 詳細設定
+
+```{include} common/description.md
+```
+
+```{include} common/poll.md
+```
+
+:Confirm on Release:
+  起動 hotkey を離した瞬間に On Confirm を実行してモーダルを終了します。
+
+:Block UI:
+  モーダル中、画面の他の UI（ボタン、メニューなど）への操作をブロックします。
+
+:Lock:
+  モーダルが起動した area / region に処理を固定します。マウスが別の area に乗っても、モーダルは元の area の context で動き続けます。
+
+  ```{versionadded} 2.0.4
+  Lock 有効時のマウス移動でプロパティを編集している間、カーソルが起動元エリア内へ戻りやすくなりました。
+  ```
+
+---
+
+## スロットタイプ（Modal 固有）
+
+### Command
+
+サブホットキーが押されたときに実行する Python コードを書きます。スロットエディタ内でこのスロット用のサブホットキーを 1 つ割り当てます。
+
+```python
+bpy.ops.transform.resize('INVOKE_DEFAULT')
+```
+
+```python
+C.scene.tool_settings.use_proportional_edit = not C.scene.tool_settings.use_proportional_edit
+```
+
+### Property
+
+プロパティへのパスを指定し、どの入力で変えるかを選びます。Property タブの中で入力モードを 3 つから選択します。
+
+| 入力モード | 挙動 |
+|---|---|
+| **Hotkey** | サブホットキーを押している間、マウス移動で値が変わります。 |
+| **Mouse Move** | サブホットキーは使わず、マウス移動だけで値が変わります。他のサブホットキーを塞ぐため、Confirm on Release と組み合わせて確定経路を確保します。 |
+| **Mouse Wheel** | マウスホイールの上下で値を増減します。列挙型 / 離散値向きです。 |
+
+### On Invoke
+
+モーダルが起動した瞬間に 1 回だけ実行する Python コードを書きます。初期値の保存、オーバーレイ描画の開始、起動時 context の記録などに使います。
+
+```python
+pme.start_size = paint_settings().brush.size
+```
+
+### On Confirm
+
+ユーザーが確定したとき（Enter キー / Confirm on Release / `confirm()` 関数）に実行する Python コードを書きます。
+
+### On Cancel
+
+ユーザーが取消したとき（Escape キー / 右クリック / `cancel()` 関数）に実行する Python コードを書きます。
+
+### On Update
+
+モーダル中に何かが起きるたびに走る Python コードを書きます。配置位置による対象の違いは「メニュースロット」節を参照してください。
+
+---
+
+## Python から確定・取消する
+
+Command スロットや On Update の中から、Modal を Python で終了させる関数が使えます。
+
+````{py:function} confirm()
+:noindex:
+
+Modal Operator を確定して終了します。On Confirm が走ります。
+
+:return: `True`
+````
+
+````{py:function} cancel()
+:noindex:
+
+Modal Operator を取消して終了します。On Cancel が走ります。
+
+:return: `True`
+````
+
+```python
+if condition_met:
+    confirm()
+```
+
+```python
+if invalid_input:
+    cancel()
+```
+
+---
+
+## 応用的な使い方
+
+### マウス移動でブラシサイズを連続調整
+
+Property スロットでブラシサイズをバインドし、入力モードを **Mouse Move**、起動キー設定で **Confirm on Release** を有効にすると、押している間マウス移動で値が変わり、離すと確定する操作になります。
+
+### 軸ごとのサブホットキーで対象を切り替える
+
+複数の Property スロットを並べ、それぞれに別のサブホットキー（`X` / `Y` / `Z` など）を割り当てます。モーダル中にどのキーを押すかで調整対象が切り替わります。
+
+### マウスホイールで列挙プロパティを巡回
+
+Property スロットで列挙型プロパティ（`C.space_data.shading.type` など）を指定し、入力モードを **Mouse Wheel** にします。ホイールを回すと値が次々と切り替わります。
+
+### Macro の途中で対話的な調整を入れる
+
+Macro Operator の Menu スロットに Modal Operator を指定すると、Macro の途中でユーザー入力を待つ調整ステップを挟めます。確定するまで次のスロットには進みません。
+
+### On Invoke / On Cancel で「キャンセルしたら元に戻す」
+
+On Invoke で現在値を `pme` 名前空間に保存し、On Cancel でその値に戻すパターンです。
+
+```python
+pme.start_size = paint_settings().brush.size
+```
+
+```python
+paint_settings().brush.size = pme.start_size
+```
+
+### `release_confirm` を渡す Blender ネイティブ Modal の呼び出し
+
+Blender の Transform 系のように、ネイティブ側にも `release_confirm` がある operator は、Command スロットから直接呼び出して PME 側の確定挙動と揃えられます。
+
+```python
+bpy.ops.transform.resize('INVOKE_DEFAULT', release_confirm=True)
+```
+
+```{admonition} Blender の Modal Map との違い
+:class: note
+
+Modal Operator Editor は、Blender 内部の **modal keymap**（Transform や Knife ツール内のキー割り当て表）を直接編集する機能ではありません。PME が用意する Modal 風ミニツールを構築する仕組みです。
+```
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+- [Blender の Keymap と PME](../reference/keymap_and_pme.md)
+```

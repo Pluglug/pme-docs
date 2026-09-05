@@ -1,0 +1,181 @@
+(stack-key-editor)=
+
+# Stack Key Editor
+
+**Stack Key** は、1 つの hotkey に複数の処理を積み重ね、押すたびに次の処理へ進めるエディターです。1 スロット構成にして、任意の Python コードに hotkey を割り当てるラッパーとしても使われます。
+
+---
+
+## 構成
+
+| 項目 | 値 |
+|---|---|
+| スロット数 | 任意（1 個から） |
+| スロットタイプ | Command / Hotkey |
+| Hotkey 設定 | あり |
+| プレビュー | なし |
+| 詳細設定 | Description / Poll / Remember Slot / Advance On / Repeat Timeout / Undo Previous Command |
+| ビューポートのヒントテキスト | あり（スロット 2 個以上） |
+| スロットアイコン | あり |
+
+---
+
+## エディター画面
+
+:::{image} /_static/images/editors/stack_key_editor_ui.png
+:class: img-shadow
+:alt: Stack Key Editor
+:width: 100%
+:align: center
+:::
+
+### トップバー
+
+```{include} common/topbar.md
+```
+
+### Hotkey 設定
+
+```{include} common/hotkey_settings.md
+```
+
+### メニュースロット
+
+スロットは上から順に実行されるスタックです。1 回押すと現在位置のスロットを実行し、次の押下で次のスロットへ進みます。最後まで進むと先頭に戻ります。
+
+- スロットの追加・削除・並び替えが可能です。
+- 個別スロットの有効化/無効化ができます。
+- 各スロットには表示名が付き、ビューポート上部のヒントテキストにこの名前が表示されます。
+
+```{versionadded} 2.0.5
+スロットごとにアイコンを設定できるようになりました。スロットを呼び出したときの通知にも、スロット名とアイコンが表示されます。
+```
+
+### 詳細設定
+
+```{include} common/description.md
+```
+
+```{include} common/poll.md
+```
+
+:Remember Slot:
+  直前に実行したスロット位置を保存します。無効の場合、別の操作を挟むと次の押下は先頭スロットから再開します。
+
+  ```{versionchanged} 2.0.5
+  従来の {guilabel}`Remember State` を {guilabel}`Remember Slot` に整理しました。
+  ```
+
+:Advance On:
+  Remember Slot 有効時に、次のスロットへ進むタイミングを選びます。
+
+  - **Every Press** — 押すたびに次のスロットへ進みます。
+  - **Quick Repeat** — 短時間に続けて押したときだけ次へ進み、間隔が空いた押下では現在のスロットを再実行します。
+
+  ```{versionadded} 2.0.5
+  Advance On を追加しました。既存の Stack Key 設定は Every Press 相当の動作を保ちます。
+  ```
+
+:Repeat Timeout:
+  Advance On が Quick Repeat のときに使う、「連続押し」と認める時間のしきい値（ミリ秒）。デフォルト: 600 ms。
+
+:Undo Previous Command:
+  次のスロットを実行する前に、Blender の Undo を 1 つ実行します。
+
+---
+
+## ビューポート上部のヒントテキスト
+
+現在のスロットの表示名がビューポート上部に表示されます。表示はスロットが 2 個以上の Stack Key で有効になり、1 スロット構成では表示されません。
+
+---
+
+## スロットエディタ
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
+```
+:::
+
+:::{tab-item} Hotkey
+:sync: hotkey
+
+```{include} common/slot_types/hotkey.md
+```
+:::
+
+::::
+
+---
+
+## 応用的な使い方
+
+### 2 つのワークスペースを巡回する
+
+スロット 1:
+
+```python
+C.window.workspace = D.workspaces['Default']
+```
+
+スロット 2:
+
+```python
+C.window.workspace = D.workspaces['Scripting']
+```
+
+### 1 スロットだけの「hotkey 付き Python コード」
+
+任意の Python コードや `open_menu()` 呼び出しを 1 つのスロットに書き、Stack Key の hotkey に割り当てます。
+
+```python
+open_menu("My Pie Menu")
+```
+
+```python
+paint_settings().brush = D.brushes["MyCustomBrush"]
+```
+
+### 修飾キーに応じてスロットを呼び分ける
+
+スロットに名前を付けると、外部からスロット名を指定して呼び出せます。`event_mods(E)` は現在のイベントから `""` / `"Ctrl"` / `"Shift"` / `"Ctrl Shift"` のような文字列を返すヘルパーで、スロット名と一致させることで修飾キー別に処理を切り替えられます。
+
+```python
+open_menu("My Stack Key", event_mods(E))
+```
+
+### コンテキストに応じてスロットを切り替える
+
+```python
+open_menu("My Stack Key", "Command 1") if C.mode == 'OBJECT' else open_menu("My Stack Key", "Command 2")
+```
+
+### 直前の操作を Undo してから別パラメータで再実行
+
+Undo Previous Command を有効にすると、直前の結果を巻き戻してから次のスロットを試せます。
+
+スロット 1:
+
+```python
+bpy.ops.mesh.loop_to_region(select_bigger=False)
+```
+
+スロット 2:
+
+```python
+bpy.ops.mesh.loop_to_region(select_bigger=True)
+```
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+- [Blender の Keymap と PME](../reference/keymap_and_pme.md)
+```

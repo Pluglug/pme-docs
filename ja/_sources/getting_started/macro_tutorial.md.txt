@@ -1,0 +1,28 @@
+(macro-tutorial)=
+
+# マクロで独自機能を作成
+
+```{admonition} このページについて (WIP)
+:class: note
+
+このチュートリアルは現在書き直し中です。  
+Macro Operator の機能と画面構成は [Macro Operator Editor](../editors/macro_operator_editor.md) を、エディター画面の共通要素は [エディターの共通要素](../editors/editor_common_elements.md) を参照してください。
+
+旧版にあった「**Record / Stop ボタンで操作を記録する**」という記述は PME の実装と食い違っていたため、内容を全面的に取り下げました。  
+PME の Macro Operator は**スロットを上から並べて、それぞれに既存オペレーターやコマンドを設定する**方式です。記録機能ではありません。
+```
+
+## このチュートリアルで扱う予定の内容
+
+- Macro Operator の新規作成
+- スロットへの既存オペレーター（`bpy.ops.*`）の登録
+- スロットの順序調整と不要ステップの整理
+- 完成したマクロを Pie Menu / Pop-up Dialog の **Menu スロット**から呼び出す導線
+- 動作確認と、F9（Redo Last）からのパラメータ調整
+
+## さしあたって参照できるページ
+
+- [Macro Operator Editor](../editors/macro_operator_editor.md) — エディター本体の機能解説
+- [スロットタイプ: Command](../editors/common/slot_types/command.md) — マクロの 1 ステップを構成するスロット
+- [基本的なパイメニューの作成](basic_pie_menu.md) — Pie の作成手順
+- [スロットタイプ: Menu](../editors/common/slot_types/menu.md) — マクロを Pie / Pop-up から呼び出すスロット

@@ -1,0 +1,1852 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pluglug.github.io/pme-docs/schema/pme2-2.0.json",
+  "title": "PME2 Menu Export Format",
+  "description": "Pie Menu Editor 2 JSON export/import format. schema_version 2.0.",
+  "type": "object",
+  "required": ["$schema", "schema_version", "addon_version", "menus"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri",
+      "description": "Must be the URL of this schema document."
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^2\\.",
+      "description": "Schema version. Currently '2.0'.",
+      "examples": ["2.0"]
+    },
+    "addon_version": {
+      "type": "string",
+      "description": "Version of the PME addon that exported this file.",
+      "examples": ["2.0.0"]
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 timestamp of when this file was exported."
+    },
+    "menus": {
+      "type": "array",
+      "description": "List of exported menus.",
+      "items": { "$ref": "#/$defs/Menu" }
+    },
+    "tags": {
+      "type": "array",
+      "description": "All tags referenced by menus in this file.",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "extensions": {
+      "$ref": "#/$defs/RootExtensions",
+      "default": {}
+    }
+  },
+
+  "allOf": [
+    {
+      "if": { "$ref": "#/$defs/DocumentHasTagRegistryEnvelope" },
+      "then": {
+        "allOf": [
+          { "$ref": "#/$defs/DocumentRequiresTagRegistryFeature" },
+          { "$ref": "#/$defs/DocumentUsesCanonicalTagNameProjections" }
+        ]
+      }
+    },
+    {
+      "if": { "$ref": "#/$defs/DocumentMentionsTagRegistryFeature" },
+      "then": { "$ref": "#/$defs/DocumentHasTagRegistryEnvelope" }
+    },
+    {
+      "if": { "$ref": "#/$defs/DocumentHasTagUidMembership" },
+      "then": {
+        "allOf": [
+          { "$ref": "#/$defs/DocumentHasTagRegistryEnvelope" },
+          { "$ref": "#/$defs/DocumentRequiresTagRegistryFeature" }
+        ]
+      }
+    },
+    {
+      "if": { "$ref": "#/$defs/DocumentHasExpandGeometry" },
+      "then": { "$ref": "#/$defs/DocumentRequiresExpandGeometryFeature" }
+    },
+    {
+      "if": { "$ref": "#/$defs/DocumentMentionsExpandGeometryFeature" },
+      "then": { "$ref": "#/$defs/DocumentHasExpandGeometry" }
+    },
+    {
+      "if": { "$ref": "#/$defs/DocumentHasPmiUidPayload" },
+      "then": { "$ref": "#/$defs/DocumentRequiresPmiUidFeature" }
+    },
+    {
+      "if": { "$ref": "#/$defs/DocumentMentionsPmiUidFeature" },
+      "then": {
+        "allOf": [
+          { "$ref": "#/$defs/DocumentHasPmiUidPayload" },
+          { "$ref": "#/$defs/DocumentRequiresPmiUidFeature" },
+          { "$ref": "#/$defs/DocumentPmiUidFeatureRequiresAllItemUids" }
+        ]
+      }
+    }
+  ],
+
+  "$defs": {
+
+    "RootExtensions": {
+      "type": "object",
+      "description": "File-level vendor extensions. Unknown vendor namespaces remain allowed.",
+      "additionalProperties": true,
+      "properties": {
+        "pme": { "$ref": "#/$defs/PmeRootExtension" }
+      }
+    },
+
+    "PmeRootExtension": {
+      "type": "object",
+      "description": "PME-owned file extension payloads. Unknown PME siblings remain allowed.",
+      "additionalProperties": true,
+      "properties": {
+        "tag_registry": { "$ref": "#/$defs/TagRegistryEnvelope" }
+      }
+    },
+
+    "TagRegistryEnvelope": {
+      "type": "object",
+      "description": "Tag registry identity definitions. Version 1 treats definition array order as non-semantic; version 2 uses it as the canonical manual Tag order.",
+      "required": ["version", "definitions"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "integer", "enum": [1, 2] },
+        "definitions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/TagRegistryDefinition" },
+          "uniqueItems": true
+        }
+      }
+    },
+
+    "TagRegistryDefinition": {
+      "type": "object",
+      "required": ["uid", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "uid": { "$ref": "#/$defs/TagUid" },
+        "name": { "$ref": "#/$defs/TagName" }
+      }
+    },
+
+    "TagName": {
+      "type": "string",
+      "pattern": "^(?:|[^\\s,\\u0000\\uD800-\\uDFFF](?:[^,\\u0000\\uD800-\\uDFFF]*[^\\s,\\u0000\\uD800-\\uDFFF])?)(?![\\s\\S])"
+    },
+
+    "TagUid": {
+      "type": "string",
+      "pattern": "^tag_[a-z2-7]{26}$"
+    },
+
+    "PmiUid": {
+      "type": "string",
+      "pattern": "^pmi_[a-z2-7]{8}$",
+      "description": "Parent-menu-scoped stable identifier for a menu item, e.g. 'pmi_f7c2k3ha'."
+    },
+
+    "TagUidMembership": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/TagUid" },
+      "uniqueItems": true
+    },
+
+    "DocumentHasTagRegistryEnvelope": {
+      "required": ["extensions"],
+      "properties": {
+        "extensions": {
+          "type": "object",
+          "required": ["pme"],
+          "properties": {
+            "pme": {
+              "type": "object",
+              "required": ["tag_registry"]
+            }
+          }
+        }
+      }
+    },
+
+    "DocumentRequiresTagRegistryFeature": {
+      "required": ["extensions"],
+      "properties": {
+        "extensions": {
+          "type": "object",
+          "required": ["pme"],
+          "properties": {
+            "pme": {
+              "type": "object",
+              "required": ["requires"],
+              "properties": {
+                "requires": {
+                  "type": "object",
+                  "required": ["features"],
+                  "properties": {
+                    "features": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "uniqueItems": true,
+                      "contains": { "const": "tag_registry" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "DocumentUsesCanonicalTagNameProjections": {
+      "properties": {
+        "menus": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "tags": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/TagName" },
+                "uniqueItems": true
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "DocumentMentionsTagRegistryFeature": {
+      "required": ["extensions"],
+      "properties": {
+        "extensions": {
+          "type": "object",
+          "required": ["pme"],
+          "properties": {
+            "pme": {
+              "type": "object",
+              "required": ["requires"],
+              "properties": {
+                "requires": {
+                  "type": "object",
+                  "required": ["features"],
+                  "properties": {
+                    "features": {
+                      "anyOf": [
+                        {
+                          "type": "array",
+                          "contains": { "const": "tag_registry" }
+                        },
+                        { "const": "tag_registry" }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "DocumentHasTagUidMembership": {
+      "properties": {
+        "menus": {
+          "contains": {
+            "required": ["extensions"],
+            "properties": {
+              "extensions": {
+                "type": "object",
+                "required": ["pme"],
+                "properties": {
+                  "pme": {
+                    "type": "object",
+                    "required": ["tag_uids"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "DocumentHasExpandGeometry": {
+      "required": ["menus"],
+      "properties": {
+        "menus": {
+          "type": "array",
+          "contains": {
+            "type": "object",
+            "required": ["items"],
+            "properties": {
+              "items": {
+                "type": "array",
+                "contains": {
+                  "type": "object",
+                  "required": ["action"],
+                  "properties": {
+                    "action": {
+                      "type": "object",
+                      "required": ["type", "opts"],
+                      "properties": {
+                        "type": { "const": "menu" },
+                        "opts": {
+                          "type": "object",
+                          "required": ["expand_geometry"]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "DocumentRequiresExpandGeometryFeature": {
+      "required": ["extensions"],
+      "properties": {
+        "extensions": {
+          "type": "object",
+          "required": ["pme"],
+          "properties": {
+            "pme": {
+              "type": "object",
+              "required": ["requires"],
+              "properties": {
+                "requires": {
+                  "type": "object",
+                  "required": ["features"],
+                  "properties": {
+                    "features": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "uniqueItems": true,
+                      "contains": { "const": "expand_geometry" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "DocumentMentionsExpandGeometryFeature": {
+      "required": ["extensions"],
+      "properties": {
+        "extensions": {
+          "type": "object",
+          "required": ["pme"],
+          "properties": {
+            "pme": {
+              "type": "object",
+              "required": ["requires"],
+              "properties": {
+                "requires": {
+                  "type": "object",
+                  "required": ["features"],
+                  "properties": {
+                    "features": {
+                      "type": "array",
+                      "contains": { "const": "expand_geometry" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "DocumentHasPmiUidPayload": {
+      "required": ["menus"],
+      "properties": {
+        "menus": {
+          "type": "array",
+          "contains": {
+            "type": "object",
+            "required": ["items"],
+            "properties": {
+              "items": {
+                "type": "array",
+                "contains": {
+                  "type": "object",
+                  "required": ["uid"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "DocumentRequiresPmiUidFeature": {
+      "required": ["extensions"],
+      "properties": {
+        "extensions": {
+          "type": "object",
+          "required": ["pme"],
+          "properties": {
+            "pme": {
+              "type": "object",
+              "required": ["requires"],
+              "properties": {
+                "requires": {
+                  "type": "object",
+                  "required": ["features"],
+                  "properties": {
+                    "features": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "uniqueItems": true,
+                      "contains": { "const": "pmi_uid" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "DocumentMentionsPmiUidFeature": {
+      "required": ["extensions"],
+      "properties": {
+        "extensions": {
+          "type": "object",
+          "required": ["pme"],
+          "properties": {
+            "pme": {
+              "type": "object",
+              "required": ["requires"],
+              "properties": {
+                "requires": {
+                  "type": "object",
+                  "required": ["features"],
+                  "properties": {
+                    "features": {
+                      "anyOf": [
+                        {
+                          "type": "array",
+                          "contains": { "const": "pmi_uid" }
+                        },
+                        { "const": "pmi_uid" }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "DocumentPmiUidFeatureRequiresAllItemUids": {
+      "required": ["menus"],
+      "properties": {
+        "menus": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["items"],
+            "properties": {
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["uid"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "MenuMode": {
+      "type": "string",
+      "description": "Type of the PME menu.",
+      "enum": ["PMENU", "VMENU", "RMENU", "DIALOG", "FPANEL", "PANEL", "HPANEL", "SCRIPT", "MACRO", "MODAL", "STICKY", "PROPERTY", "CONDITION", "ROUTER"]
+    },
+
+    "ActivationMode": {
+      "type": "string",
+      "description": "How the hotkey is activated.",
+      "enum": ["PRESS", "HOLD", "DOUBLE_CLICK", "TWEAK", "CHORDS", "CLICK", "CLICK_DRAG"]
+    },
+
+    "DragDirection": {
+      "type": "string",
+      "description": "Drag direction for CLICK_DRAG activation.",
+      "enum": ["ANY", "NORTH", "NORTH_EAST", "EAST", "SOUTH_EAST", "SOUTH", "SOUTH_WEST", "WEST", "NORTH_WEST"]
+    },
+
+    "ActionType": {
+      "type": "string",
+      "description": "Type of action a menu item performs.",
+      "enum": ["command", "custom", "prop", "menu", "hotkey", "empty", "row", "spacer", "invoke", "finish", "cancel", "update"]
+    },
+
+    "Hotkey": {
+      "type": "object",
+      "description": "Hotkey binding for a menu.",
+      "additionalProperties": false,
+      "properties": {
+        "key":            { "type": "string", "default": "NONE", "description": "Key name, e.g. 'A', 'SPACE', 'F1'." },
+        "ctrl":           { "type": "boolean", "default": false },
+        "shift":          { "type": "boolean", "default": false },
+        "alt":            { "type": "boolean", "default": false },
+        "oskey":          { "type": "boolean", "default": false },
+        "any":            { "type": "boolean", "default": false, "description": "Ignore all modifier keys." },
+        "key_mod":        { "type": "string", "default": "NONE", "description": "Regular key used as a modifier." },
+        "chord":          { "type": "string", "default": "NONE", "description": "Second key in a CHORDS sequence." },
+        "keymaps":        {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["Window"],
+          "description": "Keymap(s) to register this hotkey in."
+        },
+        "activation":     { "$ref": "#/$defs/ActivationMode" },
+        "drag_direction": { "$ref": "#/$defs/DragDirection" }
+      }
+    },
+
+    "Style": {
+      "type": "object",
+      "description": "Visual style overrides (experimental, stored under extensions.pme.style).",
+      "additionalProperties": false,
+      "properties": {
+        "button_background_color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "FPANEL COMMAND button background color. Field presence enables the override; omit it to use the theme default."
+        },
+        "accent_color": {
+          "type": ["string", "null"],
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "default": null,
+          "description": "Hex color string, e.g. '#4CAF50'."
+        },
+        "accent_usage": {
+          "type": "string",
+          "enum": ["none", "bar-left", "bar-right", "dot", "background"],
+          "default": "none"
+        }
+      }
+    },
+
+    "PmeMenuExtensions": {
+      "type": "object",
+      "description": "Menu-level extensions. Unknown extension namespaces remain allowed; extensions.pme.logic is the shared PME Logic payload discriminated by menu mode.",
+      "additionalProperties": true,
+      "properties": {
+        "pme": { "$ref": "#/$defs/PmeMenuExtension" }
+      }
+    },
+
+    "PmeMenuExtension": {
+      "type": "object",
+      "description": "PME-owned menu extension payloads.",
+      "additionalProperties": true,
+      "properties": {
+        "logic": { "$ref": "#/$defs/PmeLogic" },
+        "tag_uids": { "$ref": "#/$defs/TagUidMembership" }
+      }
+    },
+
+    "PmeLogic": {
+      "description": "Shared PME Logic envelope stored at menu.extensions.pme.logic. CONDITION documents accept PropertyStackLogic. ROUTER documents accept ContextRouterLogic.",
+      "oneOf": [
+        { "$ref": "#/$defs/PropertyStackLogic" },
+        { "$ref": "#/$defs/ContextRouterLogic" }
+      ]
+    },
+
+    "PmeLogicValueSource": {
+      "type": "object",
+      "description": "Canonical shared address for a readable PME Logic condition value. RNA sources use bounded segments; PM references use UID-backed paths.",
+      "required": ["kind", "root", "detected_type", "readonly"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "type": "string", "enum": ["rna_path", "condition_ref", "pm_property_ref"] },
+        "root": { "type": "string", "enum": ["context", "paint_settings", "pme_preferences", "pm"] },
+        "path": { "type": "string" },
+        "segments": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/PmeLogicValueSourceSegment" }
+        },
+        "detected_type": {
+          "type": ["string", "null"],
+          "enum": ["bool", "int", "float", "string", "enum", "enum_set", "vector", "color", "unsupported", null]
+        },
+        "readonly": { "type": "boolean" },
+        "owner_type": { "type": ["string", "null"] },
+        "component": { "type": "integer", "minimum": 0 }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["kind"],
+            "properties": { "kind": { "const": "rna_path" } }
+          },
+          "then": {
+            "required": ["segments"],
+            "not": { "required": ["path"] },
+            "properties": {
+              "root": { "enum": ["context", "paint_settings", "pme_preferences"] },
+              "component": false
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["kind"],
+            "properties": { "kind": { "const": "condition_ref" } }
+          },
+          "then": {
+            "required": ["path"],
+            "not": { "required": ["segments"] },
+            "properties": {
+              "root": { "const": "pm" },
+              "path": { "type": "string", "pattern": "^cn_[a-z2-7]{8}$" },
+              "detected_type": { "const": "bool" },
+              "readonly": { "const": true },
+              "component": false
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["kind"],
+            "properties": { "kind": { "const": "pm_property_ref" } }
+          },
+          "then": {
+            "required": ["path"],
+            "not": { "required": ["segments"] },
+            "properties": {
+              "root": { "const": "pm" },
+              "path": { "type": "string", "pattern": "^pr_[a-z2-7]{8}$" },
+              "detected_type": { "enum": ["bool", "int", "float", "string", "enum", "enum_set"] },
+              "readonly": { "const": true },
+              "component": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      ]
+    },
+
+    "PmeLogicValueSourceSegment": {
+      "description": "One bounded RNA path segment. index_source contains one non-recursive UID-backed integer PME PROPERTY reference.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "name"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "attr" },
+            "name": { "type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]*$" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "key"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "key" },
+            "key": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "index"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "index" },
+            "index": { "type": "integer", "minimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "source"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "index_source" },
+            "source": { "$ref": "#/$defs/PmeLogicIntegerPropertyRefSource" }
+          }
+        }
+      ]
+    },
+
+    "PmeLogicIntegerPropertyRefSource": {
+      "type": "object",
+      "required": ["kind", "root", "path", "detected_type", "readonly"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "const": "pm_property_ref" },
+        "root": { "const": "pm" },
+        "path": { "type": "string", "pattern": "^pr_[a-z2-7]{8}$" },
+        "detected_type": { "const": "int" },
+        "readonly": { "const": true },
+        "owner_type": { "type": ["string", "null"] },
+        "component": false
+      }
+    },
+
+    "PmeLogicConditionOperator": {
+      "type": "string",
+      "description": "Canonical operator vocabulary shared by PME Logic condition rows.",
+      "enum": ["is_true", "is_false", "equals", "not_equals", "lt", "le", "ge", "gt", "contains", "starts_with", "equals_any", "not_equals_any"]
+    },
+
+    "PmeLogicPredicateValue": {
+      "description": "Canonical PME Logic predicate comparison value. Enum and enum_set multi values are stored as arrays of identifiers.",
+      "type": ["boolean", "integer", "number", "string", "array", "null"],
+      "items": { "type": "string" }
+    },
+
+    "PmeLogicConditionRow": {
+      "type": "object",
+      "description": "Canonical shared condition row for persisted PME Logic authoring. This shape uses source.kind as the source discriminator and keeps runtime evaluation facts out of Schema v2.",
+      "required": ["condition_uid", "enabled", "authoring_state", "label", "source", "op", "value", "value_type"],
+      "additionalProperties": false,
+      "properties": {
+        "condition_uid": { "type": "string", "minLength": 1 },
+        "enabled": { "type": "boolean" },
+        "authoring_state": { "type": "string", "enum": ["complete", "incomplete"] },
+        "label": { "type": "string", "maxLength": 256 },
+        "source": {
+          "oneOf": [
+            { "$ref": "#/$defs/PmeLogicValueSource" },
+            { "type": "null" }
+          ]
+        },
+        "op": {
+          "oneOf": [
+            { "$ref": "#/$defs/PmeLogicConditionOperator" },
+            { "type": "null" }
+          ]
+        },
+        "value": { "$ref": "#/$defs/PmeLogicPredicateValue" },
+        "value_type": {
+          "type": ["string", "null"],
+          "enum": ["bool", "int", "float", "string", "enum", "enum_set", null]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["authoring_state"],
+            "properties": { "authoring_state": { "const": "complete" } }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "allOf": [
+                  { "$ref": "#/$defs/PmeLogicValueSource" },
+                  {
+                    "properties": {
+                      "detected_type": {
+                        "enum": ["bool", "int", "float", "string", "enum", "enum_set"]
+                      }
+                    }
+                  }
+                ]
+              },
+              "op": { "$ref": "#/$defs/PmeLogicConditionOperator" },
+              "value_type": {
+                "type": "string",
+                "enum": ["bool", "int", "float", "string", "enum", "enum_set"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "op"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "op": { "enum": ["is_true", "is_false"] }
+            }
+          },
+          "then": {
+            "properties": {
+              "value_type": { "const": "bool" },
+              "value": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "op"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "op": { "enum": ["lt", "le", "ge", "gt"] }
+            }
+          },
+          "then": {
+            "properties": {
+              "value_type": { "enum": ["int", "float"] },
+              "value": { "type": "number" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "op"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "op": { "enum": ["equals_any", "not_equals_any"] }
+            }
+          },
+          "then": {
+            "properties": {
+              "value_type": { "enum": ["enum", "enum_set"] },
+              "value": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "op"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "op": { "enum": ["contains", "starts_with"] }
+            }
+          },
+          "then": {
+            "properties": {
+              "value_type": { "const": "string" },
+              "value": { "type": "string" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "op"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "op": { "enum": ["equals", "not_equals"] }
+            }
+          },
+          "then": {
+            "properties": { "value": { "type": ["boolean", "number", "string"] } }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "op"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "op": { "const": "equals" }
+            }
+          },
+          "then": {
+            "properties": {
+              "value_type": { "enum": ["bool", "int", "float", "string", "enum"] }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "op"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "op": { "const": "not_equals" }
+            }
+          },
+          "then": {
+            "properties": {
+              "value_type": { "enum": ["int", "float", "string", "enum"] }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "value_type"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "value_type": { "const": "bool" }
+            }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": { "detected_type": { "const": "bool" } }
+              },
+              "value": {
+                "oneOf": [
+                  { "type": "boolean" },
+                  { "type": "null" }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "value_type"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "value_type": { "const": "int" }
+            }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": { "detected_type": { "const": "int" } }
+              },
+              "value": { "type": "integer" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "value_type"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "value_type": { "const": "float" }
+            }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": { "detected_type": { "const": "float" } }
+              },
+              "value": { "type": "number" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "value_type"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "value_type": { "const": "string" }
+            }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": { "detected_type": { "const": "string" } }
+              },
+              "value": { "type": "string" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "value_type"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "value_type": { "const": "enum" }
+            }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": { "detected_type": { "const": "enum" } }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "op", "value_type"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "op": { "enum": ["equals", "not_equals"] },
+              "value_type": { "const": "enum" }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["authoring_state", "value_type"],
+            "properties": {
+              "authoring_state": { "const": "complete" },
+              "value_type": { "const": "enum_set" }
+            }
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": { "detected_type": { "const": "enum_set" } }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["op"],
+            "properties": { "op": { "enum": ["is_true", "is_false"] } }
+          },
+          "then": {
+            "properties": { "value": { "type": "null" } }
+          }
+        },
+        {
+          "if": {
+            "required": ["op"],
+            "properties": { "op": { "enum": ["lt", "le", "ge", "gt"] } }
+          },
+          "then": {
+            "properties": { "value": { "type": ["number", "null"] } }
+          }
+        },
+        {
+          "if": {
+            "required": ["op"],
+            "properties": { "op": { "enum": ["equals_any", "not_equals_any"] } }
+          },
+          "then": {
+            "properties": { "value": { "type": ["array", "null"] } }
+          }
+        },
+        {
+          "if": {
+            "required": ["op"],
+            "properties": { "op": { "enum": ["contains", "starts_with"] } }
+          },
+          "then": {
+            "properties": { "value": { "type": ["string", "null"] } }
+          }
+        },
+        {
+          "if": {
+            "required": ["op"],
+            "properties": { "op": { "enum": ["equals", "not_equals"] } }
+          },
+          "then": {
+            "properties": { "value": { "type": ["boolean", "number", "string", "null"] } }
+          }
+        }
+      ]
+    },
+
+    "ContextRouterEventModifierConditionRow": {
+      "type": "object",
+      "description": "Context Router-only condition row for invocation event modifier evidence. This is not a PmeLogicValueSource and does not persist a live bpy.types.Event.",
+      "required": ["condition_uid", "enabled", "authoring_state", "label", "event"],
+      "additionalProperties": false,
+      "properties": {
+        "condition_uid": { "type": "string", "minLength": 1 },
+        "enabled": { "type": "boolean" },
+        "authoring_state": { "type": "string", "enum": ["complete", "incomplete"] },
+        "label": { "type": "string", "maxLength": 256 },
+        "event": {
+          "type": "object",
+          "required": ["kind", "modifiers", "pressed"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "type": "string", "const": "modifier" },
+            "modifiers": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "type": "string", "enum": ["shift", "ctrl", "alt", "oskey"] }
+            },
+            "pressed": { "type": "boolean", "const": true }
+          }
+        }
+      }
+    },
+
+    "ContextRouterConditionRow": {
+      "description": "Context Router condition list item. RNA/property conditions use the shared PME Logic condition row; invocation event evidence uses a Router-owned event variant.",
+      "oneOf": [
+        { "$ref": "#/$defs/PmeLogicConditionRow" },
+        { "$ref": "#/$defs/ContextRouterEventModifierConditionRow" }
+      ]
+    },
+
+    "ContextRouterEmptyOpts": {
+      "type": "object",
+      "description": "Options for Context Router hotkey and custom target actions. COMMAND and current MENU targets use their shared PMI option vocabulary.",
+      "additionalProperties": false,
+      "properties": {}
+    },
+
+    "ContextRouterMenuTargetOpts": {
+      "type": "object",
+      "description": "Presentation options owned by a current Context Router MENU target. Absence means the target is invoked rather than expanded.",
+      "additionalProperties": false,
+      "properties": {
+        "expand_menu": { "type": "boolean" },
+        "use_frame": { "type": "boolean" }
+      }
+    },
+
+    "ContextRouterTargetActionV1": {
+      "type": "object",
+      "description": "Published Context Router v1 target action. MENU, HOTKEY, and CUSTOM options remain closed and empty.",
+      "required": ["type", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["menu", "command", "hotkey", "custom"] },
+        "value": { "type": "string" },
+        "opts": { "type": "object", "default": {} }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "const": "menu" } }
+          },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "pattern": "^(pm|rm|pd|fp|s|sk|mc|md)_[a-z2-7]{8}$" },
+              "opts": { "$ref": "#/$defs/ContextRouterEmptyOpts" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "const": "command" } }
+          },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "minLength": 1, "maxLength": 1024 },
+              "opts": { "$ref": "#/$defs/CommandActionOpts" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "const": "hotkey" } }
+          },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "minLength": 1 },
+              "opts": { "$ref": "#/$defs/ContextRouterEmptyOpts" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "const": "custom" } }
+          },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "minLength": 1, "maxLength": 32768 },
+              "opts": { "$ref": "#/$defs/ContextRouterEmptyOpts" }
+            }
+          }
+        }
+      ]
+    },
+
+    "ContextRouterTargetAction": {
+      "type": "object",
+      "description": "Action-compatible subset used by current Context Router branch targets. MENU presentation is owned by the selected target action, not by a parent MENU-to-ROUTER link.",
+      "required": ["type", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string", "enum": ["menu", "command", "hotkey", "custom"] },
+        "value": { "type": "string" },
+        "opts": { "type": "object", "default": {} }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "const": "menu" } }
+          },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "pattern": "^(pm|rm|pd|fp|s|sk|mc|md)_[a-z2-7]{8}$" },
+              "opts": { "$ref": "#/$defs/ContextRouterMenuTargetOpts" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["type", "opts"],
+            "properties": {
+              "type": { "const": "menu" },
+              "opts": {
+                "required": ["expand_menu"],
+                "properties": { "expand_menu": { "const": true } }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "pattern": "^(rm|pd)_[a-z2-7]{8}$" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["type", "opts"],
+            "properties": {
+              "type": { "const": "menu" },
+              "opts": {
+                "required": ["use_frame"],
+                "properties": { "use_frame": { "const": true } }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "pattern": "^pd_[a-z2-7]{8}$" },
+              "opts": {
+                "required": ["expand_menu"],
+                "properties": { "expand_menu": { "const": true } }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "const": "command" } }
+          },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "minLength": 1, "maxLength": 1024 },
+              "opts": { "$ref": "#/$defs/CommandActionOpts" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "const": "hotkey" } }
+          },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "minLength": 1 },
+              "opts": { "$ref": "#/$defs/ContextRouterEmptyOpts" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "const": "custom" } }
+          },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "minLength": 1, "maxLength": 32768 },
+              "opts": { "$ref": "#/$defs/ContextRouterEmptyOpts" }
+            }
+          }
+        }
+      ]
+    },
+
+    "ContextRouterTargetPresentation": {
+      "type": "object",
+      "description": "Optional Context Router target presentation intent. Absence means auto_icon=false.",
+      "required": ["auto_icon"],
+      "additionalProperties": false,
+      "properties": {
+        "auto_icon": { "type": "boolean" }
+      }
+    },
+
+    "ContextRouterTargetV1": {
+      "type": "object",
+      "description": "Published Context Router v1 target shape. It remains closed and does not admit presentation fields.",
+      "required": ["action", "fallback_name"],
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "oneOf": [
+            { "$ref": "#/$defs/ContextRouterTargetActionV1" },
+            { "type": "null" }
+          ]
+        },
+        "fallback_name": { "type": "string", "maxLength": 256 }
+      }
+    },
+
+    "ContextRouterTarget": {
+      "type": "object",
+      "description": "Context Router v2 durable target intent. action=null means an intentionally saved but unconfigured target; fallback_name is display/diagnostics provenance, not identity.",
+      "required": ["action", "fallback_name"],
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "oneOf": [
+            { "$ref": "#/$defs/ContextRouterTargetAction" },
+            { "type": "null" }
+          ]
+        },
+        "fallback_name": { "type": "string", "maxLength": 256 },
+        "presentation": { "$ref": "#/$defs/ContextRouterTargetPresentation" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["presentation"],
+            "properties": {
+              "presentation": {
+                "required": ["auto_icon"],
+                "properties": { "auto_icon": { "const": true } }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "action": {
+                "type": "object",
+                "required": ["type"],
+                "properties": { "type": { "const": "command" } }
+              }
+            }
+          }
+        }
+      ]
+    },
+
+    "ContextRouterBranchV1": {
+      "type": "object",
+      "description": "One ordered Context Router v1 branch.",
+      "required": ["branch_uid", "name", "combine_mode", "conditions", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "branch_uid": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "maxLength": 256 },
+        "combine_mode": { "type": "string", "enum": ["all", "any"] },
+        "conditions": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/ContextRouterConditionRow" },
+          "default": []
+        },
+        "target": { "$ref": "#/$defs/ContextRouterTargetV1" }
+      }
+    },
+
+    "ContextRouterBranch": {
+      "type": "object",
+      "description": "One ordered Context Router branch. Order is semantic because the first matching branch wins.",
+      "required": ["branch_uid", "name", "combine_mode", "conditions", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "branch_uid": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "maxLength": 256 },
+        "combine_mode": { "type": "string", "enum": ["all", "any"] },
+        "conditions": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/ContextRouterConditionRow" },
+          "default": []
+        },
+        "target": { "$ref": "#/$defs/ContextRouterTarget" }
+      }
+    },
+
+    "ContextRouterOtherwiseV1": {
+      "type": "object",
+      "description": "Fallback target used by Context Router v1.",
+      "required": ["name", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "maxLength": 256 },
+        "target": { "$ref": "#/$defs/ContextRouterTargetV1" }
+      }
+    },
+
+    "ContextRouterOtherwise": {
+      "type": "object",
+      "description": "Fallback target used when no Context Router branch matches.",
+      "required": ["name", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "maxLength": 256 },
+        "target": { "$ref": "#/$defs/ContextRouterTarget" }
+      }
+    },
+
+    "ContextRouterLogicV1": {
+      "type": "object",
+      "description": "Published Context Router v1 durable authoring payload.",
+      "required": ["version", "branches", "otherwise"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "integer", "enum": [1] },
+        "branches": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/ContextRouterBranchV1" },
+          "default": []
+        },
+        "otherwise": { "$ref": "#/$defs/ContextRouterOtherwiseV1" }
+      }
+    },
+
+    "ContextRouterLogicV2": {
+      "type": "object",
+      "description": "Context Router v2 durable authoring payload with target presentation intent.",
+      "required": ["version", "branches", "otherwise"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "integer", "enum": [2] },
+        "branches": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "#/$defs/ContextRouterBranch" },
+          "default": []
+        },
+        "otherwise": { "$ref": "#/$defs/ContextRouterOtherwise" }
+      }
+    },
+
+    "ContextRouterLogic": {
+      "description": "Context Router durable authoring payload stored at menu.extensions.pme.logic. Readers accept published v1 and current v2; canonical writers emit v2.",
+      "oneOf": [
+        { "$ref": "#/$defs/ContextRouterLogicV1" },
+        { "$ref": "#/$defs/ContextRouterLogicV2" }
+      ]
+    },
+
+    "PropertyStackLogic": {
+      "type": "object",
+      "description": "Property Stack durable authoring payload stored at menu.extensions.pme.logic.",
+      "required": ["version", "combine_mode", "predicate_rows", "write_plan"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "integer", "enum": [1] },
+        "combine_mode": { "type": "string", "enum": ["all", "any"] },
+        "predicate_rows": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PmeLogicConditionRow" },
+          "default": []
+        },
+        "write_plan": { "$ref": "#/$defs/PropertyStackWritePlan" },
+        "while_true_hud": { "$ref": "#/$defs/PropertyStackWhileTrueHud" }
+      }
+    },
+
+    "PropertyStackWhileTrueHud": {
+      "type": "object",
+      "required": ["enabled", "message", "area_type", "alignment"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": { "display": { "const": "FRAME" } },
+            "required": ["display"]
+          },
+          "then": {
+            "properties": {
+              "alignment": {
+                "enum": ["TOP", "TOP_LEFT", "TOP_RIGHT", "BOTTOM", "BOTTOM_LEFT", "BOTTOM_RIGHT", "LEFT", "RIGHT"]
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "alignment": {
+                "enum": ["TOP", "TOP_LEFT", "TOP_RIGHT", "CENTER", "BOTTOM", "BOTTOM_LEFT", "BOTTOM_RIGHT"]
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "message": { "type": "string", "maxLength": 256 },
+        "is_expr": { "type": "boolean", "default": false },
+        "area_type": {
+          "type": "string",
+          "enum": ["VIEW_3D", "DOPESHEET_EDITOR", "FILE_BROWSER", "GRAPH_EDITOR", "INFO", "CLIP_EDITOR", "NLA_EDITOR", "NODE_EDITOR", "OUTLINER", "PROPERTIES", "CONSOLE", "TEXT_EDITOR", "TIMELINE", "PREFERENCES", "IMAGE_EDITOR", "SEQUENCE_EDITOR"]
+        },
+        "alignment": {
+          "type": "string",
+          "enum": ["TOP", "TOP_LEFT", "TOP_RIGHT", "CENTER", "BOTTOM", "BOTTOM_LEFT", "BOTTOM_RIGHT", "LEFT", "RIGHT"]
+        },
+        "display": { "type": "string", "enum": ["LABEL", "FRAME"] },
+        "icon": { "type": "string", "maxLength": 256 },
+        "use_color": { "type": "boolean" },
+        "color": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+        }
+      }
+    },
+
+    "PropertyStackWritePlan": {
+      "type": "object",
+      "required": ["false_policy", "entries"],
+      "additionalProperties": false,
+      "properties": {
+        "false_policy": { "type": "string", "enum": ["no_op", "explicit_off_write"] },
+        "entries": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PropertyStackWriteEntry" },
+          "default": []
+        }
+      }
+    },
+
+    "PropertyStackWriteEntry": {
+      "type": "object",
+      "required": ["entry_uid", "kind", "status", "derived_from_condition_uid", "source", "value", "value_type", "custom_set_body", "enum_set_write_mode", "enum_set_write_values"],
+      "additionalProperties": false,
+      "properties": {
+        "entry_uid": { "type": "string" },
+        "kind": { "type": "string", "enum": ["derived", "manual_write", "custom_set"] },
+        "status": { "type": "string", "enum": ["auto_resolved", "manual_resolved", "manual_required", "off"] },
+        "derived_from_condition_uid": { "type": ["string", "null"], "minLength": 1 },
+        "source": {
+          "oneOf": [
+            { "$ref": "#/$defs/PmeLogicValueSource" },
+            { "type": "null" }
+          ]
+        },
+        "value": { "type": ["boolean", "integer", "number", "string", "null"] },
+        "value_type": {
+          "type": ["string", "null"],
+          "enum": ["bool", "int", "float", "string", "enum", "enum_set", null]
+        },
+        "custom_set_body": { "type": "string", "maxLength": 32768 },
+        "enum_set_write_mode": {
+          "type": ["string", "null"],
+          "enum": ["add", "remove", "replace", null]
+        },
+        "enum_set_write_values": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "default": []
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["source"],
+            "properties": {
+              "source": {
+                "type": "object",
+                "required": ["kind"],
+                "properties": { "kind": { "const": "condition_ref" } }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "kind": { "enum": ["derived", "manual_write"] },
+              "value_type": { "const": "bool" },
+              "value": { "type": ["boolean", "null"] },
+              "enum_set_write_mode": { "type": "null" },
+              "enum_set_write_values": { "maxItems": 0 }
+            }
+          }
+        }
+      ]
+    },
+
+    "VectorMenuItemExtension": {
+      "type": "object",
+      "description": "Vector Menu item extensions stored under extensions.pme.vector_menu.",
+      "additionalProperties": true,
+      "properties": {
+        "enum_strategy": {
+          "type": "string",
+          "enum": ["hover", "virtual_nest"],
+          "description": "Per-PROP enum presentation override for VMENU items. Omit to use the global Vector Menu enum strategy."
+        }
+      }
+    },
+
+    "PropDisplayItemExtension": {
+      "type": "object",
+      "description": "Property display item extensions stored under extensions.pme.prop_display.",
+      "additionalProperties": true,
+      "properties": {
+        "use_property_split": {
+          "type": "string",
+          "enum": ["on", "off"],
+          "description": "Per-PROP Property Split override for DIALOG/FPANEL items. Omit to inherit the menu-level Property Split setting."
+        }
+      }
+    },
+
+    "OperatorPresentationItemExtension": {
+      "type": "object",
+      "description": "Operator presentation authoring intent stored under extensions.pme.presentation.",
+      "additionalProperties": true,
+      "properties": {
+        "auto_icon": {
+          "type": "boolean",
+          "description": "Prefer an inferred Blender Tool icon where supported while retaining item.icon as the fallback."
+        }
+      }
+    },
+
+    "PMEItemExtension": {
+      "type": "object",
+      "description": "PME item-level extensions stored under extensions.pme.",
+      "additionalProperties": true,
+      "properties": {
+        "item_flags": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "use_checkbox": { "type": "boolean" }
+          }
+        },
+        "style": { "$ref": "#/$defs/Style" },
+        "vector_menu": { "$ref": "#/$defs/VectorMenuItemExtension" },
+        "prop_display": { "$ref": "#/$defs/PropDisplayItemExtension" },
+        "presentation": { "$ref": "#/$defs/OperatorPresentationItemExtension" }
+      }
+    },
+
+    "MenuItemExtensions": {
+      "type": "object",
+      "description": "Menu item vendor extensions.",
+      "additionalProperties": true,
+      "properties": {
+        "pme": { "$ref": "#/$defs/PMEItemExtension" }
+      }
+    },
+
+    "CommandActionOpts": {
+      "type": "object",
+      "description": "Options for action.type='command'.",
+      "additionalProperties": true,
+      "default": {},
+      "properties": {
+        "undo": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, use undo-enabled COMMAND fallback execution."
+        }
+      }
+    },
+
+    "MenuExpandGeometry": {
+      "type": "object",
+      "description": "Caller-local width and XY offset for an expanded MENU target. Omitted width means Auto and omitted offsets mean zero. Import additionally enforces a vector magnitude limit of 8192 after float32 normalization.",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "type": "number",
+          "minimum": 100,
+          "maximum": 2000
+        },
+        "offset_x": {
+          "type": "number",
+          "minimum": -8192,
+          "maximum": 8192,
+          "not": { "const": 0 }
+        },
+        "offset_y": {
+          "type": "number",
+          "minimum": -8192,
+          "maximum": 8192,
+          "not": { "const": 0 }
+        }
+      }
+    },
+
+    "MenuActionOpts": {
+      "type": "object",
+      "description": "Options for action.type='menu'. Unknown established MENU options remain allowed for Schema v2 compatibility.",
+      "additionalProperties": true,
+      "default": {},
+      "properties": {
+        "expand_geometry": { "$ref": "#/$defs/MenuExpandGeometry" }
+      }
+    },
+
+    "Action": {
+      "type": "object",
+      "description": "Action performed when a menu item is activated.",
+      "required": ["type", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "type":  { "$ref": "#/$defs/ActionType" },
+        "value": { "type": "string", "description": "Command string, uid reference, or '' for layout types." },
+        "opts":  { "type": "object", "description": "Type-specific options.", "default": {} }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["type"],
+            "properties": {
+              "type": { "const": "command" }
+            }
+          },
+          "then": {
+            "properties": {
+              "opts": { "$ref": "#/$defs/CommandActionOpts" }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["type"],
+            "properties": {
+              "type": { "const": "menu" }
+            }
+          },
+          "then": {
+            "properties": {
+              "opts": { "$ref": "#/$defs/MenuActionOpts" }
+            }
+          }
+        }
+      ]
+    },
+
+    "MenuItem": {
+      "type": "object",
+      "description": "A single item within a menu.",
+      "required": ["action"],
+      "additionalProperties": false,
+      "properties": {
+        "uid":                  { "$ref": "#/$defs/PmiUid" },
+        "name":                 { "type": "string", "default": "" },
+        "action":               { "$ref": "#/$defs/Action" },
+        "icon":                 { "type": ["string", "null"], "default": null, "description": "Blender icon name, e.g. 'MESH_CUBE'." },
+        "icon_only":            { "type": "boolean", "default": false },
+        "hidden":               { "type": "boolean", "default": false },
+        "enabled":              { "type": "boolean", "default": true },
+        "description":          { "type": "string", "default": "" },
+        "description_is_expr":  { "type": "boolean", "default": false },
+        "extensions":           { "$ref": "#/$defs/MenuItemExtensions", "default": {} }
+      }
+    },
+
+    "Menu": {
+      "type": "object",
+      "description": "A PME menu definition.",
+      "required": ["uid", "name", "mode", "enabled", "settings", "items"],
+      "additionalProperties": false,
+      "properties": {
+        "uid": {
+          "type": "string",
+          "pattern": "^[a-z_]+_[a-z0-9]{8}$",
+          "description": "Unique stable identifier, e.g. 'pm_9f7c2k3h'."
+        },
+        "name":                 { "type": "string", "description": "Display name (duplicates allowed)." },
+        "mode":                 { "$ref": "#/$defs/MenuMode" },
+        "enabled":              { "type": "boolean", "default": true },
+        "hotkey":               { "oneOf": [{ "$ref": "#/$defs/Hotkey" }, { "type": "null" }], "default": null },
+        "settings":             { "type": "object", "description": "Mode-specific settings (flat key/value).", "default": {} },
+        "description":          { "type": "string", "default": "" },
+        "description_is_expr":  { "type": "boolean", "default": false },
+        "poll":                 { "type": ["string", "null"], "default": null },
+        "tags":                 { "type": "array", "items": { "type": "string" }, "default": [] },
+        "items":                { "type": "array", "items": { "$ref": "#/$defs/MenuItem" }, "default": [] },
+        "extensions":           { "$ref": "#/$defs/PmeMenuExtensions", "default": {} }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["mode"],
+            "properties": { "mode": { "const": "CONDITION" } }
+          },
+          "then": {
+            "properties": {
+              "extensions": {
+                "properties": {
+                  "pme": {
+                    "properties": {
+                      "logic": { "$ref": "#/$defs/PropertyStackLogic" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["mode"],
+            "properties": { "mode": { "const": "ROUTER" } }
+          },
+          "then": {
+            "required": ["extensions"],
+            "properties": {
+              "settings": { "type": "object", "maxProperties": 0 },
+              "items": { "type": "array", "maxItems": 0 },
+              "extensions": {
+                "required": ["pme"],
+                "properties": {
+                  "pme": {
+                    "required": ["logic"],
+                    "properties": {
+                      "logic": { "$ref": "#/$defs/ContextRouterLogic" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["mode"],
+            "properties": {
+              "mode": { "not": { "enum": ["CONDITION", "ROUTER"] } }
+            }
+          },
+          "then": {
+            "properties": {
+              "extensions": {
+                "properties": {
+                  "pme": {
+                    "properties": {
+                      "logic": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": ["extensions"],
+            "properties": {
+              "extensions": {
+                "required": ["pme"],
+                "properties": {
+                  "pme": { "required": ["tag_uids"] }
+                }
+              }
+            }
+          },
+          "then": { "required": ["tags"] }
+        }
+      ]
+    }
+
+  }
+}

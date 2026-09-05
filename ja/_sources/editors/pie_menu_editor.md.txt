@@ -1,0 +1,236 @@
+(pie-menu-editor)=
+
+# Pie Menu Editor
+
+**Pie Menu** は、Blender の操作を 8 方向（＋上下 2 個）の放射状メニューとして並べるエディターです。`open_menu()` の呼び出し先としても扱われ、PME 内の他のエディターから呼ばれる入口になります。
+
+<div class="video-container">
+   <iframe src="https://www.youtube.com/embed/COW109EjBsU" frameborder="0" allowfullscreen></iframe>
+</div>
+
+---
+
+## 構成
+
+| 項目 | 値 |
+|---|---|
+| スロット数 | 10 個固定（8 方向 + 上 + 下） |
+| スロットタイプ | Command / Property / Menu / Hotkey / Custom |
+| Hotkey 設定 | あり |
+| プレビュー | あり |
+| 詳細設定 | Description / Poll / Radius / Flick / Threshold / Confirm Threshold / Confirm on Threshold |
+| Extend Target | なし |
+
+---
+
+## エディター画面
+
+### トップバー
+
+:::{image} /_static/images/editors/pie_menu/pie_ui_top.png
+:class: img-shadow
+:alt: Pie Menu Editor Top
+:width: 100%
+:align: center
+:::
+
+```{include} common/topbar.md
+```
+
+### Hotkey 設定
+
+```{include} common/hotkey_settings.md
+```
+
+Pie Menu で利用できる Open Mode は **Press** / **Hold** / **Double Click** の 3 種です。**Tweak** / **Click Drag** は Hotkey 設定の **Activation** から指定します。
+
+### メニュースロット
+
+Pie Menu は 10 個のスロットで構成されます。
+
+- 8 方向（上下左右 + 斜め 4 方向）と、垂直方向の追加スロット 2 個（最上部・最下部）。
+- スロットの数・並び・方向は固定で、増減や入れ替えはできません。
+- スロットの方向は、メニューを起動した画面上の位置を基準にした絶対方向です。
+- 空のままのスロットはパイメニュー上に描画されません。
+
+各スロットの構成要素は次のとおりです（左から右へ）。
+
+1. スロット編集ボタン — スロットエディタを開いて中身を設定
+2. アイコン設定 — スロットに表示するアイコンを選択
+3. 表示名 — スロットのラベルテキスト
+4. 詳細設定 — スロット固有の追加オプション
+
+:::{image} /_static/images/editors/pie_menu/pie_slots.png
+:class: img-shadow
+:alt: Pie Menu Editor Slots
+:width: 30%
+:align: right
+:::
+
+::::{admonition} Expansion Tool
+:class: seealso
+
+{guilabel}`Settings > General > Expand Slot Tools` を有効にすると、詳細設定メニューの編集ボタンが拡張されて、よく使う操作が直接並びます。
+
+:::{image} /_static/images/editors/common/slot_tools.png
+:class: img-shadow
+:alt: Pie Menu Slot Tools
+:align: center
+:width: 80%
+:::
+::::
+
+### 詳細設定
+
+:::{image} /_static/images/editors/pie_menu/pie_advanced_settings.png
+:class: img-shadow
+:alt: Pie Menu Editor Advanced Settings
+:width: 40%
+:align: right
+:::
+
+```{include} common/description.md
+```
+
+```{include} common/poll.md
+```
+
+:Radius:
+  パイの円の半径（ピクセル）を指定します。デフォルト値 **-1** で自動設定です。値を指定するとパイの開閉アニメーションが無効化されます。
+
+:Flick（フリックモード）:
+  マウスを少し弾くだけでスロットを選び、確定するモードです。Off にすると、Blender 標準と同じ「マウスでホバーして離す／クリック」の挙動になります。
+
+:Threshold:
+  Flick モード時、スロット選択に必要なマウス移動距離（ピクセル）。この距離を超えるとそのスロットが選択状態になります。
+
+:Confirm Threshold:
+  Flick モード時、選択を確定するマウス移動距離（ピクセル）。Threshold より大きい値を入れます。
+
+:Confirm on Threshold:
+  Confirm Threshold に到達した瞬間に自動的に選択を確定するかを切り替えます。Off の場合はマウスを離したタイミングで確定します。
+
+---
+
+## スロットエディタ
+
+:::{image} /_static/images/editors/common/slot_editor.png
+:class: img-shadow
+:alt: Pie Menu Slot Editor
+:align: center
+:width: 100%
+:::
+
+<div style="margin: 1.5rem 0;"></div>
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
+```
+:::
+
+:::{tab-item} Property
+:sync: property
+
+```{include} common/slot_types/property.md
+```
+:::
+
+:::{tab-item} Menu
+:sync: menu
+
+```{include} common/slot_types/menu.md
+```
+:::
+
+:::{tab-item} Hotkey
+:sync: hotkey
+
+```{include} common/slot_types/hotkey.md
+```
+:::
+
+:::{tab-item} Custom
+:sync: custom
+
+```{include} common/slot_types/custom.md
+```
+:::
+
+::::
+
+### スロットを追加する（プリセット）
+
+```{include} common/slot_types/examples.md
+```
+
+---
+
+## 応用的な使い方
+
+### コンテキスト感応メニュー（CSM）
+
+現在のモード / 選択 / オブジェクトタイプに応じて、開く Pie Menu そのものを切り替えます。トリガーになる hotkey は 1 つで、Command スロットから別の Pie Menu を `open_menu()` で呼び分けます。
+
+```python
+open_menu("Object") if C.mode == 'OBJECT' else open_menu("Edit Mesh")
+```
+
+```python
+open_menu("Weight Paint Menu") if C.active_object.type == 'MESH' else open_menu("Pose Menu")
+```
+
+### Hold + Confirm on Release によるジェスチャー起動
+
+Hotkey 設定の Open Mode を **Hold** にし、**Confirm on Release** を有効にすると、押している間だけ Pie Menu が表示され、離した方向のスロットが確定される操作になります。
+
+### サブメニュー / ホバーメニュー
+
+10 スロットに収まらない項目を Regular Menu や別の Pie Menu に分け、1 スロットから呼び出します。Menu スロットでリンク先メニューを指定するか、Command スロットから `open_menu()` で呼びます。
+
+```python
+open_menu("My Sub Menu")
+```
+
+Menu スロット側で **Open on Mouse Over** を有効にすると、ホバーで開く階層 UI になります。
+
+### Pie 内のトグル・スライダー・プロパティ
+
+Custom スロットに Python レイアウトを書くと、Pie のスロットに通常のメニュー項目ではなく、チェックボックスやスライダー、プロパティを直接配置できます。
+
+```python
+L.prop(C.space_data.overlay, "show_floor")
+```
+
+```python
+L.prop(C.scene.tool_settings, "use_proportional_edit")
+```
+
+### 修飾キーで動作を変える
+
+Command スロットの中で `E`（イベント）の修飾キー状態を参照すると、1 つのスロットに複数の動作を持たせられます。
+
+```python
+O.mesh.primitive_monkey_add() if E.ctrl else O.mesh.primitive_cube_add()
+```
+
+### 1 つの hotkey から複数のメニューを出し分け
+
+Stack Key と Pie Menu を組み合わせ、Stack Key の各スロットに `open_menu()` を入れると、同じ hotkey を押すたびに別の Pie Menu を呼べます。
+
+```python
+open_menu("Tab Bar Commands", props(menu))
+```
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+- [Blender の Keymap と PME](../reference/keymap_and_pme.md)
+```

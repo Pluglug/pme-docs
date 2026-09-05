@@ -1,0 +1,124 @@
+(side-panel-editor)=
+
+# Side Panel Editor
+
+**Side Panel Editor**（内部名 **Panel Group**）は、PME で作った Pop-up Dialog を Blender の N-Panel やヘッダーに常駐 UI として並べるエディターです。スロット 1 つにつき 1 枚のパネルを参照し、エディター名がそのまま N-Panel カテゴリ / グループ名になります。
+
+```{admonition} 実装が古い領域です
+:class: warning
+
+このエディターは PME の中でも実装が古い領域で、Blender 4.x 以降の新しいエリア / ワークスペースで描画位置がずれる、Sub-Panel の挙動が不安定になる、といった既知の挙動があります。
+```
+
+<div class="video-container">
+   <iframe src="https://www.youtube.com/embed/BGs0de6ZYdw" frameborder="0" allowfullscreen></iframe>
+</div>
+
+---
+
+## 構成
+
+| 項目 | 値 |
+|---|---|
+| スロット数 | 任意（並べるパネル / ダイアログの数だけ） |
+| スロットタイプ | Menu（Pop-up Dialog を指す参照のみ） |
+| Hotkey 設定 | なし |
+| プレビュー | なし |
+| 配置設定 | Space / Region / Context / Category |
+| 詳細設定 | Description / Poll / Width Icons |
+| Sub-Panel | あり（1 階層） |
+
+---
+
+## 仕組み
+
+Side Panel Editor 1 つは、Blender のサイドパネル（N-Panel）に並ぶ 1 グループに対応します。
+
+```text
+[Side Panel Editor:  "My Tools"]            ← この行が 1 つの N-panel カテゴリ
+   │
+   ├── Slot 1 → Pop-up Dialog "Quick Tools"   ← 各スロットが 1 枚のパネル
+   ├── Slot 2 → Pop-up Dialog "Selection"
+   └── Slot 3 → Pop-up Dialog "Modifiers"
+```
+
+- エディター名が N-Panel のカテゴリ名 / カテゴリ内のグループ名になります。
+- 各スロットは Pop-up Dialog を 1 つ参照します。
+- パネルの中身（ボタン・プロパティ・スライダー）は Pop-up Dialog 側で編集します。Side Panel Editor は配置順とグループ構成のみを管理します。
+
+---
+
+## エディター画面
+
+### トップバー
+
+```{include} common/topbar.md
+```
+
+トップバーには Hotkey 設定とプレビューがなく、すぐ下に配置設定が並びます。
+
+### 配置設定（Space / Region / Context / Category）
+
+| 項目 | 役割 |
+|---|---|
+| **Space** | 表示するエディタータイプ（3D View, Image Editor, Node Editor, Preferences など） |
+| **Region** | 同じ Space の中の領域（Tools, UI, Header, …）。Region が Header の場合、Context / Category は無効になります |
+| **Context** | モードでの絞り込み（`OBJECT`, `EDIT_MESH`, `POSE` …） |
+| **Category** | N-Panel タブの名前。同じ Category 名の Side Panel Editor は同じタブ内にまとまります |
+
+### スロット一覧
+
+スロットは上から順に並びます。各スロットの操作は次のとおりです。
+
+- **アイコン部分のクリック** — Sub-Panel（折りたたみ可能な子パネル）と通常パネルの切り替え。
+- **ラベル** — 表示する Pop-up Dialog の名前。PME の Pop-up Dialog なら専用アイコン、Blender ネイティブのパネルなら Blender アイコンが表示されます。
+- **メニューボタン** — Sub-Panel 化、追加、移動、削除などのスロット操作。
+
+`Add Panel` で新しいスロット行を追加します。
+
+```{note}
+Sub-Panel の階層は親 1 段までを基本に想定されています。深くしすぎると Blender 側で描画されない場合があります。
+```
+
+### 詳細設定（Extra Settings）
+
+```{include} common/description.md
+```
+
+```{include} common/poll.md
+```
+
+:Width Icons:
+  ボタン幅に合わせてアイコンを引き伸ばします。
+
+---
+
+## 応用的な使い方
+
+### 自分用 N-Panel タブを作る
+
+複数の Side Panel Editor を作り、同じ Category 名を設定すると、Blender の N-Panel 上では同じタブ内に積み上がります。タブを分けたい場合は別の Category 名にします。
+
+### ヘッダー / トップバーへの常駐ボタン
+
+Region に Header を選ぶと、3D View のヘッダーに自作のボタン群を並べられます。Header 配置では Context / Category は使用されません。
+
+### モードや状態で表示を切り替える
+
+詳細設定の Poll で表示条件を書くと、特定モード / 選択状態のときだけ Side Panel Editor を表示できます。Context での絞り込みと併用することで、シーンに応じた常駐 UI を構成できます。
+
+### Interactive Panels から取り込む
+
+[Interactive Panels](./interactive_panels.md) モードを有効にすると、画面上の既存パネルやメニューにマウスを乗せて取り込めます。Side Panel Editor の編集中に取り込んだ ID は、そのままスロットとして追加できます。
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Popup Dialog Editor](./popup_dialog_editor.md)
+- [Interactive Panels と Extend Panel](./interactive_panels.md)
+- [Hiding Unused Panels](./hiding_unused_panels.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+```

@@ -1,0 +1,131 @@
+(hiding-unused-panels)=
+
+# Hiding Unused Panels
+
+**Hiding Unused Panels**（内部名 **Hidden Panel Group**, **HPG**）は、Blender 標準やアドオンが追加するパネルを非表示にするエディターです。HPG を有効にしている間だけ対象のパネルが Blender から取り除かれ、無効にすると元に戻ります。
+
+```{admonition} 実装が古い領域です
+:class: warning
+
+このエディターは PME の中でも実装が古い領域で、Blender のバージョンによってはパネルを隠した直後に再描画されない場合があります。Header / Topbar / 一部ワークスペース固有領域では挙動が安定しません。
+```
+
+<div class="video-container">
+   <iframe src="https://www.youtube.com/embed/z19c6b7XOWo" frameborder="0" allowfullscreen></iframe>
+</div>
+
+---
+
+## 構成
+
+| 項目 | 値 |
+|---|---|
+| スロット数 | 任意（隠すパネル ID のリスト） |
+| スロットタイプ | なし（1 行 ＝ パネル ID 1 件） |
+| Hotkey 設定 | なし |
+| プレビュー | なし |
+| 詳細設定パネル | なし（Description / Poll を持ちません） |
+| Interactive Panels 連携 | あり |
+
+---
+
+## 仕組み
+
+1 つの HPG はパネル ID のリストです。
+
+```text
+[Hidden Panel Group:  "Hide unused 3DView panels"]
+   │     │   ← この HPG を「有効」にしている間だけ
+   │     │     下の一覧にあるパネルが Blender 上から消える
+   │
+   ├── VIEW3D_PT_collections
+   ├── VIEW3D_PT_view3d_cursor
+   └── VIEW3D_PT_view3d_lock
+```
+
+- HPG を有効化すると、リスト内のパネルが Blender から隠されます。
+- HPG を無効化すると、元のパネルが戻ります。
+- HPG ごとに Tag を付ければ、`pm_enable_by_tag()` でセット単位で切り替えられます。
+
+---
+
+## エディター画面
+
+### トップバー
+
+```{include} common/topbar.md
+```
+
+トップバーには Hotkey 設定とプレビューがなく、詳細設定パネルもありません。すぐ下に「隠すパネルの一覧」が並びます。
+
+### 隠すパネルの一覧
+
+| 操作 | 役割 |
+|---|---|
+| **一覧（左）** | 現在この HPG が隠しているパネル ID のリスト |
+| **追加（＋）** | パネルを取り込むメニューを開く |
+| **削除（−）** | 選択行を一覧から外す（そのパネルは Blender に戻る） |
+| **全削除（×）** | 一覧をすべて空にする |
+| **下部のトグル** | 一覧に表示する情報（Name / Class / Context / Category。複数選択可） |
+
+#### パネルを取り込む
+
+追加（＋）ボタンを押すと、次のメニューが出ます。
+
+| 項目 | 役割 |
+|---|---|
+| **Hide Panel** | Blender の画面上に赤いマーカーが表示され、隠したいパネルにマウスを乗せてクリックすると、その ID が取り込まれます |
+| **Hide Panel by ...** | パネル ID を直接入力 / 検索して指定します |
+| **Interactive Panels** | Blender のパネル / メニュー / ボタンの上で赤いハイライトを常時表示するモードを切り替えます |
+
+Interactive Panels モードは PME 全体で共有されます。Side Panel Editor / Pop-up Dialog / Regular Menu / Stack Key などからの取り込みでも同じトグルが使われます。詳細は [Interactive Panels と Extend Panel](./interactive_panels.md) を参照してください。
+
+#### 一覧に表示する情報
+
+下部の Name / Class / Context / Category は、一覧の各行に表示する情報の切り替えです。
+
+| 表示項目 | 値 |
+|---|---|
+| **Name** | Blender 上でのパネル表示名 |
+| **Class** | Blender クラス ID（例: `VIEW3D_PT_view3d_cursor`） |
+| **Context** | パネルが属するモード / コンテキスト |
+| **Category** | N-Panel タブ名 |
+
+---
+
+## 応用的な使い方
+
+### Tag によるセット単位の切り替え
+
+HPG を用途別に分けて Tag を付けると、`pm_enable_by_tag("名前", True/False)` でまとめて切り替えられます。
+
+```python
+pm_enable_by_tag("Modeling", True)
+```
+
+### 用途別の HPG 分割
+
+| パターン例 | 中身 |
+|---|---|
+| `Hide unused 3DView N-panel` | 3D View の N-Panel で使わない標準パネル |
+| `Hide Properties tabs (Modeling)` | モデリング中は使わない Properties タブ |
+| `Hide third-party addon panels` | 常用しないアドオンのパネル群 |
+
+### Side Panel Editor との組み合わせ
+
+HPG で標準パネルを隠し、Side Panel Editor で自作 UI を並べると、サイドバー全体を入れ替えられます。
+
+### Interactive Panels から取り込む
+
+Interactive Panels モードを有効にしている間は、Blender 画面上のパネルが赤くハイライトされ、クリックでその ID を HPG に追加できます。編集が終わったらモードを無効に戻します。
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Side Panel Editor](./side_panel_editor.md)
+- [Interactive Panels と Extend Panel](./interactive_panels.md)
+- [Popup Dialog Editor](./popup_dialog_editor.md)
+```

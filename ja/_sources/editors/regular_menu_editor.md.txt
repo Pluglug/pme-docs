@@ -1,0 +1,176 @@
+(regular-menu-editor)=
+
+# Regular Menu Editor
+
+**Regular Menu** は、項目を縦に並べたドロップダウン型のメニューを作成するエディターです。Blender のドロップダウンメニューやコンテキストメニューと同じ形式で動作します。
+
+---
+
+## 構成
+
+| 項目 | 値 |
+|---|---|
+| スロット数 | 任意 |
+| スロットタイプ | Command / Property / Menu / Hotkey / Custom |
+| Hotkey 設定 | あり |
+| プレビュー | あり |
+| 詳細設定 | Description / Poll / タイトル表示 |
+| Extend Target | あり（Blender 既存メニューへの差し込み） |
+
+---
+
+## エディター画面
+
+:::{image} /_static/images/editors/regular_menu_editor_ui.png
+:class: img-shadow
+:alt: Regular Menu Editor
+:width: 100%
+:align: center
+:::
+
+### トップバー
+
+```{include} common/topbar.md
+```
+
+### Hotkey 設定
+
+```{include} common/hotkey_settings.md
+```
+
+### Extend Target 行
+
+トップバー直下にあり、Blender の既存メニューへこの Regular Menu を差し込むための行です。
+
+```{versionadded} 2.0.0
+Extend Target に対して複数の Pop-up Dialog / Regular Menu を重ねられるようになりました。
+```
+
+:Extend Target:
+  差し込み先の Blender メニュークラス ID。`VIEW3D_MT_object` のような文字列を入れます。未指定の場合は差し込みは行われません。
+
+:Side:
+  差し込み位置。**▲** は対象メニューの先頭、**▼** は末尾を指します。
+
+:Order:
+  同じ Target に複数のメニューが差し込まれている場合の表示順。値が小さいほど先に並びます。
+
+差し込み先 ID は [Interactive Panels](./interactive_panels.md) モードからも取得できます。
+
+### メニュースロット
+
+スロットは上から順にメニュー項目として並びます。
+
+- 並び順がそのままメニューの表示順になります。
+- スロットの追加・削除・並び替えが可能です。
+- 個別スロットの有効化/無効化は、無効化されたスロットがメニューから取り除かれた状態で表示されます。
+- スロットタイプを未設定（空スロット）にすると、メニュー上で区切り線として描画されます。
+- サブメニューは、Menu スロットで別のメニューを参照することで構成します。
+
+### 詳細設定
+
+```{include} common/description.md
+```
+
+```{include} common/poll.md
+```
+
+:タイトル表示:
+  メニュー上部にメニュー名を見出しとして描画するかを切り替えます。
+
+---
+
+## スロットエディタ
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
+```
+:::
+
+:::{tab-item} Property
+:sync: property
+
+```{include} common/slot_types/property.md
+```
+:::
+
+:::{tab-item} Menu
+:sync: menu
+
+```{include} common/slot_types/menu.md
+```
+:::
+
+:::{tab-item} Hotkey
+:sync: hotkey
+
+```{include} common/slot_types/hotkey.md
+```
+:::
+
+:::{tab-item} Custom
+:sync: custom
+
+```{include} common/slot_types/custom.md
+```
+:::
+
+::::
+
+---
+
+## 応用的な使い方
+
+### Pie Menu からのサブメニュー / ホバーメニュー
+
+Pie Menu のスロットから Regular Menu を開くと、放射状 + リストのハイブリッド UI を構成できます。Pie Menu のスロットエディタで **Menu タブ**を選び、リンク先に Regular Menu を指定します。同じスロットの **Open on Mouse Over** を有効にすると、ホバーで Regular Menu が開きます。
+
+### 動的なドロップダウン / 列挙
+
+Custom スロットの 1 行で、Blender の `prop_menu_enum` などをそのまま流し込めます。列挙型プロパティを Regular Menu の形で出す典型形です。
+
+```python
+L.prop_menu_enum(C.object, "display_type")
+```
+
+### `draw_menu()` で別レイアウトに描く
+
+`open_menu()` が「Regular Menu を新しいポップアップとして開く」のに対し、`draw_menu()` は **現在の layout にその Regular Menu の中身を描画する** ヘルパーです。Pop-up Dialog や Panel Group の中で Regular Menu を再利用するときに使います。
+
+```python
+draw_menu("Regular Menu Name")
+```
+
+### Stack Key / Macro Operator の呼び出し口
+
+Regular Menu に Stack Key や Macro Operator をリストとして並べると、コマンド一覧として使えます。並べ方は 2 通りあり、動作経路が異なります。
+
+- **Menu スロットで直接参照** — Stack Key / Macro を Menu スロットの参照先に指定。Macro の場合、Blender の **Adjust Last Operation**（F9）パネルから引数を再調整できる経路を維持します。
+- **Command スロットから `open_menu()` で呼び出し** — `open_menu("名前")` を Command スロットで実行。条件分岐をはさんで呼ぶメニューを切り替えるなど、コード側で制御したい場合に使います。
+
+```python
+open_menu("My Macro Operator")
+```
+
+### Extend Menu の重ね合わせ
+
+```{versionadded} 2.0.0
+同じ Extend Target に対して、Poll で出し分けながら複数の Regular Menu を重ねられるようになりました。
+```
+
+Extend Target / Side / Order の詳細と Interactive Panels からの追加手順は [Interactive Panels と Extend Panel](interactive_panels.md) を参照してください。
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Interactive Panels と Extend Panel](interactive_panels.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+- [Blender の Keymap と PME](../reference/keymap_and_pme.md)
+```

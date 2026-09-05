@@ -1,0 +1,1004 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="保存先とフォルダ構成" href="../reference/file_locations.html"><link rel="prev" title="カスタムアイコン" href="custom_icons.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>Settings - Pie Menu Editor JA 2.0.5.5 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c621e55a" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=c621e55a" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+      }
+    }
+  }
+</style>
+
+<script type="text/javascript">
+    (function () {
+        if (window.__PMEBeaconInitialized) {
+            return;
+        }
+
+        window.__PMEBeaconInitialized = true;
+
+        !function(e,t,n){function a(){var e=t.getElementsByTagName("script")[0],n=t.createElement("script");n.type="text/javascript",n.async=!0,n.src="https://beacon-v2.helpscout.net",e.parentNode.insertBefore(n,e)}if(e.Beacon=n=function(t,n,a){e.Beacon.readyQueue.push({method:t,options:n,data:a})},n.readyQueue=[],"complete"===t.readyState)return a();e.attachEvent?e.attachEvent("onload",a):e.addEventListener("load",a,!1)}(window,document,window.Beacon||function(){});
+        window.Beacon('init', 'e458ab6a-6436-4e96-a0b6-038336504b24');
+        window.Beacon('config', {
+            display: {
+                style: 'manual'
+            }
+        });
+
+        window.PMEDocs = window.PMEDocs || {};
+        window.PMEDocs.beaconPrefillTemplates = {
+            supportRequest: [
+                'Summary:',
+                '- What went wrong?',
+                '',
+                'Steps to reproduce:',
+                '1.',
+                '2.',
+                '3.',
+                '',
+                'What happened:',
+                '- Describe the actual result.',
+                '',
+                'Environment:',
+                '- Blender version:',
+                '- PME version:',
+                '- OS:',
+                '',
+                'Attachments:',
+                '- PME setup JSON:',
+                '- Console output / screenshot:',
+                '- Small .blend file (if relevant):',
+                '',
+                'Additional notes:',
+                '- Anything else that may help.'
+            ].join('\n')
+        };
+
+        window.PMEDocs.openSupportBeacon = function (event, templateName) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            if (typeof window.Beacon === 'function') {
+                const prefillText = window.PMEDocs.beaconPrefillTemplates[templateName];
+                if (prefillText) {
+                    window.Beacon('prefill', {
+                        text: prefillText
+                    });
+                }
+
+                window.Beacon('open');
+                window.Beacon('navigate', '/ask/message/');
+                return false;
+            }
+
+            return true;
+        };
+
+        document.addEventListener('click', function (event) {
+            const trigger = event.target.closest('[data-beacon-open]');
+            if (!trigger) {
+                return;
+            }
+
+            window.PMEDocs.openSupportBeacon(event, trigger.dataset.beaconTemplate);
+        });
+    }());
+</script></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Pie Menu Editor JA 2.0.5.5 ドキュメント</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor JA 2.0.5.5 ドキュメント</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">はじめる</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/basic_pie_menu.html">基本的なパイメニューの作成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/popup_dialog_tutorial.html">ポップアップダイアログをパイメニューに追加</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/macro_tutorial.html">マクロで独自機能を作成</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">エディタ</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="popup_dialog_editor.html">Pop-up Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property_editor.html">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="side_panel_editor.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hiding_unused_panels.html">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interactive_panels.html">Interactive Panels と Extend Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="editor_common_elements.html">エディターの共通要素</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#hiding-unused-panels">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#menu-panel-extension">Menu/Panel Extension</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html#pme-toolbar">PME Toolbar</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context_menu.html">コンテキストメニュー</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_icons.html">カスタムアイコン</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">参考資料</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/file_locations.html">保存先とフォルダ構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/boot_options.html">起動オプション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/terminology.html">用語集</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_and_pme.html">BlenderのKeymapとPME</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_duplicates.html">削除したはずのPMEキーマップが残り続ける(重複・ゴーストキーマップ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/poll_method.html">Poll Method の基礎</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/scripting.html">スクリプティング</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_guide.html">Keymapの選び方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/developer_options.html">開発者オプション</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">サポート</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">サポート</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/editors/settings.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="settings">
+<span id="id1"></span><h1>Settings<a class="headerlink" href="#settings" title="Link to this heading">¶</a></h1>
+<p><strong>Settings</strong> は、Pie Menu Editor 全体の挙動を調整する設定画面です。Edit &gt; Preferences &gt; Add-ons から Pie Menu Editor を開き、画面上部の <strong>Editor / Settings</strong> タブの <strong>Settings</strong> 側で表示されます。</p>
+<p>左側のタブで 10 枚に分かれています。上の 5 タブが<strong>全体に効く設定</strong>、中央の 4 タブが<strong>各エディター固有のデフォルト</strong>、最下段が<strong>開発者向け</strong>です。</p>
+<hr class="docutils" />
+<section id="general">
+<span id="settings-general"></span><h2>General<a class="headerlink" href="#general" title="Link to this heading">¶</a></h2>
+<p>PME 全体の使い勝手に関わる設定をまとめたタブです。エディター画面の見た目、メニューリストの幅・行数、自動バックアップやタグの自動付与、上級者向けトグルがここに集まります。各エディター固有のデフォルトは、後続のエディター別タブで設定します。</p>
+<p><strong>インターフェース</strong></p>
+<section id="n-panel-preferences">
+<span id="setting-n-panel-preferences"></span><h3>N-Panel Preferences<a class="headerlink" href="#n-panel-preferences" title="Link to this heading">¶</a></h3>
+<p>3D View の N-Panel に PME の設定を表示するかを切り替えます。有効にすると、3D View の N-Panel 内に <strong>PME</strong> タブが追加され、Preferences ウィンドウを開かなくても主要な設定にアクセスできます。</p>
+</section>
+<section id="expand-slot-tools">
+<span id="setting-expand-slot-tools"></span><h3>Expand Slot Tools<a class="headerlink" href="#expand-slot-tools" title="Link to this heading">¶</a></h3>
+<p>スロットエディタを開いたときに、コピー・削除・移動などのスロットツール群を最初から展開して並べるかを切り替えます。</p>
+<a class="img-shadow reference internal image-reference" href="../_images/slot_tools.png"><img alt="Slot Tools 展開時" class="img-shadow align-center" src="../_images/slot_tools.png" style="width: 80%;" />
+</a>
+</section>
+<section id="operator-editor">
+<span id="setting-operator-editor"></span><h3>Operator Editor<a class="headerlink" href="#operator-editor" title="Link to this heading">¶</a></h3>
+<p>Command タブで <strong>Operator Properties Editor</strong>（Blender の F6 / Adjust Last Operation と同等の入力 UI）を使うかを切り替えます。Off にすると、Blender の汎用フィールド入力にフォールバックします。</p>
+</section>
+<section id="recent-menu-targets">
+<span id="setting-recent-menu-targets"></span><h3>Recent Menu Targets<a class="headerlink" href="#recent-menu-targets" title="Link to this heading">¶</a></h3>
+<p>Widget Context Menu で、PME メニューへ要素を追加する際に、<strong>最近呼んだメニュー</strong>を追加先候補として表示するかを切り替えます。デフォルトで有効です。</p>
+</section>
+<section id="editor-link-buttons">
+<span id="setting-editor-link-buttons"></span><h3>Editor Link Buttons<a class="headerlink" href="#editor-link-buttons" title="Link to this heading">¶</a></h3>
+<p>Pop-up Dialog / Floating Panel エディター画面のリンク先メニュー（MENU / Dialog スロットから参照しているメニュー）の右側に、参照先メニューへ直接ジャンプするボタンを表示するかを切り替えます。同じ設定は Popup Dialog タブにもあります（<a class="reference internal" href="#setting-popup-editor-link-buttons">Popup Dialog 側の表示</a>）。</p>
+</section>
+<section id="persist-tree-state">
+<span id="setting-persist-tree-state"></span><h3>Persist Tree State<a class="headerlink" href="#persist-tree-state" title="Link to this heading">¶</a></h3>
+<p>メニュー一覧のツリー表示で、展開/折りたたみの状態を Blender 終了後も保存するかを切り替えます。</p>
+</section>
+<section id="show-tree-group-counts">
+<span id="setting-show-tree-group-counts"></span><h3>Show Tree Group Counts<a class="headerlink" href="#show-tree-group-counts" title="Link to this heading">¶</a></h3>
+<p>ツリー表示のグループ行（タグごとの見出しなど）に、含まれるメニュー数を表示するかを切り替えます。</p>
+</section>
+<section id="list-width">
+<span id="setting-list-width"></span><h3>List Width<a class="headerlink" href="#list-width" title="Link to this heading">¶</a></h3>
+<p>エディター画面左側のメニューリストの幅（%）を指定します。範囲は 1〜80、デフォルトは 40。</p>
+</section>
+<section id="list-rows">
+<span id="setting-list-rows"></span><h3>List Rows<a class="headerlink" href="#list-rows" title="Link to this heading">¶</a></h3>
+<p>メニューリストに表示する行数を指定します。範囲は 5〜50、デフォルトは 10。</p>
+</section>
+<section id="search-keywords">
+<span id="setting-search-keywords"></span><h3>Search Keywords<a class="headerlink" href="#search-keywords" title="Link to this heading">¶</a></h3>
+<p>メニューの Search / Select 機能で、メニュー名以外に検索対象に含めるトークンを選びます。以下から複数選択できます。</p>
+<ul class="simple">
+<li><p><strong>Hotkey</strong> — メニューに割り当てた hotkey 文字列（例: <code class="docutils literal notranslate"><span class="pre">Ctrl+Shift+A</span></code>）</p></li>
+<li><p><strong>Extend Target</strong> — Extend Panel / Extend Menu の差し込み先クラス ID（例: <code class="docutils literal notranslate"><span class="pre">VIEW3D_MT_object</span></code>）</p></li>
+<li><p><strong>UID</strong> — PME 内部の uid 文字列</p></li>
+</ul>
+<p>デフォルトは Hotkey のみ。</p>
+<p><strong>自動化</strong></p>
+</section>
+<section id="auto-backup">
+<span id="setting-auto-backup"></span><h3>Auto Backup<a class="headerlink" href="#auto-backup" title="Link to this heading">¶</a></h3>
+<p>メニューを編集して保存するたびに、自動でバックアップを取るかを切り替えます。Resources タブの保存先パス配下にタイムスタンプ付きで蓄積されます。バックアップを 1 ファイルに上書きしたい場合は <a class="reference internal" href="#setting-overwrite-backup-file">Overwrite Backup File</a> を使います。</p>
+</section>
+<section id="auto-tag-new-menus">
+<span id="setting-auto-tag-new-menus"></span><h3>Auto-Tag New Menus<a class="headerlink" href="#auto-tag-new-menus" title="Link to this heading">¶</a></h3>
+<p>タグフィルターをかけた状態（例: <code class="docutils literal notranslate"><span class="pre">Modeling</span></code> だけ表示中）で新規メニューを作成したときに、そのタグを自動で割り当てるかを切り替えます。</p>
+<p><strong>パフォーマンス</strong></p>
+</section>
+<section id="cache-scripts">
+<span id="setting-cache-scripts"></span><h3>Cache Scripts<a class="headerlink" href="#cache-scripts" title="Link to this heading">¶</a></h3>
+<p>Custom / Command スロットから読み込む外部 Python スクリプトをキャッシュするかを切り替えます。同じスクリプトを繰り返し評価するメニューで起動コストを下げます。</p>
+<p><strong>Expert</strong></p>
+</section>
+<section id="show-error-trace">
+<span id="setting-show-error-trace"></span><h3>Show Error Trace<a class="headerlink" href="#show-error-trace" title="Link to this heading">¶</a></h3>
+<p>スロットの Python 式（Description / Poll / Custom / Command）で例外が出たときに、トレース情報を表示するかを切り替えます。</p>
+</section>
+<section id="sidebar-tab-memory-retired">
+<span id="setting-persist-sidearea-tabs"></span><h3>Sidebar Tab Memory (Retired)<a class="headerlink" href="#sidebar-tab-memory-retired" title="Link to this heading">¶</a></h3>
+<p>PME 2.1ではこの旧設定を表示・使用しません。Toggle Side AreaはSidebarのタブ名を別に読み書きして復元しません。Blenderでタブ情報を直接読み取る経路が強制終了につながる場合があるためです。<span class="guilabel">Preserve Side Area State</span> が対応するエディターの状態そのものを保持できた場合は、その一部として表示中のパネルが戻ることがありますが、すべてのSidebarタブを対象にした記憶機能ではありません。Sidebarの表示状態と、開いたエリアの幅または高さは、現在のBlenderセッション中は引き続き記憶されます。既存の設定はそのまま読み込めます。</p>
+</section>
+<section id="show-command-tab-undo">
+<span id="setting-show-command-tab-undo"></span><h3>Show Command Tab Undo<a class="headerlink" href="#show-command-tab-undo" title="Link to this heading">¶</a></h3>
+<p>Command タブに <strong>Undo Previous Command</strong> チェックボックスを表示するかを切り替えます。詳細は <a class="reference internal" href="macro_operator_editor.html"><span class="std std-doc">Macro Operator Editor</span></a> と <a class="reference internal" href="stack_key_editor.html"><span class="std std-doc">Stack Key Editor</span></a> を参照してください。</p>
+</section>
+<section id="preserve-side-area-state">
+<span id="setting-preserve-side-area-space-state"></span><h3>Preserve Side Area State<a class="headerlink" href="#preserve-side-area-state" title="Link to this heading">¶</a></h3>
+<p>Toggle Side Areaで対応するエディターを閉じた後や、別のエディターへ切り替えて戻った後も、そのエディターの作業状態を現在のBlenderセッション中に保持します。Outlinerの検索・表示・フィルター、Propertiesのコンテキスト、Node EditorのノードツリーやSidebar表示に加え、Blender 5.2ではText Editorの開いていたText、スクロール位置、表示・検索設定と、Dope Sheet / Timeline / Actionのモード、フィルター、チャンネル選択、表示位置などを戻します。F-Curve / Driversでも、同じエディター履歴、モード、フィルター、表示設定、カーソル・ピボット、対応する表示位置を復元します。NLA Editorでは表示、フィルター、対応する表示位置、Consoleではコマンド履歴、スクロールバック、行カーソル・種類、フォントサイズを復元します。Spreadsheetではpin flag、Mesh用の表示・フィルター設定、row filterを復元します。Video Sequence Editorでは、検証済みのTimeline、Preview Image、Combined Histogramの表示・overlay・cursor設定と、表示中のtimeline / preview位置を復元します。Movie Clip Editorでは、検証済みのClip、Graph、Dope Sheet viewの直接設定と、表示中のclip / preview位置を復元します。Image Editor / UV Editorでは、生成画像のpin、モード、cursor、pivot、overlay、UV、scope表示、zoomの設定と、表示中のWindow位置を復元します。Preferencesでは、Display Filterの検索文字列とNavigation領域の表示状態を復元します。初期状態はOFFです。</p>
+<div class="admonition warning">
+<p class="admonition-title">警告</p>
+<p>このExpert設定はBlender内部の仕組みを利用するため、Blenderが不安定になる場合があります。</p>
+</div>
+<p>Blender 4.5.xから5.2.xに対応し、操作のたびに実行中のBlenderが持つエリアとエディター履歴の構造を確認します。2026年8月10日時点の公式Windows x64版19リリース（4.5.0〜4.5.12、5.0.0〜5.0.1、5.1.0〜5.1.2、5.2.0）で、Outliner、Properties、Node Editorの開閉と復元を確認しています。Text Editor、Dope Sheet / Timeline / Action、F-Curve / Drivers、NLA Editor、Console、Spreadsheet、Video Sequence Editor、Movie Clip Editor、Image Editor / UV Editor、Preferencesの追加対応は、Windows版Blender 5.2.0 build <code class="docutils literal notranslate"><span class="pre">fbe6228777e7</span></code>で確認しました。特定のbuild hashだけに機能を制限する方式ではありません。</p>
+<p>Pencil+ 4 Line 4.1.8を使ったBlender 5.1.1での確認では、Pcl4 Node Editorの<span class="guilabel">Pencil+ 4 Line</span>タブを最初に1回選んだ後、Propertiesへの切り替え、サイドエリアのクローズ、Pcl4の再オープンを行っても、追加のタブ操作なしにPcl4のパネルが再表示され、同じノードツリーとPropertiesのSceneコンテキストが戻りました。Pcl4専用の処理はなく、この確認は一般的なNode Editor履歴の実例です。すべてのSidebarタブを一般に記憶・復元する保証ではありません。</p>
+<p>同じメインエリアでは、対応するエディターの基本種類ごとに1つの作業状態を保持します。Node Editorの各サブタイプが別々の履歴を持つわけではなく、Dope Sheet / Timeline / Actionも1つの基本種類を共有し、F-Curve / Driversも別の1つの基本種類を共有します。Movie Clip EditorのClip / Graph / Dope Sheet viewも1つの基本種類を共有し、Image Editor / UV Editorも1つの<code class="docutils literal notranslate"><span class="pre">SpaceImage</span></code>履歴を共有します。Blender 5.2では、PMEが追跡・検証できるL字レイアウトの部分的なCLOSEで、要求したtargetだけを閉じ、Mainと追跡中のすべてのnon-target Side Areaを同じArea、active Space、Space membership、Region、エディターの作業状態のまま維持します。<span class="guilabel">Preserve Side Area State</span> のON/OFFは、このsurvivorの扱いを選びません。ONで対応targetのexact state返却条件が成立した場合だけ、そのtargetの状態をMainへ返します。この操作は直交するAsset BrowserやText Editorを閉じたり作り直したりしません。さらにBlender 5.2では、Text Editor、Dope Sheet、Timeline、Action、F-Curve、Drivers、NLA Editor、Console、Spreadsheet、Video Sequence Editor、Movie Clip Editor、Image Editor / UV Editor、Preferences自身をtargetとして閉じて後で開き直した場合も、同じエディター履歴を復元します。Dope Sheetを閉じた後に一時的なTimelineを開いても、保存済みのDope Sheet履歴は置き換えません。F-Curveを閉じた後に一時的なDriversを開いても、保存済みのF-Curve履歴は置き換えません。Image Editorを閉じた後に一時的なUV Editorを開いても、保存済みのImage履歴は置き換えません。Asset Browser自体のexact state保存はまだ対象外です。</p>
+<p>Blender 4.5/5.0/5.1の部分的なCLOSE、Blender 5.1でexact stateを移動する場合、または現在のFile Browser / Asset Browserから切り替える場合は、既存の物理的なエリア置換を使います。後から別方向のサイドエリアを開いたため対象がメインエリアと完全な辺を共有しなくなった物理置換では、この設定に関係なく、生き残るサイドエリアを一時的に閉じ、対象を閉じるか置き換えた後に元のside、順序、side方向の大きさ、エディター種類、表示状態で作り直します。この設定がONでexact stateの保持条件も成立する場合だけ、同じSpace / Regionの作業状態を追加で復元します。設定がOFFの場合、File Browser / Asset Browser、対応外の種類、同じ基本種類の履歴競合、または安全にexact復元できない場合も、通常のレイアウト再構成は継続し、exact working stateだけを復元しません。File BrowserとAsset Browser自体の作業状態、全RNAプロパティ、操作中のモーダル状態、描画・実行時キャッシュ、Spreadsheetのtable・実際の表示行、SequencerのRegion alignment・combined divider geometry・media/job/cache状態・Channels Regionのraw View2D Y、Movie Clipのview別履歴・cross-view viewport・tracking/solve/prefetch/proxy job・modal・scope/runtime cache、Image / UVの別履歴・cross-mode viewport・inactive Region proxy・<code class="docutils literal notranslate"><span class="pre">ui_mode</span></code>・Render Result / file / viewer image・paint / mask / modal / job・computed scopes / cache、Preferencesで選択中のカテゴリ・派生検索結果・Extensions / Add-ons処理・表示位置・操作中のfile selector、任意の既存workspace、MainとSideが同じ基本種類の組み合わせ、ファイル読み込み、アドオン再読み込み、Blender再起動を越える保持は保証しません。今回のBlender 5.2追加対応はBlender 4.5/5.0/5.1には適用されません。</p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="resources">
+<span id="settings-resources"></span><h2>Resources<a class="headerlink" href="#resources" title="Link to this heading">¶</a></h2>
+<p>PME がメニュー以外のユーザーデータ（カスタムアイコン、Export 済み JSON、Custom スロットから参照する外部スクリプト、自動バックアップ）を保存する場所を指定するタブです。ここで設定したフォルダ配下に PME がサブディレクトリ（<code class="docutils literal notranslate"><span class="pre">icons</span></code> / <code class="docutils literal notranslate"><span class="pre">scripts</span></code> / <code class="docutils literal notranslate"><span class="pre">exports</span></code> / <code class="docutils literal notranslate"><span class="pre">backups</span></code>）を作り、それぞれの種類のリソースを格納します。</p>
+<p>PME 2.0.0 以降は、これらのリソースをアドオン本体のフォルダから分離して、ユーザーリソースとして扱うようになりました。アドオンを再インストール / アップデートしても、ここに置いたデータは消えません。</p>
+<section id="open-resource-folder">
+<span id="setting-resources-open-folder"></span><h3>Open Resource Folder<a class="headerlink" href="#open-resource-folder" title="Link to this heading">¶</a></h3>
+<p>現在のリソースルートディレクトリを OS のファイルブラウザで開きます。フォルダがまだ存在しない場合は、自動的に作成されます。</p>
+</section>
+<section id="root-directory">
+<span id="setting-resources-root-directory"></span><h3>Root Directory<a class="headerlink" href="#root-directory" title="Link to this heading">¶</a></h3>
+<p>ユーザーリソースの保存先ルートディレクトリです。デフォルトは <code class="docutils literal notranslate"><span class="pre">~/Documents/Pie</span> <span class="pre">Menu</span> <span class="pre">Editor/</span></code> 配下。任意のフォルダに変更でき、空欄にすると直近の有効パスに戻ります。</p>
+<p>ステータス行には、現在の <strong>scripts / exports / icons / backup</strong> の数が表示されます。サブフォルダが欠けている場合は、行の右側に <strong>Missing resource folders</strong> が表示され、リロードボタン（<svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-sync" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z"></path></svg>）で初期化できます。</p>
+<p>関連: <a class="reference internal" href="../reference/file_locations.html"><span class="std std-doc">ファイルの保存場所</span></a>、<a class="reference internal" href="#../custom_icons.md"><span class="xref myst">Custom Icons</span></a></p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="hotkeys">
+<span id="settings-hotkeys"></span><h2>Hotkeys<a class="headerlink" href="#hotkeys" title="Link to this heading">¶</a></h2>
+<p>PME 自体のホットキーと、共通的なキー入力タイミングをまとめたタブです。PME を初めて開くときの起動 hotkey、Widget Context Menu の hotkey、HOLD / CHORD / TWEAK の判定時間や距離をここで設定します。Keymap Doctor から、現在有効な Blender キーマップとの競合も確認できます。</p>
+<section id="pme-hotkey">
+<span id="setting-pme-hotkey"></span><h3>PME Hotkey<a class="headerlink" href="#pme-hotkey" title="Link to this heading">¶</a></h3>
+<p>PME のメニュー編集画面（Pie Menu Editor / Regular Menu Editor などのエディター集）を開くためのホットキーです。Blender のキーマップとは独立して動きます。割り当てたキーは、3D View / Properties / Image Editor などほぼ全エリアから利用できます。</p>
+</section>
+<section id="widget-context-menu">
+<span id="setting-widget-context-menu-hotkey"></span><h3>Widget Context Menu<a class="headerlink" href="#widget-context-menu" title="Link to this heading">¶</a></h3>
+<p>Interactive Panels 経由でキャプチャした UI 要素（ボタン / プロパティ / パネル）に対するコンテキストメニューを呼び出すホットキーです。マウス下のウィジェットに対して、PME メニューへの追加・コピーなどの操作を出します。</p>
+<p>詳細は <a class="reference internal" href="interactive_panels.html"><span class="std std-doc">Interactive Panels と Extend Panel</span></a> を参照してください。</p>
+<p><strong>Hotkey Modes</strong></p>
+</section>
+<section id="tweak-mode-threshold">
+<span id="setting-tweak-mode-threshold"></span><h3>Tweak Mode Threshold<a class="headerlink" href="#tweak-mode-threshold" title="Link to this heading">¶</a></h3>
+<p>Blender 全体の <strong>ドラッグ判定距離</strong>（ピクセル）です。マウスをこのピクセル数以上動かすと、PME 側でも「ドラッグ」とみなして TWEAK / CLICK_DRAG モードに切り替わります。Blender 標準の Tweak Mode Threshold と同じ値を共有しています。</p>
+</section>
+<section id="hold-mode-timeout">
+<span id="setting-hold-mode-timeout"></span><h3>Hold Mode Timeout<a class="headerlink" href="#hold-mode-timeout" title="Link to this heading">¶</a></h3>
+<p><strong>HOLD モード</strong>の判定時間（ミリ秒）です。キーを押してからこの時間を超えると HOLD 扱いになります。範囲は 50〜1000、デフォルトは 200。</p>
+</section>
+<section id="chord-mode-timeout">
+<span id="setting-chord-mode-timeout"></span><h3>Chord Mode Timeout<a class="headerlink" href="#chord-mode-timeout" title="Link to this heading">¶</a></h3>
+<p><strong>CHORD モード</strong>の判定時間（ミリ秒）です。最初のキーを押してからこの時間以内に次のキーを入力すると、CHORD として連続入力が成立します。範囲は 50〜1000、デフォルトは 300。</p>
+</section>
+<section id="show-next-key-chord">
+<span id="setting-show-next-key-chord"></span><h3>Show Next Key Chord<a class="headerlink" href="#show-next-key-chord" title="Link to this heading">¶</a></h3>
+<p>CHORD 入力中に、次に押せるキーをヒントとして画面に表示するかを切り替えます。</p>
+</section>
+<section id="experimental-modes">
+<span id="setting-experimental-modes"></span><h3>Experimental Modes<a class="headerlink" href="#experimental-modes" title="Link to this heading">¶</a></h3>
+<p>Hotkey 設定の Open Mode に、<strong>Click</strong> / <strong>Click Drag</strong> などの実験的なモードを表示するかを切り替えます。標準では非表示です。</p>
+<p>関連: <a class="reference internal" href="common/hotkey_settings.html"><span class="std std-doc">Hotkey 設定</span></a></p>
+</section>
+<section id="keymap-doctor">
+<span id="setting-keymap-diagnostics"></span><h3>Keymap Doctor<a class="headerlink" href="#keymap-doctor" title="Link to this heading">¶</a></h3>
+<p><strong>Scan Keymaps</strong> は、各 PME Hotkey を現在有効な Blender の user keymap と比較し、同じキーマップ内の競合を表示します。あわせて、空の PME キーマップ項目、<code class="docutils literal notranslate"><span class="pre">active</span></code> layer に焼き付いた可能性がある PME 項目、判定を完了できなかった Hotkey も確認できます。</p>
+<p>異なる Hotkey Mode、異なる CHORD、mouse modifier など、PME の dispatcher が意図どおり振り分ける組み合わせは競合件数に含めず、情報として区別します。同じ Hotkey Mode や同じ CHORD の重複、余分な ghost 項目は競合として残ります。</p>
+<p>スキャン、概要のコピー、レポートの出力はキーマップを変更しません。<strong>Clean Up Empty Items</strong> が削除するのは、空だと確認できた PME 項目だけです。競合項目は自動的に変更・削除されません。</p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="overlay">
+<span id="settings-overlay"></span><h2>Overlay<a class="headerlink" href="#overlay" title="Link to this heading">¶</a></h2>
+<p>メニュー実行中に画面上に重ねて表示するオーバーレイ（Stack Key の現在スロット名、Modal Operator の操作ガイド、各種ヒントメッセージ）の見た目を調整するタブです。文字サイズ、色、位置、フェード時間をまとめて設定します。</p>
+<section id="font-size">
+<span id="setting-overlay-font-size"></span><h3>Font Size<a class="headerlink" href="#font-size" title="Link to this heading">¶</a></h3>
+<p>オーバーレイ全体のフォントサイズ（ピクセル）です。範囲は 10〜50、デフォルトは 24。Stack Key や Modal Operator のラベルに使用されます。</p>
+</section>
+<section id="text-color">
+<span id="setting-overlay-text-color"></span><h3>Text Color<a class="headerlink" href="#text-color" title="Link to this heading">¶</a></h3>
+<p>オーバーレイの主テキスト色です。RGBA で指定。Stack Key のスロット名や Modal Operator の現在モードに使われます。</p>
+</section>
+<section id="secondary">
+<span id="setting-overlay-secondary-color"></span><h3>Secondary<a class="headerlink" href="#secondary" title="Link to this heading">¶</a></h3>
+<p>サブテキストの色です。RGBA で指定。Stack Key の補助テキスト、Modal の値表示などに使われます。</p>
+</section>
+<section id="background">
+<span id="setting-overlay-background-color"></span><h3>Background<a class="headerlink" href="#background" title="Link to this heading">¶</a></h3>
+<p>オーバーレイの背景色です。RGBA で指定。<a class="reference internal" href="#setting-overlay-use-background">Use Background</a> が有効なときだけ描画に使われます。</p>
+</section>
+<section id="use-background">
+<span id="setting-overlay-use-background"></span><h3>Use Background<a class="headerlink" href="#use-background" title="Link to this heading">¶</a></h3>
+<p>テキストの背景パネルを描画するかを切り替えます。</p>
+</section>
+<section id="use-shadow">
+<span id="setting-overlay-use-shadow"></span><h3>Use Shadow<a class="headerlink" href="#use-shadow" title="Link to this heading">¶</a></h3>
+<p>テキストにドロップシャドウを乗せるかを切り替えます。デフォルトで有効です。</p>
+</section>
+<section id="alignment">
+<span id="setting-overlay-alignment"></span><h3>Alignment<a class="headerlink" href="#alignment" title="Link to this heading">¶</a></h3>
+<p>オーバーレイの画面内アラインメント（上 / 中央 / 下 など）を指定します。</p>
+</section>
+<section id="offset-x">
+<span id="setting-overlay-offset-x"></span><h3>Offset X<a class="headerlink" href="#offset-x" title="Link to this heading">¶</a></h3>
+<p>画面端からの横方向オフセット（ピクセル）です。</p>
+</section>
+<section id="offset-y">
+<span id="setting-overlay-offset-y"></span><h3>Offset Y<a class="headerlink" href="#offset-y" title="Link to this heading">¶</a></h3>
+<p>画面端からの縦方向オフセット（ピクセル）です。</p>
+</section>
+<section id="duration">
+<span id="setting-overlay-duration"></span><h3>Duration<a class="headerlink" href="#duration" title="Link to this heading">¶</a></h3>
+<p>オーバーレイの表示時間（秒）です。範囲は 1〜10、デフォルトは 2。</p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="gpu-layout">
+<span id="settings-gpu-layout"></span><h2>GPU Layout<a class="headerlink" href="#gpu-layout" title="Link to this heading">¶</a></h2>
+<p>PME 2.0.0 で導入した独自描画レイヤ（<strong>Floating Panel</strong> や FPANEL 系の UI）の挙動を調整するタブです。tooltip の最大幅、INVOKE オペレーターの優先戦略、デバッグ用トグルなどがここに集まります。</p>
+<section id="tooltip-max-width">
+<span id="setting-tooltip-max-width"></span><h3>Tooltip Max Width<a class="headerlink" href="#tooltip-max-width" title="Link to this heading">¶</a></h3>
+<p>GPULayout の tooltip テキストの最大幅（unscaled ピクセル）です。範囲は 160〜1200、デフォルトは 420。</p>
+</section>
+<section id="invoke-priority">
+<span id="setting-invoke-priority"></span><h3>Invoke Priority<a class="headerlink" href="#invoke-priority" title="Link to this heading">¶</a></h3>
+<p>オペレーターが INVOKE モードで呼ばれ、明示的な <code class="docutils literal notranslate"><span class="pre">invoke_strategy</span></code> 指定がないときの既定戦略を選びます。</p>
+<ul class="simple">
+<li><p><strong>Suspend</strong> — <code class="docutils literal notranslate"><span class="pre">INVOKE_SUSPEND</span></code>（パネルを生かしたまま）を優先。</p></li>
+<li><p><strong>Afterfunc</strong> — <code class="docutils literal notranslate"><span class="pre">INVOKE_AFTERFUNC</span></code>（閉じる → invoke → 再オープン）を優先。</p></li>
+</ul>
+</section>
+<section id="force-invoke-afterfunc-operators">
+<span id="setting-force-invoke-afterfunc-operators"></span><h3>Force INVOKE_AFTERFUNC Operators<a class="headerlink" href="#force-invoke-afterfunc-operators" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">INVOKE_AFTERFUNC</span></code> を必ず使う対象のオペレーター ID 列です。<code class="docutils literal notranslate"><span class="pre">bpy.ops.foo.bar</span></code> のような ID を、カンマ・スペース・改行のいずれかで区切って並べます。</p>
+</section>
+<section id="force-invoke-suspend-operators">
+<span id="setting-force-invoke-suspend-operators"></span><h3>Force INVOKE_SUSPEND Operators<a class="headerlink" href="#force-invoke-suspend-operators" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">INVOKE_SUSPEND</span></code> を必ず使う対象のオペレーター ID 列です。指定形式は上と同じ。</p>
+</section>
+<section id="debug-toggle-keys">
+<span id="setting-debug-toggle-keys"></span><h3>Debug Toggle Keys<a class="headerlink" href="#debug-toggle-keys" title="Link to this heading">¶</a></h3>
+<p>Floating Panel 上で、開発用のキー入力（<code class="docutils literal notranslate"><span class="pre">D</span></code> = HitTest debug、<code class="docutils literal notranslate"><span class="pre">V</span></code> = Visible/Culling debug、<code class="docutils literal notranslate"><span class="pre">M</span></code> = Metrics debug）を受け付けるかを切り替えます。</p>
+</section>
+<section id="sync-fpanel-to-dialog">
+<span id="setting-sync-fpanel-to-dialog"></span><h3>Sync FPANEL to DIALOG<a class="headerlink" href="#sync-fpanel-to-dialog" title="Link to this heading">¶</a></h3>
+<p>Floating Panel と並べて、レイアウト比較用の DIALOG コピーを開くかを切り替えます。GPULayout の見た目検証用です。</p>
+</section>
+<section id="show-unsupported-fpanel-ui">
+<span id="setting-show-unsupported-fpanel-ui"></span><h3>Show Unsupported FPANEL UI<a class="headerlink" href="#show-unsupported-fpanel-ui" title="Link to this heading">¶</a></h3>
+<p>Floating Panel 内で、まだ Blender の UILayout 経由で描画している（GPULayout 未対応の）開発用 UI を表示するかを切り替えます。デバッグ目的の項目です。</p>
+</section>
+<section id="layout-panel-header-spacing">
+<span id="setting-layout-panel-header-spacing"></span><h3>Layout Panel Header Spacing<a class="headerlink" href="#layout-panel-header-spacing" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">UILayout.panel()</span></code> のヘッダーレイアウトを使ったとき、ヘッダーとボディの間に上スペースを足すかを切り替えます。<code class="docutils literal notranslate"><span class="pre">Show</span> <span class="pre">Unsupported</span> <span class="pre">FPANEL</span> <span class="pre">UI</span></code> を有効にすると現れます。</p>
+</section>
+<section id="force-separator-line">
+<span id="setting-force-separator-line"></span><h3>Force Separator Line<a class="headerlink" href="#force-separator-line" title="Link to this heading">¶</a></h3>
+<p>AUTO セパレータを「線として描画」するか、「スペース確保のみ」にするかを切り替えます。</p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="pie-menu">
+<span id="settings-pie"></span><h2>Pie Menu<a class="headerlink" href="#pie-menu" title="Link to this heading">¶</a></h2>
+<p>Pie Menu の見た目と既定動作をまとめたタブです。Pie タイトルの有無、マウス位置の復元、Pie 内の追加スロット間隔がここで決まります。半径やしきい値などは Blender 標準のキー操作設定と共通で、同じ値をこのタブから一緒に変更できます。</p>
+<section id="show-title">
+<span id="setting-show-title"></span><h3>Show Title<a class="headerlink" href="#show-title" title="Link to this heading">¶</a></h3>
+<p>Pie Menu の上部にメニュー名を見出しとして描画するかを切り替えます。デフォルトで有効。</p>
+</section>
+<section id="restore-mouse-position">
+<span id="setting-restore-mouse-position"></span><h3>Restore Mouse Position<a class="headerlink" href="#restore-mouse-position" title="Link to this heading">¶</a></h3>
+<p>Pie Menu の hotkey を離した後に、マウス位置を起動時の位置に戻すかを切り替えます。Off にすると、選択したスロットの方向にマウスが残ります。</p>
+</section>
+<section id="extra-pie-slot-gap-size">
+<span id="setting-extra-pie-slot-gap-size"></span><h3>Extra Pie Slot Gap Size<a class="headerlink" href="#extra-pie-slot-gap-size" title="Link to this heading">¶</a></h3>
+<p>Pie の 8 方向以外（<strong>上</strong> / <strong>下</strong> の追加スロット 2 個）の間隔を指定します。</p>
+</section>
+<section id="animation-timeout-blender">
+<span id="setting-animation-timeout"></span><h3>Animation Timeout (Blender)<a class="headerlink" href="#animation-timeout-blender" title="Link to this heading">¶</a></h3>
+<p>Pie Menu が開くときのアニメーション時間です。Blender 標準のキー操作設定と共有しています。</p>
+</section>
+<section id="initial-timeout-blender">
+<span id="setting-initial-timeout"></span><h3>Initial Timeout (Blender)<a class="headerlink" href="#initial-timeout-blender" title="Link to this heading">¶</a></h3>
+<p>Pie Menu を開いてから入力受付までの遅延時間です。Blender 標準のキー操作設定と共有しています。</p>
+</section>
+<section id="menu-radius-blender">
+<span id="setting-menu-radius"></span><h3>Menu Radius (Blender)<a class="headerlink" href="#menu-radius-blender" title="Link to this heading">¶</a></h3>
+<p>Pie Menu の半径です。Blender 標準のキー操作設定と共有しています。Pie Menu Editor 側で個別に <a class="reference internal" href="pie_menu_editor.html"><span class="std std-doc">Radius</span></a> を指定すると、そのメニューに限りこの値が上書きされます。</p>
+</section>
+<section id="menu-threshold-blender">
+<span id="setting-menu-threshold"></span><h3>Menu Threshold (Blender)<a class="headerlink" href="#menu-threshold-blender" title="Link to this heading">¶</a></h3>
+<p>スロット選択のしきい値（フリック判定距離）です。Blender 標準のキー操作設定と共有しています。</p>
+</section>
+<section id="menu-confirm-blender">
+<span id="setting-menu-confirm"></span><h3>Menu Confirm (Blender)<a class="headerlink" href="#menu-confirm-blender" title="Link to this heading">¶</a></h3>
+<p>フリック確定のしきい値です。Blender 標準のキー操作設定と共有しています。</p>
+<p>関連: <a class="reference internal" href="pie_menu_editor.html"><span class="std std-doc">Pie Menu Editor</span></a></p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="regular-menu">
+<span id="settings-menu"></span><h2>Regular Menu<a class="headerlink" href="#regular-menu" title="Link to this heading">¶</a></h2>
+<p>Regular Menu（ドロップダウンメニュー）の開き方の既定値をまとめたタブです。マウスホバーでサブメニューを開くか、その遅延時間をここで設定します。</p>
+<section id="open-on-mouse-over-blender">
+<span id="setting-open-on-mouse-over"></span><h3>Open on Mouse Over (Blender)<a class="headerlink" href="#open-on-mouse-over-blender" title="Link to this heading">¶</a></h3>
+<p>メニュー項目にマウスを乗せただけでサブメニューを開くかを切り替えます。Blender 標準のキー操作設定と共有しています。</p>
+</section>
+<section id="top-level">
+<span id="setting-top-level"></span><h3>Top Level<a class="headerlink" href="#top-level" title="Link to this heading">¶</a></h3>
+<p>トップレベルメニューが開くまでの遅延時間です。<a class="reference internal" href="#setting-open-on-mouse-over">Open on Mouse Over</a> が有効なときだけ意味を持ちます。</p>
+</section>
+<section id="sub-level">
+<span id="setting-sub-level"></span><h3>Sub Level<a class="headerlink" href="#sub-level" title="Link to this heading">¶</a></h3>
+<p>サブメニューが開くまでの遅延時間です。<a class="reference internal" href="#setting-open-on-mouse-over">Open on Mouse Over</a> が有効なときだけ意味を持ちます。</p>
+<p>関連: <a class="reference internal" href="regular_menu_editor.html"><span class="std std-doc">Regular Menu Editor</span></a></p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="popup-dialog">
+<span id="settings-popup"></span><h2>Popup Dialog<a class="headerlink" href="#popup-dialog" title="Link to this heading">¶</a></h2>
+<p>Pop-up Dialog の既定値をまとめたタブです。Spacer の扱い、ジャンプボタンの表示、新規ダイアログの初期モード、Toolbar モードの最大サイズがここで決まります。</p>
+<section id="use-spacer-separator-by-default">
+<span id="setting-use-spacer-separator"></span><h3>Use ‘Spacer’ Separator by Default<a class="headerlink" href="#use-spacer-separator-by-default" title="Link to this heading">¶</a></h3>
+<p>空スロット（中身が空のスロット）を、デフォルトで <strong>Spacer</strong>（柔軟な余白）として扱うかを切り替えます。Off の場合は固定幅のセパレータになります。</p>
+</section>
+<section id="setting-popup-editor-link-buttons">
+<span id="id2"></span><h3>Editor Link Buttons<a class="headerlink" href="#setting-popup-editor-link-buttons" title="Link to this heading">¶</a></h3>
+<p><a class="reference internal" href="#setting-editor-link-buttons">General タブの Editor Link Buttons</a> と同じ設定です。</p>
+</section>
+<section id="default-mode">
+<span id="setting-default-popup-mode"></span><h3>Default Mode<a class="headerlink" href="#default-mode" title="Link to this heading">¶</a></h3>
+<p>新規 Pop-up Dialog の既定モードを <strong>Pie Mode</strong> / <strong>Popup Mode</strong> から選びます。</p>
+</section>
+<section id="max-width-toolbars">
+<span id="setting-toolbars-max-width"></span><h3>Max Width (Toolbars)<a class="headerlink" href="#max-width-toolbars" title="Link to this heading">¶</a></h3>
+<p>縦型 Toolbar モードの最大幅（ピクセル）です。デフォルトは 60。</p>
+</section>
+<section id="max-height-toolbars">
+<span id="setting-toolbars-max-height"></span><h3>Max Height (Toolbars)<a class="headerlink" href="#max-height-toolbars" title="Link to this heading">¶</a></h3>
+<p>横型 Toolbar モードの最大高さ（ピクセル）です。デフォルトは 60。</p>
+<p>関連: <a class="reference internal" href="popup_dialog_editor.html"><span class="std std-doc">Popup Dialog Editor</span></a></p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="modal-operator">
+<span id="settings-modal"></span><h2>Modal Operator<a class="headerlink" href="#modal-operator" title="Link to this heading">¶</a></h2>
+<p>Modal Operator のマウス動作と、各プロパティ型ごとの「動かしたときの単位」をまとめたタブです。マウスをどの方向にどれだけ動かすと値がどれだけ変わるか、ここで全エディター共通の既定が決まります。個別の Modal Operator 側で上書きしたい場合は、その Modal の詳細設定で同じ値を設定できます。</p>
+<section id="mouse-movement-direction">
+<span id="setting-mouse-movement-direction"></span><h3>Mouse Movement Direction<a class="headerlink" href="#mouse-movement-direction" title="Link to this heading">¶</a></h3>
+<p>マウスをどの方向に動かしたときに値を変えるかを選びます（縦 / 横 / 距離 など）。Modal Operator 全体に影響します。</p>
+</section>
+<section id="mouse-threshold-int">
+<span id="setting-mouse-threshold-int"></span><h3>Mouse Threshold (Int)<a class="headerlink" href="#mouse-threshold-int" title="Link to this heading">¶</a></h3>
+<p>INT プロパティで、値を <strong>1 変えるのに必要なマウス移動量</strong>（ピクセル）です。小さくすると敏感に、大きくすると粗くなります。</p>
+</section>
+<section id="mouse-threshold-float">
+<span id="setting-mouse-threshold-float"></span><h3>Mouse Threshold (Float)<a class="headerlink" href="#mouse-threshold-float" title="Link to this heading">¶</a></h3>
+<p>FLOAT プロパティの同上です。プロパティの step 値に対する 1 単位分のマウス移動量を指定します。</p>
+</section>
+<section id="mouse-threshold-bool">
+<span id="setting-mouse-threshold-bool"></span><h3>Mouse Threshold (Bool)<a class="headerlink" href="#mouse-threshold-bool" title="Link to this heading">¶</a></h3>
+<p>BOOL プロパティのトグルしきい値です。左にあるトグルで「BOOL に対してもしきい値を使うか」を切り替え、その状態でフィールドが有効になります。</p>
+</section>
+<section id="mouse-threshold-enum">
+<span id="setting-mouse-threshold-enum"></span><h3>Mouse Threshold (Enum)<a class="headerlink" href="#mouse-threshold-enum" title="Link to this heading">¶</a></h3>
+<p>ENUM プロパティの項目切替しきい値です。左にあるトグルで「ENUM に対してもしきい値を使うか」を切り替え、その状態でフィールドが有効になります。</p>
+<p>関連: <a class="reference internal" href="modal_operator_editor.html"><span class="std std-doc">Modal Operator Editor</span></a></p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="developer">
+<span id="settings-developer"></span><h2>Developer<a class="headerlink" href="#developer" title="Link to this heading">¶</a></h2>
+<p>開発・診断向けの設定です。普段の編集では使いません。Boot Config（起動オプション）、Logger（ログ）、Backup / Export 用の開発フラグがここに集まります。</p>
+<p><strong>Boot Config</strong></p>
+<section id="open-boot-config-folder">
+<span id="setting-boot-config-open-folder"></span><h3>Open Boot Config Folder<a class="headerlink" href="#open-boot-config-folder" title="Link to this heading">¶</a></h3>
+<p>Boot Config が保存されているフォルダを OS のファイルブラウザで開きます。</p>
+</section>
+<section id="enable-import-pme-alias">
+<span id="setting-enable-import-pme-alias"></span><h3>Enable import pme Alias<a class="headerlink" href="#enable-import-pme-alias" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">sys.modules['pme']</span></code> を登録するかを切り替えます。外部スクリプトやアドオンから <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pme</span></code> で PME の公開 API にアクセスしたいときに有効化します。次回起動から反映されます。</p>
+</section>
+<section id="enable-init-log">
+<span id="setting-enable-init-log"></span><h3>Enable Init Log<a class="headerlink" href="#enable-init-log" title="Link to this heading">¶</a></h3>
+<p>アドオン起動時の init 診断ログを記録するかを切り替えます。次回起動から反映されます。</p>
+</section>
+<section id="use-bundled-loader-manifest">
+<span id="setting-use-bundled-loader-manifest"></span><h3>Use Bundled Loader Manifest<a class="headerlink" href="#use-bundled-loader-manifest" title="Link to this heading">¶</a></h3>
+<p>同梱の loader manifest を使った高速起動を有効にするかを切り替えます。manifest が見つからない / 壊れている場合は、動的検出に自動でフォールバックします。次回起動から反映されます。デフォルトで有効。</p>
+</section>
+<section id="auto-save-candidate-on-startup">
+<span id="setting-auto-save-candidate-on-startup"></span><h3>Auto-Save Candidate on Startup<a class="headerlink" href="#auto-save-candidate-on-startup" title="Link to this heading">¶</a></h3>
+<p>起動成功後に、動的検出で得たモジュール順を candidate manifest として <code class="docutils literal notranslate"><span class="pre">loader_manifest.json</span></code> の隣に自動保存するかを切り替えます。loader manifest の整備フローで使います。</p>
+<p><strong>Logger</strong></p>
+</section>
+<section id="open-log-folder">
+<span id="setting-logger-open-folder"></span><h3>Open Log Folder<a class="headerlink" href="#open-log-folder" title="Link to this heading">¶</a></h3>
+<p>ログの出力フォルダを OS のファイルブラウザで開きます。</p>
+</section>
+<section id="use-colors">
+<span id="setting-logger-use-colors"></span><h3>Use Colors<a class="headerlink" href="#use-colors" title="Link to this heading">¶</a></h3>
+<p>コンソール出力に色を付けるかを切り替えます。デフォルトで有効。</p>
+</section>
+<section id="file-output-jsonl">
+<span id="setting-logger-file-output"></span><h3>File Output (JSONL)<a class="headerlink" href="#file-output-jsonl" title="Link to this heading">¶</a></h3>
+<p>セッションごとに JSONL ログファイルを書き出すかを切り替えます。</p>
+</section>
+<section id="keep-last">
+<span id="setting-logger-keep-last"></span><h3>Keep Last<a class="headerlink" href="#keep-last" title="Link to this heading">¶</a></h3>
+<p>メモリ上のリングバッファに残す最近ログの件数です。範囲は 0〜5000、デフォルトは 200。</p>
+</section>
+<section id="logger-categories">
+<span id="setting-logger-categories"></span><h3>Logger Categories<a class="headerlink" href="#logger-categories" title="Link to this heading">¶</a></h3>
+<p>カテゴリ別にログの有効/無効と Log Level を設定します。出荷時の既定では、内部・開発系カテゴリは Off、ユーザー向けの <code class="docutils literal notranslate"><span class="pre">user_exec</span></code> だけが On で警告／エラーを拾います。</p>
+</section>
+<section id="apply-level-apply-to-all">
+<span id="setting-logger-apply-level"></span><h3>Apply Level / Apply to All<a class="headerlink" href="#apply-level-apply-to-all" title="Link to this heading">¶</a></h3>
+<p>選んだ Log Level を<strong>すべてのカテゴリに一括適用</strong>します。プルダウンでレベルを選び、<code class="docutils literal notranslate"><span class="pre">Apply</span> <span class="pre">to</span> <span class="pre">All</span></code> ボタンで反映します。</p>
+<p><strong>Backup</strong></p>
+</section>
+<section id="overwrite-backup-file">
+<span id="setting-overwrite-backup-file"></span><h3>Overwrite Backup File<a class="headerlink" href="#overwrite-backup-file" title="Link to this heading">¶</a></h3>
+<p><a class="reference internal" href="#setting-auto-backup">Auto Backup</a> で作るバックアップを、タイムスタンプ別ではなく<strong>単一ファイルに上書き</strong>する形で保存するかを切り替えます。</p>
+<p><strong>Export</strong></p>
+</section>
+<section id="sort-exported-menus-by-name">
+<span id="setting-sort-exported-menus"></span><h3>Sort Exported Menus by Name<a class="headerlink" href="#sort-exported-menus-by-name" title="Link to this heading">¶</a></h3>
+<p>メニューを Export するときに、メニュー名でソートして書き出すかを切り替えます。Off の場合は PME 内部の順序を保ったまま書き出します。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id3">
+<h2>参考<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="editor_common_elements.html"><span class="std std-doc">エディターの共通要素</span></a></p></li>
+<li><p><a class="reference internal" href="common/hotkey_settings.html"><span class="std std-doc">Hotkey 設定</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/boot_options.html"><span class="std std-doc">起動オプション</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/developer_options.html"><span class="std std-doc">Developer Options</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/file_locations.html"><span class="std std-doc">ファイルの保存場所</span></a></p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../reference/file_locations.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">保存先とフォルダ構成</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="custom_icons.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">カスタムアイコン</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Settings</a><ul>
+<li><a class="reference internal" href="#general">General</a><ul>
+<li><a class="reference internal" href="#n-panel-preferences">N-Panel Preferences</a></li>
+<li><a class="reference internal" href="#expand-slot-tools">Expand Slot Tools</a></li>
+<li><a class="reference internal" href="#operator-editor">Operator Editor</a></li>
+<li><a class="reference internal" href="#recent-menu-targets">Recent Menu Targets</a></li>
+<li><a class="reference internal" href="#editor-link-buttons">Editor Link Buttons</a></li>
+<li><a class="reference internal" href="#persist-tree-state">Persist Tree State</a></li>
+<li><a class="reference internal" href="#show-tree-group-counts">Show Tree Group Counts</a></li>
+<li><a class="reference internal" href="#list-width">List Width</a></li>
+<li><a class="reference internal" href="#list-rows">List Rows</a></li>
+<li><a class="reference internal" href="#search-keywords">Search Keywords</a></li>
+<li><a class="reference internal" href="#auto-backup">Auto Backup</a></li>
+<li><a class="reference internal" href="#auto-tag-new-menus">Auto-Tag New Menus</a></li>
+<li><a class="reference internal" href="#cache-scripts">Cache Scripts</a></li>
+<li><a class="reference internal" href="#show-error-trace">Show Error Trace</a></li>
+<li><a class="reference internal" href="#sidebar-tab-memory-retired">Sidebar Tab Memory (Retired)</a></li>
+<li><a class="reference internal" href="#show-command-tab-undo">Show Command Tab Undo</a></li>
+<li><a class="reference internal" href="#preserve-side-area-state">Preserve Side Area State</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#resources">Resources</a><ul>
+<li><a class="reference internal" href="#open-resource-folder">Open Resource Folder</a></li>
+<li><a class="reference internal" href="#root-directory">Root Directory</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#hotkeys">Hotkeys</a><ul>
+<li><a class="reference internal" href="#pme-hotkey">PME Hotkey</a></li>
+<li><a class="reference internal" href="#widget-context-menu">Widget Context Menu</a></li>
+<li><a class="reference internal" href="#tweak-mode-threshold">Tweak Mode Threshold</a></li>
+<li><a class="reference internal" href="#hold-mode-timeout">Hold Mode Timeout</a></li>
+<li><a class="reference internal" href="#chord-mode-timeout">Chord Mode Timeout</a></li>
+<li><a class="reference internal" href="#show-next-key-chord">Show Next Key Chord</a></li>
+<li><a class="reference internal" href="#experimental-modes">Experimental Modes</a></li>
+<li><a class="reference internal" href="#keymap-doctor">Keymap Doctor</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#overlay">Overlay</a><ul>
+<li><a class="reference internal" href="#font-size">Font Size</a></li>
+<li><a class="reference internal" href="#text-color">Text Color</a></li>
+<li><a class="reference internal" href="#secondary">Secondary</a></li>
+<li><a class="reference internal" href="#background">Background</a></li>
+<li><a class="reference internal" href="#use-background">Use Background</a></li>
+<li><a class="reference internal" href="#use-shadow">Use Shadow</a></li>
+<li><a class="reference internal" href="#alignment">Alignment</a></li>
+<li><a class="reference internal" href="#offset-x">Offset X</a></li>
+<li><a class="reference internal" href="#offset-y">Offset Y</a></li>
+<li><a class="reference internal" href="#duration">Duration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gpu-layout">GPU Layout</a><ul>
+<li><a class="reference internal" href="#tooltip-max-width">Tooltip Max Width</a></li>
+<li><a class="reference internal" href="#invoke-priority">Invoke Priority</a></li>
+<li><a class="reference internal" href="#force-invoke-afterfunc-operators">Force INVOKE_AFTERFUNC Operators</a></li>
+<li><a class="reference internal" href="#force-invoke-suspend-operators">Force INVOKE_SUSPEND Operators</a></li>
+<li><a class="reference internal" href="#debug-toggle-keys">Debug Toggle Keys</a></li>
+<li><a class="reference internal" href="#sync-fpanel-to-dialog">Sync FPANEL to DIALOG</a></li>
+<li><a class="reference internal" href="#show-unsupported-fpanel-ui">Show Unsupported FPANEL UI</a></li>
+<li><a class="reference internal" href="#layout-panel-header-spacing">Layout Panel Header Spacing</a></li>
+<li><a class="reference internal" href="#force-separator-line">Force Separator Line</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pie-menu">Pie Menu</a><ul>
+<li><a class="reference internal" href="#show-title">Show Title</a></li>
+<li><a class="reference internal" href="#restore-mouse-position">Restore Mouse Position</a></li>
+<li><a class="reference internal" href="#extra-pie-slot-gap-size">Extra Pie Slot Gap Size</a></li>
+<li><a class="reference internal" href="#animation-timeout-blender">Animation Timeout (Blender)</a></li>
+<li><a class="reference internal" href="#initial-timeout-blender">Initial Timeout (Blender)</a></li>
+<li><a class="reference internal" href="#menu-radius-blender">Menu Radius (Blender)</a></li>
+<li><a class="reference internal" href="#menu-threshold-blender">Menu Threshold (Blender)</a></li>
+<li><a class="reference internal" href="#menu-confirm-blender">Menu Confirm (Blender)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#regular-menu">Regular Menu</a><ul>
+<li><a class="reference internal" href="#open-on-mouse-over-blender">Open on Mouse Over (Blender)</a></li>
+<li><a class="reference internal" href="#top-level">Top Level</a></li>
+<li><a class="reference internal" href="#sub-level">Sub Level</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#popup-dialog">Popup Dialog</a><ul>
+<li><a class="reference internal" href="#use-spacer-separator-by-default">Use ‘Spacer’ Separator by Default</a></li>
+<li><a class="reference internal" href="#setting-popup-editor-link-buttons">Editor Link Buttons</a></li>
+<li><a class="reference internal" href="#default-mode">Default Mode</a></li>
+<li><a class="reference internal" href="#max-width-toolbars">Max Width (Toolbars)</a></li>
+<li><a class="reference internal" href="#max-height-toolbars">Max Height (Toolbars)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#modal-operator">Modal Operator</a><ul>
+<li><a class="reference internal" href="#mouse-movement-direction">Mouse Movement Direction</a></li>
+<li><a class="reference internal" href="#mouse-threshold-int">Mouse Threshold (Int)</a></li>
+<li><a class="reference internal" href="#mouse-threshold-float">Mouse Threshold (Float)</a></li>
+<li><a class="reference internal" href="#mouse-threshold-bool">Mouse Threshold (Bool)</a></li>
+<li><a class="reference internal" href="#mouse-threshold-enum">Mouse Threshold (Enum)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#developer">Developer</a><ul>
+<li><a class="reference internal" href="#open-boot-config-folder">Open Boot Config Folder</a></li>
+<li><a class="reference internal" href="#enable-import-pme-alias">Enable import pme Alias</a></li>
+<li><a class="reference internal" href="#enable-init-log">Enable Init Log</a></li>
+<li><a class="reference internal" href="#use-bundled-loader-manifest">Use Bundled Loader Manifest</a></li>
+<li><a class="reference internal" href="#auto-save-candidate-on-startup">Auto-Save Candidate on Startup</a></li>
+<li><a class="reference internal" href="#open-log-folder">Open Log Folder</a></li>
+<li><a class="reference internal" href="#use-colors">Use Colors</a></li>
+<li><a class="reference internal" href="#file-output-jsonl">File Output (JSONL)</a></li>
+<li><a class="reference internal" href="#keep-last">Keep Last</a></li>
+<li><a class="reference internal" href="#logger-categories">Logger Categories</a></li>
+<li><a class="reference internal" href="#apply-level-apply-to-all">Apply Level / Apply to All</a></li>
+<li><a class="reference internal" href="#overwrite-backup-file">Overwrite Backup File</a></li>
+<li><a class="reference internal" href="#sort-exported-menus-by-name">Sort Exported Menus by Name</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id3">参考</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=b695b4be"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>
