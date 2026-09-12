@@ -1,0 +1,77 @@
+(custom-icons)=
+
+# Custom Icons
+
+Use your own PNG icons in PME.
+
+## Basics
+
+- **Format**: PNG (only files with the `.png` extension are loaded).
+- **Location**: the **`icons/` folder in your user resource directory**. See [File Locations](../reference/file_locations.md) for paths on each OS.
+  On Windows: `%USERPROFILE%\Documents\Pie Menu Editor\icons\my_icon.png`
+- **Names**: the filename without its extension becomes the icon name (`my_icon.png` → `my_icon`). Match it exactly, including case and spaces.
+
+```{tip}
+Use **Open Folder** under {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Resources` to open `icons/` directly.
+The folder is preserved during add-on updates, so your icons do not need to be moved for an update.
+```
+
+## Loading and refreshing icons
+
+Icons load when Blender starts and the add-on is enabled.
+After adding or changing a PNG, press the **refresh button** ({octicon}`sync`) in the icon selector's **Custom** tab.
+
+```{versionadded} 2.1
+Custom icons can be reloaded without restarting Blender.
+```
+
+## Using a custom icon
+
+View and select loaded icons in the icon selector's **Custom** tab.
+
+An unknown name may display a fallback Blender icon.
+
+## Using icons in scripts (optional)
+
+- **PME wrapper**: pass a string containing `@` directly.
+  ```python
+  # With LayoutHelper
+  lh.operator("wm.operator", text="Run", icon='@my_icon')
+  ```
+- **Blender UI API**: combine `icon='NONE'` with `icon_value`.
+  ```python
+  # Directly from Python
+  from pie_menu_editor.previews_helper import custom_icon
+  layout.operator("wm.operator", text="Run", icon='NONE', icon_value=custom_icon("my_icon"))
+  ```
+
+## Naming and image quality
+
+- Prefer ASCII letters, numbers, and `_` to reduce typing errors.
+- Use a PNG with a transparent background.
+- Any resolution is accepted; around 32–64 pixels square is usually readable.
+
+## Troubleshooting
+
+- **Missing or incorrect icon**
+  - Check the `.png` extension.
+  - Check that the filename without its extension matches the requested name (`@name`) exactly.
+  - Refresh the **Custom** tab after adding or changing a file.
+- **Icon missing from the list**
+  - Place it directly inside `icons`; subfolders are not scanned.
+  - Try saving the image again to rule out a damaged file.
+  - Reload with the refresh button.
+
+## Included samples
+
+Samples such as `p1.png`, `p2.png`, and `pA.png` are initially copied into the user resource `icons/` folder. Use them as `@p1`, `@pA`, and so on.
+
+## Quick steps
+
+1. Place PNG files in the user resource `icons/` folder (open it through {guilabel}`Settings` > {guilabel}`Resources` > **Open Folder**).
+2. Press refresh in the icon selector's **Custom** tab.
+3. Use `@filename` in PME.
+
+## Related reference
+
+- [File Locations](../reference/file_locations.md) — user resource paths on each OS and how to change them.

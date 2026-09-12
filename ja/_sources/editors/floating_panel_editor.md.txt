@@ -1,0 +1,81 @@
+(floating-panel-editor)=
+
+# Floating Panel Editor
+
+**Floating Panel** は、作業中に開いて使うパネルを、行と列に操作や設定を並べて作るエディターです。複数の設定を一つの作業用パネルに集めたり、Vector Menu に組み込んだりできます。
+
+行や列を追加し、その中にスロットを配置する編集方法は、[Popup Dialog Editor](popup_dialog_editor.md) と同じ考え方です。Popup Dialog のレイアウト編集を出発点に、作業用のパネルを組み立てられます。
+
+:::{admonition} 開発中の機能
+:class: note
+
+Floating Panel は、Blender の UI レイアウトを GPU で描画するための PME の仕組み **GPULayout** を使っています。[Vector Menu](vector_menu_editor.md) も同じ仕組みで描画されます。
+
+Floating Panel と GPULayout は開発中です。編集方法は Popup Dialog と似ていますが、対応するウィジェット・レイアウト API・表示や操作は完全に同じではありません。現在の対応範囲は下の構成ガイドを参照してください。
+:::
+
+:::{dropdown} 構成ガイド — 作業用パネルを組み立てる（AI 向け）
+
+**呼び名：Floating Panel／種別 ID：`FPANEL`。** 行・列のレイアウトに Command / Property / Menu / Hotkey / Custom を配置します。編集レイアウトは Popup Dialog と共通する部分がありますが、実行時の表示と対応 UI は同一ではありません。
+
+- **Property**：RNA パスを指定して設定を配置。Custom では `L` の対応レイアウト API を使います。Blender のあらゆる UI をそのまま描けるとは仮定しません。
+- **Menu**：別のカスタマイズを参照。Vector Menu から配置する場合は Expand Panel の構成を使います。
+- **用途**：色や数値を調整する作業パネル／頻繁に使う操作を並べる／Vector Menu の方向スロットや上下の追加スロットに設定群を配置。
+- **設計時の判断**：パネルを単独で開くのか、別メニューに展開するのかを先に決めます。展開先ごとの幅・位置は配置先のスロットで指定します。
+
+レイアウトは {ref}`行とスロット <floating-slots>`、表示の整列は {ref}`Advanced settings <floating-advanced>`、組み込みは {ref}`活用例 <floating-usage>`へ。
+:::
+
+## 画面と編集の流れ
+
+名前と呼び出すキーを決め、行にスロットを追加してパネルを組み立てます。実際に使うエディターで開き、操作対象が合っているか確認します。
+
+(floating-basic)=
+
+## 名前と基本操作
+
+有効状態、プレビュー、名前、タグなどの共通操作です。各ボタンは {ref}`選択メニューの設定 <overview-selected>`を参照してください。
+
+(floating-advanced)=
+
+## Advanced settings
+
+Description と Poll に加え、プロパティのラベルと入力欄の表示方法を設定します。
+
+```{versionadded} 2.1
+Property Split によるプロパティ名と入力欄の整列に対応。
+```
+
+**Property Split** はラベルと値を分けて整列します。**Property Decorators** はアニメーションに関する装飾表示を設定します。この入力欄は Property Split が ON のときに有効になります。項目ごとの表示設定も確認してください。共通の説明文・利用条件は {ref}`詳細設定 <editor-extra-settings>`を参照してください。
+
+(floating-hotkey)=
+
+## Keymap / Hotkey
+
+使う場所を Keymap、起動キーと修飾キーを Hotkey で設定します。入力操作は {ref}`共通の Hotkey 設定 <hotkey-editor>`を参照してください。
+
+(floating-slots)=
+
+## 行とスロット
+
+行を追加し、その中に操作やプロパティを配置します。列やサブ行を組み合わせて、例えば上段を状態表示、下段を操作ボタンにできます。
+
+- Command は選択時に実行する Python コード。
+- Property は既存の RNA プロパティを表示・変更するウィジェット。
+- Menu は別のカスタマイズへの参照。
+- Hotkey は実行時のキー割り当てからオペレーターを探して呼び出す項目。
+- Custom は Python で描画する UI。描画時にデータを変更する処理を置かないでください。
+
+行・列の編集操作は {ref}`Popup Dialog のレイアウト <popup-layout>` と共通する部分があります。コードの入力制限は [コードの書き方と入力制限](../reference/command_text.md) を参照してください。
+
+(floating-usage)=
+
+## Vector Menu に設定パネルを組み込む
+
+Vector Menu の Menu タブで Floating Panel を選ぶと、パネルを展開する構成になります。配置先で幅と位置を調整できます。
+
+```{versionadded} 2.1
+Vector Menu に組み込む Floating Panel の幅と位置を、配置先のスロットで調整できます。
+```
+
+色や数値を操作するパネルは、単独で開いた場合と Vector Menu 内へ展開した場合の両方で操作を確認します。実際の入力方法、キャンセル、Undo が目的の作業に合うかを確認してください。

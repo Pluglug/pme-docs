@@ -1,0 +1,88 @@
+(reference-guide)=
+
+# リファレンス案内
+
+PME の設定やコードを組み立てるための資料を、調べる対象ごとにまとめています。
+
+既存の資料には旧バージョンの記述が含まれます。この案内への掲載は、
+リンク先の全手順を PME 2.1 で確認済みという意味ではありません。
+各ページの対象バージョンと制約を確認してください。適用範囲が記載されていない
+部分は、使用環境での追加確認が必要です。
+
+## メニューと操作の設定
+
+:::{figure} /../../shared/_static/images/reference/ai_assistance/editor-menu-types-blender-5-1.png
+:alt: PME エディターで Add an Item を開いた状態。Pie Menu、Vector Menu、Property Stack、Context Router などのメニュー種別が並ぶ。
+:width: 680px
+:align: center
+
+メニュー種別の選択画面。Blender 5.1.0 / PME 2.1.0-beta.6 の開発環境で撮影。
+:::
+
+まず [エディターの共通要素](../editors/editor_common_elements.md) で、
+設定画面とスロットの説明を参照できます。個別のメニューについては、以下に既存資料があります。
+
+| 調べる対象 | 資料 |
+|---|---|
+| Vector Menu | [Vector Menu Editor](../editors/vector_menu_editor.md) |
+| Floating Panel | [Floating Panel Editor](../editors/floating_panel_editor.md) |
+| Property Stack | [Property Stack Editor](../editors/property_stack_editor.md) |
+| Context Router | [Context Router Editor](../editors/context_router_editor.md) |
+| Pie Menu | [Pie Menu Editor](../editors/pie_menu_editor.md) |
+| Regular Menu | [Regular Menu Editor](../editors/regular_menu_editor.md) |
+| Pop-up Dialog | [Pop-up Dialog Editor](../editors/popup_dialog_editor.md) |
+| Stack Key | [Stack Key Editor](../editors/stack_key_editor.md) |
+| Sticky Key | [Sticky Key Editor](../editors/sticky_key_editor.md) |
+| Macro Operator | [Macro Operator Editor](../editors/macro_operator_editor.md) |
+| Modal Operator | [Modal Operator Editor](../editors/modal_operator_editor.md) |
+| Property | [Property Editor](../editors/property_editor.md) |
+| サイドパネルの構成 | [Side Panel Editor](../editors/side_panel_editor.md) |
+| 既存パネルの非表示 | [Hiding Unused Panels](../editors/hiding_unused_panels.md) |
+
+これは既存資料の一覧です。PME の全メニュー種別を網羅した一覧ではありません。
+
+## 呼び出し条件と Blender UI
+
+- [Keymap の選び方](keymap_guide.md)：操作する場所に対応する Keymap の説明。
+- [Poll Method の基礎](poll_method.md)：メニューを利用できる条件の説明。
+- [Interactive Panels と Extend Panel](../editors/interactive_panels.md)：既存 UI の取り込みと拡張。
+- [キャプチャーメニュー](../editors/context_menu.md)：Blender の操作やプロパティを取得し、PME のメニューへ追加する。
+- [カスタムアイコン](../editors/custom_icons.md)：アイコンの設定。
+
+## コード・API・保存先
+
+- [コードの入力と実行](command_text.md)：入力上限、変数、外部ファイル、実行条件とエラーの確認。
+- [コード例](scripting_workflow.md)：作りたいものから設定先と貼り付けるコードを選ぶ。
+- [API リファレンス](scripting.rst)：PME の関数・変数と引数。
+- [Public API](public_api.md)：外部スクリプトからの利用についての既存資料。
+- [起動オプション](boot_options.md)：起動時の設定と、`import pme` に関する説明。
+- [Settings](../editors/settings.md)：PME の設定項目。
+- [保存先とフォルダ構成](file_locations.md)：設定やユーザーファイルの保存場所。
+- [用語集](terminology.md)：Blender と PME の用語。
+
+## 参考動画
+
+- [原作者の動画：機能別一覧](original_author_videos.md)：roaoao のチャンネルの動画タイトルを、関連する機能ごとに整理しています。
+
+```{toctree}
+:hidden:
+
+original_author_videos
+```
+
+## AI に相談するときに伝える情報
+
+希望する結果に加えて、次の情報があると適用条件を確認しやすくなります。
+分からない項目は、推測した値を埋めず、その確認方法から相談してください。
+
+- 使用している PME と Blender のバージョン。
+- 設定するメニューの種類と入力欄。コードがある場合はその内容。
+- 操作するエディター、モード、対象オブジェクトや選択状態。
+- 期待する結果。動かない場合は、実際の結果とエラー内容。
+
+AI には、回答の根拠となるページ、必要な前提、設定先、結果の確認方法を
+合わせて説明してもらいます。資料だけでは判断できない場合、AI は対象バージョンと
+未確認点を明示し、必要な情報の質問や追加資料の案内に進みます。
+未確認の API を使えるものとして提案せず、確認できた範囲で手順を組み立てます。
+
+過去の質問・回答・使用例は [PME Treasure](https://pluglug.github.io/ba-pme-treasure/) から探せます。

@@ -1,0 +1,80 @@
+(reference-guide)=
+
+# Reference Guide
+
+Find the references you need to configure PME menus and write code.
+
+Some existing references describe older versions. Inclusion here does not mean every linked procedure has been verified in PME 2.1. Check each page's target version and constraints; where the scope is unspecified, verify it in your environment.
+
+## Menus and operations
+
+:::{figure} /../../shared/_static/images/reference/ai_assistance/editor-menu-types-blender-5-1.png
+:alt: Add an Item in the PME editor, listing Pie Menu, Vector Menu, Property Stack, Context Router, and other menu types.
+:width: 680px
+:align: center
+
+Menu type selection in a Blender 5.1.0 / PME 2.1.0-beta.6 development environment.
+:::
+
+Start with [Common Editor Elements](../editors/editor_common_elements.md) for the editor interface and slots. References for individual menus are listed below.
+
+| Topic | Reference |
+|---|---|
+| Vector Menu | [Vector Menu Editor](../editors/vector_menu_editor.md) |
+| Floating Panel | [Floating Panel Editor](../editors/floating_panel_editor.md) |
+| Property Stack | [Property Stack Editor](../editors/property_stack_editor.md) |
+| Context Router | [Context Router Editor](../editors/context_router_editor.md) |
+| Pie Menu | [Pie Menu Editor](../editors/pie_menu_editor.md) |
+| Regular Menu | [Regular Menu Editor](../editors/regular_menu_editor.md) |
+| Pop-up Dialog | [Pop-up Dialog Editor](../editors/popup_dialog_editor.md) |
+| Stack Key | [Stack Key Editor](../editors/stack_key_editor.md) |
+| Sticky Key | [Sticky Key Editor](../editors/sticky_key_editor.md) |
+| Macro Operator | [Macro Operator Editor](../editors/macro_operator_editor.md) |
+| Modal Operator | [Modal Operator Editor](../editors/modal_operator_editor.md) |
+| Property | [Property Editor](../editors/property_editor.md) |
+| Sidebar layout | [Side Panel Editor](../editors/side_panel_editor.md) |
+| Hiding existing panels | [Hiding Unused Panels](../editors/hiding_unused_panels.md) |
+
+This is a list of existing references, not an exhaustive list of PME menu types.
+
+## Invocation conditions and Blender UI
+
+- [Choosing a Keymap](keymap_guide.md): selecting the Keymap for the place you work.
+- [Poll Method](poll_method.md): conditions that make a menu available.
+- [Interactive Panels and Extend Panel](../editors/interactive_panels.md): capturing and extending existing UI.
+- [Capture Menu](../editors/context_menu.md): capture Blender operations or properties and add them to PME menus.
+- [Custom Icons](../editors/custom_icons.md): icon configuration.
+
+## Code, APIs, and storage
+
+- [Writing and Running Code](command_text.md): input format, variables, external files, execution requirements, and errors.
+- [Code Examples](scripting_workflow.md): configurations and code for specific tasks.
+- [API Reference](scripting.rst): PME functions, variables, and arguments.
+- [Public API](public_api.md): using PME from external scripts.
+- [Boot Options](boot_options.md): startup settings and `import pme`.
+- [Settings](../editors/settings.md): PME preferences.
+- [File Locations](file_locations.md): settings and user files.
+- [Glossary](terminology.md): Blender and PME terminology.
+
+## Reference videos
+
+- [Original Author's Videos](original_author_videos.md): videos from roaoao's channel grouped by feature.
+
+```{toctree}
+:hidden:
+
+original_author_videos
+```
+
+## What to tell an AI assistant
+
+Along with the desired result, provide the following information to help establish the requirements. If you do not know a value, ask how to check it instead of guessing.
+
+- Your PME and Blender versions.
+- The menu type and field being configured, and any existing code.
+- The editor, mode, target objects, and selection state.
+- The expected result; if something fails, the actual result and error message.
+
+Ask the AI to include its source pages, prerequisites, the field to configure, and how to verify the result. If the references do not settle a question, the AI should identify the target version and unverified details, then ask for the missing information or point to further sources. It should build instructions from verified APIs rather than assume an unconfirmed API is available.
+
+Search [PME Treasure](https://pluglug.github.io/ba-pme-treasure/) for earlier questions, answers, and examples.

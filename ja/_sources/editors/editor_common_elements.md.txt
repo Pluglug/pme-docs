@@ -1,0 +1,328 @@
+(editor-common-elements)=
+
+# エディターの共通要素
+
+PME の編集は、**一覧で対象を選び、右側でその設定と中身を編集する**流れです。
+メニュー種別によって右側の設定は変わります。ここでは実用的な Pie Menu の設定画面を例に、共通する操作を説明します。
+
+## 画面全体から探す
+
+```{raw} html
+:file: common/_overview_map.html
+```
+
+1. [編集画面の機能・状態](#overview-features)：一覧やフィルター、選択モード、ツリー表示を切り替える。
+2. [一覧の表示項目](#overview-columns)：一覧に表示する列を選ぶ。
+3. [Editor / Settings](#overview-tabs)：編集画面と PME 全体の設定画面を切り替える。
+4. [補助機能と表示領域](#overview-tools)：Interactive Panels、Debug Mode、Maximize Preferences を切り替える。
+5. [メニュー一覧](#overview-menus)：編集するメニューを選ぶ。
+6. [メニューの追加と管理](#overview-manage)：追加、複製、Import / Export などを行う。
+7. [選択メニューの設定](#overview-selected)：名前、呼び出し方、詳細設定を編集する。
+8. [メニューの中身](#slot-list)：スロットや分岐など、種別ごとの内容を編集する。
+
+(overview-display)=
+
+## 上部バーの4つのまとまり
+
+最上部は、左から順に次の4つの役割に分かれます。
+選択中のメニューの名前・有効状態・詳細設定は、その下の行にあります。
+
+(overview-features)=
+
+### 1. 編集画面の機能・状態
+
+左端のブロックは、編集画面で使う機能と表示モードを切り替えます。
+
+| 操作 | 役割 |
+|---|---|
+| Show List（三本線） | メニュー一覧の表示・非表示。OFF にすると選択中のメニューの編集欄を広く使える。対象を切り替えるときは ON に戻す |
+| Filter（漏斗） | 一覧のフィルターを有効・無効にする。見つからないメニューがあるときは、削除されたと判断する前にフィルターを確認する |
+| Select Mode（矢印） | 複数メニューを選んでまとめて操作するモード。通常の、編集対象を一つ選ぶ操作とは異なる |
+| Tree Mode（ツリー） | メニューの関係をツリーで表示する |
+| Group by（画像では星と下向き矢印） | Tree Mode でのグループ分け。None / Keymap / Type / Tag / Key から選ぶ。アイコンは選択項目によって変わる |
+
+Show List を OFF にすると、このブロックの残りの操作と、次の「一覧の表示項目」も隠れます。
+
+(overview-columns)=
+
+### 2. 一覧の表示項目
+
+チェックボックスから **F** までの5つは、**メニュー一覧にどの情報を表示するか**を選ぶボタンです。
+
+| ボタン | 一覧に表示する情報 |
+|---|---|
+| チェックボックス | 各メニューの有効・無効の欄 |
+| Ab | メニュー名 |
+| 星 | タグ |
+| マウス | Keymap 名 |
+| F | ホットキー |
+
+上部バーのチェックボックスを OFF にしても、メニュー自体を無効にはしません。
+有効状態を変える操作は、一覧の各行や選択メニューの設定にあるチェックボックスです。
+名前とホットキーは両方を非表示にできません。一方が非表示のときに他方も OFF にすると、先に隠していた方が自動で表示されます。
+
+(overview-tabs)=
+
+### 3. Editor / Settings
+
+中央の大きな切り替えは、作業する画面を選びます。
+**Editor** ではメニューの設定と中身を編集し、**Settings** では PME 全体の設定を変更します。
+たとえば、スロットの操作ボタンを展開する **Expand Slot Tools** は Settings > General にあります。
+
+(overview-tools)=
+
+### 4. 補助機能と表示領域
+
+右端の3つは、次の補助機能です。
+
+| 操作 | 役割 |
+|---|---|
+| Interactive Panels（パネル） | Blender のパネルなどに PME の編集用ボタンを表示する。[Interactive Panels](interactive_panels.md) を参照 |
+| Debug Mode（Python） | Blender の `bpy.app.debug_wm` を切り替え、operator のログなどの追加デバッグ情報を出力する。エラートレースの表示設定とは別 |
+| Maximize Preferences（拡大） | Preferences 内の表示を PME 用に広げる |
+
+**Show List** は PME 内の一覧、**Maximize Preferences** は Preferences 内で PME が使う表示領域を調整します。
+Blender のエリア自体を最大化する操作とは別です。
+
+(overview-menus)=
+
+## メニュー一覧
+
+一覧で名前を選ぶと、右側の編集対象が切り替わります。名前のそばのアイコンはメニュー種別を示します。
+同じホットキーを使うメニューでも、種類、Keymap、条件によって役割が異なります。
+一覧の名前だけで判断せず、右側の設定を確認してください。
+
+**Tag** は分類・検索のためのラベルです。一つのメニューに複数付けられます。
+タグ別のグループ表示では、同じメニューが複数のグループに現れることがあります。
+別々のコピーを作成したという意味ではありません。
+
+(overview-manage)=
+
+## メニューの追加と管理
+
+一覧のそばの **＋** からメニュー種別を選んで追加します。複製やその他の管理操作も一覧のツールから行います。
+作成する種別によって右側の設定項目が変わるため、先に「何を作るか」を選びます。
+
+一覧の下の **Import / Export** は設定ファイルを読み書きする入口です。
+既存の設定を例として取り込んだ場合も、呼び出すメニューや外部スクリプトが揃っているかを確認してください。
+保存先は [保存先とフォルダ構成](../reference/file_locations.md) にまとめています。
+
+(overview-selected)=
+
+## 選択メニューの設定
+
+右側の上部には、選択したメニューの名前と、表示・呼び出しに関する設定があります。
+まず名前と有効状態を確認し、ホットキーが必要な種別では呼び出す場所とキーを設定します。
+詳細設定は必要に応じて開きます。
+
+```{include} common/topbar.md
+```
+
+(hotkey-editor)=
+
+## Hotkey 設定
+
+ホットキーに対応するメニューで、呼び出す場所とキー操作を設定します。Property のように値を定義する種別では、この欄はありません。
+
+```{include} common/hotkey_settings.md
+```
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [キーマップの選び方](../reference/keymap_guide.md) — Keymap の階層と、PME のホットキーがその中でどう解決されるか
+- [Keymap の重複の確認](../reference/keymap_duplicates.md) — 既存のホットキーと衝突したときの調べ方
+```
+
+---
+
+(slot-list)=
+
+## スロット一覧
+
+**スロット**は「メニューを構成する 1 つ 1 つの項目」です。たとえば Pie Menu の 8 方向それぞれや、Pop-up Dialog のボタン 1 つ 1 つはすべて 1 スロットです。
+
+スロットの並びはエディターによって少しずつ意味が違います。
+
+- **数が固定されているもの**: Pie Menu は 10 スロット（8 方向 + 上 + 下）、Sticky Key は 2 スロット（On Press と On Release）
+- **数を自由に増減できるもの**: Pop-up Dialog、Regular Menu、Stack Key、Macro Operator、Modal Operator
+- **並びそのものに意味があるもの**: Macro Operator はスロットの順序が実行順になります。Modal Operator は「呼び出された時」「確定時」「取消時」といったタイミング用のスロットを混在させます。
+
+具体的な並びと意味は、各エディターの専用ページを参照してください。
+
+Pie Menu などの通常のスロットには、次の操作が用意されています。表示する項目は種別によって異なります。
+
+1. **スロット編集ボタン** — スロットエディタを開いて中身を設定します
+2. **アイコン** — スロットに表示するアイコンを選択します
+3. **表示名** — スロットのラベルテキストを設定します
+4. **詳細設定** — スロットごとの追加オプション
+
+(expand-slot-tools)=
+
+### Expand Slot Tools
+
+Settings > General > **Expand Slot Tools** を ON にすると、各スロット右端のメニューにある操作が、直接押せるアイコンとして並びます。
+スロットの内容や実行方法を変更する設定ではありません。
+
+Pie Menu では **Edit Slot / Copy / Move Slot / Enabled・Disabled / Clear** が並び、
+スロットをコピー済みの場合は **Paste** も表示されます。
+Move Slot は Pie Menu の固定された位置の間で中身を交換し、Clear はその位置を空にします。
+使える操作はエディター種別とスロットの状態によって異なります。
+
+展開した状態は [Pie Menu の画面](pie_menu_editor.md) で確認できます。
+OFF に戻すと、これらの操作はスロット右端のメニューにまとまります。
+
+---
+
+(slot-editor)=
+
+## スロットエディタ
+
+スロット編集ボタンを押すと、**スロットエディタ**が開きます。
+上部で名前などを設定し、対応するタブでスロットタイプを選びます。関数や条件など、種別専用の編集欄は各エディターの説明を参照してください。
+
+:::{image} /../../shared/_static/images/editors/common/slot_editor.png
+:class: img-shadow
+:alt: スロットエディタ
+:align: center
+:width: 100%
+:::
+
+<div style="margin: 1.5rem 0;"></div>
+
+### 上部の共通操作
+
+- **アイコン**: スロットに表示するアイコンを選びます。Custom Icon を使う場合は [Custom Icons](custom_icons.md) を参照してください。
+- **表示名**: スロットのラベルテキストです。{octicon}`arrow-left` を押すと、現在の設定から候補名（Suggested name）を自動的に当てはめます。
+- **OK / Cancel**: スロットの編集を確定 / 取消します。{kbd}`Enter` / {kbd}`Escape` キーでも同じ操作ができます。
+
+(slot-types)=
+
+### スロットタイプ
+
+スロットには **5 種類のタイプ**があり、何を行うスロットかをタイプで決めます。
+**そのエディターが対応しているタイプだけ**がタブとして表示されます。特殊な入力欄を持つ種別もあるため、各エディターで使えるタイプは、それぞれの専用ページを確認してください。
+
+次のタブで、それぞれの設定内容を確認できます。
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
+```
+:::
+
+:::{tab-item} Property
+:sync: property
+
+```{include} common/slot_types/property.md
+```
+:::
+
+:::{tab-item} Menu
+:sync: menu
+
+```{include} common/slot_types/menu.md
+```
+:::
+
+:::{tab-item} Hotkey
+:sync: hotkey
+
+```{include} common/slot_types/hotkey.md
+```
+:::
+
+:::{tab-item} Custom
+:sync: custom
+
+```{include} common/slot_types/custom.md
+```
+:::
+::::
+
+(how-to-add-widgets)=
+
+### スロットを追加する（プリセット）
+
+```{include} common/slot_types/examples.md
+```
+
+---
+
+(editor-extra-settings)=
+
+## 詳細設定
+
+選択メニューの歯車ボタンから開きます。表示する項目は種別によって異なります。
+Description は説明文、Poll は利用できる条件です。さらに Pie Menu の Radius、Stack Key の Remember Slot / Advance On などの固有設定が並びます。
+
+(menu-description)=
+
+```{include} common/description.md
+```
+
+(poll-method)=
+
+```{include} common/poll.md
+```
+
+固有オプションの説明は各エディターの専用ページにあります。
+
+---
+
+## このページに含まれない要素
+
+次のものは「共通要素」ではなく**各エディター固有の機能**です。それぞれのエディターの専用ページに書きます。
+
+- Pie Menu の **Radius** / **Threshold** / **Confirm Threshold** / Confirm on Release
+- Pop-up Dialog のレイアウト（行・列・サブ行）、Pie / Dialog / Popup のモード、固定列、配置
+- Modal Operator の **On Invoke / On Confirm / On Cancel / On Update** スロット、Confirm on Release、Block UI、Lock
+- Macro Operator のサブメニュー指定（Sticky Key / Macro / Modal の入れ子）、診断表示
+- Stack Key の **Remember Slot** / **Advance On** (Every Press / Quick Repeat) / **Repeat Timeout** / **Undo Previous Command**
+- Sticky Key の On Press / On Release ペア、**Save and Restore Previous Value** ジェネレータ
+- Property Editor の型・保存先・Property ID・Getter / Setter
+- Property Stack の条件と状態、Context Router の分岐と対象外の動作
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [Pie Menu Editor](pie_menu_editor.md)
+- [Pop-up Dialog Editor](popup_dialog_editor.md)
+- [Regular Menu Editor](regular_menu_editor.md)
+- [Modal Operator Editor](modal_operator_editor.md)
+- [Macro Operator Editor](macro_operator_editor.md)
+- [Stack Key Editor](stack_key_editor.md)
+- [Sticky Key Editor](sticky_key_editor.md)
+- [Property Editor](property_editor.md)
+- [用語集](../reference/terminology.md)
+```
+
+(common-hotkey-videos)=
+
+## 参考動画（原作者のチャンネル）
+
+[roaoao の動画一覧](../reference/original_author_videos.md)より。旧版の UI・手順を扱う参考動画です。
+
+:::{dropdown} Advanced Mouse Hotkeys in Blender
+:open:
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/9cGWQF6L4o4" title="Advanced Mouse Hotkeys in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Advanced Mouse Hotkeys in Blender — YouTube で開く](https://www.youtube.com/watch?v=9cGWQF6L4o4)
+:::
+
+:::{dropdown} Double Click + Hold
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/8XUvscCCviA" title="Double Click + Hold" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Double Click + Hold — YouTube で開く](https://www.youtube.com/watch?v=8XUvscCCviA)
+:::

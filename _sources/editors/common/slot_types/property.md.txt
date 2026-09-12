@@ -1,0 +1,8 @@
+Specify an object property path to display it as a widget.
+For example, `bpy.context.object.location` displays and edits the object's location.
+
+:::{admonition} Advanced property operations
+:class: tip
+
+Use [Property Editor](/editors/property_editor.md) when you need indexing or more complex property operations.
+:::

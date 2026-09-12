@@ -1,0 +1,1035 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Pie Menu Editor" href="pie_menu_editor.html"><link rel="prev" title="Code Examples" href="../reference/scripting_workflow.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>Common Editor Elements - Pie Menu Editor 2.0.5.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=6b3a701d" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/editor-overview.css?v=8fac9edf" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+      }
+    }
+  }
+</style>
+
+<script type="text/javascript">
+    (function () {
+        if (window.__PMEBeaconInitialized) {
+            return;
+        }
+
+        window.__PMEBeaconInitialized = true;
+
+        !function(e,t,n){function a(){var e=t.getElementsByTagName("script")[0],n=t.createElement("script");n.type="text/javascript",n.async=!0,n.src="https://beacon-v2.helpscout.net",e.parentNode.insertBefore(n,e)}if(e.Beacon=n=function(t,n,a){e.Beacon.readyQueue.push({method:t,options:n,data:a})},n.readyQueue=[],"complete"===t.readyState)return a();e.attachEvent?e.attachEvent("onload",a):e.addEventListener("load",a,!1)}(window,document,window.Beacon||function(){});
+        window.Beacon('init', 'e458ab6a-6436-4e96-a0b6-038336504b24');
+        window.Beacon('config', {
+            display: {
+                style: 'manual'
+            }
+        });
+
+        window.PMEDocs = window.PMEDocs || {};
+        window.PMEDocs.beaconPrefillTemplates = {
+            supportRequest: [
+                'Summary:',
+                '- What went wrong?',
+                '',
+                'Steps to reproduce:',
+                '1.',
+                '2.',
+                '3.',
+                '',
+                'What happened:',
+                '- Describe the actual result.',
+                '',
+                'Environment:',
+                '- Blender version:',
+                '- PME version:',
+                '- OS:',
+                '',
+                'Attachments:',
+                '- PME setup JSON:',
+                '- Console output / screenshot:',
+                '- Small .blend file (if relevant):',
+                '',
+                'Additional notes:',
+                '- Anything else that may help.'
+            ].join('\n')
+        };
+
+        window.PMEDocs.openSupportBeacon = function (event, templateName) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            if (typeof window.Beacon === 'function') {
+                const prefillText = window.PMEDocs.beaconPrefillTemplates[templateName];
+                if (prefillText) {
+                    window.Beacon('prefill', {
+                        text: prefillText
+                    });
+                }
+
+                window.Beacon('open');
+                window.Beacon('navigate', '/ask/message/');
+                return false;
+            }
+
+            return true;
+        };
+
+        document.addEventListener('click', function (event) {
+            const trigger = event.target.closest('[data-beacon-open]');
+            if (!trigger) {
+                return;
+            }
+
+            window.PMEDocs.openSupportBeacon(event, trigger.dataset.beaconTemplate);
+        });
+    }());
+</script></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Pie Menu Editor 2.0.5.5 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor 2.0.5.5 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/basic_pie_menu.html">Create Your First Pie Menu</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/examples.html">Examples &amp; Ideas</a><input aria-label="Toggle navigation of Examples &amp; Ideas" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/scripting_workflow.html">Code Examples</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Editors</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Common Editor Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector_menu_editor.html">Vector Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="popup_dialog_editor.html">Pop-up Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="floating_panel_editor.html">Floating Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property_editor.html">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property_stack_editor.html">Property Stack Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context_router_editor.html">Context Router Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="side_panel_editor.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hiding_unused_panels.html">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interactive_panels.html">Interactive Panels and Extend Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html">UI Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context_menu.html">Capture Menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_icons.html">Custom Icons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Scripting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/command_text.html">Writing and Running Code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/poll_method.html">Poll Method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/scripting.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_guide.html">Choosing a Keymap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_duplicates.html">Keymap Conflicts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/terminology.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/file_locations.html">File Locations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/boot_options.html">Boot Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/developer_options.html">Developer Options</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference Guide</a><input aria-label="Toggle navigation of Reference Guide" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/original_author_videos.html">Original Author’s Videos</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
+</ul>
+
+</div>
+</div>
+<nav class="documentation-languages" aria-label="Language">
+  
+  <a href="editor_common_elements.html" lang="en" hreflang="en" aria-label="English" title="English" aria-current="true"><span aria-hidden="true">🇺🇸</span></a>
+  
+  <a href="../ja/editors/editor_common_elements.html" lang="ja" hreflang="ja" aria-label="日本語" title="日本語"><span aria-hidden="true">🇯🇵</span></a>
+  
+</nav>
+<script>
+(() => {
+  const links = [...document.querySelectorAll('.documentation-languages a')];
+  const targets = links.map(link => link.getAttribute('href'));
+  function syncFragment() {
+    links.forEach((link, index) => { link.href = targets[index] + window.location.hash; });
+  }
+  syncFragment();
+  window.addEventListener('hashchange', syncFragment);
+})();
+</script>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/editors/editor_common_elements.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="common-editor-elements">
+<span id="editor-common-elements"></span><h1>Common Editor Elements<a class="headerlink" href="#common-editor-elements" title="Link to this heading">¶</a></h1>
+<p>In PME, <strong>select an item in the list, then edit its settings and contents on the right</strong>.
+The right-hand settings depend on the menu type. This page uses a practical Pie Menu configuration to explain shared controls.</p>
+<section id="find-controls-in-the-overview">
+<h2>Find controls in the overview<a class="headerlink" href="#find-controls-in-the-overview" title="Link to this heading">¶</a></h2>
+<figure class="pme-overview">
+  <div class="pme-overview__image">
+    <img src="../_static/images/editors/overview/editor-overview-blender-5-2.png" width="1208" height="660" alt="PME overview. A menu list grouped by tag is on the left. On the right are the Transform Preset Pie name, Shift C hotkey, and slots such as Local, Global, and Proportional.">
+    <a class="pme-overview__spot" style="--x:0.5%;--y:0.5%;--w:11.5%;--h:4.5%" href="editor_common_elements.html#overview-features" aria-label="1 Learn about editor controls and display modes">
+      <span class="pme-overview__number">1</span><span class="pme-overview__tip"><strong>Editor controls and display modes</strong>Switch Show List, Filter, Select Mode, Tree Mode, and grouping.</span>
+    </a>
+    <a class="pme-overview__spot" style="--x:12.7%;--y:0.5%;--w:10.2%;--h:4.5%" href="editor_common_elements.html#overview-columns" aria-label="2 Learn about list columns">
+      <span class="pme-overview__number">2</span><span class="pme-overview__tip"><strong>List columns</strong>Choose whether to show enabled state, name, tag, Keymap, and hotkey columns.</span>
+    </a>
+    <a class="pme-overview__spot" style="--x:23.6%;--y:0.5%;--w:68%;--h:4.5%" href="editor_common_elements.html#overview-tabs" aria-label="3 Learn about Editor / Settings">
+      <span class="pme-overview__number">3</span><span class="pme-overview__tip"><strong>Editor / Settings</strong>Switch between menu editing and settings for PME as a whole.</span>
+    </a>
+    <a class="pme-overview__spot pme-overview__spot--right" style="--x:92.3%;--y:0.5%;--w:7.2%;--h:4.5%" href="editor_common_elements.html#overview-tools" aria-label="4 Learn about tools and display area">
+      <span class="pme-overview__number">4</span><span class="pme-overview__tip"><strong>Tools and display area</strong>Interactive Panels, Debug Mode, and Maximize Preferences.</span>
+    </a>
+    <a class="pme-overview__spot" style="--x:3.5%;--y:6.3%;--w:48%;--h:76.5%" href="editor_common_elements.html#overview-menus" aria-label="5 Learn about the menu list">
+      <span class="pme-overview__number">5</span><span class="pme-overview__tip"><strong>Menu list</strong>Select a menu to edit. When grouped by tag, one menu can appear in several groups.</span>
+    </a>
+    <a class="pme-overview__spot" style="--x:52.3%;--y:6.3%;--w:2.5%;--h:46.5%" href="editor_common_elements.html#overview-manage" aria-label="6 Learn about adding and managing menus">
+      <span class="pme-overview__number">6</span><span class="pme-overview__tip"><strong>Add and manage</strong>Use + to choose a menu type. Import / Export controls are below the list.</span>
+    </a>
+    <a class="pme-overview__spot pme-overview__spot--right" style="--x:55.3%;--y:6.3%;--w:44%;--h:15%" href="editor_common_elements.html#overview-selected" aria-label="7 Learn about selected menu settings">
+      <span class="pme-overview__number">7</span><span class="pme-overview__tip"><strong>Selected menu settings</strong>Edit the name, enabled state, advanced settings, and Keymap / Hotkey for supported types.</span>
+    </a>
+    <a class="pme-overview__spot pme-overview__spot--right" style="--x:55.3%;--y:22%;--w:44%;--h:38%" href="editor_common_elements.html#slot-list" aria-label="8 Learn about menu contents">
+      <span class="pme-overview__number">8</span><span class="pme-overview__tip"><strong>Menu contents</strong>This Pie Menu has eight directional slots and two additional slots. Other menu types show branches or property settings here.</span>
+    </a>
+  </div>
+  <figcaption>Transform Preset Pie in a Blender 5.2.0 LTS / PME 2.1.0-beta.6 development environment.</figcaption>
+</figure>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#overview-features">Editor features and display modes</a>: toggle the list, filters, selection mode, and tree view.</p></li>
+<li><p><a class="reference internal" href="#overview-columns">List columns</a>: choose which columns appear in the list.</p></li>
+<li><p><a class="reference internal" href="#overview-tabs">Editor / Settings</a>: switch between menu editing and PME-wide settings.</p></li>
+<li><p><a class="reference internal" href="#overview-tools">Tools and display area</a>: toggle Interactive Panels, Debug Mode, and Maximize Preferences.</p></li>
+<li><p><a class="reference internal" href="#overview-menus">Menu list</a>: choose a menu to edit.</p></li>
+<li><p><a class="reference internal" href="#overview-manage">Add and manage menus</a>: add, duplicate, import, and export menus.</p></li>
+<li><p><a class="reference internal" href="#overview-selected">Selected menu settings</a>: edit its name, invocation, and advanced settings.</p></li>
+<li><p><a class="reference internal" href="#slot-list">Menu contents</a>: edit slots, branches, or other type-specific content.</p></li>
+</ol>
+</section>
+<section id="four-groups-in-the-top-bar">
+<span id="overview-display"></span><h2>Four groups in the top bar<a class="headerlink" href="#four-groups-in-the-top-bar" title="Link to this heading">¶</a></h2>
+<p>From left to right, the top bar has four groups of controls.
+The selected menu’s name, enabled state, and advanced settings are in the row below.</p>
+<section id="editor-features-and-display-modes">
+<span id="overview-features"></span><h3>1. Editor features and display modes<a class="headerlink" href="#editor-features-and-display-modes" title="Link to this heading">¶</a></h3>
+<p>The leftmost group switches editor features and display modes.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Control</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Show List (three lines)</p></td>
+<td><p>Shows or hides the menu list. Turn it off to widen the selected menu’s editor; turn it on to select another menu</p></td>
+</tr>
+<tr class="row-odd"><td><p>Filter (funnel)</p></td>
+<td><p>Enables or disables list filtering. Check filters before concluding that a missing menu was deleted</p></td>
+</tr>
+<tr class="row-even"><td><p>Select Mode (arrow)</p></td>
+<td><p>Selects several menus for bulk actions, distinct from choosing one menu to edit</p></td>
+</tr>
+<tr class="row-odd"><td><p>Tree Mode (tree)</p></td>
+<td><p>Displays menu relationships as a tree</p></td>
+</tr>
+<tr class="row-even"><td><p>Group by (star and downward arrow in the image)</p></td>
+<td><p>Groups Tree Mode by None / Keymap / Type / Tag / Key. The icon reflects the selected choice</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Turning Show List off also hides the remaining controls in this group and the List columns group.</p>
+</section>
+<section id="list-columns">
+<span id="overview-columns"></span><h3>2. List columns<a class="headerlink" href="#list-columns" title="Link to this heading">¶</a></h3>
+<p>The five controls from the checkbox through <strong>F</strong> choose <strong>which information appears in the menu list</strong>.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Button</p></th>
+<th class="head"><p>List information</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Checkbox</p></td>
+<td><p>Each menu’s enabled state</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ab</p></td>
+<td><p>Menu name</p></td>
+</tr>
+<tr class="row-even"><td><p>Star</p></td>
+<td><p>Tags</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mouse</p></td>
+<td><p>Keymap name</p></td>
+</tr>
+<tr class="row-even"><td><p>F</p></td>
+<td><p>Hotkey</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Turning off the top-bar checkbox does not disable menus.
+Use the checkboxes on list rows or in the selected menu settings to change enabled state.
+Name and hotkey cannot both be hidden. Turning off the second while the first is hidden automatically shows the first again.</p>
+</section>
+<section id="editor-settings">
+<span id="overview-tabs"></span><h3>3. Editor / Settings<a class="headerlink" href="#editor-settings" title="Link to this heading">¶</a></h3>
+<p>The large central control selects the working page.
+<strong>Editor</strong> edits menu settings and contents; <strong>Settings</strong> changes PME-wide options.
+For example, <strong>Expand Slot Tools</strong>, which exposes slot action buttons, is under Settings &gt; General.</p>
+</section>
+<section id="tools-and-display-area">
+<span id="overview-tools"></span><h3>4. Tools and display area<a class="headerlink" href="#tools-and-display-area" title="Link to this heading">¶</a></h3>
+<p>The three controls on the right provide:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Control</p></th>
+<th class="head"><p>Role</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Interactive Panels (panel)</p></td>
+<td><p>Adds PME editing buttons to Blender panels and other UI. See <a class="reference internal" href="interactive_panels.html"><span class="std std-doc">Interactive Panels</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>Debug Mode (Python)</p></td>
+<td><p>Toggles Blender’s <code class="docutils literal notranslate"><span class="pre">bpy.app.debug_wm</span></code> for operator logs and other debugging information. Separate from error traceback display</p></td>
+</tr>
+<tr class="row-even"><td><p>Maximize Preferences (expand)</p></td>
+<td><p>Gives PME more space inside Preferences</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Show List</strong> controls the list within PME; <strong>Maximize Preferences</strong> controls how much of Preferences PME occupies.
+Neither is Blender’s area-maximization command.</p>
+</section>
+</section>
+<section id="menu-list">
+<span id="overview-menus"></span><h2>Menu list<a class="headerlink" href="#menu-list" title="Link to this heading">¶</a></h2>
+<p>Select a name to change the menu being edited on the right. The icon next to it identifies the menu type.
+Menus sharing a hotkey can serve different purposes according to type, Keymap, and conditions.
+Check the right-hand settings rather than relying on the name alone.</p>
+<p><strong>Tags</strong> label menus for organization and search. A menu can have several tags.
+When grouped by tag, the same menu can appear in several groups.
+These are not separate copies.</p>
+</section>
+<section id="add-and-manage-menus">
+<span id="overview-manage"></span><h2>Add and manage menus<a class="headerlink" href="#add-and-manage-menus" title="Link to this heading">¶</a></h2>
+<p>Use <strong>＋</strong> beside the list to choose and add a menu type. Duplication and other management actions are also available in the list tools.
+Choose what to create first: the type determines which settings appear on the right.</p>
+<p><strong>Import / Export</strong> below the list reads and writes configuration files.
+When importing an example, check that its referenced menus and external scripts are also available.
+See <a class="reference internal" href="../reference/file_locations.html"><span class="std std-doc">File Locations</span></a> for storage paths.</p>
+</section>
+<section id="selected-menu-settings">
+<span id="overview-selected"></span><h2>Selected menu settings<a class="headerlink" href="#selected-menu-settings" title="Link to this heading">¶</a></h2>
+<p>The top of the right-hand area shows the selected menu’s name and display/invocation settings.
+Check its name and enabled state, then set where and how it is called if the type supports hotkeys.
+Open advanced settings as needed.</p>
+<p>These controls sit on either side of the menu name at the top of the editing area. Available controls depend on the menu type.</p>
+<dl class="myst field-list simple">
+<dt class="field-odd">Enable/Disable<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Enables or disables the entire menu. Disabling it blocks hotkeys, script calls such as <code class="docutils literal notranslate"><span class="pre">open_menu()</span></code> / <code class="docutils literal notranslate"><span class="pre">pme.invoke_pm()</span></code>, and registered menu or panel routes (Extend Panel / Side Panel / Hidden Panel Group).
+To remove only the shortcut, edit the <a class="reference internal" href="#hotkey-editor"><span class="std std-ref">Hotkey settings</span></a> instead.</p>
+</dd>
+<dt class="field-even">Preview<span class="colon">:</span></dt>
+<dd class="field-even"><p>Opens a supported menu to inspect its layout and order. This uses normal menu invocation, so interacting with items can execute commands or change values. Check it in the intended editor as well; this is not a display-only test. The Preview for editing Property values is a separate control in <a class="reference internal" href="property_editor.html"><span class="std std-doc">Property Editor</span></a>.</p>
+</dd>
+<dt class="field-odd">Menu selector<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Switches the menu being edited. Its icon identifies the current type (Pie / Popup / Regular / Modal, etc.). The selector supports searching and filtering by type.</p>
+</dd>
+<dt class="field-even">Menu name<span class="colon">:</span></dt>
+<dd class="field-even"><p>The menu’s display label and the identifier used to call it from other menus or Python. Use this name in <code class="docutils literal notranslate"><span class="pre">open_menu(&quot;Name&quot;)</span></code>.
+Menu slot links and Pop-up Dialog / Floating Panel Dialog links retain their references when a menu is renamed. However, <strong>Command / Custom code containing <code class="docutils literal notranslate"><span class="pre">open_menu(&quot;Name&quot;)</span></code> / <code class="docutils literal notranslate"><span class="pre">draw_menu(&quot;Name&quot;)</span></code> calls that literal name</strong>. Review these strings when renaming a menu.</p>
+</dd>
+<dt class="field-odd">References button<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Appears when other menus reference this menu. Click it to list and jump to those menus. Use it to trace dependencies, such as a Macro calling a Sticky Key or a Regular Menu slot calling a Pop-up Dialog.</p>
+</dd>
+<dt class="field-even">Tag<span class="colon">:</span></dt>
+<dd class="field-even"><p>Labels used to organize and find menus. Click to open the tag editor and assign several tags.
+Tags support <strong>filtering</strong> and <strong>grouping</strong> in the menu list, and enabling sets through <code class="docutils literal notranslate"><span class="pre">pm_enable_by_tag(&quot;Name&quot;,</span> <span class="pre">True)</span></code>. Enable <span class="guilabel">Settings &gt; General &gt; Auto-Tag New Menus</span> to tag new menus automatically with the current tag filter.</p>
+</dd>
+<dt class="field-odd">Documentation<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Opens the relevant page in PME’s online documentation (this site).</p>
+</dd>
+<dt class="field-even">Advanced settings toggle<span class="colon">:</span></dt>
+<dd class="field-even"><p>Opens or closes Description, Poll, and editor-specific options. Some editors, such as Hidden Panel Group, have no advanced settings.</p>
+</dd>
+</dl>
+</section>
+<section id="hotkey-settings">
+<span id="hotkey-editor"></span><h2>Hotkey settings<a class="headerlink" href="#hotkey-settings" title="Link to this heading">¶</a></h2>
+<p>For menu types supporting hotkeys, choose where and how to invoke them. Value-definition types such as Property do not have this section.</p>
+<figure class="pme-overview pme-overview--editor" style="--editor-width:614px">
+<div class="pme-overview__image">
+<div class="pme-overview__crop" style="--crop-ratio:614 / 76;--crop-offset:-41.05263158%">
+<img src="../_static/images/editors/pie_menu/pie-editor-focused-blender-5-2.png" width="614" height="570" alt="Hotkey settings: Keymap at the top, Hotkey Mode at the lower left, and keys and modifiers at the lower right. This example assigns Shift C in 3D View Generic.">
+</div>
+<a class="pme-overview__spot" style="--x:1.1401%;--y:0.0000%;--w:97.5570%;--h:32.8947%" href="#hotkey-keymap" aria-label="1 Learn about Keymap settings"><span class="pme-overview__number">1</span><span class="pme-overview__tip"><strong>Keymap settings</strong>Choose where the hotkey is used.</span></a>
+<a class="pme-overview__spot" style="--x:1.1401%;--y:34.2105%;--w:3.7459%;--h:64.4737%" href="#hotkey-mode" aria-label="2 Learn about Hotkey Mode"><span class="pme-overview__number">2</span><span class="pme-overview__tip"><strong>Hotkey Mode</strong>Choose the input that invokes the menu, such as pressing or holding a key.</span></a>
+<a class="pme-overview__spot" style="--x:5.0489%;--y:34.2105%;--w:93.6482%;--h:64.4737%" href="#hotkey-key-modifiers" aria-label="3 Learn about keys and modifiers"><span class="pme-overview__number">3</span><span class="pme-overview__tip"><strong>Keys and modifiers</strong>Set the invocation key and modifiers such as Ctrl and Shift.</span></a>
+</div>
+</figure>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#hotkey-keymap"><span class="std std-ref">Keymap settings</span></a></p></li>
+<li><p><a class="reference internal" href="#hotkey-mode"><span class="std std-ref">Hotkey Mode</span></a></p></li>
+<li><p><a class="reference internal" href="#hotkey-key-modifiers"><span class="std std-ref">Key and modifiers</span></a></p></li>
+</ol>
+<section id="keymap-settings">
+<span id="hotkey-keymap"></span><h3>Keymap settings<a class="headerlink" href="#keymap-settings" title="Link to this heading">¶</a></h3>
+<p>Choose where the hotkey is used. Search for a Keymap in the input field to register it. <strong>Use the ＋ button on the right to register the hotkey in additional Keymaps.</strong></p>
+<p>Names in parentheses in the suggestions identify operations already assigned to the same key combination in that Keymap.</p>
+<p>Blender organizes Keymaps by editor and mode, with a hierarchy between them. See <a class="reference internal" href="../reference/keymap_guide.html"><span class="doc">Choosing a Keymap</span></a> for details.</p>
+</section>
+<section id="hotkey-mode">
+<span id="id1"></span><h3>Hotkey Mode<a class="headerlink" href="#hotkey-mode" title="Link to this heading">¶</a></h3>
+<p>Use the leftmost button to choose <strong>which action triggers the menu</strong>.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Mode</p></th>
+<th class="head"><p>Trigger</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Press</strong></p></td>
+<td><p>Press the key</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Hold</strong></p></td>
+<td><p>Hold the key</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Click Drag</strong></p></td>
+<td><p>Move the mouse while holding the key</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Double Click</strong></p></td>
+<td><p>Press the key twice in succession</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Key Chords</strong></p></td>
+<td><p>Press the trigger key, then the configured Chord key</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Available modes depend on the menu type. Key Chords adds an input field for the second key.</p>
+<p>Enable <span class="guilabel">Settings &gt; Hotkeys &gt; Experimental Modes</span> to also use <strong>Click (Experimental)</strong> and <strong>Click Drag (Experimental)</strong>. These use Blender’s native click and drag events. They can conflict with existing assignments or fail to trigger as expected, so use them with an understanding of Keymaps and event handling. See <a class="reference internal" href="settings.html#setting-experimental-modes"><span class="std std-ref">Experimental Modes</span></a>.</p>
+</section>
+<section id="key-and-modifiers">
+<span id="hotkey-key-modifiers"></span><h3>Key and modifiers<a class="headerlink" href="#key-and-modifiers" title="Link to this heading">¶</a></h3>
+<p>Set the trigger key in the upper row and choose its modifiers below. The image shows <strong>Shift + C</strong>.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Item</p></th>
+<th class="head"><p>Setting</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Key</strong></p></td>
+<td><p>Click the input field, then press the key to assign</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Ctrl / Shift / Alt / OSKey</strong></p></td>
+<td><p>Modifiers held with the trigger key. You can combine several</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Any</strong></p></td>
+<td><p>Responds to the trigger key regardless of the Ctrl / Shift / Alt / OSKey state</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Mouse buttons can also act as modifiers, such as LMB + Tab, RMB + Tab, or MMB + Tab. See the <a class="reference internal" href="#common-hotkey-videos"><span class="std std-ref">mouse and hotkey videos</span></a> for examples.</p>
+<div class="seealso admonition">
+<p class="admonition-title">Related pages</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../reference/keymap_guide.html"><span class="std std-doc">Choosing a Keymap</span></a> — Keymap hierarchy and how PME hotkeys are resolved</p></li>
+<li><p><a class="reference internal" href="../reference/keymap_duplicates.html"><span class="std std-doc">Checking Keymap Duplicates</span></a> — investigate conflicts with existing hotkeys</p></li>
+</ul>
+</div>
+<hr class="docutils" />
+</section>
+</section>
+<section id="slot-list">
+<span id="id2"></span><h2>Slot list<a class="headerlink" href="#slot-list" title="Link to this heading">¶</a></h2>
+<p>A <strong>slot</strong> is one item in a menu. Each Pie Menu direction or Pop-up Dialog button, for example, is a slot.</p>
+<p>Slot arrangement has different meanings in different editors.</p>
+<ul class="simple">
+<li><p><strong>Fixed count</strong>: Pie Menu has ten slots (eight directions plus top and bottom); Sticky Key has two (On Press and On Release).</p></li>
+<li><p><strong>Variable count</strong>: Pop-up Dialog, Regular Menu, Stack Key, Macro Operator, and Modal Operator.</p></li>
+<li><p><strong>Meaningful order</strong>: Macro Operator runs slots in order. Modal Operator mixes action slots with event slots such as invocation, confirmation, and cancellation.</p></li>
+</ul>
+<p>See each editor’s page for its arrangement and behavior.</p>
+<p>Ordinary slots, such as Pie Menu slots, provide the following controls. Available controls vary by type.</p>
+<ol class="arabic simple">
+<li><p><strong>Edit Slot</strong> — opens the Slot Editor to configure its contents.</p></li>
+<li><p><strong>Icon</strong> — chooses the displayed icon.</p></li>
+<li><p><strong>Display name</strong> — sets the slot label.</p></li>
+<li><p><strong>Advanced settings</strong> — additional options for the slot.</p></li>
+</ol>
+<section id="expand-slot-tools">
+<span id="id3"></span><h3>Expand Slot Tools<a class="headerlink" href="#expand-slot-tools" title="Link to this heading">¶</a></h3>
+<p>Enable Settings &gt; General &gt; <strong>Expand Slot Tools</strong> to expose the actions from each slot’s rightmost menu as directly clickable icons.
+This changes the editor display, not slot contents or execution.</p>
+<p>For Pie Menu, the controls are <strong>Edit Slot / Copy / Move Slot / Enabled or Disabled / Clear</strong>;
+<strong>Paste</strong> also appears after copying a slot.
+Move Slot exchanges contents between fixed pie positions; Clear empties a position.
+Available actions depend on editor type and slot state.</p>
+<p>See the <a class="reference internal" href="pie_menu_editor.html"><span class="std std-doc">Pie Menu interface</span></a> for the expanded view.
+Turn it off to group the actions back into each slot’s rightmost menu.</p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="slot-editor">
+<span id="id4"></span><h2>Slot Editor<a class="headerlink" href="#slot-editor" title="Link to this heading">¶</a></h2>
+<p>Click Edit Slot to open the <strong>Slot Editor</strong>.
+Set the name and other shared options at the top, then choose a slot type through its tab. See each editor’s page for specialized fields such as callbacks and conditions.</p>
+<a class="img-shadow reference internal image-reference" href="../_images/slot_editor.png"><img alt="Slot Editor" class="img-shadow align-center" src="../_images/slot_editor.png" style="width: 100%;" />
+</a>
+<div style="margin: 1.5rem 0;"></div>
+<section id="shared-controls-at-the-top">
+<h3>Shared controls at the top<a class="headerlink" href="#shared-controls-at-the-top" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Icon</strong>: chooses the slot’s icon. See <a class="reference internal" href="custom_icons.html"><span class="std std-doc">Custom Icons</span></a> for custom artwork.</p></li>
+<li><p><strong>Display name</strong>: the slot label. Press <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-arrow-left" viewBox="0 0 16 16" aria-hidden="true"><path d="M7.78 12.53a.75.75 0 0 1-1.06 0L2.47 8.28a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L4.81 7h7.44a.75.75 0 0 1 0 1.5H4.81l2.97 2.97a.75.75 0 0 1 0 1.06Z"></path></svg> to apply a Suggested name derived from the current settings.</p></li>
+<li><p><strong>OK / Cancel</strong>: accepts or discards slot edits. <kbd class="kbd docutils literal notranslate">Enter</kbd> / <kbd class="kbd docutils literal notranslate">Escape</kbd> perform the same actions.</p></li>
+</ul>
+</section>
+<section id="slot-types">
+<span id="id5"></span><h3>Slot types<a class="headerlink" href="#slot-types" title="Link to this heading">¶</a></h3>
+<p>There are <strong>five slot types</strong>, defining what the slot does.
+Only <strong>types supported by the current editor</strong> appear as tabs. Some editors have specialized inputs; check their individual pages for supported types.</p>
+<p>The tabs below describe each type.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="command" for="sd-tab-item-0">
+Command</label><div class="sd-tab-content docutils">
+<p>Sets the Python code evaluated when the item is executed.
+When calling an operator, use one that supports the current editor, mode, and selection.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add a cube in the 3D Viewport's Object Mode</span>
+<span class="n">bpy</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">primitive_cube_add</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="important admonition">
+<p class="admonition-title">Writing commands</p>
+<p>The input limit is <strong>1,024 UTF-8 bytes</strong>. Text containing multibyte characters reaches the limit sooner than 1,024 characters.
+Separate short simple statements with <code class="docutils literal notranslate"><span class="pre">;</span></code>; do not mechanically flatten indented blocks into one line.
+See <a class="reference internal" href="../reference/command_text.html"><span class="std std-doc">Code Input and Execution</span></a> for checking length and moving code into an external script.</p>
+</div>
+<div class="hint admonition">
+<p class="admonition-title">Global variables</p>
+<p><strong>Examples of available globals:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">C</span></code>: the context PME provides to scripts</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">O</span></code>: bpy.ops (Blender operators)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">E</span></code>: event information</p></li>
+</ul>
+<p>See <a class="reference internal" href="../reference/scripting.html"><span class="std std-doc">Scripting Reference</span></a> for details.</p>
+</div>
+</div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="property" for="sd-tab-item-1">
+Property</label><div class="sd-tab-content docutils">
+<p>Specify an object property path to display it as a widget.
+For example, <code class="docutils literal notranslate"><span class="pre">bpy.context.object.location</span></code> displays and edits the object’s location.</p>
+<div class="tip admonition">
+<p class="admonition-title">Advanced property operations</p>
+<p>Use <a class="reference internal" href="property_editor.html"><span class="std std-doc">Property Editor</span></a> when you need indexing or more complex property operations.</p>
+</div>
+</div>
+<input id="sd-tab-item-2" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="menu" for="sd-tab-item-2">
+Menu</label><div class="sd-tab-content docutils">
+<p>When clicked, calls another menu item created in PME.
+Examples:</p>
+<ul class="simple">
+<li><p>Display a <strong>Popup Dialog</strong> with <code class="docutils literal notranslate"><span class="pre">Expand</span> <span class="pre">Popup</span> <span class="pre">Dialog</span></code></p></li>
+<li><p>Display a <strong>Regular Menu</strong> with <code class="docutils literal notranslate"><span class="pre">Open</span> <span class="pre">on</span> <span class="pre">Mouse</span> <span class="pre">Over</span></code></p></li>
+<li><p>Run a <strong>Macro Operator</strong></p></li>
+</ul>
+</div>
+<input id="sd-tab-item-3" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="hotkey" for="sd-tab-item-3">
+Hotkey</label><div class="sd-tab-content docutils">
+<p>When clicked, finds and executes the operator assigned to the specified Blender hotkey.
+For example, use Blender’s standard <code class="docutils literal notranslate"><span class="pre">G</span></code> for Move or <code class="docutils literal notranslate"><span class="pre">R</span></code> for Rotate.</p>
+</div>
+<input id="sd-tab-item-4" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" data-sync-group="tab" data-sync-id="custom" for="sd-tab-item-4">
+Custom</label><div class="sd-tab-content docutils">
+<p>Sets Python code evaluated when the UI is drawn.
+<code class="docutils literal notranslate"><span class="pre">L</span></code> is the layout object; use Blender’s layout API to build the UI.
+This code also runs on redraw. Place buttons for actions such as adding or removing objects,
+rather than performing those actions directly while drawing.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Display a label inside a box</span>
+<span class="n">L</span><span class="o">.</span><span class="n">box</span><span class="p">()</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s2">"Add Mesh"</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Arrange several buttons vertically</span>
+<span class="n">col</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">column</span><span class="p">();</span> <span class="n">col</span><span class="o">.</span><span class="n">operator</span><span class="p">(</span><span class="s2">"mesh.primitive_cube_add"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Cube"</span><span class="p">);</span> <span class="n">col</span><span class="o">.</span><span class="n">operator</span><span class="p">(</span><span class="s2">"mesh.primitive_uv_sphere_add"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Sphere"</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These are two independent examples. To place several UI elements in one Pie Menu slot,
+wrap them in a single column or box as in the second example.
+Adding multiple elements directly to the pie layout can shift subsequent slots to different directions.</p>
+<p>The input limit is <strong>1,024 UTF-8 bytes</strong>.
+See <a class="reference internal" href="../reference/command_text.html"><span class="std std-doc">Code Input and Execution</span></a> for
+length limits, multiline code, and external scripts.</p>
+</div>
+</div>
+</section>
+<section id="add-a-slot-preset">
+<span id="how-to-add-widgets"></span><h3>Add a slot preset<a class="headerlink" href="#add-a-slot-preset" title="Link to this heading">¶</a></h3>
+<a class="reference internal image-reference" href="../_images/slot_examples.png"><img alt="PME Slot Examples" class="align-right" src="../_images/slot_examples.png" style="width: 40%;" />
+</a>
+<p>Use the rightmost hamburger menu (<svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-three-bars" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"></path></svg>) to add one of the supplied slot functions.</p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="advanced-settings">
+<span id="editor-extra-settings"></span><h2>Advanced settings<a class="headerlink" href="#advanced-settings" title="Link to this heading">¶</a></h2>
+<p>Open these with the selected menu’s gear button. Available options depend on the type.
+Description sets tooltip text; Poll sets availability. Type-specific options follow, such as Pie Menu Radius or Stack Key Remember Slot / Advance On.</p>
+<p id="menu-description"><strong>Description</strong></p>
+<p>Sets the text shown in a menu or slot’s tooltip.
+Enter plain text, or enable the script toggle <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-code" viewBox="0 0 16 16" aria-hidden="true"><path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"></path></svg> on the right to enter
+<strong>Python code that returns the description with <code class="docutils literal notranslate"><span class="pre">return</span></code></strong>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="sa">f</span><span class="s2">"Active: </span><span class="si">{</span><span class="n">C</span><span class="o">.</span><span class="n">active_object</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">C</span><span class="o">.</span><span class="n">active_object</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'(none)'</span><span class="si">}</span><span class="s2">"</span>
+</pre></div>
+</div>
+<p>This example displays the active object’s name, or <code class="docutils literal notranslate"><span class="pre">(none)</span></code> when there is no active object.</p>
+<div class="tip admonition">
+<p class="admonition-title">Returning a description from Python</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">return</span></code> is required.</strong> A string expression alone does not return a description.</p></li>
+<li><p>The code runs when a description is requested, independently of the Command executed when an item is clicked.</p></li>
+<li><p>Use it to read the current state. Put operations that add or remove objects, change settings, or otherwise modify data in Command.</p></li>
+<li><p>Returning <code class="docutils literal notranslate"><span class="pre">None</span></code>, or an evaluation failure, falls back to the default tooltip. Errors are reported in the console.</p></li>
+</ul>
+</div>
+<p>In a plain-text description, <code class="docutils literal notranslate"><span class="pre">\n</span></code> inserts a line break in the tooltip.
+If a menu call has no description, the called menu’s name is displayed.</p>
+<dl class="myst field-list" id="poll-method">
+<dt class="field-odd">Poll<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Uses Python to determine whether this menu can run in the current Blender context. A <code class="docutils literal notranslate"><span class="pre">True</span></code> result allows the menu to run; <code class="docutils literal notranslate"><span class="pre">False</span></code> skips it when called through a hotkey or UI.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ao</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">active_object</span><span class="p">;</span> <span class="k">return</span> <span class="n">ao</span> <span class="ow">and</span> <span class="n">ao</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">'MESH'</span>
+</pre></div>
+</div>
+<p>Poll is checked for hotkey calls, HOLD / TWEAK / CHORD, script calls such as <code class="docutils literal notranslate"><span class="pre">open_menu()</span></code> / <code class="docutils literal notranslate"><span class="pre">pme.invoke_pm()</span></code>, editor previews, Popup Dialog and regular menu drawing, and calls from Macro / Modal / Sticky / Floating Panel. This prevents another invocation route from running a menu that is unavailable in the current context.</p>
+<p>The <svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-plus" viewBox="0 0 16 16" aria-hidden="true"><path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"></path></svg> button on the right opens Poll helpers for common conditions, inserting an empty Poll, and Cut / Copy / Paste. See <a class="reference internal" href="../reference/poll_method.html"><span class="std std-doc">Poll Method</span></a> for writing conditions.</p>
+</dd>
+</dl>
+<p>See each editor’s page for its specific options.</p>
+</section>
+<hr class="docutils" />
+<section id="editor-specific-features">
+<h2>Editor-specific features<a class="headerlink" href="#editor-specific-features" title="Link to this heading">¶</a></h2>
+<p>The following belong to <strong>individual editors</strong>, rather than shared controls, and are covered on their respective pages:</p>
+<ul class="simple">
+<li><p>Pie Menu <strong>Radius</strong> / <strong>Threshold</strong> / <strong>Confirm Threshold</strong> / Confirm on Release.</p></li>
+<li><p>Pop-up Dialog layout (rows, columns, subrows), Pie / Dialog / Popup modes, fixed columns, and alignment.</p></li>
+<li><p>Modal Operator <strong>On Invoke / On Confirm / On Cancel / On Update</strong> slots, Confirm on Release, Block UI, and Lock.</p></li>
+<li><p>Macro Operator submenu references (nested Sticky Key / Macro / Modal) and diagnostics.</p></li>
+<li><p>Stack Key <strong>Remember Slot</strong> / <strong>Advance On</strong> (Every Press / Quick Repeat) / <strong>Repeat Timeout</strong> / <strong>Undo Previous Command</strong>.</p></li>
+<li><p>Sticky Key On Press / On Release pair and <strong>Save and Restore Previous Value</strong> generator.</p></li>
+<li><p>Property Editor types, storage, Property ID, Getter / Setter.</p></li>
+<li><p>Property Stack conditions and state; Context Router branches and fallback behavior.</p></li>
+</ul>
+<hr class="docutils" />
+<div class="seealso admonition">
+<p class="admonition-title">Related pages</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="pie_menu_editor.html"><span class="std std-doc">Pie Menu Editor</span></a></p></li>
+<li><p><a class="reference internal" href="popup_dialog_editor.html"><span class="std std-doc">Pop-up Dialog Editor</span></a></p></li>
+<li><p><a class="reference internal" href="regular_menu_editor.html"><span class="std std-doc">Regular Menu Editor</span></a></p></li>
+<li><p><a class="reference internal" href="modal_operator_editor.html"><span class="std std-doc">Modal Operator Editor</span></a></p></li>
+<li><p><a class="reference internal" href="macro_operator_editor.html"><span class="std std-doc">Macro Operator Editor</span></a></p></li>
+<li><p><a class="reference internal" href="stack_key_editor.html"><span class="std std-doc">Stack Key Editor</span></a></p></li>
+<li><p><a class="reference internal" href="sticky_key_editor.html"><span class="std std-doc">Sticky Key Editor</span></a></p></li>
+<li><p><a class="reference internal" href="property_editor.html"><span class="std std-doc">Property Editor</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/terminology.html"><span class="std std-doc">Glossary</span></a></p></li>
+</ul>
+</div>
+</section>
+<section id="reference-videos-original-authors-channel">
+<span id="common-hotkey-videos"></span><h2>Reference videos (original author’s channel)<a class="headerlink" href="#reference-videos-original-authors-channel" title="Link to this heading">¶</a></h2>
+<p>From <a class="reference internal" href="../reference/original_author_videos.html"><span class="std std-doc">roaoao’s videos</span></a>. These show an older interface and workflow.</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3" open="open">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Advanced Mouse Hotkeys in Blender</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/9cGWQF6L4o4" title="Advanced Mouse Hotkeys in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+<p class="sd-card-text"><a class="reference external" href="https://www.youtube.com/watch?v=9cGWQF6L4o4">Advanced Mouse Hotkeys in Blender — Open on YouTube</a></p>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Double Click + Hold</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/8XUvscCCviA" title="Double Click + Hold" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+<p class="sd-card-text"><a class="reference external" href="https://www.youtube.com/watch?v=8XUvscCCviA">Double Click + Hold — Open on YouTube</a></p>
+</div>
+</details></section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="pie_menu_editor.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Pie Menu Editor</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../reference/scripting_workflow.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Code Examples</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Common Editor Elements</a><ul>
+<li><a class="reference internal" href="#find-controls-in-the-overview">Find controls in the overview</a></li>
+<li><a class="reference internal" href="#four-groups-in-the-top-bar">Four groups in the top bar</a><ul>
+<li><a class="reference internal" href="#editor-features-and-display-modes">1. Editor features and display modes</a></li>
+<li><a class="reference internal" href="#list-columns">2. List columns</a></li>
+<li><a class="reference internal" href="#editor-settings">3. Editor / Settings</a></li>
+<li><a class="reference internal" href="#tools-and-display-area">4. Tools and display area</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#menu-list">Menu list</a></li>
+<li><a class="reference internal" href="#add-and-manage-menus">Add and manage menus</a></li>
+<li><a class="reference internal" href="#selected-menu-settings">Selected menu settings</a></li>
+<li><a class="reference internal" href="#hotkey-settings">Hotkey settings</a><ul>
+<li><a class="reference internal" href="#keymap-settings">Keymap settings</a></li>
+<li><a class="reference internal" href="#hotkey-mode">Hotkey Mode</a></li>
+<li><a class="reference internal" href="#key-and-modifiers">Key and modifiers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#slot-list">Slot list</a><ul>
+<li><a class="reference internal" href="#expand-slot-tools">Expand Slot Tools</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#slot-editor">Slot Editor</a><ul>
+<li><a class="reference internal" href="#shared-controls-at-the-top">Shared controls at the top</a></li>
+<li><a class="reference internal" href="#slot-types">Slot types</a></li>
+<li><a class="reference internal" href="#add-a-slot-preset">Add a slot preset</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#advanced-settings">Advanced settings</a></li>
+<li><a class="reference internal" href="#editor-specific-features">Editor-specific features</a></li>
+<li><a class="reference internal" href="#reference-videos-original-authors-channel">Reference videos (original author’s channel)</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=2f8f0f10"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

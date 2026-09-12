@@ -1,0 +1,326 @@
+(original-author-videos)=
+
+# 原作者の動画：機能別一覧
+
+PME の原作者 **roaoao** のチャンネル [r3a1ay（@r3a1ay4）](https://www.youtube.com/channel/UC9W8LzX1ICprmq6z_5nZ7CA/videos) にある Pie Menu Editor 関連の動画を、機能ごとにまとめています。
+タイトルは原題を掲載し、Jimmy Livefjord によるレビュー・チュートリアルのクレジットも残しています。
+
+旧版の操作や構成を知るための参考資料です。分類はタイトルと作者の再生リストを基にしており、動画内の全手順を PME 2.1 で検証したものではありません。
+現在の設定名・制約は、各機能のリファレンスを参照してください。
+
+タイトルを開くと、このページ内でプレビュー・再生できます。YouTube で開くリンクも各動画にあります。
+
+2026年9月6日確認：Pie Menu Editor 関連の24本。
+
+(author-videos-pie)=
+
+## Pie Menu・概要
+
+関連資料：[現在のリファレンス](../editors/pie_menu_editor.md)
+
+:::{dropdown} Pie Menu Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/COW109EjBsU" title="Pie Menu Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Pie Menu Editor for Blender — YouTube で開く](https://www.youtube.com/watch?v=COW109EjBsU)
+:::
+
+:::{dropdown} Pie Menu Editor Review by Jimmy Livefjord
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/dWwBbnV1IOs" title="Pie Menu Editor Review by Jimmy Livefjord" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Pie Menu Editor Review by Jimmy Livefjord — YouTube で開く](https://www.youtube.com/watch?v=dWwBbnV1IOs)
+:::
+
+:::{dropdown} Nested Pie Menu, Confirm Threshold and Sticky Keys
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/5zDp586Uy2w" title="Nested Pie Menu, Confirm Threshold and Sticky Keys" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Nested Pie Menu, Confirm Threshold and Sticky Keys — YouTube で開く](https://www.youtube.com/watch?v=5zDp586Uy2w)
+:::
+
+
+(author-videos-popup)=
+
+## Pop-up Dialog・レイアウト
+
+関連資料：[現在のリファレンス](../editors/popup_dialog_editor.md)
+
+:::{dropdown} Popup Dialog Editor
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/JdbmDSV9wIU" title="Popup Dialog Editor" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog Editor — YouTube で開く](https://www.youtube.com/watch?v=JdbmDSV9wIU)
+:::
+
+:::{dropdown} Popup Dialog with Panels
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/-fhI2imoo4U" title="Popup Dialog with Panels" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog with Panels — YouTube で開く](https://www.youtube.com/watch?v=-fhI2imoo4U)
+:::
+
+:::{dropdown} Popup Dialog with Custom Layout
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/sF10rVDVo-k" title="Popup Dialog with Custom Layout" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog with Custom Layout — YouTube で開く](https://www.youtube.com/watch?v=sF10rVDVo-k)
+:::
+
+:::{dropdown} Popup Dialog with Complex Layout
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/MbnaiXBwBJI" title="Popup Dialog with Complex Layout" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog with Complex Layout — YouTube で開く](https://www.youtube.com/watch?v=MbnaiXBwBJI)
+:::
+
+
+(author-videos-regular)=
+
+## Regular Menu
+
+関連資料：[現在のリファレンス](../editors/regular_menu_editor.md)
+
+:::{dropdown} Menu Editor
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/bvDADkqMLEw" title="Menu Editor" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Menu Editor — YouTube で開く](https://www.youtube.com/watch?v=bvDADkqMLEw)
+:::
+
+
+(author-videos-property)=
+
+## Property
+
+関連資料：[現在のリファレンス](../editors/property_editor.md)
+
+:::{dropdown} Property Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/xQ-ETd8xacA" title="Property Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Property Editor for Blender — YouTube で開く](https://www.youtube.com/watch?v=xQ-ETd8xacA)
+:::
+
+
+(author-videos-macro)=
+
+## Macro Operator
+
+関連資料：[現在のリファレンス](../editors/macro_operator_editor.md)
+
+:::{dropdown} Macro Operator Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/x4HhN4aHCxg" title="Macro Operator Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Macro Operator Editor for Blender — YouTube で開く](https://www.youtube.com/watch?v=x4HhN4aHCxg)
+:::
+
+:::{dropdown} Macro Operator Tutorial by Jimmy Livefjord
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/-RQFK1kqqVw" title="Macro Operator Tutorial by Jimmy Livefjord" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Macro Operator Tutorial by Jimmy Livefjord — YouTube で開く](https://www.youtube.com/watch?v=-RQFK1kqqVw)
+:::
+
+
+(author-videos-modal)=
+
+## Modal Operator
+
+関連資料：[現在のリファレンス](../editors/modal_operator_editor.md)
+
+:::{dropdown} Modal Operator Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/aDEX5bix384" title="Modal Operator Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Modal Operator Editor for Blender — YouTube で開く](https://www.youtube.com/watch?v=aDEX5bix384)
+:::
+
+
+(author-videos-sticky)=
+
+## Sticky Key
+
+関連資料：[現在のリファレンス](../editors/sticky_key_editor.md)
+
+:::{dropdown} Sticky Key Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/pcFOPWnHC7U" title="Sticky Key Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Sticky Key Editor for Blender — YouTube で開く](https://www.youtube.com/watch?v=pcFOPWnHC7U)
+:::
+
+
+(author-videos-stack)=
+
+## Stack Key
+
+関連資料：[現在のリファレンス](../editors/stack_key_editor.md)
+
+:::{dropdown} Stack Keys in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/4wZKiyKE_P4" title="Stack Keys in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Stack Keys in Blender — YouTube で開く](https://www.youtube.com/watch?v=4wZKiyKE_P4)
+:::
+
+:::{dropdown} Blender Stack Key Tutorial by Jimmy Livefjord
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/-rknBwAPypk" title="Blender Stack Key Tutorial by Jimmy Livefjord" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Blender Stack Key Tutorial by Jimmy Livefjord — YouTube で開く](https://www.youtube.com/watch?v=-rknBwAPypk)
+:::
+
+
+(author-videos-hotkey)=
+
+## マウス操作・呼び出し方
+
+関連資料：{ref}`共通の Hotkey 設定 <hotkey-editor>`
+
+:::{dropdown} Advanced Mouse Hotkeys in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/9cGWQF6L4o4" title="Advanced Mouse Hotkeys in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Advanced Mouse Hotkeys in Blender — YouTube で開く](https://www.youtube.com/watch?v=9cGWQF6L4o4)
+:::
+
+:::{dropdown} Double Click + Hold
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/8XUvscCCviA" title="Double Click + Hold" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Double Click + Hold — YouTube で開く](https://www.youtube.com/watch?v=8XUvscCCviA)
+:::
+
+
+(author-videos-poll)=
+
+## コンテキスト・呼び出し条件
+
+関連資料：[現在のリファレンス](poll_method.md)
+
+:::{dropdown} Context Sensitive Menus in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/m8pCPZdK_qc" title="Context Sensitive Menus in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Context Sensitive Menus in Blender — YouTube で開く](https://www.youtube.com/watch?v=m8pCPZdK_qc)
+:::
+
+
+(author-videos-panels)=
+
+## パネルの構成・非表示・拡張
+
+関連資料：[Side Panel](../editors/side_panel_editor.md) / [パネルの非表示](../editors/hiding_unused_panels.md) / [Interactive Panels と Extend Panel](../editors/interactive_panels.md)
+
+:::{dropdown} Side Panel Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/BGs0de6ZYdw" title="Side Panel Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Side Panel Editor for Blender — YouTube で開く](https://www.youtube.com/watch?v=BGs0de6ZYdw)
+:::
+
+:::{dropdown} Hiding unused panels in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/z19c6b7XOWo" title="Hiding unused panels in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Hiding unused panels in Blender — YouTube で開く](https://www.youtube.com/watch?v=z19c6b7XOWo)
+:::
+
+:::{dropdown} Extending Panels in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/iO9PzLX6EDQ" title="Extending Panels in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Extending Panels in Blender — YouTube で開く](https://www.youtube.com/watch?v=iO9PzLX6EDQ)
+:::
+
+
+(author-videos-toolbar)=
+
+## 旧版のツールバー
+
+関連資料：{ref}`PME Toolbar の既存資料 <pme-toolbar>`
+
+:::{dropdown} Toolbars in Blender 2.79
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/PB3wtlZ6AaM" title="Toolbars in Blender 2.79" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Toolbars in Blender 2.79 — YouTube で開く](https://www.youtube.com/watch?v=PB3wtlZ6AaM)
+:::
+
+
+(author-videos-script)=
+
+## スクリプト
+
+関連資料：[現在のリファレンス](scripting_workflow.md)
+
+:::{dropdown} Script Editor
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/A81jLLynssk" title="Script Editor" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Script Editor — YouTube で開く](https://www.youtube.com/watch?v=A81jLLynssk)
+:::
+
+
+(author-videos-installation)=
+
+## 旧版のインストール
+
+現行版の導入は [インストール](../getting_started/installation.md) を参照してください。以下は旧版の記録です。
+
+:::{dropdown} Pie Menu Editor: Installation
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/HTAsqEyZnEs" title="Pie Menu Editor: Installation" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Pie Menu Editor: Installation — YouTube で開く](https://www.youtube.com/watch?v=HTAsqEyZnEs)
+:::

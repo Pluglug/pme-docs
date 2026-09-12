@@ -1,0 +1,762 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Poll Method" href="poll_method.html"><link rel="prev" title="Settings" href="../editors/settings.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>Writing and Running Code - Pie Menu Editor 2.0.5.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=6b3a701d" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/editor-overview.css?v=8fac9edf" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+      }
+    }
+  }
+</style>
+
+<script type="text/javascript">
+    (function () {
+        if (window.__PMEBeaconInitialized) {
+            return;
+        }
+
+        window.__PMEBeaconInitialized = true;
+
+        !function(e,t,n){function a(){var e=t.getElementsByTagName("script")[0],n=t.createElement("script");n.type="text/javascript",n.async=!0,n.src="https://beacon-v2.helpscout.net",e.parentNode.insertBefore(n,e)}if(e.Beacon=n=function(t,n,a){e.Beacon.readyQueue.push({method:t,options:n,data:a})},n.readyQueue=[],"complete"===t.readyState)return a();e.attachEvent?e.attachEvent("onload",a):e.addEventListener("load",a,!1)}(window,document,window.Beacon||function(){});
+        window.Beacon('init', 'e458ab6a-6436-4e96-a0b6-038336504b24');
+        window.Beacon('config', {
+            display: {
+                style: 'manual'
+            }
+        });
+
+        window.PMEDocs = window.PMEDocs || {};
+        window.PMEDocs.beaconPrefillTemplates = {
+            supportRequest: [
+                'Summary:',
+                '- What went wrong?',
+                '',
+                'Steps to reproduce:',
+                '1.',
+                '2.',
+                '3.',
+                '',
+                'What happened:',
+                '- Describe the actual result.',
+                '',
+                'Environment:',
+                '- Blender version:',
+                '- PME version:',
+                '- OS:',
+                '',
+                'Attachments:',
+                '- PME setup JSON:',
+                '- Console output / screenshot:',
+                '- Small .blend file (if relevant):',
+                '',
+                'Additional notes:',
+                '- Anything else that may help.'
+            ].join('\n')
+        };
+
+        window.PMEDocs.openSupportBeacon = function (event, templateName) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            if (typeof window.Beacon === 'function') {
+                const prefillText = window.PMEDocs.beaconPrefillTemplates[templateName];
+                if (prefillText) {
+                    window.Beacon('prefill', {
+                        text: prefillText
+                    });
+                }
+
+                window.Beacon('open');
+                window.Beacon('navigate', '/ask/message/');
+                return false;
+            }
+
+            return true;
+        };
+
+        document.addEventListener('click', function (event) {
+            const trigger = event.target.closest('[data-beacon-open]');
+            if (!trigger) {
+                return;
+            }
+
+            window.PMEDocs.openSupportBeacon(event, trigger.dataset.beaconTemplate);
+        });
+    }());
+</script></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Pie Menu Editor 2.0.5.5 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor 2.0.5.5 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/basic_pie_menu.html">Create Your First Pie Menu</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="examples.html">Examples &amp; Ideas</a><input aria-label="Toggle navigation of Examples &amp; Ideas" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="scripting_workflow.html">Code Examples</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Editors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../editors/editor_common_elements.html">Common Editor Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/vector_menu_editor.html">Vector Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/popup_dialog_editor.html">Pop-up Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/floating_panel_editor.html">Floating Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/property_editor.html">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/property_stack_editor.html">Property Stack Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/context_router_editor.html">Context Router Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/side_panel_editor.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/hiding_unused_panels.html">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/interactive_panels.html">Interactive Panels and Extend Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/ui_customization.html">UI Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/context_menu.html">Capture Menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/custom_icons.html">Custom Icons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../editors/settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Scripting</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Writing and Running Code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="poll_method.html">Poll Method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scripting.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="keymap_guide.html">Choosing a Keymap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keymap_duplicates.html">Keymap Conflicts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_locations.html">File Locations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boot_options.html">Boot Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_options.html">Developer Options</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="index.html">Reference Guide</a><input aria-label="Toggle navigation of Reference Guide" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="original_author_videos.html">Original Author’s Videos</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
+</ul>
+
+</div>
+</div>
+<nav class="documentation-languages" aria-label="Language">
+  
+  <a href="command_text.html" lang="en" hreflang="en" aria-label="English" title="English" aria-current="true"><span aria-hidden="true">🇺🇸</span></a>
+  
+  <a href="../ja/reference/command_text.html" lang="ja" hreflang="ja" aria-label="日本語" title="日本語"><span aria-hidden="true">🇯🇵</span></a>
+  
+</nav>
+<script>
+(() => {
+  const links = [...document.querySelectorAll('.documentation-languages a')];
+  const targets = links.map(link => link.getAttribute('href'));
+  function syncFragment() {
+    links.forEach((link, index) => { link.href = targets[index] + window.location.hash; });
+  }
+  syncFragment();
+  window.addEventListener('hashchange', syncFragment);
+})();
+</script>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/reference/command_text.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="writing-and-running-code">
+<span id="command-text"></span><h1>Writing and Running Code<a class="headerlink" href="#writing-and-running-code" title="Link to this heading">¶</a></h1>
+<p>This reference covers the format and execution rules for Python code entered in PME 2.1.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>First: PME code fields use one line</p>
+<ul class="simple">
+<li><p><strong>Standard Command / Custom fields and menu Poll fields take a single line of code.</strong> Use <code class="docutils literal notranslate"><span class="pre">;</span></code> or expressions for short operations.</p></li>
+<li><p><strong>Move longer or reusable logic into an external Python file.</strong> Keep a short call such as <code class="docutils literal notranslate"><span class="pre">execute_script(&quot;scripts/my_action.py&quot;)</span></code> in the PME field.</p></li>
+</ul>
+<p>AI-generated answers should also distinguish a multiline external file from the single line to paste into PME.</p>
+</div>
+<p id="code-input-limit">For AI authors: standard slot Command / Custom fields accept up to 1,024 UTF-8 bytes. Move longer code into an external file. The dedicated Context Router Custom field accepts up to 32,768 characters.</p>
+<p>For functions, variables, and arguments, see the <a class="reference internal" href="scripting.html"><span class="std std-doc">API Reference</span></a>. For menu availability, see <a class="reference internal" href="poll_method.html"><span class="std std-doc">Poll Method</span></a>.</p>
+<section id="prepare-one-line-for-the-code-field">
+<span id="code-one-line"></span><h2>Prepare one line for the code field<a class="headerlink" href="#prepare-one-line-for-the-code-field" title="Link to this heading">¶</a></h2>
+<p>Enter short operations as a single line in standard Command / Custom fields and menu Poll fields. Multiline Python formatted for explanation is not ready to paste into these fields.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Operation</p></th>
+<th class="head"><p>Single-line form</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Run simple statements in order</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">1;</span> <span class="pre">print(x)</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">;</span></code> establishes execution order; it does not wait for an interactive operation to finish</p></td>
+</tr>
+<tr class="row-odd"><td><p>Choose a value by a condition</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">value_if_true</span> <span class="pre">if</span> <span class="pre">condition</span> <span class="pre">else</span> <span class="pre">value_if_false</span></code></p></td>
+<td><p>Replace these names with your actual expressions</p></td>
+</tr>
+<tr class="row-even"><td><p>Run only when a condition is true</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">condition</span> <span class="pre">and</span> <span class="pre">action()</span></code></p></td>
+<td><p>Evaluates the right side only when the left side is true</p></td>
+</tr>
+<tr class="row-odd"><td><p>Return a Poll result</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">C.mode</span> <span class="pre">==</span> <span class="pre">'OBJECT'</span></code></p></td>
+<td><p>For menu Poll, not Command</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>You cannot convert <code class="docutils literal notranslate"><span class="pre">if</span></code> / <code class="docutils literal notranslate"><span class="pre">for</span></code> / <code class="docutils literal notranslate"><span class="pre">def</span></code> blocks simply by replacing line breaks with <code class="docutils literal notranslate"><span class="pre">;</span></code>. Move long, deeply nested, looping, or function-based logic into an <a class="reference internal" href="#external-command-script"><span class="std std-ref">external file</span></a>.</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Importing a multiline operation history</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">Some capture paths extract operator calls and assignments from an operation history and combine them into one line. This is not a way to store an arbitrary Python script unchanged. Check the captured result.</p>
+</div>
+</details></section>
+<section id="where-code-goes-and-when-it-runs">
+<h2>Where code goes and when it runs<a class="headerlink" href="#where-code-goes-and-when-it-runs" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head"><p>When evaluated</p></th>
+<th class="head"><p>What to write</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Command</p></td>
+<td><p>When the item is executed</p></td>
+<td><p>Operator calls and value changes</p></td>
+</tr>
+<tr class="row-odd"><td><p>Custom</p></td>
+<td><p>While drawing the UI, repeatedly on redraw</p></td>
+<td><p>UI layout using <code class="docutils literal notranslate"><span class="pre">L</span></code>; do not modify data merely by drawing</p></td>
+</tr>
+<tr class="row-even"><td><p>Menu Poll</p></td>
+<td><p>When checking whether the menu is available</p></td>
+<td><p>Read conditions and <code class="docutils literal notranslate"><span class="pre">return</span></code> a result; do not modify data</p></td>
+</tr>
+<tr class="row-odd"><td><p>Property Getter / Setter / Update</p></td>
+<td><p>When reading, writing, or updating a value</p></td>
+<td><p>Code for each callback’s role; see <a class="reference internal" href="../editors/property_editor.html#property-callbacks"><span class="std std-ref">callback specifications</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>A file called with <code class="docutils literal notranslate"><span class="pre">execute_script()</span></code></p></td>
+<td><p>When its caller is evaluated</p></td>
+<td><p>Code appropriate to the caller; a call from Custom runs during drawing</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>For example, putting <code class="docutils literal notranslate"><span class="pre">bpy.ops.mesh.primitive_cube_add()</span></code> in Custom adds data while the UI draws. To place a button, use <code class="docutils literal notranslate"><span class="pre">L.operator(&quot;mesh.primitive_cube_add&quot;)</span></code>.</p>
+</section>
+<section id="names-provided-by-pme-and-names-you-define">
+<h2>Names provided by PME and names you define<a class="headerlink" href="#names-provided-by-pme-and-names-you-define" title="Link to this heading">¶</a></h2>
+<p>PME supplies convenient names in its code fields, but the available values are not identical in every field. This table introduces Command / Custom and files called from them with <code class="docutils literal notranslate"><span class="pre">execute_script()</span></code>.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Purpose</p></th>
+<th class="head"><p>Requirements and notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">C</span></code> / <code class="docutils literal notranslate"><span class="pre">context</span></code></p></td>
+<td><p>Read the context supplied by PME for this execution or drawing operation</p></td>
+<td><p>Not necessarily the same object as <code class="docutils literal notranslate"><span class="pre">bpy.context</span></code>; members without a target may be <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bpy</span></code></p></td>
+<td><p>Use Blender’s API</p></td>
+<td><p>PME may adjust how <code class="docutils literal notranslate"><span class="pre">bpy.context</span></code> is exposed on some drawing paths</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">D</span></code></p></td>
+<td><p>Access Blender data</p></td>
+<td><p>Shortcut for <code class="docutils literal notranslate"><span class="pre">bpy.data</span></code>; does not guarantee that a particular object exists</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">O</span></code></p></td>
+<td><p>Call Blender operators</p></td>
+<td><p>Shortcut for <code class="docutils literal notranslate"><span class="pre">bpy.ops</span></code>; operator requirements still apply</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">T</span></code></p></td>
+<td><p>Access Blender types</p></td>
+<td><p>Shortcut for <code class="docutils literal notranslate"><span class="pre">bpy.types</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">L</span></code></p></td>
+<td><p>Draw UI elements in the current layout</p></td>
+<td><p>Available during drawing that receives a layout, such as Custom; not an operation target for Command</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">E</span></code></p></td>
+<td><p>Inspect the input event passed to this operation</p></td>
+<td><p>The name itself may be unavailable when evaluation has no event</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">U</span></code></p></td>
+<td><p>Share temporary values within a PME session</p></td>
+<td><p>Not persistent storage; do not use it for values that must survive PME re-registration or a Blender restart</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Check the field-specific meaning of names such as <code class="docutils literal notranslate"><span class="pre">pm</span></code>, <code class="docutils literal notranslate"><span class="pre">pmi</span></code>, and <code class="docutils literal notranslate"><span class="pre">menu</span></code>. For example, <code class="docutils literal notranslate"><span class="pre">menu</span></code> in a Property callback is the Property ID. Consult <a class="reference internal" href="../editors/property_editor.html"><span class="std std-doc">Property callbacks</span></a> before reusing code from another type of slot.</p>
+<p>Define or import your own functions, <code class="docutils literal notranslate"><span class="pre">mathutils.Vector</span></code>, and other modules in the external file that uses them. Do not confuse names PME supplies now with variables previously entered in the Python Console.</p>
+</section>
+<section id="run-an-external-file">
+<span id="external-command-script"></span><h2>Run an external file<a class="headerlink" href="#run-an-external-file" title="Link to this heading">¶</a></h2>
+<p>Write longer logic in a regular Python file and call it from PME with <code class="docutils literal notranslate"><span class="pre">execute_script()</span></code>. This example displays the number of selected objects.</p>
+<p><strong>1. Save the file</strong> — Save <code class="docutils literal notranslate"><span class="pre">selection_report.py</span></code> in the user scripts folder described in <a class="reference internal" href="file_locations.html"><span class="std std-doc">File Locations</span></a>.</p>
+<p><strong>File contents (multiline):</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">return_value</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">build_report</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">prefix</span><span class="p">):</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="s2">"selected_objects"</span><span class="p">,</span> <span class="p">())</span> <span class="ow">or</span> <span class="p">()</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+
+<span class="n">report</span> <span class="o">=</span> <span class="n">build_report</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"prefix"</span><span class="p">,</span> <span class="s2">"Selection"</span><span class="p">)))</span>
+<span class="n">message_box</span><span class="p">(</span><span class="n">report</span><span class="p">)</span>
+<span class="n">return_value</span> <span class="o">=</span> <span class="n">report</span>
+</pre></div>
+</div>
+<p><strong>2. Set up the call</strong> — Paste this line into a pie menu slot’s <strong>Command</strong> field.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">execute_script</span><span class="p">(</span><span class="s2">"scripts/selection_report.py"</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">"Selected objects"</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>3. Check the result</strong> — Select objects in the 3D Viewport’s Object Mode and run the item. A message shows the selection count. Deselect everything and run it again to see <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+<section id="file-paths-and-arguments">
+<h3>File paths and arguments<a class="headerlink" href="#file-paths-and-arguments" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Item</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scripts/selection_report.py</span></code></p></td>
+<td><p>Searches the user scripts folder first, then PME’s bundled scripts</p></td>
+</tr>
+<tr class="row-odd"><td><p>Other relative paths</p></td>
+<td><p>Relative to the add-on folder; absolute paths are also accepted</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">kwargs</span></code></p></td>
+<td><p>Dictionary of arguments passed by the call; a variable named <code class="docutils literal notranslate"><span class="pre">prefix</span></code> is not created automatically</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">__file__</span></code></p></td>
+<td><p>Path of the file actually loaded</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">return_value</span></code></p></td>
+<td><p>The return value of <code class="docutils literal notranslate"><span class="pre">execute_script()</span></code>; assign to this instead of using a top-level <code class="docutils literal notranslate"><span class="pre">return</span></code> statement</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Assign the call to a variable if you need its result. A return value is not displayed automatically, which is why this example calls <code class="docutils literal notranslate"><span class="pre">message_box()</span></code>. In PME 2.1, functions defined in the same execution can also access imports and definitions at the beginning of the file.</p>
+<p>Moving code into a file does not change the caller’s context or evaluation timing. Include the file when sharing the setup with another environment.</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Using the return value to check success</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">The default <code class="docutils literal notranslate"><span class="pre">return_value</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>. Some paths that catch an exception can still return this value, so it is not a general success indicator. This example starts with <code class="docutils literal notranslate"><span class="pre">False</span></code> and assigns the result at the end. Check error output and the actual result as well. This assignment does not roll back data changes made before a failure.</p>
+</div>
+</details></section>
+</section>
+<section id="operator-context-and-timing">
+<span id="code-operator-context"></span><h2>Operator context and timing<a class="headerlink" href="#operator-context-and-timing" title="Link to this heading">¶</a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">bpy.ops</span></code> call depends on where it runs as well as its arguments. The same code can behave differently when called from the 3D Viewport or a button in Preferences.</p>
+<ul class="simple">
+<li><p>Are you in the required editor and region?</p></li>
+<li><p>Is the mode correct, with the required active and selected targets?</p></li>
+<li><p>Do the argument names and values exist in your Blender version?</p></li>
+<li><p>Should the operation execute immediately, or start an interaction the user adjusts with the mouse?</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">EXEC_DEFAULT</span></code> executes with the supplied values. <code class="docutils literal notranslate"><span class="pre">INVOKE_DEFAULT</span></code> calls the operator’s initialization path, which may open a dialog or begin mouse interaction. Not every operator supports both forms. See <a class="reference external" href="https://docs.blender.org/api/current/bpy.ops.html">Blender’s Operator API</a>.</p>
+<p>When an operator returns <code class="docutils literal notranslate"><span class="pre">RUNNING_MODAL</span></code>, user interaction is still in progress. Python written after its call with <code class="docutils literal notranslate"><span class="pre">;</span></code> does not wait for confirmation. Consider a <a class="reference internal" href="../editors/macro_operator_editor.html"><span class="std std-doc">Macro Operator</span></a> for sequences that include user adjustments.</p>
+<p>Adding code that switches to the first area it finds whenever a context error occurs can make an operation run in an unintended view. Start by calling it from the intended editor and checking the hotkey’s scope. If it must target another area, define how to choose that area and what to do when none exists.</p>
+</section>
+<section id="diagnose-errors">
+<h2>Diagnose errors<a class="headerlink" href="#diagnose-errors" title="Link to this heading">¶</a></h2>
+<p>Results displayed in Blender’s Python Console and the destination of PME’s <code class="docutils literal notranslate"><span class="pre">print()</span></code> output are not necessarily the same. Check Blender’s standard output and error output for <code class="docutils literal notranslate"><span class="pre">print()</span></code> and Python exceptions. On macOS, this may be the terminal used to launch Blender.</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Symptom</p></th>
+<th class="head"><p>Check first</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NameError</span></code></p></td>
+<td><p>Is the required name imported or defined in this file? Does this field provide <code class="docutils literal notranslate"><span class="pre">L</span></code> or <code class="docutils literal notranslate"><span class="pre">E</span></code>?</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></p></td>
+<td><p>Is the dependency installed in Blender’s Python, rather than only the system Python?</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AttributeError</span></code> / <code class="docutils literal notranslate"><span class="pre">NoneType</span></code></p></td>
+<td><p>Missing targets, object type, property names, and Blender version</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">poll()</span> <span class="pre">failed</span></code></p></td>
+<td><p>The editor, region, mode, and selection required by the Blender operator</p></td>
+</tr>
+<tr class="row-even"><td><p>Syntax error at the end of the code</p></td>
+<td><p>Does the pasted code match the original?</p></td>
+</tr>
+<tr class="row-odd"><td><p>Works in the Text Editor but not PME</p></td>
+<td><p>Missing imports, variables left from a previous execution, or a different execution context</p></td>
+</tr>
+<tr class="row-even"><td><p>Runs but gives an unexpected result</p></td>
+<td><p>Operator results such as <code class="docutils literal notranslate"><span class="pre">CANCELLED</span></code>, target selection, and interactive operations still in progress</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Run a short diagnostic Command from the intended editor to identify the state in which an error occurs.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"PME context:"</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">area</span><span class="p">,</span> <span class="s2">"type"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="n">C</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span> <span class="n">C</span><span class="o">.</span><span class="n">active_object</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Confirm one operation before adding branches or sequences. For data changes, test both with and without a target, and check Undo / Redo. Joining statements with <code class="docutils literal notranslate"><span class="pre">;</span></code> or using <code class="docutils literal notranslate"><span class="pre">EXEC_DEFAULT</span></code> does not guarantee a single Undo step. Do not add <code class="docutils literal notranslate"><span class="pre">bpy.ops.ed.undo_push()</span></code> mechanically without checking the history.</p>
+</section>
+<section id="related-references">
+<h2>Related references<a class="headerlink" href="#related-references" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="scripting_workflow.html"><span class="std std-doc">Code Examples</span></a>: configurations and code to paste.</p></li>
+<li><p><a class="reference internal" href="scripting.html"><span class="std std-doc">API Reference</span></a>: functions and variables.</p></li>
+<li><p><a class="reference internal" href="public_api.html"><span class="std std-doc">Public API</span></a>: using PME from external add-ons and scripts.</p></li>
+<li><p><a class="reference internal" href="scripting_workflow.html#scripting-user-data"><span class="std std-ref">Sharing temporary values</span></a>: choosing between <code class="docutils literal notranslate"><span class="pre">U</span></code> and persistent storage.</p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="poll_method.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Poll Method</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../editors/settings.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Settings</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Writing and Running Code</a><ul>
+<li><a class="reference internal" href="#prepare-one-line-for-the-code-field">Prepare one line for the code field</a></li>
+<li><a class="reference internal" href="#where-code-goes-and-when-it-runs">Where code goes and when it runs</a></li>
+<li><a class="reference internal" href="#names-provided-by-pme-and-names-you-define">Names provided by PME and names you define</a></li>
+<li><a class="reference internal" href="#run-an-external-file">Run an external file</a><ul>
+<li><a class="reference internal" href="#file-paths-and-arguments">File paths and arguments</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#operator-context-and-timing">Operator context and timing</a></li>
+<li><a class="reference internal" href="#diagnose-errors">Diagnose errors</a></li>
+<li><a class="reference internal" href="#related-references">Related references</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=2f8f0f10"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

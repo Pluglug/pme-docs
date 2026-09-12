@@ -1,0 +1,417 @@
+(pie-menu-editor)=
+
+# Pie Menu Editor
+
+**Pie Menu** arranges actions in Blender's pie menu.
+Edit eight directional items and two extra slots at the top and bottom.
+Open it from a shortcut or another menu's Menu slot.
+
+Setting names and constraints on this page describe PME 2.1.
+Older images and videos may show a different interface or arrangement.
+
+(pie-configuration-guide)=
+
+:::{dropdown} Configuration guide — features, combinations, and uses (for AI)
+
+**Name: Pie Menu / Type ID: `PMENU`.**
+Use the name in user explanations and the type ID when checking data or implementation.
+Its role is to display the contents of eight directional slots and two extras using Blender's native pie menu.
+There are **ten fixed slots**. Empty slots retain their positions.
+
+**Slot assignments**
+
+| Tab | Assignment and purpose | Type ID |
+|---|---|---|
+| Command | Runs an action: one operator or Python performing several operations | `COMMAND` |
+| Property | Places a widget to display or change a value at an RNA property path | `PROP` |
+| Menu | References another PME customization. Invocation and drawing depend on the target | `MENU` |
+| Hotkey | Finds a key assignment in the runtime context and runs its operator. See {ref}`difference from key input <pie-hotkey-slot>` | `HOTKEY` |
+| Custom | Draws UI directly with Python using Blender's `UILayout`. `L` is the layout. Wrap multiple elements in one column or box | `CUSTOM` |
+
+Unassigned slots are empty (`EMPTY`). Before proposing code, check destination-specific constraints in
+[Code Input and Execution](../reference/command_text.md).
+
+**Common Menu combinations**
+
+- **Pie Menu → Pie Menu**: opens a nested pie. To organize actions by category and move into a child while holding the trigger key, enable the parent's **Confirm on Release and a positive Confirm Threshold**. See {ref}`nested setup <pie-nested-pattern>`.
+- **Pie Menu → Regular Menu / Popup Dialog**: opens a separate menu, or places its contents inside the pie with **Expand Regular Menu / Expand Popup Dialog**. Expanded Popup Dialog width and position can be set on the destination slot. See {ref}`expansion options and requirements <pie-menu-expand>`.
+- **Pie Menu → Property / Property Stack**: places the property's widget. This is not an action that opens a child menu.
+
+These are examples, not an exhaustive target list. Menu tab references and script calls from Command use different routes.
+
+**Uses and design decisions**
+
+- **Open from a hotkey**: choose the editor, Keymap, and key. Click Drag uses the setting value `TWEAK`. See {ref}`Keymap / Hotkey <pie-hotkey-settings>`.
+- **Use as a Context Router branch**: choose a Pie Menu by mode or target. Define branch conditions and fallback behavior. See {ref}`context-dependent switching <pie-context-pattern>`.
+- **Move from a parent pie into detailed actions**: assign categories to the parent and individual actions to children. Choose between clicking to open or holding the key and moving outward. See {ref}`nested setup <pie-nested-pattern>`.
+
+Combining menus does not guarantee that each action has its required editor, mode, and target.
+See {ref}`Poll <poll-method>` for availability, and {ref}`menu slots <pie-slot-controls>` for placement and editing.
+:::
+
+## Interface and editing workflow
+
+```{raw} html
+:file: common/_pie_overview_map.html
+```
+
+1. {ref}`Name and basic controls <pie-basic-settings>`
+2. {ref}`Advanced settings <pie-advanced-settings>`
+3. {ref}`Keymap / Hotkey <pie-hotkey-settings>`
+4. {ref}`Menu slots <pie-slot-controls>`
+
+Configure advanced settings and invocation, then assign actions or properties to the ten slots.
+
+**Expand Slot Tools** is a display setting that exposes edit, copy, move, and other controls at each slot's right end.
+See the shared {ref}`Expand Slot Tools <expand-slot-tools>` description for their behavior.
+Names, tags, search, adding menus, and overall editor operation are covered in [Common Editor Elements](editor_common_elements.md).
+The following sections describe Pie Menu-specific placement and behavior.
+
+(pie-basic-settings)=
+
+## Name and basic controls
+
+```{raw} html
+<figure class="pme-overview pme-overview--pie">
+  <div class="pme-overview__crop" style="--crop-ratio:614 / 31;--crop-offset:-6.84210526%">
+    <img src="../_static/images/editors/pie_menu/pie-editor-focused-blender-5-2.png" width="614" height="570" alt="Transform Preset Pie name row, with enabled state, preview, menu selector, name, tags, documentation, and advanced settings.">
+  </div>
+  <figcaption>Name and basic controls for the selected menu.</figcaption>
+</figure>
+```
+
+From left to right: **Enable/Disable → Preview → Menu selector → Name → Tags → Documentation → Advanced settings**.
+
+The **menu name** identifies the entire customization: **Transform Preset Pie** in the image.
+Use this row to set the name and enabled state and open preview or advanced settings.
+It is separate from the display names on individual slots. See {ref}`selected menu settings <overview-selected>` for each button.
+
+(pie-advanced-settings)=
+
+## Advanced settings
+
+```{raw} html
+<figure class="pme-overview pme-overview--pie">
+  <div class="pme-overview__crop" style="--crop-ratio:614 / 156;--crop-offset:-12.80701754%">
+    <img src="../_static/images/editors/pie_menu/pie-editor-focused-blender-5-2.png" width="614" height="570" alt="Expanded advanced settings: Description, Poll, Radius, Threshold, Confirm Threshold, and Confirm on Release.">
+  </div>
+  <figcaption>Advanced settings expanded. Values belong to this example menu.</figcaption>
+</figure>
+```
+
+**Advanced settings** controls the description, availability, display radius, and how items are selected and confirmed.
+Open it with the selected menu's gear button.
+
+- **Description**: the menu's description, optionally returned dynamically by Python. See the shared {ref}`Description settings <menu-description>`.
+- **Poll**: tests whether the menu is available in the current context. See the shared {ref}`Description / Poll settings <editor-extra-settings>`.
+
+The following settings control Pie Menu distances and confirmation.
+
+| Setting | Meaning | Range and default |
+|---|---|---|
+| Radius | Display radius, separate from selection distance | `-1`–`1000`; `-1` uses Blender's current setting |
+| Confirm on Release | Enables confirming an item by releasing the trigger key | On by default |
+| Threshold | Distance from the center before directional selection starts | `-1`–`1000`; `-1` uses the default referenced by PME |
+| Confirm Threshold | Additional distance beyond Threshold for distance-based confirmation | `-1`–`1000`; `-1` uses the default; `0` disables distance-based confirmation |
+
+Distance fields use pixels. Blender's UI scale also affects the actual thresholds.
+Threshold and Confirm Threshold appear when Confirm on Release is on.
+With it off, these per-menu distance settings are not used.
+
+When Radius differs from Blender's current value, PME temporarily disables
+pie menu animation to apply the custom display radius.
+
+### Selection distance versus display radius
+
+This diagram shows the distances used when holding the trigger key to select an ordinary directional item.
+Radius controls where items are drawn and is not added to the confirmation distance.
+
+```{mermaid}
+:name: pie-selection-distance
+:alt: Directional selection starts at Threshold from the center. Adding Confirm Threshold gives the distance-based confirmation boundary.
+
+flowchart LR
+    A["Center"] -->|"Threshold"| B["Selection begins"]
+    B -->|"Confirm Threshold"| C["Distance confirmation boundary"]
+```
+
+Distance-based confirmation is available when Confirm Threshold is positive.
+For example, Threshold `20` and Confirm Threshold `40`
+put the confirmation boundary `60` from the center before UI scaling.
+Confirm Threshold does not need to exceed Threshold.
+Crossing the boundary does not execute immediately: Blender confirms after detecting a brief pause in mouse movement.
+
+Confirm on Release also does not guarantee that a short tap of the trigger key closes the menu.
+A short tap can switch Blender to click selection instead.
+
+
+(pie-hotkey-settings)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--pie">
+  <div class="pme-overview__crop" style="--crop-ratio:614 / 76;--crop-offset:-41.05263158%">
+    <img src="../_static/images/editors/pie_menu/pie-editor-focused-blender-5-2.png" width="614" height="570" alt="Keymap set to 3D View Generic and Hotkey to Shift C.">
+  </div>
+  <figcaption>Example invocation location and key settings.</figcaption>
+</figure>
+```
+
+From top to bottom: **Keymap (where) → Hotkey (trigger key) → Modifiers**. Use the triangle on the left to set **Open Mode (trigger action)**.
+
+Keymap selects where the menu is available; Hotkey defines its key combination.
+See the shared {ref}`Hotkey settings <hotkey-editor>` for the input controls.
+
+Standard Open Modes are **Press** / **Hold** / **Double Click** / **Click Drag** / **Key Chords**.
+Click Drag opens the menu through a dragging action.
+Distinguish Experimental modes from the ordinary choices.
+
+Open Mode determines when the menu opens. It is separate from Confirm on Release and Threshold,
+which affect selection and confirmation after opening.
+
+(pie-slot-controls)=
+
+## Menu slots
+
+```{raw} html
+:file: common/_pie_slot_map.html
+```
+
+The first eight rows correspond to the eight pie directions; the two separated rows below are the extra top and bottom slots.
+The image has **Expand Slot Tools on**, exposing action buttons at the right.
+
+Slots are the actions, properties, and other items placed in the pie.
+Pie Menu has ten slots.
+
+- Eight directions (up, down, left, right, and four diagonals) plus two extra vertical slots at the top and bottom.
+- Slot positions and count are fixed. **Move Slot** swaps contents between positions.
+- Directions are absolute screen directions relative to the menu's invocation position.
+- Empty slots are not drawn in the pie.
+
+The following slot types are available. Shared field controls and code guidance are in the
+{ref}`Slot Editor <slot-editor>` section.
+
+| Type | Content placed in the pie |
+|---|---|
+| Command | An item that runs an action when selected |
+| Property | A widget displaying and changing a value at an RNA path |
+| Menu | A link to another PME menu |
+| Hotkey | An item invoking an operator from a key assignment in the runtime context |
+| Custom | UI drawn directly with Python and Blender's `UILayout`. Wrap several elements in one column or box |
+
+Adding several Custom elements directly to the pie layout shifts the directions used by subsequent items.
+See Custom under {ref}`slot types <slot-types>` for grouping UI within one slot.
+Editing, icons, labels, and extra tools are covered in the shared {ref}`slot list <slot-list>`.
+
+(pie-slot-edit)=
+
+### A. Edit a slot
+
+Click the leftmost **direction arrow** to open the {ref}`Slot Editor <slot-editor>`.
+Choose Command / Property / Menu or another tab and configure the contents.
+In this image, the arrow indicates the slot's pie position.
+
+(pie-slot-icon)=
+
+### B. Icon
+
+The control next to the arrow sets the **icon displayed on the slot**.
+It is separate from the leftmost Edit Slot button.
+
+(pie-slot-label)=
+
+### C. Display name
+
+Text such as **Local** is the slot label shown in the menu.
+It is separate from the overall customization name and the target selected in the Menu tab.
+
+(pie-slot-link)=
+
+### D. Open the linked customization for editing
+
+The **chain button** opens the customization linked in the Slot Editor's **Menu** tab.
+Use it to inspect or edit linked content. Configure the target itself in the Menu tab.
+It appears only where linked-menu navigation applies.
+
+(pie-slot-options)=
+
+### E. Slot actions (Expand Slot Tools)
+
+The right end contains slot actions. In this image, **Settings > General > Expand Slot Tools is on**,
+so actions normally grouped in a menu appear as individual icons.
+
+From left to right: **Edit Slot / Copy / Move Slot / Enabled or Disabled / Clear**.
+**Paste** also appears when a slot has been copied.
+This exposes action buttons, not the slot's configuration fields.
+See the shared {ref}`Expand Slot Tools <expand-slot-tools>` description.
+
+
+---
+
+## Create and check an item
+
+1. Click Edit Slot at the desired one of the ten positions.
+2. Choose Command / Property / Menu / Hotkey / Custom according to its purpose.
+3. Set the contents, display name, and icon, then confirm with OK.
+4. Open the menu in the intended editor and check direction and behavior.
+
+See {ref}`slot presets <how-to-add-widgets>` for creating items from existing presets.
+For code, [Code Input and Execution](../reference/command_text.md) explains destinations and limits.
+Opening preview alone does not prove that an action works with the mode and selection at its actual invocation site.
+
+## Advanced uses
+
+(pie-context-pattern)=
+
+### Switch by context
+
+```{versionadded} 2.1
+Conditional routing with Context Router.
+```
+
+Use **Context Router** to choose a menu by mode or target object. Define condition scope and fallback behavior,
+then configure each branch's target.
+
+Even when testing conditions in code, do not treat every non-Object Mode context as Mesh Edit Mode,
+or assume an active object always exists.
+
+(pie-nested-pattern)=
+
+### Nested Pie Menus — from categories to actions
+
+For example, place Selection and Transform in a parent Modeling pie and link each to a separate Pie Menu.
+Set the parent's directional slots to **Menu** and select existing child Pie Menus.
+No Command code is needed simply to open a child.
+
+**Use the parent's Confirm Threshold to enter a child while holding the trigger key.**
+When distance-based confirmation occurs in the parent, the selected Menu slot opens its child.
+
+1. Set the parent to open from a hotkey and enable its **Confirm on Release**.
+2. Set the parent's **Confirm Threshold** to a positive value. For example, Threshold `20` plus Confirm Threshold `40` gives a boundary `60` from the center before UI scaling. These are illustrative values, not fixed recommendations; adjust for comfortable use.
+3. Hold the trigger key, move toward the child, then pause briefly beyond the boundary to enter it. Merely crossing the boundary does not open it instantly.
+
+Confirm Threshold `0` disables this distance-based confirmation.
+Changing Radius alone does not change the confirmation distance.
+See {ref}`Advanced settings <pie-advanced-settings>` for the calculation and defaults.
+This example applies to **directional Menu slots**; the top and bottom extras do not use the same directional selection.
+
+Check entering the child while holding the key separately from confirming the intended child action.
+Increase the parent's confirmation distance if you enter children accidentally; reduce it if entering is difficult.
+
+(pie-menu-expand)=
+
+### Open a Menu target or expand its contents inside the pie
+
+Create a **Regular Menu** for an action list or a **Popup Dialog** for settings arranged in rows and columns,
+then reference it from the pie slot's **Menu** tab.
+Enable expansion on the referencing slot to show the contents in place.
+
+| Target referenced from the pie | Expansion off | Expansion on |
+|---|---|---|
+| Regular Menu | Select to open a separate menu | **Expand Regular Menu** places its items inside the pie |
+| Popup Dialog | Select to open a separate dialog | **Expand Popup Dialog** places its layout inside the pie |
+
+```{versionadded} 2.1
+**Expand Regular Menu** draws the Regular Menu's items within the pie.
+```
+Do not confuse it with **Open on Mouse Over** offered by other placements.
+For a Pie Menu reference, expansion does not mean opening a separate menu on hover.
+**Expand Slot Tools** is also separate: it exposes editing buttons in the editor.
+
+**Width and position of an expanded Popup Dialog**
+
+```{versionadded} 2.1
+Set the expanded Popup Dialog's width and position on its destination slot.
+```
+
+The same dialog can have different settings at each placement.
+
+- **Width**: `-1` is natural width (Auto). An explicit value ranges from `100` to `2000` pixels.
+- **Radial Offset**: distance outward along the slot's direction. Pie Menu does not support inward movement here.
+- These controls apply to **Pie Menu → Popup Dialog with expansion on**. Do not assume the same controls exist for Regular Menu expansion.
+
+See [Popup Dialog Editor](popup_dialog_editor.md) for the dialog's own row-and-column layout.
+
+### Call another menu from a script
+
+A Command slot can call a menu by name as follows:
+This example requires a menu named `My Sub Menu`.
+
+```python
+open_menu("My Sub Menu")
+```
+
+**Open on Mouse Over** opens supported menus on hover.
+It is distinct from entering a child pie through directional selection.
+
+(pie-hotkey-slot)=
+
+### Hotkey slots versus actual key input
+
+A Hotkey slot searches the **Keymaps for the runtime editor and mode** for an enabled **Press** assignment
+matching the specified key and modifiers, then calls an available operator.
+The same key can produce different results according to context and the user's key assignments.
+
+This does not reproduce the key's press, hold, and release events.
+Do not assume it can replay Hold, Double Click, or keys within a modal interaction.
+PME menu-invocation assignments are excluded from this search.
+Use the **Menu** tab to open another PME menu.
+
+### Toggles, sliders, and properties inside a pie
+
+Use a **Property slot** first when displaying an existing Blender property.
+Custom slots can combine several UI elements through layout code.
+The following example toggles the grid in the 3D Viewport.
+Check that `C.space_data` belongs to a 3D Viewport.
+
+```python
+L.prop(C.space_data.overlay, "show_floor")
+```
+
+For settings such as proportional editing, whose source varies by editor or mode,
+one property path may not cover every context.
+Identify the display location and target data separately, then switch with Context Router if needed.
+
+---
+
+```{admonition} Related pages
+:class: seealso
+
+- [Common Editor Elements](editor_common_elements.md)
+- [Poll Method](../reference/poll_method.md)
+- [Choosing a Keymap](../reference/keymap_guide.md)
+- [Code Input and Execution](../reference/command_text.md)
+```
+
+## Reference videos (original author's channel)
+
+From [roaoao's videos](../reference/original_author_videos.md). These show an older interface and workflow.
+
+:::{dropdown} Pie Menu Editor for Blender
+:open:
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/COW109EjBsU" title="Pie Menu Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Pie Menu Editor for Blender — Open on YouTube](https://www.youtube.com/watch?v=COW109EjBsU)
+:::
+
+:::{dropdown} Pie Menu Editor Review by Jimmy Livefjord
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/dWwBbnV1IOs" title="Pie Menu Editor Review by Jimmy Livefjord" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Pie Menu Editor Review by Jimmy Livefjord — Open on YouTube](https://www.youtube.com/watch?v=dWwBbnV1IOs)
+:::
+
+:::{dropdown} Nested Pie Menu, Confirm Threshold and Sticky Keys
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/5zDp586Uy2w" title="Nested Pie Menu, Confirm Threshold and Sticky Keys" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Nested Pie Menu, Confirm Threshold and Sticky Keys — Open on YouTube](https://www.youtube.com/watch?v=5zDp586Uy2w)
+:::

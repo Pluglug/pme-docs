@@ -1,0 +1,1001 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="Property Stack Editor" href="property_stack_editor.html"><link rel="prev" title="Modal Operator Editor" href="modal_operator_editor.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>Property Editor - Pie Menu Editor 2.0.5.5 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=6b3a701d" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/editor-overview.css?v=8fac9edf" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+      }
+    }
+  }
+</style>
+
+<script type="text/javascript">
+    (function () {
+        if (window.__PMEBeaconInitialized) {
+            return;
+        }
+
+        window.__PMEBeaconInitialized = true;
+
+        !function(e,t,n){function a(){var e=t.getElementsByTagName("script")[0],n=t.createElement("script");n.type="text/javascript",n.async=!0,n.src="https://beacon-v2.helpscout.net",e.parentNode.insertBefore(n,e)}if(e.Beacon=n=function(t,n,a){e.Beacon.readyQueue.push({method:t,options:n,data:a})},n.readyQueue=[],"complete"===t.readyState)return a();e.attachEvent?e.attachEvent("onload",a):e.addEventListener("load",a,!1)}(window,document,window.Beacon||function(){});
+        window.Beacon('init', 'e458ab6a-6436-4e96-a0b6-038336504b24');
+        window.Beacon('config', {
+            display: {
+                style: 'manual'
+            }
+        });
+
+        window.PMEDocs = window.PMEDocs || {};
+        window.PMEDocs.beaconPrefillTemplates = {
+            supportRequest: [
+                'Summary:',
+                '- What went wrong?',
+                '',
+                'Steps to reproduce:',
+                '1.',
+                '2.',
+                '3.',
+                '',
+                'What happened:',
+                '- Describe the actual result.',
+                '',
+                'Environment:',
+                '- Blender version:',
+                '- PME version:',
+                '- OS:',
+                '',
+                'Attachments:',
+                '- PME setup JSON:',
+                '- Console output / screenshot:',
+                '- Small .blend file (if relevant):',
+                '',
+                'Additional notes:',
+                '- Anything else that may help.'
+            ].join('\n')
+        };
+
+        window.PMEDocs.openSupportBeacon = function (event, templateName) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            if (typeof window.Beacon === 'function') {
+                const prefillText = window.PMEDocs.beaconPrefillTemplates[templateName];
+                if (prefillText) {
+                    window.Beacon('prefill', {
+                        text: prefillText
+                    });
+                }
+
+                window.Beacon('open');
+                window.Beacon('navigate', '/ask/message/');
+                return false;
+            }
+
+            return true;
+        };
+
+        document.addEventListener('click', function (event) {
+            const trigger = event.target.closest('[data-beacon-open]');
+            if (!trigger) {
+                return;
+            }
+
+            window.PMEDocs.openSupportBeacon(event, trigger.dataset.beaconTemplate);
+        });
+    }());
+</script></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Pie Menu Editor 2.0.5.5 ドキュメント</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor 2.0.5.5 ドキュメント</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">はじめる</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/basic_pie_menu.html">基本的なパイメニューの作成</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/examples.html">使用例とアイデア</a><input aria-label="Toggle navigation of 使用例とアイデア" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/scripting_workflow.html">コード例</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">エディタ</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="editor_common_elements.html">エディターの共通要素</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector_menu_editor.html">Vector Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="popup_dialog_editor.html">Pop-up Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="floating_panel_editor.html">Floating Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property_stack_editor.html">Property Stack Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context_router_editor.html">Context Router Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="side_panel_editor.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hiding_unused_panels.html">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interactive_panels.html">Interactive Panels と Extend Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html">UI Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context_menu.html">キャプチャーメニュー</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_icons.html">カスタムアイコン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">スクリプティング</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/command_text.html">コードの入力と実行</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/poll_method.html">Poll Method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/scripting.html">API リファレンス</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">参考資料</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_guide.html">キーマップの選び方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_duplicates.html">キーマップの重複</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/terminology.html">用語集</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/file_locations.html">保存先とフォルダ構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/boot_options.html">起動オプション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/developer_options.html">開発者オプション</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">リファレンス案内</a><input aria-label="Toggle navigation of リファレンス案内" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/original_author_videos.html">原作者の動画：機能別一覧</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">サポート</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">既知の問題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">サポート</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
+</ul>
+
+</div>
+</div>
+<nav class="documentation-languages" aria-label="言語">
+  
+  <a href="../../editors/property_editor.html" lang="en" hreflang="en" aria-label="English" title="English"><span aria-hidden="true">🇺🇸</span></a>
+  
+  <a href="property_editor.html" lang="ja" hreflang="ja" aria-label="日本語" title="日本語" aria-current="true"><span aria-hidden="true">🇯🇵</span></a>
+  
+</nav>
+<script>
+(() => {
+  const links = [...document.querySelectorAll('.documentation-languages a')];
+  const targets = links.map(link => link.getAttribute('href'));
+  function syncFragment() {
+    links.forEach((link, index) => { link.href = targets[index] + window.location.hash; });
+  }
+  syncFragment();
+  window.addEventListener('hashchange', syncFragment);
+})();
+</script>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/editors/property_editor.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="property-editor">
+<span id="id1"></span><h1>Property Editor<a class="headerlink" href="#property-editor" title="Link to this heading">¶</a></h1>
+<p><strong>Property Editor</strong> は、自分で用意した値をチェックボックス、数値欄、文字列欄、選択肢として使うためのエディターです。作成した設定を <strong>PME Property</strong> と呼びます。メニューの状態を共有したり、既存の値を計算して表示したりできます。</p>
+<p><strong>一つの Property メニューで、一つのプロパティを定義します。</strong> 複数の値を用意する場合は、Property メニューをそれぞれ作成します。Enum の項目や Getter / Setter の入力欄は、同じプロパティの設定です。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>実現したいこと</p></th>
+<th class="head"><p>選ぶ機能</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>自分で Boolean / 数値 / 文字列 / 選択肢を定義する</p></td>
+<td><p>このページの <strong>Property Editor</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Blender にすでにある設定をメニューに表示する</p></td>
+<td><p><a class="reference internal" href="common/slot_types/property.html"><span class="std std-doc">スロットタイプ: Property</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p>複数の設定や条件を一つのオン・オフにまとめる</p></td>
+<td><p><a class="reference internal" href="property_stack_editor.html"><span class="std std-doc">Property Stack</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>モードなどの条件に応じて、表示・実行する内容を切り替える</p></td>
+<td><p><a class="reference internal" href="context_router_editor.html"><span class="std std-doc">Context Router</span></a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>このページは PME 2.1 の仕様を扱います。2.0 以前の設定を使っている場合は、<a class="reference internal" href="#property-id"><span class="std std-ref">Property ID と移行</span></a>も確認してください。</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">構成ガイド — 値とウィジェットを定義する（AI 向け）</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>呼び名：Property / PME Property／種別 ID：<code class="docutils literal notranslate"><span class="pre">PROPERTY</span></code>。</strong> 一つのメニューで一つのプロパティを定義します。Boolean / Int / Float / String / Enum を選びます。</p>
+<ul class="simple">
+<li><p class="sd-card-text"><strong>保存する値</strong>：型と Default Value、必要に応じて範囲・表示方法・保存先を指定。単なる値の保存には Getter / Setter を追加する必要はありません。</p></li>
+<li><p class="sd-card-text"><strong>既存データへの窓口</strong>：Getter / Setter で既存値を読み書きする構成も可能です。型・戻り値・対象がない場合の扱いを揃えます。</p></li>
+<li><p class="sd-card-text"><strong>配置</strong>：別メニューの Menu タブから PME Property を参照するか、Preview でコピーしたパスを Property スロットやスクリプトで使います。表示名からパスを推測しません。</p></li>
+<li><p class="sd-card-text"><strong>使い分け</strong>：既存 RNA パスのウィジェット配置だけなら Property スロット。複数条件の判定と一括切り替えなら Property Stack。</p></li>
+<li><p class="sd-card-text"><strong>制約</strong>：独立した Hotkey はありません。Default Value と現在の値、表示名と Property ID を区別します。既存スクリプトの参照を維持する場合は ID を Lock します。</p></li>
+</ul>
+<p class="sd-card-text">型は <a class="reference internal" href="#property-types"><span class="std std-ref">プロパティの型</span></a>、参照は <a class="reference internal" href="#property-id"><span class="std std-ref">Property ID</span></a>、コードは <a class="reference internal" href="#property-callbacks"><span class="std std-ref">Getter / Setter</span></a>へ。</p>
+</div>
+</details><section id="id2">
+<h2>画面と編集の流れ<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__image">
+<img src="../_static/images/editors/overview/property-bevel-weight-blender-5-2.png" width="663" height="553" alt="pp_mean_edge_bevel_weight の編集画面。">
+<a class="pme-overview__spot" style="--x:1%;--y:5.7866%;--w:98%;--h:5.0633%" href="property_editor.html#property-basic" aria-label="1 名前と基本操作の説明へ">
+<span class="pme-overview__number">1</span><span class="pme-overview__tip"><strong>名前と基本操作</strong>編集対象の有効状態と名前を確認し、詳細設定を開きます。</span></a>
+<a class="pme-overview__spot" style="--x:1%;--y:11.3924%;--w:98%;--h:32.5497%" href="property_editor.html#property-advanced" aria-label="2 Advanced settingsの説明へ">
+<span class="pme-overview__number">2</span><span class="pme-overview__tip"><strong>Advanced settings</strong>保存先、Getter / Setter などのコード、Property Size を設定します。</span></a>
+<a class="pme-overview__spot" style="--x:1%;--y:44.3038%;--w:98%;--h:35.9855%" href="property_editor.html#property-types" aria-label="3 型と値の設定の説明へ">
+<span class="pme-overview__number">3</span><span class="pme-overview__tip"><strong>型と値の設定</strong>型、初期値、範囲、表示方法を指定します。この例は Float です。</span></a>
+<a class="pme-overview__spot" style="--x:1%;--y:81.7360%;--w:98%;--h:17.9024%" href="property_editor.html#property-id" aria-label="4 Preview / Property IDの説明へ">
+<span class="pme-overview__number">4</span><span class="pme-overview__tip"><strong>Preview / Property ID</strong>現在の値を確認し、スクリプトで使う参照パスをコピーします。</span></a>
+</div>
+<figcaption>Blender 5.2 / PME 2.1 の開発環境。「pp_mean_edge_bevel_weight」の設定例。</figcaption>
+</figure>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#property-basic"><span class="std std-ref">名前と基本操作</span></a></p></li>
+<li><p><a class="reference internal" href="#property-advanced"><span class="std std-ref">Advanced settings</span></a></p></li>
+<li><p><a class="reference internal" href="#property-types"><span class="std std-ref">型と値の設定</span></a></p></li>
+<li><p><a class="reference internal" href="#property-id"><span class="std std-ref">Preview / Property ID</span></a></p></li>
+</ol>
+<p>型と初期値を選び、必要な場合に保存先や Getter / Setter を設定します。最後に Preview で実際の値と参照パスを確認します。</p>
+</section>
+<section id="property-basic">
+<span id="id3"></span><h2>名前と基本操作<a class="headerlink" href="#property-basic" title="Link to this heading">¶</a></h2>
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-5.78661844%">
+<img src="../_static/images/editors/overview/property-bevel-weight-blender-5-2.png" width="663" height="553" alt="pp_mean_edge_bevel_weight の 名前と基本操作。編集対象の有効状態と名前を確認し、詳細設定を開きます。">
+</div>
+<figcaption>名前と基本操作。値はこの例の設定です。</figcaption>
+</figure><p>有効状態、選択メニュー、名前、タグ、詳細設定などを操作します。共通の <a class="reference internal" href="editor_common_elements.html#overview-selected"><span class="std std-ref">選択メニューの設定</span></a>を参照してください。表示名と Property ID は別です。</p>
+</section>
+<section id="id4">
+<h2>作成して使うまで<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p>PME のメニュー一覧の <strong>＋</strong> から <span class="guilabel">Property</span> を追加します。</p></li>
+<li><p>表示名と型を選び、<span class="guilabel">Default Value</span> を設定します。単純に値を保存するだけなら、Getter / Setter は不要です。</p></li>
+<li><p><span class="guilabel">Preview</span> で現在の値を操作します。Default Value は初期値、Preview は実際に読み書きする値です。</p></li>
+<li><p>Preview のコピーボタンで参照パスをコピーします。スクリプトなどから使う前に Property ID を Lock すると、後で表示名を変えても同じ ID を維持できます。</p></li>
+<li><p>コピーしたパスを、別のメニューの Property スロットなどに設定します。</p></li>
+</ol>
+<p>例えば、表示名 <code class="docutils literal notranslate"><span class="pre">My</span> <span class="pre">Toggle</span></code> の Boolean を既定の保存先で作成すると、参照パスは <code class="docutils literal notranslate"><span class="pre">props().my_toggle</span></code> になります。実際の ID は重複などにより変わる場合があるため、<strong>表示名から推測せず Preview のパスを使ってください。</strong></p>
+</section>
+<section id="advanced-settings">
+<span id="property-advanced"></span><h2>Advanced settings<a class="headerlink" href="#advanced-settings" title="Link to this heading">¶</a></h2>
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 180;--crop-offset:-11.39240506%">
+<img src="../_static/images/editors/overview/property-bevel-weight-blender-5-2.png" width="663" height="553" alt="pp_mean_edge_bevel_weight の Advanced settings。保存先、Getter / Setter などのコード、Property Size を設定します。">
+</div>
+<figcaption>Advanced settings。値はこの例の設定です。</figcaption>
+</figure><p>保存先、Restore Default Value、Getter / Setter / On Update / On Init、Property Size などを設定します。型によって表示される設定が異なります。保存と実行の仕様は、このページの各詳細を参照してください。</p>
+</section>
+<section id="property-types">
+<span id="id5"></span><h2>プロパティの型<a class="headerlink" href="#property-types" title="Link to this heading">¶</a></h2>
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 199;--crop-offset:-44.30379747%">
+<img src="../_static/images/editors/overview/property-bevel-weight-blender-5-2.png" width="663" height="553" alt="pp_mean_edge_bevel_weight の 型と値の設定。型、初期値、範囲、表示方法を指定します。この例は Float です。">
+</div>
+<figcaption>型と値の設定。値はこの例の設定です。</figcaption>
+</figure><div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>型</p></th>
+<th class="head"><p>値の例</p></th>
+<th class="head"><p>主な設定</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="guilabel">Boolean</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">False</span></code> / <code class="docutils literal notranslate"><span class="pre">True</span></code></p></td>
+<td><p>Default Value</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="guilabel">Int</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code>、<code class="docutils literal notranslate"><span class="pre">12</span></code></p></td>
+<td><p>Default Value、Min Value、Max Value、Step、Subtype</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="guilabel">Float</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.0</span></code>、<code class="docutils literal notranslate"><span class="pre">0.25</span></code></p></td>
+<td><p>Int と共通の設定に加え、Precision、Unit</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="guilabel">String</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code>、<code class="docutils literal notranslate"><span class="pre">&quot;render&quot;</span></code></p></td>
+<td><p>Default Value、Subtype</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="guilabel">Enum</span></p></td>
+<td><p>定義した項目の識別子</p></td>
+<td><p>Items、Default Value、Multi-Select、Expand、Horizontal Layout</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<section id="id6">
+<h3>数値とベクトル<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p>Boolean / Int / Float は、詳細設定の <span class="guilabel">Property Size</span> を <strong>1～32</strong> に設定できます。1 は単一の値、2 以上はその個数の成分を持つベクトルです。例えば Float の Size を 3 にすると、3 成分の値を扱います。String / Enum にはこの設定はありません。</p>
+<ul class="simple">
+<li><p><strong>Min Value / Max Value</strong> は値の下限・上限です。</p></li>
+<li><p><strong>Step</strong> は数値欄の操作に関する設定です。特に Float では、表示する小数点以下の桁数を指定する値ではありません。</p></li>
+<li><p><strong>Precision</strong> は Float の表示桁数で、<strong>0～6</strong> です。</p></li>
+<li><p><strong>Subtype / Unit</strong> は、値の意味に合わせて表示や単位を選ぶ設定です。選択できる項目は型によって変わります。</p></li>
+</ul>
+<p>色や方向を表す場合は、Float の成分数と Subtype を組み合わせます。成分数だけを増やしても、値の意味が自動で決まるわけではありません。型や Property Size を変更したら、Default Value と、それを使うスクリプトの値の形も確認してください。</p>
+</section>
+<section id="enum">
+<h3>Enum の識別子と表示ラベル<a class="headerlink" href="#enum" title="Link to this heading">¶</a></h3>
+<p><span class="guilabel">Items</span> の <span class="guilabel">Add Slot</span> で選択肢を追加します。項目名は <code class="docutils literal notranslate"><span class="pre">識別子|表示ラベル</span></code> の形にできます。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>項目名の入力</p></th>
+<th class="head"><p>スクリプトで使う値</p></th>
+<th class="head"><p>表示</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">LOW</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;LOW&quot;</span></code></p></td>
+<td><p>LOW</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">HIGH|High</span> <span class="pre">Quality</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">&quot;HIGH&quot;</span></code></p></td>
+<td><p>High Quality</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">|</span></code> がない場合は、同じ文字列を識別子と表示に使います。識別子に空白は使わず、<code class="docutils literal notranslate"><span class="pre">LOW</span></code> / <code class="docutils literal notranslate"><span class="pre">HIGH</span></code> のような簡潔で重複しない値にすると参照しやすくなります。<strong>表示ラベルを、スクリプトで代入する値として使わないでください。</strong></p>
+<p><span class="guilabel">Multi-Select</span> がオフなら一つの識別子、オンなら識別子の集合を扱います。例えば、上の二項目を両方選ぶ値は <code class="docutils literal notranslate"><span class="pre">{&quot;LOW&quot;,</span> <span class="pre">&quot;HIGH&quot;}</span></code> です。<span class="guilabel">Expand</span> は選択肢を展開する設定、<span class="guilabel">Horizontal Layout</span> は展開した項目の配置を変える設定です。</p>
+</section>
+</section>
+<section id="property-id">
+<span id="id7"></span><h2>Property ID と移行<a class="headerlink" href="#property-id" title="Link to this heading">¶</a></h2>
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 99;--crop-offset:-81.73598553%">
+<img src="../_static/images/editors/overview/property-bevel-weight-blender-5-2.png" width="663" height="553" alt="pp_mean_edge_bevel_weight の Preview / Property ID。現在の値を確認し、スクリプトで使う参照パスをコピーします。">
+</div>
+<figcaption>Preview / Property ID。値はこの例の設定です。</figcaption>
+</figure><p><strong>表示名</strong>はユーザーに見せる名前、<strong>Property ID</strong> は Python から参照するための名前です。PME 2.1 では、PME Property と Property Stack にこの区別があります。</p>
+<section id="id">
+<h3>使用できる ID<a class="headerlink" href="#id" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>制約</p></th>
+<th class="head"><p>内容</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>長さ</p></td>
+<td><p><strong>1～63 文字</strong>。使用できる文字は ASCII のため、この範囲では文字数とバイト数が一致します</p></td>
+</tr>
+<tr class="row-odd"><td><p>先頭</p></td>
+<td><p>半角英字 <code class="docutils literal notranslate"><span class="pre">A–Z</span></code> / <code class="docutils literal notranslate"><span class="pre">a–z</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>2 文字目以降</p></td>
+<td><p>半角英字、数字、アンダースコア <code class="docutils literal notranslate"><span class="pre">_</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>使用できない名前</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">class</span></code> などの Python 予約語、および <code class="docutils literal notranslate"><span class="pre">keys</span></code> / <code class="docutils literal notranslate"><span class="pre">values</span></code> / <code class="docutils literal notranslate"><span class="pre">items</span></code> / <code class="docutils literal notranslate"><span class="pre">get</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>使用できない例</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1_toggle</span></code>、<code class="docutils literal notranslate"><span class="pre">_toggle</span></code>、<code class="docutils literal notranslate"><span class="pre">my-toggle</span></code>、<code class="docutils literal notranslate"><span class="pre">My</span> <span class="pre">Toggle</span></code>、<code class="docutils literal notranslate"><span class="pre">切替</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>使用できる例</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">my_toggle</span></code>、<code class="docutils literal notranslate"><span class="pre">quality2</span></code>、<code class="docutils literal notranslate"><span class="pre">MyToggle</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>これは <strong>Property ID の制限</strong>です。メニューの表示名や String 型の値の制限とは別です。表示名には日本語や空白を使えます。その名前から ID を自動生成できても、ローマ字への翻訳結果になるとは限りません。</p>
+</section>
+<section id="preview-lock">
+<h3>Preview で編集・Lock する<a class="headerlink" href="#preview-lock" title="Link to this heading">¶</a></h3>
+<p>Preview の鉛筆ボタンから <span class="guilabel">Edit Property ID</span> を開き、ID と Lock の状態を編集します。通常は表示名の変更に ID も追従します。<strong>スクリプトやコピー済みのパスで使う ID は、Lock してから参照する</strong>と、後の表示名変更による修正を避けられます。</p>
+<figure class="align-default" id="id15">
+<a class="reference internal image-reference" href="../_images/property-id-locked.png"><img alt="Property Editor で表示名 Shared Toggle と、Lock 済みの props().my_toggle が表示されている" src="../_images/property-id-locked.png" style="width: 480px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Blender 5.1.0 / PME 2.1.0-beta.6。My Toggle の ID を Lock してから表示名を Shared Toggle に変更しても、参照パスは props().my_toggle のままです。Preview はオン、Default Value はオフを示しています。</span><a class="headerlink" href="#id15" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>Lock は ID の自動変更を止める設定です。プロパティの値や表示名を編集できなくする設定ではありません。ID 自体を編集した場合は、以前コピーしたパスやスクリプトを確認してください。PME が任意の Python コード中の文字列を書き換えるわけではありません。</p>
+</section>
+<section id="id8">
+<h3>2.0 以前の設定を使う場合<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<p>移行時に従来の名前を ID として使える場合は、参照を維持するため自動で Lock されます。名前に空白などがあり ID が変わった場合は、Preview に表示される現在のパスへスクリプトを更新します。</p>
+<p>古い例にある <code class="docutils literal notranslate"><span class="pre">props(&quot;表示名&quot;)</span></code> は、条件によって読み取り互換として動くことがありますが、表示名への書き込みには使えません。新しく書くコードでは、読み取り・書き込みともに <strong>現在の Property ID</strong> を使ってください。</p>
+</section>
+</section>
+<section id="id9">
+<h2>値の保存先<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h2>
+<p>詳細設定の <span class="guilabel">Store in Addon Preferences</span> をクリックすると、保存先の型を選べます。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>保存先</p></th>
+<th class="head"><p>値が属する対象</p></th>
+<th class="head"><p>使い分け</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="guilabel">Store in Addon Preferences</span></p></td>
+<td><p>PME 共通の保存領域</p></td>
+<td><p>複数のメニューで同じ設定を使う</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="guilabel">Store in Scene Instances</span></p></td>
+<td><p>各 Scene</p></td>
+<td><p>Scene ごとに異なる値を持つ</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="guilabel">Store in Object Instances</span></p></td>
+<td><p>各 Object</p></td>
+<td><p>Object ごとに異なる値を持つ</p></td>
+</tr>
+<tr class="row-odd"><td><p>その他の型</p></td>
+<td><p>選択した型の各データ</p></td>
+<td><p>Material、Mesh など、目的に合う所有者を使う</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Addon Preferences の値は Blender の Preferences、Scene / Object などのデータに属する値はそのデータを含む <code class="docutils literal notranslate"><span class="pre">.blend</span></code> の保存を確認してください。<strong>メニュー定義の JSON エクスポートを、すべての Scene / Object の現在値のバックアップとして扱わないでください。</strong></p>
+<p>Object などを選んだとき、Preview のパスは特定のデータを指す場合があります。そのまま使うと、そのデータを操作します。「アクティブな Object を操作したい」場合は、対象が存在する条件を確かめ、対象の選び方も合わせて設計します。保存先を変えただけで既存の値が別の所有者へ移るとは考えず、変更後の値を確認してください。</p>
+<section id="restore-default-value">
+<h3>Restore Default Value<a class="headerlink" href="#restore-default-value" title="Link to this heading">¶</a></h3>
+<p>Addon Preferences を選んだときだけ表示されます。有効にすると、PME の初期化時に保存済みの値を破棄し、Default Value から始めます。無効にすると保存値を使用します。Preview を押すたびに初期値へ戻す設定ではありません。</p>
+</section>
+<section id="preview">
+<h3>Preview に値が表示されない場合<a class="headerlink" href="#preview" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>表示</p></th>
+<th class="head"><p>確認すること</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Property</span> <span class="pre">is</span> <span class="pre">disabled</span></code></p></td>
+<td><p>メニュー一覧で Property を有効にする</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Property</span> <span class="pre">ID</span> <span class="pre">could</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">registered</span></code></p></td>
+<td><p>ID の制約・重複、型や関数の設定を確認する</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Registered</span> <span class="pre">-</span> <span class="pre">preview</span> <span class="pre">path</span> <span class="pre">unavailable</span></code></p></td>
+<td><p>選択した保存先のデータが存在するか確認する。登録済みでも Preview 用の対象を選べない場合がある</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Property</span> <span class="pre">ID</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">registered</span></code></p></td>
+<td><p>有効状態と、Property ID が登録できているか確認する</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>この状態の ID 表示を、実行できる参照パスと取り違えないでください。</p>
+</section>
+</section>
+<section id="id10">
+<h2>メニューやスクリプトから使う<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h2>
+<p>以下は、保存先が Addon Preferences、Property ID が <code class="docutils literal notranslate"><span class="pre">my_toggle</span></code> の Boolean を作成済みの場合の例です。</p>
+<p><strong>Property スロット</strong>の参照パス:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">props</span><span class="p">()</span><span class="o">.</span><span class="n">my_toggle</span>
+</pre></div>
+</div>
+<p><strong>Command スロット</strong>で値をオンにする:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">props</span><span class="p">()</span><span class="o">.</span><span class="n">my_toggle</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+<p><strong>Custom スロット</strong>にチェックボックスを表示する:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span><span class="o">.</span><span class="n">prop</span><span class="p">(</span><span class="n">props</span><span class="p">(),</span> <span class="s2">"my_toggle"</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">"Shared Toggle"</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">props()</span></code> は PME のスクリプト環境で使えるヘルパーです。Blender の Python Console などにそのまま貼り付けても、同じ名前が用意されているとは限りません。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>書き方</p></th>
+<th class="head"><p>意味</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">props()</span></code></p></td>
+<td><p>Addon Preferences の値の保存領域を取得</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">props().my_toggle</span></code></p></td>
+<td><p>ID <code class="docutils literal notranslate"><span class="pre">my_toggle</span></code> の値を読む</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">props().my_toggle</span> <span class="pre">=</span> <span class="pre">True</span></code></p></td>
+<td><p>ID <code class="docutils literal notranslate"><span class="pre">my_toggle</span></code> の値を書く</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">props(&quot;my_toggle&quot;)</span></code></p></td>
+<td><p>ID を文字列で指定して読む。見つからなければ <code class="docutils literal notranslate"><span class="pre">None</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">props(&quot;my_toggle&quot;,</span> <span class="pre">True)</span></code></p></td>
+<td><p>ID を文字列で指定して書く。書き込みを受け付けると <code class="docutils literal notranslate"><span class="pre">True</span></code>、対象が未登録などの場合は <code class="docutils literal notranslate"><span class="pre">False</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">props()</span></code> は Object / Scene 側の値を自動で探す機能ではありません。また、未作成の ID を渡して新しいプロパティを定義する機能でもありません。</p>
+<p>第 2 引数の <code class="docutils literal notranslate"><span class="pre">value</span></code> が <code class="docutils literal notranslate"><span class="pre">None</span></code> の場合は、書き込みではなく読み取りになります。
+型が合わない値の代入などでは例外になる場合もあります。
+書き込みの戻り値 <code class="docutils literal notranslate"><span class="pre">True</span></code> だけでは、独自 Setter が意図した値を保存した証明にはなりません。
+変更後の値を実際の保存先で確認してください。</p>
+</section>
+<section id="getter-setter-on-update-on-init">
+<span id="property-callbacks"></span><h2>Getter / Setter / On Update / On Init<a class="headerlink" href="#getter-setter-on-update-on-init" title="Link to this heading">¶</a></h2>
+<p>値の読み書きに独自処理が必要な場合だけ、詳細設定から関数を追加します。関数の有無で、値を保存する方法も変わります。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>構成</p></th>
+<th class="head"><p>用途</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Getter / Setter なし</p></td>
+<td><p>PME が通常の値を保存する。単純な自作設定はこれで始める</p></td>
+</tr>
+<tr class="row-odd"><td><p>Getter のみ</p></td>
+<td><p>他のデータから計算して読む。読み取り専用のプロパティになる</p></td>
+</tr>
+<tr class="row-even"><td><p>Getter と Setter</p></td>
+<td><p>読み取り先と書き込み先を自分で定義する</p></td>
+</tr>
+<tr class="row-odd"><td><p>Setter のみ</p></td>
+<td><p>作成できない。先に Getter を追加する</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Setter がある間は Getter を削除できません。標準の保存動作へ戻す場合は Setter を先に削除します。</p>
+<section id="id11">
+<h3>呼び出しと変数<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>関数</p></th>
+<th class="head"><p>呼び出される場面</p></th>
+<th class="head"><p>固有の変数・戻り値</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Getter</strong></p></td>
+<td><p>値の読み取り。UI の再描画などでも呼ばれる</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">self</span></code> は値の所有者。<code class="docutils literal notranslate"><span class="pre">return</span></code> で値を返す</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Setter</strong></p></td>
+<td><p>値の書き込み</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">self</span></code> は所有者、<code class="docutils literal notranslate"><span class="pre">value</span></code> は書き込む値。戻り値は不要</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>On Update</strong></p></td>
+<td><p>値の更新に伴う追加処理</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">self</span></code> は所有者。Setter の <code class="docutils literal notranslate"><span class="pre">value</span></code> を前提にせず、所有者から必要な値を読む</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>On Init</strong></p></td>
+<td><p>Property の初期化時</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">self</span></code> / <code class="docutils literal notranslate"><span class="pre">value</span></code> は渡されない。プロパティの登録が成功し、有効な場合に実行される</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>これらの関数では、<code class="docutils literal notranslate"><span class="pre">menu</span></code> は <strong>Property ID</strong>、<code class="docutils literal notranslate"><span class="pre">pm_name</span></code> は <strong>現在の表示名</strong>です。<code class="docutils literal notranslate"><span class="pre">menu</span></code> を表示名と考えてコードを組み立てないでください。</p>
+</section>
+<section id="boolean">
+<h3>Boolean の保存を自分で行う例<a class="headerlink" href="#boolean" title="Link to this heading">¶</a></h3>
+<p>次は、保存先を変えず、同じ所有者のデータを使って Boolean を読み書きする最小例です。単に Boolean を保存したいだけなら、関数を追加しない構成のほうが簡単です。</p>
+<p>Getter:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">menu</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Setter:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="bp">self</span><span class="p">[</span><span class="n">menu</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">self</span></code> は Addon Preferences を選んだ場合は PME の保存領域、Object を選んだ場合はその Object です。上の組み合わせは、同じ所有者・同じキーから読み、同じ場所へ書きます。</p>
+<p>保存先が Addon Preferences の場合、Getter 内で自身の ID を <code class="docutils literal notranslate"><span class="pre">props(menu)</span></code> で読み直したり、Setter 内で <code class="docutils literal notranslate"><span class="pre">props(menu,</span> <span class="pre">value)</span></code> を呼んだりすると、自分自身の読み書きを再び呼び出します。<strong>自身のプロパティ経由で再帰させず、保存データや別の明確な対象を操作してください。</strong> Object / Scene を保存先にしている場合も、<code class="docutils literal notranslate"><span class="pre">props()</span></code> ではその所有者の値を読み書きできません。</p>
+</section>
+<section id="id12">
+<h3>戻り値と実行条件<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h3>
+<p>Getter は、設定した型と成分数に合う値を返します。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>型</p></th>
+<th class="head"><p>Getter が返す値</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Boolean / Int / Float / String</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code> / <code class="docutils literal notranslate"><span class="pre">int</span></code> / <code class="docutils literal notranslate"><span class="pre">float</span></code> / <code class="docutils literal notranslate"><span class="pre">str</span></code> に対応する値</p></td>
+</tr>
+<tr class="row-odd"><td><p>ベクトル</p></td>
+<td><p>Property Size と同じ長さで、各成分が型に合う配列</p></td>
+</tr>
+<tr class="row-even"><td><p>Enum</p></td>
+<td><p>定義済みの識別子、または対応する整数値</p></td>
+</tr>
+<tr class="row-odd"><td><p>Multi-Select の Enum</p></td>
+<td><p>定義済みの識別子の集合、または対応するビット値</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">None</span></code> や存在しない Enum の識別子は有効な値ではありません。Getter の例外、無効な戻り値、再帰的な読み取りなどが起きると、PME は初期値などの代替値を返すことがあります。<strong>値が表示されたことだけでは、Getter の処理が成功した証拠になりません。</strong></p>
+<p>Getter は再描画で繰り返し呼ばれるため、オブジェクト作成・モード変更・ファイル書き込みのような処理を入れず、値を読む処理にします。また、Object の選択や特定エディターの存在を前提にする場合は、対象外で返す値も定めます。On Init はメニュー操作中の処理ではないため、呼び出し元エリアがあることを前提にしないでください。</p>
+<p>関数欄は 1 行の入力欄です。短い処理を記述し、長い分岐や大きなスクリプトを無理に一行へ詰め込まないでください。Getter に必要な <code class="docutils literal notranslate"><span class="pre">return</span></code> と、通常の Command に書くコードを区別することも重要です。</p>
+</section>
+</section>
+<section id="id13">
+<h2>動作を確かめる<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>通常の保存</strong>：Preview を変更して、参照先メニューにも同じ値が表示されるか確認する。</p></li>
+<li><p><strong>ID の固定</strong>：Lock 後に表示名を変え、コピー済みのパスでも同じ値を読めるか確認する。</p></li>
+<li><p><strong>所有者ごとの値</strong>：Object / Scene を二つ用意し、片方を変えても他方に意図しない影響がないか確認する。</p></li>
+<li><p><strong>独自関数</strong>：通常時に加え、対象がない場合やモードが異なる場合も確認する。Setter の結果は保存先の値で確かめる。</p></li>
+<li><p><strong>保存と再起動</strong>：Preferences または <code class="docutils literal notranslate"><span class="pre">.blend</span></code> を保存し、再起動後の値が Restore Default Value の設定と一致するか確認する。</p></li>
+</ul>
+<p>AI に作成を相談するときも、「型」「保存先」「Property ID」「どの欄にコードを入れるか」「対象外でどうするか」を含めると、使えるコードを絞り込めます。</p>
+<div class="seealso admonition">
+<p class="admonition-title">関連ページ</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="editor_common_elements.html"><span class="std std-doc">エディターの共通要素</span></a></p></li>
+<li><p><a class="reference internal" href="common/slot_types/property.html"><span class="std std-doc">スロットタイプ: Property</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/index.html"><span class="std std-doc">リファレンス案内</span></a></p></li>
+</ul>
+</div>
+</section>
+<section id="id14">
+<h2>参考動画（原作者のチャンネル）<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="../reference/original_author_videos.html"><span class="std std-doc">roaoao の動画一覧</span></a>より。旧版の UI・手順を扱う参考動画です。</p>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3" open="open">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Property Editor for Blender</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/xQ-ETd8xacA" title="Property Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+<p class="sd-card-text"><a class="reference external" href="https://www.youtube.com/watch?v=xQ-ETd8xacA">Property Editor for Blender — YouTube で開く</a></p>
+</div>
+</details></section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="property_stack_editor.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Property Stack Editor</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="modal_operator_editor.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Modal Operator Editor</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Property Editor</a><ul>
+<li><a class="reference internal" href="#id2">画面と編集の流れ</a></li>
+<li><a class="reference internal" href="#property-basic">名前と基本操作</a></li>
+<li><a class="reference internal" href="#id4">作成して使うまで</a></li>
+<li><a class="reference internal" href="#advanced-settings">Advanced settings</a></li>
+<li><a class="reference internal" href="#property-types">プロパティの型</a><ul>
+<li><a class="reference internal" href="#id6">数値とベクトル</a></li>
+<li><a class="reference internal" href="#enum">Enum の識別子と表示ラベル</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#property-id">Property ID と移行</a><ul>
+<li><a class="reference internal" href="#id">使用できる ID</a></li>
+<li><a class="reference internal" href="#preview-lock">Preview で編集・Lock する</a></li>
+<li><a class="reference internal" href="#id8">2.0 以前の設定を使う場合</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id9">値の保存先</a><ul>
+<li><a class="reference internal" href="#restore-default-value">Restore Default Value</a></li>
+<li><a class="reference internal" href="#preview">Preview に値が表示されない場合</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id10">メニューやスクリプトから使う</a></li>
+<li><a class="reference internal" href="#getter-setter-on-update-on-init">Getter / Setter / On Update / On Init</a><ul>
+<li><a class="reference internal" href="#id11">呼び出しと変数</a></li>
+<li><a class="reference internal" href="#boolean">Boolean の保存を自分で行う例</a></li>
+<li><a class="reference internal" href="#id12">戻り値と実行条件</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id13">動作を確かめる</a></li>
+<li><a class="reference internal" href="#id14">参考動画（原作者のチャンネル）</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=b695b4be"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

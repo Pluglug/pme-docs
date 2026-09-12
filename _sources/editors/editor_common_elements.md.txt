@@ -1,0 +1,328 @@
+(editor-common-elements)=
+
+# Common Editor Elements
+
+In PME, **select an item in the list, then edit its settings and contents on the right**.
+The right-hand settings depend on the menu type. This page uses a practical Pie Menu configuration to explain shared controls.
+
+## Find controls in the overview
+
+```{raw} html
+:file: common/_overview_map.html
+```
+
+1. [Editor features and display modes](#overview-features): toggle the list, filters, selection mode, and tree view.
+2. [List columns](#overview-columns): choose which columns appear in the list.
+3. [Editor / Settings](#overview-tabs): switch between menu editing and PME-wide settings.
+4. [Tools and display area](#overview-tools): toggle Interactive Panels, Debug Mode, and Maximize Preferences.
+5. [Menu list](#overview-menus): choose a menu to edit.
+6. [Add and manage menus](#overview-manage): add, duplicate, import, and export menus.
+7. [Selected menu settings](#overview-selected): edit its name, invocation, and advanced settings.
+8. [Menu contents](#slot-list): edit slots, branches, or other type-specific content.
+
+(overview-display)=
+
+## Four groups in the top bar
+
+From left to right, the top bar has four groups of controls.
+The selected menu's name, enabled state, and advanced settings are in the row below.
+
+(overview-features)=
+
+### 1. Editor features and display modes
+
+The leftmost group switches editor features and display modes.
+
+| Control | Role |
+|---|---|
+| Show List (three lines) | Shows or hides the menu list. Turn it off to widen the selected menu's editor; turn it on to select another menu |
+| Filter (funnel) | Enables or disables list filtering. Check filters before concluding that a missing menu was deleted |
+| Select Mode (arrow) | Selects several menus for bulk actions, distinct from choosing one menu to edit |
+| Tree Mode (tree) | Displays menu relationships as a tree |
+| Group by (star and downward arrow in the image) | Groups Tree Mode by None / Keymap / Type / Tag / Key. The icon reflects the selected choice |
+
+Turning Show List off also hides the remaining controls in this group and the List columns group.
+
+(overview-columns)=
+
+### 2. List columns
+
+The five controls from the checkbox through **F** choose **which information appears in the menu list**.
+
+| Button | List information |
+|---|---|
+| Checkbox | Each menu's enabled state |
+| Ab | Menu name |
+| Star | Tags |
+| Mouse | Keymap name |
+| F | Hotkey |
+
+Turning off the top-bar checkbox does not disable menus.
+Use the checkboxes on list rows or in the selected menu settings to change enabled state.
+Name and hotkey cannot both be hidden. Turning off the second while the first is hidden automatically shows the first again.
+
+(overview-tabs)=
+
+### 3. Editor / Settings
+
+The large central control selects the working page.
+**Editor** edits menu settings and contents; **Settings** changes PME-wide options.
+For example, **Expand Slot Tools**, which exposes slot action buttons, is under Settings > General.
+
+(overview-tools)=
+
+### 4. Tools and display area
+
+The three controls on the right provide:
+
+| Control | Role |
+|---|---|
+| Interactive Panels (panel) | Adds PME editing buttons to Blender panels and other UI. See [Interactive Panels](interactive_panels.md) |
+| Debug Mode (Python) | Toggles Blender's `bpy.app.debug_wm` for operator logs and other debugging information. Separate from error traceback display |
+| Maximize Preferences (expand) | Gives PME more space inside Preferences |
+
+**Show List** controls the list within PME; **Maximize Preferences** controls how much of Preferences PME occupies.
+Neither is Blender's area-maximization command.
+
+(overview-menus)=
+
+## Menu list
+
+Select a name to change the menu being edited on the right. The icon next to it identifies the menu type.
+Menus sharing a hotkey can serve different purposes according to type, Keymap, and conditions.
+Check the right-hand settings rather than relying on the name alone.
+
+**Tags** label menus for organization and search. A menu can have several tags.
+When grouped by tag, the same menu can appear in several groups.
+These are not separate copies.
+
+(overview-manage)=
+
+## Add and manage menus
+
+Use **＋** beside the list to choose and add a menu type. Duplication and other management actions are also available in the list tools.
+Choose what to create first: the type determines which settings appear on the right.
+
+**Import / Export** below the list reads and writes configuration files.
+When importing an example, check that its referenced menus and external scripts are also available.
+See [File Locations](../reference/file_locations.md) for storage paths.
+
+(overview-selected)=
+
+## Selected menu settings
+
+The top of the right-hand area shows the selected menu's name and display/invocation settings.
+Check its name and enabled state, then set where and how it is called if the type supports hotkeys.
+Open advanced settings as needed.
+
+```{include} common/topbar.md
+```
+
+(hotkey-editor)=
+
+## Hotkey settings
+
+For menu types supporting hotkeys, choose where and how to invoke them. Value-definition types such as Property do not have this section.
+
+```{include} common/hotkey_settings.md
+```
+
+```{admonition} Related pages
+:class: seealso
+
+- [Choosing a Keymap](../reference/keymap_guide.md) — Keymap hierarchy and how PME hotkeys are resolved
+- [Checking Keymap Duplicates](../reference/keymap_duplicates.md) — investigate conflicts with existing hotkeys
+```
+
+---
+
+(slot-list)=
+
+## Slot list
+
+A **slot** is one item in a menu. Each Pie Menu direction or Pop-up Dialog button, for example, is a slot.
+
+Slot arrangement has different meanings in different editors.
+
+- **Fixed count**: Pie Menu has ten slots (eight directions plus top and bottom); Sticky Key has two (On Press and On Release).
+- **Variable count**: Pop-up Dialog, Regular Menu, Stack Key, Macro Operator, and Modal Operator.
+- **Meaningful order**: Macro Operator runs slots in order. Modal Operator mixes action slots with event slots such as invocation, confirmation, and cancellation.
+
+See each editor's page for its arrangement and behavior.
+
+Ordinary slots, such as Pie Menu slots, provide the following controls. Available controls vary by type.
+
+1. **Edit Slot** — opens the Slot Editor to configure its contents.
+2. **Icon** — chooses the displayed icon.
+3. **Display name** — sets the slot label.
+4. **Advanced settings** — additional options for the slot.
+
+(expand-slot-tools)=
+
+### Expand Slot Tools
+
+Enable Settings > General > **Expand Slot Tools** to expose the actions from each slot's rightmost menu as directly clickable icons.
+This changes the editor display, not slot contents or execution.
+
+For Pie Menu, the controls are **Edit Slot / Copy / Move Slot / Enabled or Disabled / Clear**;
+**Paste** also appears after copying a slot.
+Move Slot exchanges contents between fixed pie positions; Clear empties a position.
+Available actions depend on editor type and slot state.
+
+See the [Pie Menu interface](pie_menu_editor.md) for the expanded view.
+Turn it off to group the actions back into each slot's rightmost menu.
+
+---
+
+(slot-editor)=
+
+## Slot Editor
+
+Click Edit Slot to open the **Slot Editor**.
+Set the name and other shared options at the top, then choose a slot type through its tab. See each editor's page for specialized fields such as callbacks and conditions.
+
+:::{image} /../../shared/_static/images/editors/common/slot_editor.png
+:class: img-shadow
+:alt: Slot Editor
+:align: center
+:width: 100%
+:::
+
+<div style="margin: 1.5rem 0;"></div>
+
+### Shared controls at the top
+
+- **Icon**: chooses the slot's icon. See [Custom Icons](custom_icons.md) for custom artwork.
+- **Display name**: the slot label. Press {octicon}`arrow-left` to apply a Suggested name derived from the current settings.
+- **OK / Cancel**: accepts or discards slot edits. {kbd}`Enter` / {kbd}`Escape` perform the same actions.
+
+(slot-types)=
+
+### Slot types
+
+There are **five slot types**, defining what the slot does.
+Only **types supported by the current editor** appear as tabs. Some editors have specialized inputs; check their individual pages for supported types.
+
+The tabs below describe each type.
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
+```
+:::
+
+:::{tab-item} Property
+:sync: property
+
+```{include} common/slot_types/property.md
+```
+:::
+
+:::{tab-item} Menu
+:sync: menu
+
+```{include} common/slot_types/menu.md
+```
+:::
+
+:::{tab-item} Hotkey
+:sync: hotkey
+
+```{include} common/slot_types/hotkey.md
+```
+:::
+
+:::{tab-item} Custom
+:sync: custom
+
+```{include} common/slot_types/custom.md
+```
+:::
+::::
+
+(how-to-add-widgets)=
+
+### Add a slot preset
+
+```{include} common/slot_types/examples.md
+```
+
+---
+
+(editor-extra-settings)=
+
+## Advanced settings
+
+Open these with the selected menu's gear button. Available options depend on the type.
+Description sets tooltip text; Poll sets availability. Type-specific options follow, such as Pie Menu Radius or Stack Key Remember Slot / Advance On.
+
+(menu-description)=
+
+```{include} common/description.md
+```
+
+(poll-method)=
+
+```{include} common/poll.md
+```
+
+See each editor's page for its specific options.
+
+---
+
+## Editor-specific features
+
+The following belong to **individual editors**, rather than shared controls, and are covered on their respective pages:
+
+- Pie Menu **Radius** / **Threshold** / **Confirm Threshold** / Confirm on Release.
+- Pop-up Dialog layout (rows, columns, subrows), Pie / Dialog / Popup modes, fixed columns, and alignment.
+- Modal Operator **On Invoke / On Confirm / On Cancel / On Update** slots, Confirm on Release, Block UI, and Lock.
+- Macro Operator submenu references (nested Sticky Key / Macro / Modal) and diagnostics.
+- Stack Key **Remember Slot** / **Advance On** (Every Press / Quick Repeat) / **Repeat Timeout** / **Undo Previous Command**.
+- Sticky Key On Press / On Release pair and **Save and Restore Previous Value** generator.
+- Property Editor types, storage, Property ID, Getter / Setter.
+- Property Stack conditions and state; Context Router branches and fallback behavior.
+
+---
+
+```{admonition} Related pages
+:class: seealso
+
+- [Pie Menu Editor](pie_menu_editor.md)
+- [Pop-up Dialog Editor](popup_dialog_editor.md)
+- [Regular Menu Editor](regular_menu_editor.md)
+- [Modal Operator Editor](modal_operator_editor.md)
+- [Macro Operator Editor](macro_operator_editor.md)
+- [Stack Key Editor](stack_key_editor.md)
+- [Sticky Key Editor](sticky_key_editor.md)
+- [Property Editor](property_editor.md)
+- [Glossary](../reference/terminology.md)
+```
+
+(common-hotkey-videos)=
+
+## Reference videos (original author's channel)
+
+From [roaoao's videos](../reference/original_author_videos.md). These show an older interface and workflow.
+
+:::{dropdown} Advanced Mouse Hotkeys in Blender
+:open:
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/9cGWQF6L4o4" title="Advanced Mouse Hotkeys in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Advanced Mouse Hotkeys in Blender — Open on YouTube](https://www.youtube.com/watch?v=9cGWQF6L4o4)
+:::
+
+:::{dropdown} Double Click + Hold
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/8XUvscCCviA" title="Double Click + Hold" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Double Click + Hold — Open on YouTube](https://www.youtube.com/watch?v=8XUvscCCviA)
+:::

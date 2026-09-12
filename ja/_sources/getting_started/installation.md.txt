@@ -1,0 +1,174 @@
+(installation)=
+
+(installation-2-1)=
+
+# インストール
+
+PME 2.1以降は、**Extension**としてインストールします。
+PME 2.0までのLegacy Add-onとPME 2.1 Extensionは、同時に有効化しないでください。
+
+## 対応バージョン
+
+PME 2.1は、**Blender 4.5から5.2まで**に対応しています。
+
+<span id="install-fresh"></span><span id="install-update"></span><span id="migration-prep"></span><span id="install-clean"></span><span id="post-install-check"></span>
+
+PME 2.0以前の手順は、[Legacy Add-on向けのアーカイブ](installation_legacy.md)を参照してください。
+
+::::::{tab-set}
+
+:::::{tab-item} 新規インストール
+
+(install-2-1-fresh)=
+
+### 1. アクセス情報を取得
+
+```{include} _repository_access.inc
+```
+
+### 2. Repositoryを追加
+
+```{include} _repository_add.inc
+```
+
+### 3. PMEをインストール
+
+1. {guilabel}`Get Extensions`へ戻り、追加したPME Repositoryを同期します。
+   一覧が更新されない場合は、{guilabel}`Refresh Remote`を実行してください。
+2. {guilabel}`Pie Menu Editor Fork`を検索し、{guilabel}`Install`を押します。
+3. PMEが無効の場合は、{guilabel}`Preferences` > {guilabel}`Add-ons`で有効にします。
+
+:::::
+
+:::::{tab-item} 旧版から移行
+
+(install-2-1-migrate)=
+
+PME 1.18.x、1.19.x、2.0.5.xからPME 2.1へ移行する手順です。
+
+### 1. 旧版をバックアップして終了
+
+::::{important}
+**PME 1.18.x / 1.19.xを使用している場合は、先にユーザーリソースをバックアップしてください。**
+
+PME 1では、スクリプトやアイコンなどが旧アドオンの内部または隣接フォルダに保存されています。
+旧版をアンインストールする前に、使用しているファイルを別の安全な場所へコピーしてください。
+
+:::{dropdown} バックアップする場所
+
+使用しているBlenderバージョンの標準`addons`フォルダを開きます。
+`<version>`は`4.2`などのBlenderバージョン番号です。
+
+| OS | `addons`フォルダ |
+|---|---|
+| Windows | `%APPDATA%\Blender Foundation\Blender\<version>\scripts\addons\` |
+| macOS | `~/Library/Application Support/Blender/<version>/scripts/addons/` |
+| Linux | `~/.config/blender/<version>/scripts/addons/` |
+
+その中にある次のフォルダを、PMEをアンインストールしても削除されない場所へコピーします。
+
+| リソース | `addons`フォルダからの相対パス |
+|---|---|
+| カスタムスクリプト | `pie_menu_editor/scripts/` |
+| カスタムアイコン | `pie_menu_editor/icons/` |
+| バックアップ | `pie_menu_editor_data/backups/` |
+
+無効化したメニューの状態も引き継ぐ場合は、PME 1.19.0以降でJSONを書き出してください。
+それ以前のPME 1では、無効状態がJSONに含まれません。
+
+:::
+::::
+
+PME 2.0.5.xのユーザーリソースは、アドオン本体とは別の
+[ユーザーリソースフォルダ](../reference/file_locations.md)に保存されています。
+2.0.0以降では旧版をアンインストールしても削除されません。
+
+1. 旧版PMEのPreferencesを開き、{guilabel}`Export` > {guilabel}`All Menus`で
+   メニューをJSONファイルへ書き出します。
+2. {guilabel}`Preferences` > {guilabel}`Add-ons`から旧版PMEをアンインストールします。
+3. Blenderを終了します。
+
+### 2. アクセス情報を取得
+
+```{include} _repository_access.inc
+```
+
+### 3. Repositoryを追加
+
+```{include} _repository_add.inc
+```
+
+### 4. PMEをインストールして設定をImport
+
+1. {guilabel}`Get Extensions`へ戻り、追加したPME Repositoryを同期します。
+   一覧が更新されない場合は、{guilabel}`Refresh Remote`を実行してください。
+2. {guilabel}`Pie Menu Editor Fork`を検索し、{guilabel}`Install`を押します。
+3. PMEが無効の場合は、{guilabel}`Preferences` > {guilabel}`Add-ons`で有効にします。
+4. PME 1から移行する場合は、退避したカスタムスクリプトを
+   [ユーザーリソースフォルダ](../reference/file_locations.md)の`scripts/`へ、
+   カスタムアイコンを`icons/`へコピーします。
+   旧版のシステムファイルでPME 2.1のファイルを上書きしないでください。
+5. PME 2.1の{guilabel}`Import Menus`を開き、保存したJSONファイルを
+   {guilabel}`Rename if exists`で読み込みます。
+
+{guilabel}`compatible JSON`は一部の情報を省略するため、PME 2.1への移行には使用しません。
+
+- **JSONから読み込まれる設定**
+  - PMEメニュー
+  - PMEメニューに設定したHotkey
+- **PME 2.1で設定し直す項目**
+  - PMEの一般設定
+  - PME全体を開くためのGlobal Hotkey
+  - User Propertiesに保存された現在値
+  - ユーザーリソースフォルダの変更設定
+  - `boot_config`と`import pme`の有効化設定
+
+:::::
+
+:::::{tab-item} アップデート
+
+(install-2-1-update)=
+
+PME RepositoryからインストールしたPMEは、BlenderのExtensions機能でアップデートします。
+
+1. {guilabel}`Edit` > {guilabel}`Preferences` > {guilabel}`Get Extensions`を開きます。
+2. 必要に応じて{guilabel}`Refresh Remote`を実行します。
+3. {guilabel}`Install Available Updates`を実行します。
+4. PMEの表示バージョンが更新されたことを確認します。
+5. 作業中のファイルを保存し、Blenderを再起動します。
+
+```{important}
+アップデート後は、PMEを使い続ける前に必ずBlenderを再起動してください。
+
+Extensionのファイルが更新されても、同じBlenderセッション内に更新前のPMEの状態が
+残る場合があります。アップデート直後のセッションでPMEを使い続ける手順はサポートされません。
+```
+
+:::::
+
+::::::
+
+## Q&A
+
+旧版PMEが残っているというエラーが表示される
+: 旧版PMEをアンインストールし、Blenderを再起動してからPME 2.1を有効化してください。
+
+再起動後も表示やHotkeyがおかしい
+: {guilabel}`Preferences` > {guilabel}`Add-ons`で旧版PMEが残っていないか確認してください。
+  残っている場合はアンインストールしてBlenderを再起動します。
+  解決しない場合は、下記の案内に従ってエラーメッセージを報告してください。
+
+Importしたメニューが再起動後に消えた
+: {guilabel}`Auto-Save Preferences`が無効になっていないか確認してください。
+  無効の場合は、Import後に{guilabel}`Save Preferences`を実行します。
+
+エラーメッセージまたは`See System Console`と表示された
+: 表示されたメッセージとSystem Consoleの出力を添えて、
+  [サポートページ](../support_community/get_support.md)から報告してください。
+  Windowsでは{guilabel}`Window` > {guilabel}`Toggle System Console`でSystem Consoleを開けます。
+
+---
+
+[PME 2.0.5.xへ戻す](rollback_to_2_0.md)
+
+[PME 2.0以前のインストール（アーカイブ）](installation_legacy.md)
