@@ -1,0 +1,1028 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Writing and Running Code" href="../reference/command_text.html"><link rel="prev" title="Custom Icons" href="custom_icons.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>Settings - Pie Menu Editor 2.0.5.5 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=6b3a701d" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/editor-overview.css?v=8fac9edf" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+      }
+    }
+  }
+</style>
+
+<script type="text/javascript">
+    (function () {
+        if (window.__PMEBeaconInitialized) {
+            return;
+        }
+
+        window.__PMEBeaconInitialized = true;
+
+        !function(e,t,n){function a(){var e=t.getElementsByTagName("script")[0],n=t.createElement("script");n.type="text/javascript",n.async=!0,n.src="https://beacon-v2.helpscout.net",e.parentNode.insertBefore(n,e)}if(e.Beacon=n=function(t,n,a){e.Beacon.readyQueue.push({method:t,options:n,data:a})},n.readyQueue=[],"complete"===t.readyState)return a();e.attachEvent?e.attachEvent("onload",a):e.addEventListener("load",a,!1)}(window,document,window.Beacon||function(){});
+        window.Beacon('init', 'e458ab6a-6436-4e96-a0b6-038336504b24');
+        window.Beacon('config', {
+            display: {
+                style: 'manual'
+            }
+        });
+
+        window.PMEDocs = window.PMEDocs || {};
+        window.PMEDocs.beaconPrefillTemplates = {
+            supportRequest: [
+                'Summary:',
+                '- What went wrong?',
+                '',
+                'Steps to reproduce:',
+                '1.',
+                '2.',
+                '3.',
+                '',
+                'What happened:',
+                '- Describe the actual result.',
+                '',
+                'Environment:',
+                '- Blender version:',
+                '- PME version:',
+                '- OS:',
+                '',
+                'Attachments:',
+                '- PME setup JSON:',
+                '- Console output / screenshot:',
+                '- Small .blend file (if relevant):',
+                '',
+                'Additional notes:',
+                '- Anything else that may help.'
+            ].join('\n')
+        };
+
+        window.PMEDocs.openSupportBeacon = function (event, templateName) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            if (typeof window.Beacon === 'function') {
+                const prefillText = window.PMEDocs.beaconPrefillTemplates[templateName];
+                if (prefillText) {
+                    window.Beacon('prefill', {
+                        text: prefillText
+                    });
+                }
+
+                window.Beacon('open');
+                window.Beacon('navigate', '/ask/message/');
+                return false;
+            }
+
+            return true;
+        };
+
+        document.addEventListener('click', function (event) {
+            const trigger = event.target.closest('[data-beacon-open]');
+            if (!trigger) {
+                return;
+            }
+
+            window.PMEDocs.openSupportBeacon(event, trigger.dataset.beaconTemplate);
+        });
+    }());
+</script></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Pie Menu Editor 2.0.5.5 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor 2.0.5.5 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/basic_pie_menu.html">Create Your First Pie Menu</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/examples.html">Examples &amp; Ideas</a><input aria-label="Toggle navigation of Examples &amp; Ideas" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/scripting_workflow.html">Code Examples</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Editors</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="editor_common_elements.html">Common Editor Elements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector_menu_editor.html">Vector Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="popup_dialog_editor.html">Pop-up Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="floating_panel_editor.html">Floating Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property_editor.html">Property Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property_stack_editor.html">Property Stack Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context_router_editor.html">Context Router Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="side_panel_editor.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hiding_unused_panels.html">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interactive_panels.html">Interactive Panels and Extend Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html">UI Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context_menu.html">Capture Menu</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_icons.html">Custom Icons</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Scripting</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/command_text.html">Writing and Running Code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/poll_method.html">Poll Method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/scripting.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_guide.html">Choosing a Keymap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_duplicates.html">Keymap Conflicts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/terminology.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/file_locations.html">File Locations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/boot_options.html">Boot Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/developer_options.html">Developer Options</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">Reference Guide</a><input aria-label="Toggle navigation of Reference Guide" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/original_author_videos.html">Original Author’s Videos</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
+</ul>
+
+</div>
+</div>
+<nav class="documentation-languages" aria-label="Language">
+  
+  <a href="settings.html" lang="en" hreflang="en" aria-label="English" title="English" aria-current="true"><span aria-hidden="true">🇺🇸</span></a>
+  
+  <a href="../ja/editors/settings.html" lang="ja" hreflang="ja" aria-label="日本語" title="日本語"><span aria-hidden="true">🇯🇵</span></a>
+  
+</nav>
+<script>
+(() => {
+  const links = [...document.querySelectorAll('.documentation-languages a')];
+  const targets = links.map(link => link.getAttribute('href'));
+  function syncFragment() {
+    links.forEach((link, index) => { link.href = targets[index] + window.location.hash; });
+  }
+  syncFragment();
+  window.addEventListener('hashchange', syncFragment);
+})();
+</script>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/editors/settings.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="settings">
+<span id="id1"></span><h1>Settings<a class="headerlink" href="#settings" title="Link to this heading">¶</a></h1>
+<p><strong>Settings</strong> controls Pie Menu Editor as a whole. Open Pie Menu Editor under Edit &gt; Preferences &gt; Add-ons, then select <strong>Settings</strong> in the <strong>Editor / Settings</strong> tabs at the top.</p>
+<p>The ten tabs on the left are grouped by scope: the first five contain <strong>global settings</strong>, the next four contain <strong>editor-specific defaults</strong>, and the last contains <strong>developer settings</strong>.</p>
+<hr class="docutils" />
+<section id="general">
+<span id="settings-general"></span><h2>General<a class="headerlink" href="#general" title="Link to this heading">¶</a></h2>
+<p>General controls PME’s interface, menu list width and row count, automatic backups and tags, and expert options. Defaults for individual editors are in the editor-specific tabs below.</p>
+<p><strong>Interface</strong></p>
+<section id="n-panel-preferences">
+<span id="setting-n-panel-preferences"></span><h3>N-Panel Preferences<a class="headerlink" href="#n-panel-preferences" title="Link to this heading">¶</a></h3>
+<p>Shows PME settings in the 3D Viewport’s Sidebar (N-Panel). When enabled, a <strong>PME</strong> tab provides access to the main settings without opening the Preferences window.</p>
+</section>
+<section id="expand-slot-tools">
+<span id="setting-expand-slot-tools"></span><h3>Expand Slot Tools<a class="headerlink" href="#expand-slot-tools" title="Link to this heading">¶</a></h3>
+<p>Expands slot tools such as copy, delete, and move when the Slot Editor opens.</p>
+<a class="img-shadow reference internal image-reference" href="../_images/slot_tools.png"><img alt="Expanded Slot Tools" class="img-shadow align-center" src="../_images/slot_tools.png" style="width: 80%;" />
+</a>
+</section>
+<section id="operator-editor">
+<span id="setting-operator-editor"></span><h3>Operator Editor<a class="headerlink" href="#operator-editor" title="Link to this heading">¶</a></h3>
+<p>Uses the <strong>Operator Properties Editor</strong> in the Command tab, with controls comparable to Blender’s Adjust Last Operation (formerly F6). When disabled, it falls back to Blender’s generic input fields.</p>
+</section>
+<section id="recent-menu-targets">
+<span id="setting-recent-menu-targets"></span><h3>Recent Menu Targets<a class="headerlink" href="#recent-menu-targets" title="Link to this heading">¶</a></h3>
+<p>Shows <strong>recently invoked menus</strong> as destinations when adding an item through the Widget Context Menu. Enabled by default.</p>
+</section>
+<section id="editor-link-buttons">
+<span id="setting-editor-link-buttons"></span><h3>Editor Link Buttons<a class="headerlink" href="#editor-link-buttons" title="Link to this heading">¶</a></h3>
+<p>Shows a link button beside ordinary Menu slots in the Pop-up Dialog and Floating Panel editors, opening the referenced menu for editing. The same setting also appears in the <a class="reference internal" href="#setting-popup-editor-link-buttons">Popup Dialog tab</a>.</p>
+<p>When disabled, you can still use <strong>Go to Linked Menu</strong> in the slot’s operations menu. The link button inside a Panel Row is always shown. See <a class="reference internal" href="popup_dialog_editor.html#popup-linked-menu"><span class="std std-ref">Pop-up Dialog link controls</span></a>.</p>
+</section>
+<section id="persist-tree-state">
+<span id="setting-persist-tree-state"></span><h3>Persist Tree State<a class="headerlink" href="#persist-tree-state" title="Link to this heading">¶</a></h3>
+<p>Remembers expanded and collapsed groups in the menu tree after Blender closes.</p>
+</section>
+<section id="show-tree-group-counts">
+<span id="setting-show-tree-group-counts"></span><h3>Show Tree Group Counts<a class="headerlink" href="#show-tree-group-counts" title="Link to this heading">¶</a></h3>
+<p>Shows the number of menus in tree group rows, such as tag headings.</p>
+</section>
+<section id="list-width">
+<span id="setting-list-width"></span><h3>List Width<a class="headerlink" href="#list-width" title="Link to this heading">¶</a></h3>
+<p>Width of the menu list on the left of the editor, as a percentage. Range: 1–80; default: 40.</p>
+</section>
+<section id="list-rows">
+<span id="setting-list-rows"></span><h3>List Rows<a class="headerlink" href="#list-rows" title="Link to this heading">¶</a></h3>
+<p>Number of visible rows in the menu list. Range: 5–50; default: 10.</p>
+</section>
+<section id="search-keywords">
+<span id="setting-search-keywords"></span><h3>Search Keywords<a class="headerlink" href="#search-keywords" title="Link to this heading">¶</a></h3>
+<p>Chooses what Search / Select matches in addition to menu names. You can select multiple options:</p>
+<ul class="simple">
+<li><p><strong>Hotkey</strong> — The assigned hotkey text, such as <code class="docutils literal notranslate"><span class="pre">Ctrl+Shift+A</span></code>.</p></li>
+<li><p><strong>Extend Target</strong> — The destination class ID for Extend Panel / Extend Menu, such as <code class="docutils literal notranslate"><span class="pre">VIEW3D_MT_object</span></code>.</p></li>
+<li><p><strong>UID</strong> — PME’s internal UID string.</p></li>
+</ul>
+<p>Only Hotkey is enabled by default.</p>
+<p><strong>Automation</strong></p>
+</section>
+<section id="auto-backup">
+<span id="setting-auto-backup"></span><h3>Auto Backup<a class="headerlink" href="#auto-backup" title="Link to this heading">¶</a></h3>
+<p>Creates a backup whenever menu edits are saved. Timestamped files accumulate under the path set in Resources. To keep overwriting one file instead, use <a class="reference internal" href="#setting-overwrite-backup-file">Overwrite Backup File</a>.</p>
+</section>
+<section id="auto-tag-new-menus">
+<span id="setting-auto-tag-new-menus"></span><h3>Auto-Tag New Menus<a class="headerlink" href="#auto-tag-new-menus" title="Link to this heading">¶</a></h3>
+<p>Automatically assigns the current tag filter to newly created menus, for example when viewing only menus tagged <code class="docutils literal notranslate"><span class="pre">Modeling</span></code>.</p>
+<p><strong>Performance</strong></p>
+</section>
+<section id="cache-scripts">
+<span id="setting-cache-scripts"></span><h3>Cache Scripts<a class="headerlink" href="#cache-scripts" title="Link to this heading">¶</a></h3>
+<p>Caches external Python scripts loaded by Custom / Command slots, reducing loading overhead when the same script runs repeatedly.</p>
+<p><strong>Expert</strong></p>
+</section>
+<section id="show-error-trace">
+<span id="setting-show-error-trace"></span><h3>Show Error Trace<a class="headerlink" href="#show-error-trace" title="Link to this heading">¶</a></h3>
+<p>Shows traceback information when a slot’s Python code raises an exception (Description / Poll / Custom / Command).</p>
+</section>
+<section id="sidebar-tab-memory-retired">
+<span id="setting-persist-sidearea-tabs"></span><h3>Sidebar Tab Memory (Retired)<a class="headerlink" href="#sidebar-tab-memory-retired" title="Link to this heading">¶</a></h3>
+<p>PME 2.1 no longer displays or uses this legacy setting. Toggle Side Area does not separately read and restore Sidebar tab names, because accessing this Blender information directly can cause crashes. When <span class="guilabel">Preserve Side Area State</span> retains a supported editor’s state, the visible panel may return as part of it; this does not provide general memory for all Sidebar tabs. Sidebar visibility and the opened area’s width or height are still remembered during the current Blender session. Existing settings can still be loaded.</p>
+</section>
+<section id="show-command-tab-undo">
+<span id="setting-show-command-tab-undo"></span><h3>Show Command Tab Undo<a class="headerlink" href="#show-command-tab-undo" title="Link to this heading">¶</a></h3>
+<p>Shows the <strong>Undo Previous Command</strong> checkbox in the Command tab. See <a class="reference internal" href="macro_operator_editor.html"><span class="std std-doc">Macro Operator Editor</span></a> and <a class="reference internal" href="stack_key_editor.html"><span class="std std-doc">Stack Key Editor</span></a>.</p>
+</section>
+<section id="preserve-side-area-state">
+<span id="setting-preserve-side-area-space-state"></span><h3>Preserve Side Area State<a class="headerlink" href="#preserve-side-area-state" title="Link to this heading">¶</a></h3>
+<p>Restores an editor’s working state when reopened after Toggle Side Area closes or switches it. Off by default.
+Supported state includes Outliner search and filters, the Properties context, and the Node Editor’s node tree.
+File Browser / Asset Browser are excluded, and remembered state does not survive a Blender restart.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This experimental feature may destabilize Blender, and restoration may not work in every Blender version.</p>
+</div>
+<hr class="docutils" />
+</section>
+</section>
+<section id="resources">
+<span id="settings-resources"></span><h2>Resources<a class="headerlink" href="#resources" title="Link to this heading">¶</a></h2>
+<p>Chooses where PME stores user resources other than menus: custom icons, exported JSON, external scripts used by Custom slots, and automatic backups. PME creates <code class="docutils literal notranslate"><span class="pre">icons</span></code>, <code class="docutils literal notranslate"><span class="pre">scripts</span></code>, <code class="docutils literal notranslate"><span class="pre">exports</span></code>, and <code class="docutils literal notranslate"><span class="pre">backups</span></code> subfolders under the selected folder.</p>
+<p>Since PME 2.0.0, these user resources are stored separately from the add-on itself. Reinstalling or updating the add-on does not delete them.</p>
+<section id="open-resource-folder">
+<span id="setting-resources-open-folder"></span><h3>Open Resource Folder<a class="headerlink" href="#open-resource-folder" title="Link to this heading">¶</a></h3>
+<p>Opens the current resource root in your operating system’s file browser. The folder is created if it does not yet exist.</p>
+</section>
+<section id="root-directory">
+<span id="setting-resources-root-directory"></span><h3>Root Directory<a class="headerlink" href="#root-directory" title="Link to this heading">¶</a></h3>
+<p>The root folder for user resources, under <code class="docutils literal notranslate"><span class="pre">~/Documents/Pie</span> <span class="pre">Menu</span> <span class="pre">Editor/</span></code> by default. You can choose another folder; clearing the field restores the last valid path.</p>
+<p>The status row shows the current counts of <strong>scripts / exports / icons / backup</strong> files. If subfolders are missing, <strong>Missing resource folders</strong> appears on the right. Use the reload button (<svg version="1.1" width="1.0em" height="1.0em" class="sd-octicon sd-octicon-sync" viewBox="0 0 16 16" aria-hidden="true"><path d="M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z"></path></svg>) to initialize them.</p>
+<p>Related: <a class="reference internal" href="../reference/file_locations.html"><span class="std std-doc">File Locations</span></a>, <a class="reference internal" href="custom_icons.html"><span class="std std-doc">Custom Icons</span></a></p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="hotkeys">
+<span id="settings-hotkeys"></span><h2>Hotkeys<a class="headerlink" href="#hotkeys" title="Link to this heading">¶</a></h2>
+<p>Configures PME’s own hotkeys and shared input timing: the PME and Widget Context Menu shortcuts, plus HOLD / CHORD / TWEAK time and distance thresholds. Keymap Doctor checks for conflicts with the active Blender keymaps.</p>
+<section id="pme-hotkey">
+<span id="setting-pme-hotkey"></span><h3>PME Hotkey<a class="headerlink" href="#pme-hotkey" title="Link to this heading">¶</a></h3>
+<p>Opens the <a class="reference internal" href="context_menu.html#capture-menu"><span class="std std-ref">Capture Menu</span></a> (Quick Capture). The default is <strong>Ctrl+Shift+P</strong>, registered in Blender’s <strong>Screen Editing</strong> keymap.</p>
+</section>
+<section id="widget-context-menu">
+<span id="setting-widget-context-menu-hotkey"></span><h3>Widget Context Menu<a class="headerlink" href="#widget-context-menu" title="Link to this heading">¶</a></h3>
+<p>Opens the context menu for UI elements captured through Interactive Panels, including buttons, properties, and panels. It provides actions such as adding the widget under the mouse to a PME menu or copying it.</p>
+<p>See <a class="reference internal" href="interactive_panels.html"><span class="std std-doc">Interactive Panels and Extend Panel</span></a> for details.</p>
+<p><strong>Hotkey Modes</strong></p>
+</section>
+<section id="tweak-mode-threshold">
+<span id="setting-tweak-mode-threshold"></span><h3>Tweak Mode Threshold<a class="headerlink" href="#tweak-mode-threshold" title="Link to this heading">¶</a></h3>
+<p>Blender’s global <strong>drag distance threshold</strong>, in pixels. Moving the mouse this far is also treated as a drag by PME for TWEAK / CLICK_DRAG modes. This shares Blender’s standard Tweak Mode Threshold value.</p>
+</section>
+<section id="hold-mode-timeout">
+<span id="setting-hold-mode-timeout"></span><h3>Hold Mode Timeout<a class="headerlink" href="#hold-mode-timeout" title="Link to this heading">¶</a></h3>
+<p>Time after a key press before <strong>HOLD mode</strong> is recognized, in milliseconds. Range: 50–1000; default: 200.</p>
+</section>
+<section id="chord-mode-timeout">
+<span id="setting-chord-mode-timeout"></span><h3>Chord Mode Timeout<a class="headerlink" href="#chord-mode-timeout" title="Link to this heading">¶</a></h3>
+<p>Time allowed for the next key after the first key in <strong>CHORD mode</strong>, in milliseconds. Range: 50–1000; default: 300.</p>
+</section>
+<section id="show-next-key-chord">
+<span id="setting-show-next-key-chord"></span><h3>Show Next Key Chord<a class="headerlink" href="#show-next-key-chord" title="Link to this heading">¶</a></h3>
+<p>Shows a hint with the available next keys while entering a chord.</p>
+</section>
+<section id="experimental-modes">
+<span id="setting-experimental-modes"></span><h3>Experimental Modes<a class="headerlink" href="#experimental-modes" title="Link to this heading">¶</a></h3>
+<p>Shows experimental Open Modes such as <strong>Click</strong> / <strong>Click Drag</strong> in Hotkey settings. Hidden by default.</p>
+<p>Related: <a class="reference internal" href="editor_common_elements.html#hotkey-editor"><span class="std std-ref">Hotkey settings</span></a></p>
+</section>
+<section id="keymap-doctor">
+<span id="setting-keymap-diagnostics"></span><h3>Keymap Doctor<a class="headerlink" href="#keymap-doctor" title="Link to this heading">¶</a></h3>
+<p><strong>Scan Keymaps</strong> compares each PME hotkey with Blender’s active user keymap and reports conflicts within the same keymap. It also lists empty PME entries, PME entries that may have become embedded in the <code class="docutils literal notranslate"><span class="pre">active</span></code> layer, and hotkeys that could not be fully checked.</p>
+<p>Combinations intentionally handled by PME’s dispatcher, such as different Hotkey Modes, different chords, or mouse modifiers, are reported as information rather than counted as conflicts. Duplicate Hotkey Modes or chords and extra ghost entries remain conflicts.</p>
+<p>Scanning, copying the summary, and exporting a report do not change keymaps. <strong>Clean Up Empty Items</strong> removes only PME entries confirmed to be empty. Conflicting entries are not automatically changed or deleted.</p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="overlay">
+<span id="settings-overlay"></span><h2>Overlay<a class="headerlink" href="#overlay" title="Link to this heading">¶</a></h2>
+<p>Controls overlays shown while menus run, including the current Stack Key slot, Modal Operator controls, and hints. Adjust font size, colors, position, and fade duration here.</p>
+<section id="font-size">
+<span id="setting-overlay-font-size"></span><h3>Font Size<a class="headerlink" href="#font-size" title="Link to this heading">¶</a></h3>
+<p>Overlay font size in pixels, used for Stack Key and Modal Operator labels. Range: 10–50; default: 24.</p>
+</section>
+<section id="text-color">
+<span id="setting-overlay-text-color"></span><h3>Text Color<a class="headerlink" href="#text-color" title="Link to this heading">¶</a></h3>
+<p>Main overlay text color, in RGBA. Used for Stack Key slot names and the current Modal Operator mode.</p>
+</section>
+<section id="secondary">
+<span id="setting-overlay-secondary-color"></span><h3>Secondary<a class="headerlink" href="#secondary" title="Link to this heading">¶</a></h3>
+<p>Secondary text color, in RGBA. Used for Stack Key supporting text and Modal value displays.</p>
+</section>
+<section id="background">
+<span id="setting-overlay-background-color"></span><h3>Background<a class="headerlink" href="#background" title="Link to this heading">¶</a></h3>
+<p>Overlay background color, in RGBA. Used only when <a class="reference internal" href="#setting-overlay-use-background">Use Background</a> is enabled.</p>
+</section>
+<section id="use-background">
+<span id="setting-overlay-use-background"></span><h3>Use Background<a class="headerlink" href="#use-background" title="Link to this heading">¶</a></h3>
+<p>Draws a background panel behind the text.</p>
+</section>
+<section id="use-shadow">
+<span id="setting-overlay-use-shadow"></span><h3>Use Shadow<a class="headerlink" href="#use-shadow" title="Link to this heading">¶</a></h3>
+<p>Adds a drop shadow to the text. Enabled by default.</p>
+</section>
+<section id="alignment">
+<span id="setting-overlay-alignment"></span><h3>Alignment<a class="headerlink" href="#alignment" title="Link to this heading">¶</a></h3>
+<p>Positions the overlay within the screen, such as top, center, or bottom.</p>
+</section>
+<section id="offset-x">
+<span id="setting-overlay-offset-x"></span><h3>Offset X<a class="headerlink" href="#offset-x" title="Link to this heading">¶</a></h3>
+<p>Horizontal offset from the screen edge, in pixels.</p>
+</section>
+<section id="offset-y">
+<span id="setting-overlay-offset-y"></span><h3>Offset Y<a class="headerlink" href="#offset-y" title="Link to this heading">¶</a></h3>
+<p>Vertical offset from the screen edge, in pixels.</p>
+</section>
+<section id="duration">
+<span id="setting-overlay-duration"></span><h3>Duration<a class="headerlink" href="#duration" title="Link to this heading">¶</a></h3>
+<p>Overlay display duration in seconds. Range: 1–10; default: 2.</p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="gpu-layout">
+<span id="settings-gpu-layout"></span><h2>GPU Layout<a class="headerlink" href="#gpu-layout" title="Link to this heading">¶</a></h2>
+<p>Controls PME’s custom drawing layer introduced in 2.0.0, used by <strong>Floating Panels</strong> and related UI. Settings include tooltip width, the preferred INVOKE strategy, and debug options.</p>
+<section id="tooltip-max-width">
+<span id="setting-tooltip-max-width"></span><h3>Tooltip Max Width<a class="headerlink" href="#tooltip-max-width" title="Link to this heading">¶</a></h3>
+<p>Maximum width of GPULayout tooltip text, in unscaled pixels. Range: 160–1200; default: 420.</p>
+</section>
+<section id="invoke-priority">
+<span id="setting-invoke-priority"></span><h3>Invoke Priority<a class="headerlink" href="#invoke-priority" title="Link to this heading">¶</a></h3>
+<p>Chooses the default strategy when an operator is invoked without an explicit <code class="docutils literal notranslate"><span class="pre">invoke_strategy</span></code>.</p>
+<ul class="simple">
+<li><p><strong>Suspend</strong> — Prefers <code class="docutils literal notranslate"><span class="pre">INVOKE_SUSPEND</span></code>, keeping the panel alive.</p></li>
+<li><p><strong>Afterfunc</strong> — Prefers <code class="docutils literal notranslate"><span class="pre">INVOKE_AFTERFUNC</span></code>: close, invoke, then reopen.</p></li>
+</ul>
+</section>
+<section id="force-invoke-afterfunc-operators">
+<span id="setting-force-invoke-afterfunc-operators"></span><h3>Force INVOKE_AFTERFUNC Operators<a class="headerlink" href="#force-invoke-afterfunc-operators" title="Link to this heading">¶</a></h3>
+<p>Operator IDs that must use <code class="docutils literal notranslate"><span class="pre">INVOKE_AFTERFUNC</span></code>. Separate IDs such as <code class="docutils literal notranslate"><span class="pre">bpy.ops.foo.bar</span></code> with commas, spaces, or newlines.</p>
+</section>
+<section id="force-invoke-suspend-operators">
+<span id="setting-force-invoke-suspend-operators"></span><h3>Force INVOKE_SUSPEND Operators<a class="headerlink" href="#force-invoke-suspend-operators" title="Link to this heading">¶</a></h3>
+<p>Operator IDs that must use <code class="docutils literal notranslate"><span class="pre">INVOKE_SUSPEND</span></code>, using the same format as above.</p>
+</section>
+<section id="debug-toggle-keys">
+<span id="setting-debug-toggle-keys"></span><h3>Debug Toggle Keys<a class="headerlink" href="#debug-toggle-keys" title="Link to this heading">¶</a></h3>
+<p>Enables developer key controls over Floating Panels: <code class="docutils literal notranslate"><span class="pre">D</span></code> for HitTest debugging, <code class="docutils literal notranslate"><span class="pre">V</span></code> for Visible/Culling debugging, and <code class="docutils literal notranslate"><span class="pre">M</span></code> for Metrics debugging.</p>
+</section>
+<section id="sync-fpanel-to-dialog">
+<span id="setting-sync-fpanel-to-dialog"></span><h3>Sync FPANEL to DIALOG<a class="headerlink" href="#sync-fpanel-to-dialog" title="Link to this heading">¶</a></h3>
+<p>Opens a DIALOG copy alongside a Floating Panel to compare layouts when checking GPULayout rendering.</p>
+</section>
+<section id="show-unsupported-fpanel-ui">
+<span id="setting-show-unsupported-fpanel-ui"></span><h3>Show Unsupported FPANEL UI<a class="headerlink" href="#show-unsupported-fpanel-ui" title="Link to this heading">¶</a></h3>
+<p>Shows development UI inside Floating Panels that still uses Blender’s UILayout because GPULayout does not support it yet. Intended for debugging.</p>
+</section>
+<section id="layout-panel-header-spacing">
+<span id="setting-layout-panel-header-spacing"></span><h3>Layout Panel Header Spacing<a class="headerlink" href="#layout-panel-header-spacing" title="Link to this heading">¶</a></h3>
+<p>Adds space between the header and body when using the header layout of <code class="docutils literal notranslate"><span class="pre">UILayout.panel()</span></code>. Available when <code class="docutils literal notranslate"><span class="pre">Show</span> <span class="pre">Unsupported</span> <span class="pre">FPANEL</span> <span class="pre">UI</span></code> is enabled.</p>
+</section>
+<section id="force-separator-line">
+<span id="setting-force-separator-line"></span><h3>Force Separator Line<a class="headerlink" href="#force-separator-line" title="Link to this heading">¶</a></h3>
+<p>Chooses whether AUTO separators draw a line or only reserve space.</p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="pie-menu">
+<span id="settings-pie"></span><h2>Pie Menu<a class="headerlink" href="#pie-menu" title="Link to this heading">¶</a></h2>
+<p>Controls Pie Menu appearance and defaults, including titles, restoring the mouse position, and extra slot spacing. Radius and threshold settings share Blender’s standard input preferences and can be changed here as well.</p>
+<section id="show-title">
+<span id="setting-show-title"></span><h3>Show Title<a class="headerlink" href="#show-title" title="Link to this heading">¶</a></h3>
+<p>Shows the menu name above the Pie Menu. Enabled by default.</p>
+</section>
+<section id="restore-mouse-position">
+<span id="setting-restore-mouse-position"></span><h3>Restore Mouse Position<a class="headerlink" href="#restore-mouse-position" title="Link to this heading">¶</a></h3>
+<p>Restores the mouse to its starting position after the Pie Menu hotkey is released. When disabled, the mouse remains in the direction of the selected slot.</p>
+</section>
+<section id="extra-pie-slot-gap-size">
+<span id="setting-extra-pie-slot-gap-size"></span><h3>Extra Pie Slot Gap Size<a class="headerlink" href="#extra-pie-slot-gap-size" title="Link to this heading">¶</a></h3>
+<p>Spacing for the two extra slots <strong>above</strong> and <strong>below</strong> the pie’s eight directions.</p>
+</section>
+<section id="animation-timeout-blender">
+<span id="setting-animation-timeout"></span><h3>Animation Timeout (Blender)<a class="headerlink" href="#animation-timeout-blender" title="Link to this heading">¶</a></h3>
+<p>The animation duration when a Pie Menu opens. Shared with Blender’s standard input preferences.</p>
+</section>
+<section id="initial-timeout-blender">
+<span id="setting-initial-timeout"></span><h3>Initial Timeout (Blender)<a class="headerlink" href="#initial-timeout-blender" title="Link to this heading">¶</a></h3>
+<p>The delay between opening a Pie Menu and accepting input. Shared with Blender’s standard input preferences.</p>
+</section>
+<section id="menu-radius-blender">
+<span id="setting-menu-radius"></span><h3>Menu Radius (Blender)<a class="headerlink" href="#menu-radius-blender" title="Link to this heading">¶</a></h3>
+<p>Pie Menu radius, shared with Blender’s standard input preferences. An individual menu’s <a class="reference internal" href="pie_menu_editor.html"><span class="std std-doc">Radius</span></a> setting overrides this value for that menu.</p>
+</section>
+<section id="menu-threshold-blender">
+<span id="setting-menu-threshold"></span><h3>Menu Threshold (Blender)<a class="headerlink" href="#menu-threshold-blender" title="Link to this heading">¶</a></h3>
+<p>The slot selection threshold (gesture distance), shared with Blender’s standard input preferences.</p>
+</section>
+<section id="menu-confirm-blender">
+<span id="setting-menu-confirm"></span><h3>Menu Confirm (Blender)<a class="headerlink" href="#menu-confirm-blender" title="Link to this heading">¶</a></h3>
+<p>The gesture confirmation threshold, shared with Blender’s standard input preferences.</p>
+<p>Related: <a class="reference internal" href="pie_menu_editor.html"><span class="std std-doc">Pie Menu Editor</span></a></p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="regular-menu">
+<span id="settings-menu"></span><h2>Regular Menu<a class="headerlink" href="#regular-menu" title="Link to this heading">¶</a></h2>
+<p>Controls how Regular Menus (dropdowns) open by default, including whether hovering opens submenus and the delay before they appear.</p>
+<section id="open-on-mouse-over-blender">
+<span id="setting-open-on-mouse-over"></span><h3>Open on Mouse Over (Blender)<a class="headerlink" href="#open-on-mouse-over-blender" title="Link to this heading">¶</a></h3>
+<p>Opens submenus when the mouse hovers over their entries. Shared with Blender’s standard input preferences.</p>
+</section>
+<section id="top-level">
+<span id="setting-top-level"></span><h3>Top Level<a class="headerlink" href="#top-level" title="Link to this heading">¶</a></h3>
+<p>Delay before a top-level menu opens. Applies when <a class="reference internal" href="#setting-open-on-mouse-over">Open on Mouse Over</a> is enabled.</p>
+</section>
+<section id="sub-level">
+<span id="setting-sub-level"></span><h3>Sub Level<a class="headerlink" href="#sub-level" title="Link to this heading">¶</a></h3>
+<p>Delay before a submenu opens. Applies when <a class="reference internal" href="#setting-open-on-mouse-over">Open on Mouse Over</a> is enabled.</p>
+<p>Related: <a class="reference internal" href="regular_menu_editor.html"><span class="std std-doc">Regular Menu Editor</span></a></p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="popup-dialog">
+<span id="settings-popup"></span><h2>Popup Dialog<a class="headerlink" href="#popup-dialog" title="Link to this heading">¶</a></h2>
+<p>Controls Pop-up Dialog defaults: spacer behavior, link buttons, the initial mode of new dialogs, and maximum Toolbar size.</p>
+<section id="use-spacer-separator-by-default">
+<span id="setting-use-spacer-separator"></span><h3>Use ‘Spacer’ Separator by Default<a class="headerlink" href="#use-spacer-separator-by-default" title="Link to this heading">¶</a></h3>
+<p>Treats empty slots as <strong>Spacers</strong> (flexible space) by default. When disabled, they become fixed-width separators.</p>
+</section>
+<section id="setting-popup-editor-link-buttons">
+<span id="id2"></span><h3>Editor Link Buttons<a class="headerlink" href="#setting-popup-editor-link-buttons" title="Link to this heading">¶</a></h3>
+<p>The same setting as <a class="reference internal" href="#setting-editor-link-buttons">Editor Link Buttons in General</a>.</p>
+</section>
+<section id="default-mode">
+<span id="setting-default-popup-mode"></span><h3>Default Mode<a class="headerlink" href="#default-mode" title="Link to this heading">¶</a></h3>
+<p>Chooses <strong>Pie Mode</strong> or <strong>Popup Mode</strong> as the default for new Pop-up Dialogs.</p>
+</section>
+<section id="max-width-toolbars">
+<span id="setting-toolbars-max-width"></span><h3>Max Width (Toolbars)<a class="headerlink" href="#max-width-toolbars" title="Link to this heading">¶</a></h3>
+<p>Maximum width of a vertical Toolbar, in pixels. Default: 60.</p>
+</section>
+<section id="max-height-toolbars">
+<span id="setting-toolbars-max-height"></span><h3>Max Height (Toolbars)<a class="headerlink" href="#max-height-toolbars" title="Link to this heading">¶</a></h3>
+<p>Maximum height of a horizontal Toolbar, in pixels. Default: 60.</p>
+<p>Related: <a class="reference internal" href="popup_dialog_editor.html"><span class="std std-doc">Popup Dialog Editor</span></a></p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="modal-operator">
+<span id="settings-modal"></span><h2>Modal Operator<a class="headerlink" href="#modal-operator" title="Link to this heading">¶</a></h2>
+<p>Controls default mouse behavior and movement increments for each property type in Modal Operators. These defaults determine which direction and distance of movement changes a value. Override them for an individual Modal Operator in its advanced settings.</p>
+<section id="mouse-movement-direction">
+<span id="setting-mouse-movement-direction"></span><h3>Mouse Movement Direction<a class="headerlink" href="#mouse-movement-direction" title="Link to this heading">¶</a></h3>
+<p>Chooses which mouse movement changes values, such as vertical, horizontal, or distance. Applies to Modal Operators globally.</p>
+</section>
+<section id="mouse-threshold-int">
+<span id="setting-mouse-threshold-int"></span><h3>Mouse Threshold (Int)<a class="headerlink" href="#mouse-threshold-int" title="Link to this heading">¶</a></h3>
+<p>Mouse movement in pixels required to <strong>change an INT property by 1</strong>. Lower values are more sensitive; higher values require more movement.</p>
+</section>
+<section id="mouse-threshold-float">
+<span id="setting-mouse-threshold-float"></span><h3>Mouse Threshold (Float)<a class="headerlink" href="#mouse-threshold-float" title="Link to this heading">¶</a></h3>
+<p>Mouse movement for one step of a FLOAT property, based on that property’s step value.</p>
+</section>
+<section id="mouse-threshold-bool">
+<span id="setting-mouse-threshold-bool"></span><h3>Mouse Threshold (Bool)<a class="headerlink" href="#mouse-threshold-bool" title="Link to this heading">¶</a></h3>
+<p>Threshold for toggling BOOL properties. Enable the toggle on the left to use a threshold and edit the field.</p>
+</section>
+<section id="mouse-threshold-enum">
+<span id="setting-mouse-threshold-enum"></span><h3>Mouse Threshold (Enum)<a class="headerlink" href="#mouse-threshold-enum" title="Link to this heading">¶</a></h3>
+<p>Threshold for switching ENUM items. Enable the toggle on the left to use a threshold and edit the field.</p>
+<p>Related: <a class="reference internal" href="modal_operator_editor.html"><span class="std std-doc">Modal Operator Editor</span></a></p>
+<hr class="docutils" />
+</section>
+</section>
+<section id="developer">
+<span id="settings-developer"></span><h2>Developer<a class="headerlink" href="#developer" title="Link to this heading">¶</a></h2>
+<p>Settings for development and diagnostics, rather than everyday editing. Includes Boot Config, logging, and development flags for backups and exports.</p>
+<p><strong>Boot Config</strong></p>
+<section id="open-boot-config-folder">
+<span id="setting-boot-config-open-folder"></span><h3>Open Boot Config Folder<a class="headerlink" href="#open-boot-config-folder" title="Link to this heading">¶</a></h3>
+<p>Opens the Boot Config folder in your operating system’s file browser.</p>
+</section>
+<section id="enable-import-pme-alias">
+<span id="setting-enable-import-pme-alias"></span><h3>Enable import pme Alias<a class="headerlink" href="#enable-import-pme-alias" title="Link to this heading">¶</a></h3>
+<p>Registers <code class="docutils literal notranslate"><span class="pre">sys.modules['pme']</span></code> so external scripts or add-ons can access PME’s public API with <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pme</span></code>. Takes effect on the next startup.</p>
+</section>
+<section id="enable-init-log">
+<span id="setting-enable-init-log"></span><h3>Enable Init Log<a class="headerlink" href="#enable-init-log" title="Link to this heading">¶</a></h3>
+<p>Records initialization diagnostics when the add-on starts. Takes effect on the next startup.</p>
+</section>
+<section id="use-bundled-loader-manifest">
+<span id="setting-use-bundled-loader-manifest"></span><h3>Use Bundled Loader Manifest<a class="headerlink" href="#use-bundled-loader-manifest" title="Link to this heading">¶</a></h3>
+<p>Uses the bundled loader manifest for faster startup. If the manifest is missing or damaged, PME falls back to dynamic discovery. Takes effect on the next startup. Enabled by default.</p>
+</section>
+<section id="auto-save-candidate-on-startup">
+<span id="setting-auto-save-candidate-on-startup"></span><h3>Auto-Save Candidate on Startup<a class="headerlink" href="#auto-save-candidate-on-startup" title="Link to this heading">¶</a></h3>
+<p>After a successful startup, saves the dynamically discovered module order as a candidate manifest beside <code class="docutils literal notranslate"><span class="pre">loader_manifest.json</span></code>. Used when maintaining loader manifests.</p>
+<p><strong>Logger</strong></p>
+</section>
+<section id="open-log-folder">
+<span id="setting-logger-open-folder"></span><h3>Open Log Folder<a class="headerlink" href="#open-log-folder" title="Link to this heading">¶</a></h3>
+<p>Opens the log output folder in your operating system’s file browser.</p>
+</section>
+<section id="use-colors">
+<span id="setting-logger-use-colors"></span><h3>Use Colors<a class="headerlink" href="#use-colors" title="Link to this heading">¶</a></h3>
+<p>Colors console output. Enabled by default.</p>
+</section>
+<section id="file-output-jsonl">
+<span id="setting-logger-file-output"></span><h3>File Output (JSONL)<a class="headerlink" href="#file-output-jsonl" title="Link to this heading">¶</a></h3>
+<p>Writes a JSONL log file for each session.</p>
+</section>
+<section id="keep-last">
+<span id="setting-logger-keep-last"></span><h3>Keep Last<a class="headerlink" href="#keep-last" title="Link to this heading">¶</a></h3>
+<p>Number of recent log entries retained in the in-memory ring buffer. Range: 0–5000; default: 200.</p>
+</section>
+<section id="logger-categories">
+<span id="setting-logger-categories"></span><h3>Logger Categories<a class="headerlink" href="#logger-categories" title="Link to this heading">¶</a></h3>
+<p>Controls enablement and Log Level for each category. By default, internal and development categories are off; only the user-facing <code class="docutils literal notranslate"><span class="pre">user_exec</span></code> category is on, capturing warnings and errors.</p>
+</section>
+<section id="apply-level-apply-to-all">
+<span id="setting-logger-apply-level"></span><h3>Apply Level / Apply to All<a class="headerlink" href="#apply-level-apply-to-all" title="Link to this heading">¶</a></h3>
+<p>Applies the selected Log Level to <strong>all categories</strong>. Choose a level in the dropdown, then click <code class="docutils literal notranslate"><span class="pre">Apply</span> <span class="pre">to</span> <span class="pre">All</span></code>.</p>
+<p><strong>Backup</strong></p>
+</section>
+<section id="overwrite-backup-file">
+<span id="setting-overwrite-backup-file"></span><h3>Overwrite Backup File<a class="headerlink" href="#overwrite-backup-file" title="Link to this heading">¶</a></h3>
+<p>Makes <a class="reference internal" href="#setting-auto-backup">Auto Backup</a> <strong>overwrite a single file</strong> instead of creating separate timestamped files.</p>
+<p><strong>Export</strong></p>
+</section>
+<section id="sort-exported-menus-by-name">
+<span id="setting-sort-exported-menus"></span><h3>Sort Exported Menus by Name<a class="headerlink" href="#sort-exported-menus-by-name" title="Link to this heading">¶</a></h3>
+<p>Sorts exported menus by name. When disabled, export preserves PME’s internal order.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="related-pages">
+<h2>Related Pages<a class="headerlink" href="#related-pages" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="editor_common_elements.html"><span class="std std-doc">Common Editor Elements</span></a></p></li>
+<li><p><a class="reference internal" href="editor_common_elements.html#hotkey-editor"><span class="std std-ref">Hotkey settings</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/boot_options.html"><span class="std std-doc">Boot Options</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/developer_options.html"><span class="std std-doc">Developer Options</span></a></p></li>
+<li><p><a class="reference internal" href="../reference/file_locations.html"><span class="std std-doc">File Locations</span></a></p></li>
+</ul>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../reference/command_text.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Writing and Running Code</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="custom_icons.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Custom Icons</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Settings</a><ul>
+<li><a class="reference internal" href="#general">General</a><ul>
+<li><a class="reference internal" href="#n-panel-preferences">N-Panel Preferences</a></li>
+<li><a class="reference internal" href="#expand-slot-tools">Expand Slot Tools</a></li>
+<li><a class="reference internal" href="#operator-editor">Operator Editor</a></li>
+<li><a class="reference internal" href="#recent-menu-targets">Recent Menu Targets</a></li>
+<li><a class="reference internal" href="#editor-link-buttons">Editor Link Buttons</a></li>
+<li><a class="reference internal" href="#persist-tree-state">Persist Tree State</a></li>
+<li><a class="reference internal" href="#show-tree-group-counts">Show Tree Group Counts</a></li>
+<li><a class="reference internal" href="#list-width">List Width</a></li>
+<li><a class="reference internal" href="#list-rows">List Rows</a></li>
+<li><a class="reference internal" href="#search-keywords">Search Keywords</a></li>
+<li><a class="reference internal" href="#auto-backup">Auto Backup</a></li>
+<li><a class="reference internal" href="#auto-tag-new-menus">Auto-Tag New Menus</a></li>
+<li><a class="reference internal" href="#cache-scripts">Cache Scripts</a></li>
+<li><a class="reference internal" href="#show-error-trace">Show Error Trace</a></li>
+<li><a class="reference internal" href="#sidebar-tab-memory-retired">Sidebar Tab Memory (Retired)</a></li>
+<li><a class="reference internal" href="#show-command-tab-undo">Show Command Tab Undo</a></li>
+<li><a class="reference internal" href="#preserve-side-area-state">Preserve Side Area State</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#resources">Resources</a><ul>
+<li><a class="reference internal" href="#open-resource-folder">Open Resource Folder</a></li>
+<li><a class="reference internal" href="#root-directory">Root Directory</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#hotkeys">Hotkeys</a><ul>
+<li><a class="reference internal" href="#pme-hotkey">PME Hotkey</a></li>
+<li><a class="reference internal" href="#widget-context-menu">Widget Context Menu</a></li>
+<li><a class="reference internal" href="#tweak-mode-threshold">Tweak Mode Threshold</a></li>
+<li><a class="reference internal" href="#hold-mode-timeout">Hold Mode Timeout</a></li>
+<li><a class="reference internal" href="#chord-mode-timeout">Chord Mode Timeout</a></li>
+<li><a class="reference internal" href="#show-next-key-chord">Show Next Key Chord</a></li>
+<li><a class="reference internal" href="#experimental-modes">Experimental Modes</a></li>
+<li><a class="reference internal" href="#keymap-doctor">Keymap Doctor</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#overlay">Overlay</a><ul>
+<li><a class="reference internal" href="#font-size">Font Size</a></li>
+<li><a class="reference internal" href="#text-color">Text Color</a></li>
+<li><a class="reference internal" href="#secondary">Secondary</a></li>
+<li><a class="reference internal" href="#background">Background</a></li>
+<li><a class="reference internal" href="#use-background">Use Background</a></li>
+<li><a class="reference internal" href="#use-shadow">Use Shadow</a></li>
+<li><a class="reference internal" href="#alignment">Alignment</a></li>
+<li><a class="reference internal" href="#offset-x">Offset X</a></li>
+<li><a class="reference internal" href="#offset-y">Offset Y</a></li>
+<li><a class="reference internal" href="#duration">Duration</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#gpu-layout">GPU Layout</a><ul>
+<li><a class="reference internal" href="#tooltip-max-width">Tooltip Max Width</a></li>
+<li><a class="reference internal" href="#invoke-priority">Invoke Priority</a></li>
+<li><a class="reference internal" href="#force-invoke-afterfunc-operators">Force INVOKE_AFTERFUNC Operators</a></li>
+<li><a class="reference internal" href="#force-invoke-suspend-operators">Force INVOKE_SUSPEND Operators</a></li>
+<li><a class="reference internal" href="#debug-toggle-keys">Debug Toggle Keys</a></li>
+<li><a class="reference internal" href="#sync-fpanel-to-dialog">Sync FPANEL to DIALOG</a></li>
+<li><a class="reference internal" href="#show-unsupported-fpanel-ui">Show Unsupported FPANEL UI</a></li>
+<li><a class="reference internal" href="#layout-panel-header-spacing">Layout Panel Header Spacing</a></li>
+<li><a class="reference internal" href="#force-separator-line">Force Separator Line</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pie-menu">Pie Menu</a><ul>
+<li><a class="reference internal" href="#show-title">Show Title</a></li>
+<li><a class="reference internal" href="#restore-mouse-position">Restore Mouse Position</a></li>
+<li><a class="reference internal" href="#extra-pie-slot-gap-size">Extra Pie Slot Gap Size</a></li>
+<li><a class="reference internal" href="#animation-timeout-blender">Animation Timeout (Blender)</a></li>
+<li><a class="reference internal" href="#initial-timeout-blender">Initial Timeout (Blender)</a></li>
+<li><a class="reference internal" href="#menu-radius-blender">Menu Radius (Blender)</a></li>
+<li><a class="reference internal" href="#menu-threshold-blender">Menu Threshold (Blender)</a></li>
+<li><a class="reference internal" href="#menu-confirm-blender">Menu Confirm (Blender)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#regular-menu">Regular Menu</a><ul>
+<li><a class="reference internal" href="#open-on-mouse-over-blender">Open on Mouse Over (Blender)</a></li>
+<li><a class="reference internal" href="#top-level">Top Level</a></li>
+<li><a class="reference internal" href="#sub-level">Sub Level</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#popup-dialog">Popup Dialog</a><ul>
+<li><a class="reference internal" href="#use-spacer-separator-by-default">Use ‘Spacer’ Separator by Default</a></li>
+<li><a class="reference internal" href="#setting-popup-editor-link-buttons">Editor Link Buttons</a></li>
+<li><a class="reference internal" href="#default-mode">Default Mode</a></li>
+<li><a class="reference internal" href="#max-width-toolbars">Max Width (Toolbars)</a></li>
+<li><a class="reference internal" href="#max-height-toolbars">Max Height (Toolbars)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#modal-operator">Modal Operator</a><ul>
+<li><a class="reference internal" href="#mouse-movement-direction">Mouse Movement Direction</a></li>
+<li><a class="reference internal" href="#mouse-threshold-int">Mouse Threshold (Int)</a></li>
+<li><a class="reference internal" href="#mouse-threshold-float">Mouse Threshold (Float)</a></li>
+<li><a class="reference internal" href="#mouse-threshold-bool">Mouse Threshold (Bool)</a></li>
+<li><a class="reference internal" href="#mouse-threshold-enum">Mouse Threshold (Enum)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#developer">Developer</a><ul>
+<li><a class="reference internal" href="#open-boot-config-folder">Open Boot Config Folder</a></li>
+<li><a class="reference internal" href="#enable-import-pme-alias">Enable import pme Alias</a></li>
+<li><a class="reference internal" href="#enable-init-log">Enable Init Log</a></li>
+<li><a class="reference internal" href="#use-bundled-loader-manifest">Use Bundled Loader Manifest</a></li>
+<li><a class="reference internal" href="#auto-save-candidate-on-startup">Auto-Save Candidate on Startup</a></li>
+<li><a class="reference internal" href="#open-log-folder">Open Log Folder</a></li>
+<li><a class="reference internal" href="#use-colors">Use Colors</a></li>
+<li><a class="reference internal" href="#file-output-jsonl">File Output (JSONL)</a></li>
+<li><a class="reference internal" href="#keep-last">Keep Last</a></li>
+<li><a class="reference internal" href="#logger-categories">Logger Categories</a></li>
+<li><a class="reference internal" href="#apply-level-apply-to-all">Apply Level / Apply to All</a></li>
+<li><a class="reference internal" href="#overwrite-backup-file">Overwrite Backup File</a></li>
+<li><a class="reference internal" href="#sort-exported-menus-by-name">Sort Exported Menus by Name</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#related-pages">Related Pages</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=2f8f0f10"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

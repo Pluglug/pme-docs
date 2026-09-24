@@ -1,0 +1,169 @@
+---
+vocab: developer-facing
+---
+
+(command-text)=
+
+# Writing and Running Code
+
+This reference covers the format and execution rules for Python code entered in PME 2.1.
+
+:::{important} First: PME code fields use one line
+
+- **Standard Command / Custom fields and menu Poll fields take a single line of code.** Use `;` or expressions for short operations.
+- **Move longer or reusable logic into an external Python file.** Keep a short call such as `execute_script("scripts/my_action.py")` in the PME field.
+
+AI-generated answers should also distinguish a multiline external file from the single line to paste into PME.
+:::
+
+(code-input-limit)=
+
+For AI authors: standard slot Command / Custom fields accept up to 1,024 UTF-8 bytes. Move longer code into an external file. The dedicated Context Router Custom field accepts up to 32,768 characters.
+
+For functions, variables, and arguments, see the [API Reference](scripting.rst). For menu availability, see [Poll Method](poll_method.md).
+
+(code-one-line)=
+
+## Prepare one line for the code field
+
+Enter short operations as a single line in standard Command / Custom fields and menu Poll fields. Multiline Python formatted for explanation is not ready to paste into these fields.
+
+| Operation | Single-line form | Notes |
+|---|---|---|
+| Run simple statements in order | `x = 1; print(x)` | `;` establishes execution order; it does not wait for an interactive operation to finish |
+| Choose a value by a condition | `value_if_true if condition else value_if_false` | Replace these names with your actual expressions |
+| Run only when a condition is true | `condition and action()` | Evaluates the right side only when the left side is true |
+| Return a Poll result | `return C.mode == 'OBJECT'` | For menu Poll, not Command |
+
+You cannot convert `if` / `for` / `def` blocks simply by replacing line breaks with `;`. Move long, deeply nested, looping, or function-based logic into an {ref}`external file <external-command-script>`.
+
+:::{dropdown} Importing a multiline operation history
+
+Some capture paths extract operator calls and assignments from an operation history and combine them into one line. This is not a way to store an arbitrary Python script unchanged. Check the captured result.
+:::
+
+## Where code goes and when it runs
+
+| Field | When evaluated | What to write |
+|---|---|---|
+| Command | When the item is executed | Operator calls and value changes |
+| Custom | While drawing the UI, repeatedly on redraw | UI layout using `L`; do not modify data merely by drawing |
+| Menu Poll | When checking whether the menu is available | Read conditions and `return` a result; do not modify data |
+| Property Getter / Setter / Update | When reading, writing, or updating a value | Code for each callback's role; see {ref}`callback specifications <property-callbacks>` |
+| A file called with `execute_script()` | When its caller is evaluated | Code appropriate to the caller; a call from Custom runs during drawing |
+
+For example, putting `bpy.ops.mesh.primitive_cube_add()` in Custom adds data while the UI draws. To place a button, use `L.operator("mesh.primitive_cube_add")`.
+
+## Names provided by PME and names you define
+
+PME supplies convenient names in its code fields, but the available values are not identical in every field. This table introduces Command / Custom and files called from them with `execute_script()`.
+
+| Name | Purpose | Requirements and notes |
+|---|---|---|
+| `C` / `context` | Read the context supplied by PME for this execution or drawing operation | Not necessarily the same object as `bpy.context`; members without a target may be `None` |
+| `bpy` | Use Blender's API | PME may adjust how `bpy.context` is exposed on some drawing paths |
+| `D` | Access Blender data | Shortcut for `bpy.data`; does not guarantee that a particular object exists |
+| `O` | Call Blender operators | Shortcut for `bpy.ops`; operator requirements still apply |
+| `T` | Access Blender types | Shortcut for `bpy.types` |
+| `L` | Draw UI elements in the current layout | Available during drawing that receives a layout, such as Custom; not an operation target for Command |
+| `E` | Inspect the input event passed to this operation | The name itself may be unavailable when evaluation has no event |
+| `U` | Share temporary values within a PME session | Not persistent storage; do not use it for values that must survive PME re-registration or a Blender restart |
+
+Check the field-specific meaning of names such as `pm`, `pmi`, and `menu`. For example, `menu` in a Property callback is the Property ID. Consult [Property callbacks](../editors/property_editor.md) before reusing code from another type of slot.
+
+Define or import your own functions, `mathutils.Vector`, and other modules in the external file that uses them. Do not confuse names PME supplies now with variables previously entered in the Python Console.
+
+(external-command-script)=
+
+## Run an external file
+
+Write longer logic in a regular Python file and call it from PME with `execute_script()`. This example displays the number of selected objects.
+
+**1. Save the file** — Save `selection_report.py` in the user scripts folder described in [File Locations](file_locations.md).
+
+**File contents (multiline):**
+
+```python
+return_value = False
+
+def build_report(context, prefix):
+    objects = getattr(context, "selected_objects", ()) or ()
+    return f"{prefix}: {len(objects)}"
+
+report = build_report(C, str(kwargs.get("prefix", "Selection")))
+message_box(report)
+return_value = report
+```
+
+**2. Set up the call** — Paste this line into a pie menu slot's **Command** field.
+
+```python
+execute_script("scripts/selection_report.py", prefix="Selected objects")
+```
+
+**3. Check the result** — Select objects in the 3D Viewport's Object Mode and run the item. A message shows the selection count. Deselect everything and run it again to see `0`.
+
+### File paths and arguments
+
+| Item | Meaning |
+|---|---|
+| `scripts/selection_report.py` | Searches the user scripts folder first, then PME's bundled scripts |
+| Other relative paths | Relative to the add-on folder; absolute paths are also accepted |
+| `kwargs` | Dictionary of arguments passed by the call; a variable named `prefix` is not created automatically |
+| `__file__` | Path of the file actually loaded |
+| `return_value` | The return value of `execute_script()`; assign to this instead of using a top-level `return` statement |
+
+Assign the call to a variable if you need its result. A return value is not displayed automatically, which is why this example calls `message_box()`. In PME 2.1, functions defined in the same execution can also access imports and definitions at the beginning of the file.
+
+Moving code into a file does not change the caller's context or evaluation timing. Include the file when sharing the setup with another environment.
+
+:::{dropdown} Using the return value to check success
+
+The default `return_value` is `True`. Some paths that catch an exception can still return this value, so it is not a general success indicator. This example starts with `False` and assigns the result at the end. Check error output and the actual result as well. This assignment does not roll back data changes made before a failure.
+:::
+
+(code-operator-context)=
+
+## Operator context and timing
+
+A `bpy.ops` call depends on where it runs as well as its arguments. The same code can behave differently when called from the 3D Viewport or a button in Preferences.
+
+- Are you in the required editor and region?
+- Is the mode correct, with the required active and selected targets?
+- Do the argument names and values exist in your Blender version?
+- Should the operation execute immediately, or start an interaction the user adjusts with the mouse?
+
+`EXEC_DEFAULT` executes with the supplied values. `INVOKE_DEFAULT` calls the operator's initialization path, which may open a dialog or begin mouse interaction. Not every operator supports both forms. See [Blender's Operator API](https://docs.blender.org/api/current/bpy.ops.html).
+
+When an operator returns `RUNNING_MODAL`, user interaction is still in progress. Python written after its call with `;` does not wait for confirmation. Consider a [Macro Operator](../editors/macro_operator_editor.md) for sequences that include user adjustments.
+
+Adding code that switches to the first area it finds whenever a context error occurs can make an operation run in an unintended view. Start by calling it from the intended editor and checking the hotkey's scope. If it must target another area, define how to choose that area and what to do when none exists.
+
+## Diagnose errors
+
+Results displayed in Blender's Python Console and the destination of PME's `print()` output are not necessarily the same. Check Blender's standard output and error output for `print()` and Python exceptions. On macOS, this may be the terminal used to launch Blender.
+
+| Symptom | Check first |
+|---|---|
+| `NameError` | Is the required name imported or defined in this file? Does this field provide `L` or `E`? |
+| `ModuleNotFoundError` | Is the dependency installed in Blender's Python, rather than only the system Python? |
+| `AttributeError` / `NoneType` | Missing targets, object type, property names, and Blender version |
+| `poll() failed` | The editor, region, mode, and selection required by the Blender operator |
+| Syntax error at the end of the code | Does the pasted code match the original? |
+| Works in the Text Editor but not PME | Missing imports, variables left from a previous execution, or a different execution context |
+| Runs but gives an unexpected result | Operator results such as `CANCELLED`, target selection, and interactive operations still in progress |
+
+Run a short diagnostic Command from the intended editor to identify the state in which an error occurs.
+
+```python
+print("PME context:", getattr(C.area, "type", None), C.mode, C.active_object)
+```
+
+Confirm one operation before adding branches or sequences. For data changes, test both with and without a target, and check Undo / Redo. Joining statements with `;` or using `EXEC_DEFAULT` does not guarantee a single Undo step. Do not add `bpy.ops.ed.undo_push()` mechanically without checking the history.
+
+## Related references
+
+- [Code Examples](scripting_workflow.md): configurations and code to paste.
+- [API Reference](scripting.rst): functions and variables.
+- [Public API](public_api.md): using PME from external add-ons and scripts.
+- {ref}`Sharing temporary values <scripting-user-data>`: choosing between `U` and persistent storage.

@@ -1,0 +1,298 @@
+(macro-operator-editor)=
+
+# Macro Operator Editor
+
+**Macro Operator** runs several actions in sequence from one invocation. A registered Macro becomes a named Blender operator, callable from hotkeys, other PME menus, and Python.
+
+
+This page describes PME 2.1 settings.
+
+(macro-configuration-guide)=
+
+:::{dropdown} Configuration guide — features, combinations, and uses (for AI)
+
+**Name: Macro Operator / Type ID: `MACRO`.**
+Runs several steps in order from a single invocation. Use Stack Key instead to advance one candidate per key press.
+
+- **Inputs**: add Command / Menu slots and arrange them in execution order. Disabled slots are excluded. See {ref}`slots <macro-slots>`.
+- **Combinations**: Menu references can execute Sticky Key / Macro Operator / Modal Operator. Drawing a Popup Dialog is not itself a sequential processing step.
+- **Invocation**: hotkeys, other menus, and external scripts are supported. See {ref}`invocation methods <macro-hotkey-settings>` for external code.
+- **Constraints**: order steps so each has its required editor, mode, and target. Grouping commands into a Macro does not guarantee success or a single Undo step.
+- **Interactive steps**: operations awaiting user confirmation must be separate steps that Blender can track as operators. See {ref}`interactive operations <macro-interaction>`.
+- **Diagnostics**: check {ref}`diagnostic messages <macro-diagnostics>` for missing operators or references. Fix reported problems before running.
+- **Example design**: switch mode → select a target → perform an action. Define the starting requirements and expected final state, and check what remains after cancellation or errors.
+- **Variable lifetime**: Python code slots share variables within one Macro invocation. See {ref}`save, process, and restore <macro-shared-variables>`.
+:::
+
+
+## Interface and editing workflow
+
+```{raw} html
+:file: common/_macro_operator_editor_overview_map.html
+```
+
+1. {ref}`Name and basic controls <macro-basic-settings>`
+2. {ref}`Advanced settings <macro-advanced-settings>`
+3. {ref}`Keymap / Hotkey <macro-hotkey-settings>`
+4. {ref}`Sequential slots <macro-slots>`
+
+
+Select a Macro in the list, check its name and enabled state, then configure invocation and slots.
+See [Common Editor Elements](editor_common_elements.md) for lists, search, and tags;
+see {ref}`name <macro-basic-settings>`, {ref}`hotkeys <macro-hotkey-settings>`,
+{ref}`slots <macro-slots>`, and {ref}`advanced settings <macro-advanced-settings>` for individual sections.
+
+(macro-basic-settings)=
+
+## Name and basic controls
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-11.51079137%">
+<img src="../_static/images/editors/overview/macro-operator-blender-5-2.png" width="663" height="278" alt="Box Sel with X-Ray Macro name and enabled state.">
+</div>
+<figcaption>Name and basic controls in this example.</figcaption>
+</figure>
+```
+
+Identify the Macro by its name and enabled state. For tags, renaming, references, and related controls,
+see {ref}`selected menu settings <overview-selected>`.
+This type has no menu preview button.
+
+(macro-hotkey-settings)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 65;--crop-offset:-42.08633094%">
+<img src="../_static/images/editors/overview/macro-operator-blender-5-2.png" width="663" height="278" alt="Box Sel with X-Ray Keymap and Hotkey settings: B in 3D View.">
+</div>
+<figcaption>Keymap / Hotkey settings in this example.</figcaption>
+</figure>
+```
+
+Set where and how to invoke it. See the shared {ref}`Hotkey settings <hotkey-editor>` for input controls.
+
+Macros register as Blender operators, so even without a hotkey they can be called through menus, `open_menu()`, or `bpy.ops.pme.invoke_macro(...)`.
+
+```{versionadded} 2.0.5
+Added `bpy.ops.pme.invoke_macro(...)` for calling PME Macros from scripts or custom UI. It uses the PME Macro definition without requiring the caller to pass every slot's arguments.
+```
+
+(macro-slots)=
+
+## Slots
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 88;--crop-offset:-66.90647482%">
+<img src="../_static/images/editors/overview/macro-operator-blender-5-2.png" width="663" height="278" alt="Box Sel with X-Ray sequential slots: preparation, operation, and cleanup.">
+</div>
+<figcaption>Sequential slots in this example.</figcaption>
+</figure>
+```
+
+Slots run from top to bottom. Unlike Stack Key, they do not wait for another key press.
+
+- Add, remove, and reorder slots.
+- Enable or disable individual slots.
+- Two slot types are available: Command and Menu.
+- Menu slots can call PME **Sticky Key / Macro Operator / Modal Operator**. Interactive UI such as Pop-up Dialog / Pie Menu is not a suitable target in the middle of a Macro.
+
+(macro-shared-variables)=
+
+### Separate save → process → restore into slots
+
+**Use a value saved in one Command from a later Command.** Slots share variables within a single Macro, so temporary changes and cleanup can be written separately.
+
+```{mermaid}
+:name: macro-value-memory
+:alt: One Macro invocation saves and changes a value, performs an action, and restores the original value.
+
+flowchart LR
+    A["1. Save and change"] --> B["2. Process"]
+    B --> C["3. Restore"]
+    classDef remember fill:#e8f1fb,stroke:#4878aa,color:#172b43;
+    classDef restore fill:#e8f5ed,stroke:#45805d,color:#183f28;
+    class A,B remember;
+    class C restore;
+```
+
+For example, temporarily hide the 3D Viewport floor grid with these three Commands in order. **They run sequentially in one invocation without waiting for another key press.**
+
+**1. Save the target and current value, then hide the grid**
+
+```python
+view = C.space_data; start_floor = view.overlay.show_floor; view.overlay.show_floor = False
+```
+
+**2. Perform an action while the temporary setting is active** (here, diagnostic output)
+
+```python
+print("Action while the temporary setting is active")
+```
+
+**3. Restore the saved state**
+
+```python
+view.overlay.show_floor = start_floor
+```
+
+Set Keymap to **3D View** and invoke from a 3D Viewport. This minimal example does not wait for input, so the hidden interval may be too short to see. `print()` writes to Blender's standard output.
+
+`view` and `start_floor` are names you choose. `start_floor` could be `banana`, provided the save and restore steps use the same name.
+
+To pass values to another independent invocation or menu, use the temporary shared storage {ref}`U (User Data) <scripting-user-data>`.
+
+:::{admonition} Shared scope and restoration requirements
+:class: note
+
+- **Lifetime**: Python code in one Macro uses the same namespace. A new invocation creates a new namespace and does not inherit saved values from the previous run.
+- **Child Macros**: child Macros embedded through Menu slots share the namespace. Reusing a variable name in parent and child overwrites it, so check names when combining code. Starting another Macro separately from code creates a new execution.
+- **Other types**: embedded Sticky Key / Modal Operator variables belong to their own namespaces. Macro variables are not passed to them automatically.
+- **Target and names**: this example requires the saved 3D Viewport to remain available. Do not overwrite PME-provided names such as `C`, `E`, `menu`, or `slot` to store values.
+- **Early termination**: a cleanup slot is not `finally`. Operator cancellation, Command failure, or `stop = True` can prevent restoration; already changed values are not restored automatically.
+- **Synchronous cleanup that must run**: use `try` / `finally` within one script. However, `finally` does not wait for an interactive operator started by that script to finish.
+
+:::
+
+(macro-diagnostics)=
+
+### Diagnostic messages
+
+Warnings on slot rows show configuration problems PME can detect, such as missing operators or references. No warning does not guarantee that every operator's mode and selection requirements will be met at runtime. Check the actual context when an execution error occurs.
+
+```{versionadded} 2.0.5
+PME now detects operators missing from the current Blender environment before entering native Macro execution and stops the entire Macro. This addresses crashes caused by old settings, disabled add-ons, or renamed operators.
+```
+
+(macro-advanced-settings)=
+
+## Advanced settings
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 47;--crop-offset:-23.38129496%">
+<img src="../_static/images/editors/overview/macro-operator-blender-5-2.png" width="663" height="278" alt="Box Sel with X-Ray advanced settings: description and availability condition.">
+</div>
+<figcaption>Advanced settings in this example.</figcaption>
+</figure>
+```
+
+Open these with the gear button. See the {ref}`shared advanced settings <editor-extra-settings>` for Description and Poll.
+
+A Macro's Poll determines whether the entire Macro may run.
+
+---
+
+## Code and input fields
+
+See the configuration guide above for supported inputs. Field controls are covered in the
+{ref}`shared Slot Editor <slot-editor>`; code guidance is in
+[Code Input and Execution](../reference/command_text.md) and
+[Code Examples](../reference/scripting_workflow.md).
+
+---
+
+(macro-patterns)=
+
+## Usage patterns and conditions to check
+
+### Combine sequential actions
+
+This example starts with an active mesh in Object Mode. The first step enters Mesh Edit Mode; the next selects all elements.
+
+Slot 1 (Command):
+
+```python
+bpy.ops.object.mode_set(mode='EDIT')
+```
+
+Slot 2 (Command):
+
+```python
+bpy.ops.mesh.select_all(action='SELECT')
+```
+
+### Run the same operator with different parameters
+
+Each slot can supply different arguments to the same operator. This example starts with faces selected in Mesh Edit Mode. The second operation acts on the first operation's result.
+
+```python
+bpy.ops.mesh.inset(thickness=0.02)
+```
+
+```python
+bpy.ops.mesh.inset(thickness=0.05)
+```
+
+### Give each Stack Key slot several steps
+
+Call a Macro from a Stack Key Command slot to give each cycling step several operations.
+
+```python
+open_menu("My Macro Operator")
+```
+
+Alternatively, use `bpy.ops.pme.invoke_macro`:
+
+```python
+bpy.ops.pme.invoke_macro(pm_name="My Macro Operator")
+```
+
+### Call another Macro, Sticky Key, or Modal Operator
+
+A Macro Menu slot embeds another PME operator as one step. Split complex processing into child Macros or include Sticky Key / Modal Operator interaction. Stack Key is not a target in this Menu tab.
+
+(macro-interaction)=
+
+### Include interactive operations
+
+For operators the user adjusts, such as transforms, use invocation that starts the interaction. Operators recognized as Blender Macro steps can wait for confirmation before continuing. Starting asynchronous work within arbitrary Python does not make the Macro wait for everything automatically. Put each operator call in its own slot, and test confirmation and cancellation.
+
+```python
+bpy.ops.transform.resize('INVOKE_DEFAULT')
+```
+
+### Prepare the execution context and target
+
+First define the required editor, mode, and active/selected targets. If a step changes modes,
+order subsequent actions so they are available in that mode. Helpers such as `focus_area()` can change areas, but
+selecting another area alone does not make every operator available.
+Define what to do when a required target is missing, and [check the context](../reference/command_text.md).
+
+```{versionadded} 2.1
+Re-Capture can select several recent operations and add them as a Macro in execution order. Check arguments and execution requirements after capture.
+```
+
+---
+
+```{admonition} Related pages
+:class: seealso
+
+- [Common Editor Elements](editor_common_elements.md)
+- [Poll Method](../reference/poll_method.md)
+```
+
+## Reference videos (original author's channel)
+
+From [roaoao's videos](../reference/original_author_videos.md). These show an older interface and workflow.
+
+:::{dropdown} Macro Operator Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/x4HhN4aHCxg" title="Macro Operator Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Macro Operator Editor for Blender — Open on YouTube](https://www.youtube.com/watch?v=x4HhN4aHCxg)
+:::
+
+:::{dropdown} Macro Operator Tutorial by Jimmy Livefjord
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/-RQFK1kqqVw" title="Macro Operator Tutorial by Jimmy Livefjord" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Macro Operator Tutorial by Jimmy Livefjord — Open on YouTube](https://www.youtube.com/watch?v=-RQFK1kqqVw)
+:::

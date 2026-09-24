@@ -1,0 +1,178 @@
+(hiding-unused-panels)=
+
+# Hiding Unused Panels
+
+**Hidden Panel Group** は、Blender 標準やアドオンのパネルを一覧に登録し、まとめて非表示にするエディターです。
+使わないパネルを隠し、必要になったらこのグループの非表示設定を解除できます。
+パネル内のデータやアドオン本体を削除する機能ではありません。
+
+このページは PME 2.1 の設定を対象にしています。
+
+(hidden-configuration-guide)=
+
+:::{dropdown} 構成ガイド — 機能・組み合わせ・活用例（AI 向け）
+
+**呼び名：Hidden Panel Group（パネルの非表示）／種別 ID：`HPANEL`。**
+パネルのクラス ID を一覧で管理します。通常の Command / Custom のコード欄はありません。
+
+- **入力**：個別に検索するパネル、条件で絞ったパネル群、または Interactive Panels から取り込むパネル。{ref}`追加方法 <hidden-add-panels>`へ。
+- **適用**：グループを有効にすると対象を非表示にします。ホットキー、プレビュー、Description / Poll の詳細設定はありません。{ref}`基本操作 <hidden-basic-settings>`へ。
+- **制約**：パネル ID は提供する Blender・アドオンの版に依存します。対象の登録がない環境では、同じ表示を再現できるとは限りません。
+- **復帰**：無効化や一覧からの除去で、このグループによる非表示を解除します。同じパネルを別の有効なグループも隠している場合は、そちらも解除する必要があります。{ref}`復帰の確認 <hidden-restore>`へ。
+- **組み合わせ**：Side Panel で必要なパネルをまとめ、元の配置をこの機能で隠す。グループを用途別に分けてタグで切り替える。{ref}`活用例 <hidden-patterns>`へ。
+- **確認**：非表示と復帰を同じエディターで試します。対象アドオンが無効な場合は、そのパネルが存在しないことと非表示設定を混同しないでください。
+:::
+
+## 画面と編集の流れ
+
+```{raw} html
+:file: common/_hiding_unused_panels_overview_map.html
+```
+
+1. {ref}`名前と有効状態 <hidden-basic-settings>`
+2. {ref}`対象パネルの一覧 <hidden-slots>`
+
+一覧で Hidden Panel Group を選び、右側の一覧に隠すパネルを追加します。
+メニュー一覧やタグの共通操作は [エディターの共通要素](editor_common_elements.md)を参照してください。
+
+1. {ref}`名前と有効状態 <hidden-basic-settings>`でグループを確認する。
+2. {ref}`追加メニュー <hidden-add-panels>`から対象を選ぶ。
+3. {ref}`一覧の表示情報 <hidden-slots>`でパネル名とクラスを確認する。
+4. 非表示になったことと、{ref}`解除すると戻ること <hidden-restore>`を確認する。
+
+(hidden-basic-settings)=
+
+## 名前と基本操作
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-10.35598706%">
+<img src="../_static/images/editors/overview/hidden-panel-blender-5-2.png" width="663" height="309" alt="Hidden Panel Group (ToolsTab) の 名前と有効状態。非表示設定をまとめるグループの名前と有効状態を確認します。">
+</div>
+<figcaption>名前と有効状態。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+名前は隠すパネル群を識別するために付けます。有効にすると一覧のパネルを非表示にし、
+無効にするとこのグループによる非表示を解除します。
+名前とタグの操作は {ref}`選択メニューの設定 <overview-selected>` を参照してください。
+
+この種別には Hotkey 設定、プレビュー、詳細設定がありません。
+「特定モードでだけ有効」という Poll をこのグループへ書く構成ではありません。
+
+(hidden-slots)=
+
+## 隠すパネルの一覧
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 240;--crop-offset:-21.03559871%">
+<img src="../_static/images/editors/overview/hidden-panel-blender-5-2.png" width="663" height="309" alt="Hidden Panel Group (ToolsTab) の 対象パネルの一覧。パネルの表示名とクラス ID を並べて確認し、対象を追加・削除します。">
+</div>
+<figcaption>対象パネルの一覧。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+| 操作 | 役割 |
+|---|---|
+| 一覧 | このグループが対象にするパネル |
+| **＋** | パネルを追加するメニューを開く |
+| **−** | 選択行を外し、このグループによる非表示を解除する |
+| **×** | 一覧を空にして、このグループによる非表示をすべて解除する |
+| **Name / Class / Context / Category** | 一覧に表示する情報を選ぶ。複数を同時に表示できる |
+
+| 表示項目 | 内容 |
+|---|---|
+| **Name** | パネルの表示名 |
+| **Class** | Blender のパネルクラス ID。例：`VIEW3D_PT_view3d_cursor` |
+| **Context** | パネルに設定されたコンテキスト |
+| **Category** | パネルに設定されたサイドバーのタブ名 |
+
+同じ表示名でも別のクラスの場合があります。共有する設定や動作確認では Class も確認します。
+
+(hidden-add-panels)=
+
+## パネルを追加する
+
+**＋** から次の方法を選びます。
+
+| 項目 | 使い方 |
+|---|---|
+| **Hide Panel** | パネルを検索して一つ選ぶ |
+| **Hide Panels by ...** | Space / Region / Context / Category と表示名の Mask で候補を絞り、まとめて追加する |
+| **Interactive Panels** | 画面上のパネルなどから操作するモードを切り替える |
+
+### 条件でまとめて追加する
+
+**Hide Panels by ...** では、確定する前に対象のパネル数が表示されます。
+Mask はパネルの表示名を大文字・小文字を区別せず部分一致で絞ります。
+入力した文字列を Python コードや正規表現として実行する欄ではありません。
+対象を絞り、件数を確認してから追加します。
+
+この追加経路は Preferences のパネルと既に非表示のパネルを候補から外します。
+将来新しく登録されるすべてのパネルを、条件に応じて継続監視する設定ではありません。
+
+### 画面上のパネルから取り込む
+
+[Interactive Panels](interactive_panels.md) を有効にすると、画面上のパネルから操作メニューを使えます。
+取り込み先の Hidden Panel Group を確認して追加し、編集後は Interactive Panels を OFF に戻します。
+このモードは PME 全体で共有されるため、他のエディターの取り込みにも影響します。
+
+(hidden-restore)=
+
+## 非表示を解除して確認する
+
+グループを無効にするか、一覧から対象を外します。同じパネルを複数のグループで隠している場合は、
+有効な非表示設定が残っていないか確認してください。
+
+解除しても見つからない場合は、対象アドオンが有効か、パネルの本来のエディター・モード・対象が揃っているかを確認します。
+元のパネルに表示条件がある場合、非表示の解除だけでその条件を満たすわけではありません。
+
+(hidden-patterns)=
+
+## 活用例と確認する条件
+
+### 用途別にパネル群を分ける
+
+モデリング、アニメーションなどの用途ごとにグループを作り、何を隠すかを識別できる名前にします。
+まず少数のパネルで非表示と復帰を確かめてから対象を増やします。
+Properties エディターのパネルも対象にできますが、パネルを隠すことと Properties のタブ全体を削除することは同じではありません。
+
+### Tag でまとめて切り替える
+
+グループにタグを付けると、別の Command からまとめて有効・無効を切り替えられます。
+次の例は `Modeling` タグの付いたすべての PME メニューを有効にします。
+非表示グループだけを切り替えたい場合は、そのグループ専用のタグにしてください。
+
+```python
+pm_enable_by_tag("Modeling", True)
+```
+
+同じタグに操作用メニューも含まれていれば、それらの有効状態も変わります。
+
+### Side Panel と組み合わせる
+
+[Side Panel](side_panel_editor.md) で必要なパネルをまとめ、元のパネルを非表示にする構成です。
+先に再配置したパネルの表示と操作を確認してから元の表示を隠します。
+
+---
+
+## 関連ページ
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Side Panel Editor](side_panel_editor.md)
+- [Interactive Panels と Extend Panel](interactive_panels.md)
+- [Popup Dialog Editor](popup_dialog_editor.md)
+
+## 参考動画（原作者のチャンネル）
+
+参考動画（旧版） — [原作者 roaoao のチャンネル](../reference/original_author_videos.md)
+
+:::{dropdown} Hiding unused panels in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/z19c6b7XOWo" title="Hiding unused panels in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Hiding unused panels in Blender — YouTube で開く](https://www.youtube.com/watch?v=z19c6b7XOWo)
+:::

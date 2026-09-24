@@ -1,0 +1,28 @@
+These controls sit on either side of the menu name at the top of the editing area. Available controls depend on the menu type.
+
+:Enable/Disable:
+  Enables or disables the entire menu. Disabling it blocks hotkeys, script calls such as `open_menu()` / `pme.invoke_pm()`, and registered menu or panel routes (Extend Panel / Side Panel / Hidden Panel Group).
+  To remove only the shortcut, edit the {ref}`Hotkey settings <hotkey-editor>` instead.
+
+:Preview:
+  Opens a supported menu to inspect its layout and order. This uses normal menu invocation, so interacting with items can execute commands or change values. Check it in the intended editor as well; this is not a display-only test. The Preview for editing Property values is a separate control in [Property Editor](/editors/property_editor.md).
+
+:Menu selector:
+  Switches the menu being edited. Its icon identifies the current type (Pie / Popup / Regular / Modal, etc.). The selector supports searching and filtering by type.
+
+:Menu name:
+  The menu's display label and the identifier used to call it from other menus or Python. Use this name in `open_menu("Name")`.
+  Menu slot links and Pop-up Dialog / Floating Panel Dialog links retain their references when a menu is renamed. However, **Command / Custom code containing `open_menu("Name")` / `draw_menu("Name")` calls that literal name**. Review these strings when renaming a menu.
+
+:References button:
+  Appears when other menus reference this menu. Click it to list and jump to those menus. Use it to trace dependencies, such as a Macro calling a Sticky Key or a Regular Menu slot calling a Pop-up Dialog.
+
+:Tag:
+  Labels used to organize and find menus. Click to open the tag editor and assign several tags.
+  Tags support **filtering** and **grouping** in the menu list, and enabling sets through `pm_enable_by_tag("Name", True)`. Enable {guilabel}`Settings > General > Auto-Tag New Menus` to tag new menus automatically with the current tag filter.
+
+:Documentation:
+  Opens the relevant page in PME's online documentation (this site).
+
+:Advanced settings toggle:
+  Opens or closes Description, Poll, and editor-specific options. Some editors, such as Hidden Panel Group, have no advanced settings.

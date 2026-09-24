@@ -1,0 +1,326 @@
+(original-author-videos)=
+
+# Original Author's Videos
+
+Pie Menu Editor videos from original creator **roaoao**'s channel [r3a1ay (@r3a1ay4)](https://www.youtube.com/channel/UC9W8LzX1ICprmq6z_5nZ7CA/videos), grouped by feature.
+Original titles are retained, including credits for reviews and tutorials by Jimmy Livefjord.
+
+These videos document earlier workflows and configurations. Categories follow the titles and author's playlists; not every procedure has been verified in PME 2.1.
+See the feature references for current setting names and constraints.
+
+Expand a title to preview and play the video on this page. Each also has a link to YouTube.
+
+Checked September 6, 2026: 24 Pie Menu Editor videos.
+
+(author-videos-pie)=
+
+## Pie Menu and Overview
+
+Related reference: [Current reference](../editors/pie_menu_editor.md)
+
+:::{dropdown} Pie Menu Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/COW109EjBsU" title="Pie Menu Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Pie Menu Editor for Blender — Open on YouTube](https://www.youtube.com/watch?v=COW109EjBsU)
+:::
+
+:::{dropdown} Pie Menu Editor Review by Jimmy Livefjord
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/dWwBbnV1IOs" title="Pie Menu Editor Review by Jimmy Livefjord" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Pie Menu Editor Review by Jimmy Livefjord — Open on YouTube](https://www.youtube.com/watch?v=dWwBbnV1IOs)
+:::
+
+:::{dropdown} Nested Pie Menu, Confirm Threshold and Sticky Keys
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/5zDp586Uy2w" title="Nested Pie Menu, Confirm Threshold and Sticky Keys" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Nested Pie Menu, Confirm Threshold and Sticky Keys — Open on YouTube](https://www.youtube.com/watch?v=5zDp586Uy2w)
+:::
+
+
+(author-videos-popup)=
+
+## Pop-up Dialog and Layout
+
+Related reference: [Current reference](../editors/popup_dialog_editor.md)
+
+:::{dropdown} Popup Dialog Editor
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/JdbmDSV9wIU" title="Popup Dialog Editor" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog Editor — Open on YouTube](https://www.youtube.com/watch?v=JdbmDSV9wIU)
+:::
+
+:::{dropdown} Popup Dialog with Panels
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/-fhI2imoo4U" title="Popup Dialog with Panels" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog with Panels — Open on YouTube](https://www.youtube.com/watch?v=-fhI2imoo4U)
+:::
+
+:::{dropdown} Popup Dialog with Custom Layout
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/sF10rVDVo-k" title="Popup Dialog with Custom Layout" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog with Custom Layout — Open on YouTube](https://www.youtube.com/watch?v=sF10rVDVo-k)
+:::
+
+:::{dropdown} Popup Dialog with Complex Layout
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/MbnaiXBwBJI" title="Popup Dialog with Complex Layout" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog with Complex Layout — Open on YouTube](https://www.youtube.com/watch?v=MbnaiXBwBJI)
+:::
+
+
+(author-videos-regular)=
+
+## Regular Menu
+
+Related reference: [Current reference](../editors/regular_menu_editor.md)
+
+:::{dropdown} Menu Editor
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/bvDADkqMLEw" title="Menu Editor" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Menu Editor — Open on YouTube](https://www.youtube.com/watch?v=bvDADkqMLEw)
+:::
+
+
+(author-videos-property)=
+
+## Property
+
+Related reference: [Current reference](../editors/property_editor.md)
+
+:::{dropdown} Property Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/xQ-ETd8xacA" title="Property Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Property Editor for Blender — Open on YouTube](https://www.youtube.com/watch?v=xQ-ETd8xacA)
+:::
+
+
+(author-videos-macro)=
+
+## Macro Operator
+
+Related reference: [Current reference](../editors/macro_operator_editor.md)
+
+:::{dropdown} Macro Operator Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/x4HhN4aHCxg" title="Macro Operator Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Macro Operator Editor for Blender — Open on YouTube](https://www.youtube.com/watch?v=x4HhN4aHCxg)
+:::
+
+:::{dropdown} Macro Operator Tutorial by Jimmy Livefjord
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/-RQFK1kqqVw" title="Macro Operator Tutorial by Jimmy Livefjord" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Macro Operator Tutorial by Jimmy Livefjord — Open on YouTube](https://www.youtube.com/watch?v=-RQFK1kqqVw)
+:::
+
+
+(author-videos-modal)=
+
+## Modal Operator
+
+Related reference: [Current reference](../editors/modal_operator_editor.md)
+
+:::{dropdown} Modal Operator Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/aDEX5bix384" title="Modal Operator Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Modal Operator Editor for Blender — Open on YouTube](https://www.youtube.com/watch?v=aDEX5bix384)
+:::
+
+
+(author-videos-sticky)=
+
+## Sticky Key
+
+Related reference: [Current reference](../editors/sticky_key_editor.md)
+
+:::{dropdown} Sticky Key Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/pcFOPWnHC7U" title="Sticky Key Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Sticky Key Editor for Blender — Open on YouTube](https://www.youtube.com/watch?v=pcFOPWnHC7U)
+:::
+
+
+(author-videos-stack)=
+
+## Stack Key
+
+Related reference: [Current reference](../editors/stack_key_editor.md)
+
+:::{dropdown} Stack Keys in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/4wZKiyKE_P4" title="Stack Keys in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Stack Keys in Blender — Open on YouTube](https://www.youtube.com/watch?v=4wZKiyKE_P4)
+:::
+
+:::{dropdown} Blender Stack Key Tutorial by Jimmy Livefjord
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/-rknBwAPypk" title="Blender Stack Key Tutorial by Jimmy Livefjord" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Blender Stack Key Tutorial by Jimmy Livefjord — Open on YouTube](https://www.youtube.com/watch?v=-rknBwAPypk)
+:::
+
+
+(author-videos-hotkey)=
+
+## Mouse Input and Invocation
+
+Related reference: {ref}`Common Hotkey settings <hotkey-editor>`
+
+:::{dropdown} Advanced Mouse Hotkeys in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/9cGWQF6L4o4" title="Advanced Mouse Hotkeys in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Advanced Mouse Hotkeys in Blender — Open on YouTube](https://www.youtube.com/watch?v=9cGWQF6L4o4)
+:::
+
+:::{dropdown} Double Click + Hold
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/8XUvscCCviA" title="Double Click + Hold" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Double Click + Hold — Open on YouTube](https://www.youtube.com/watch?v=8XUvscCCviA)
+:::
+
+
+(author-videos-poll)=
+
+## Context and Availability
+
+Related reference: [Current reference](poll_method.md)
+
+:::{dropdown} Context Sensitive Menus in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/m8pCPZdK_qc" title="Context Sensitive Menus in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Context Sensitive Menus in Blender — Open on YouTube](https://www.youtube.com/watch?v=m8pCPZdK_qc)
+:::
+
+
+(author-videos-panels)=
+
+## Panel Layout, Hiding, and Extension
+
+Related reference: [Side Panel](../editors/side_panel_editor.md) / [Hiding Panels](../editors/hiding_unused_panels.md) / [Interactive Panels and Extend Panel](../editors/interactive_panels.md)
+
+:::{dropdown} Side Panel Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/BGs0de6ZYdw" title="Side Panel Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Side Panel Editor for Blender — Open on YouTube](https://www.youtube.com/watch?v=BGs0de6ZYdw)
+:::
+
+:::{dropdown} Hiding unused panels in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/z19c6b7XOWo" title="Hiding unused panels in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Hiding unused panels in Blender — Open on YouTube](https://www.youtube.com/watch?v=z19c6b7XOWo)
+:::
+
+:::{dropdown} Extending Panels in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/iO9PzLX6EDQ" title="Extending Panels in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Extending Panels in Blender — Open on YouTube](https://www.youtube.com/watch?v=iO9PzLX6EDQ)
+:::
+
+
+(author-videos-toolbar)=
+
+## Legacy Toolbars
+
+Related reference: {ref}`Existing PME Toolbar reference <pme-toolbar>`
+
+:::{dropdown} Toolbars in Blender 2.79
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/PB3wtlZ6AaM" title="Toolbars in Blender 2.79" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Toolbars in Blender 2.79 — Open on YouTube](https://www.youtube.com/watch?v=PB3wtlZ6AaM)
+:::
+
+
+(author-videos-script)=
+
+## Scripting
+
+Related reference: [Current reference](scripting_workflow.md)
+
+:::{dropdown} Script Editor
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/A81jLLynssk" title="Script Editor" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Script Editor — Open on YouTube](https://www.youtube.com/watch?v=A81jLLynssk)
+:::
+
+
+(author-videos-installation)=
+
+## Legacy Installation
+
+See [Installation](../getting_started/installation.md) for the current version. The video below is a historical reference.
+
+:::{dropdown} Pie Menu Editor: Installation
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/HTAsqEyZnEs" title="Pie Menu Editor: Installation" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Pie Menu Editor: Installation — Open on YouTube](https://www.youtube.com/watch?v=HTAsqEyZnEs)
+:::

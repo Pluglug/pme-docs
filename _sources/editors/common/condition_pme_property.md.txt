@@ -1,0 +1,10 @@
+:::{admonition} Values and conditions that need more than a property path
+:class: tip
+
+Use a regular {ref}`PME Property <property-editor>` when you need to aggregate data, calculate a value, or perform logic that a property path alone cannot express. Write Python in its {ref}`Getter <property-callbacks>` and return a single Boolean, number, Enum, or other supported value.
+
+- **To display or operate on one value**: use the PME Property directly. Reference it from another menu's Menu tab to place its widget. Configure its Setter if writing requires custom logic.
+- **To combine it with branches or other conditions**: reference the PME Property from the condition slot's **Menu tab**, then compare the returned value. Context Router uses the result to select a target; Property Stack uses it to evaluate its Getter state.
+
+Set the linked PME Property's storage to **Addon Preferences**. Read-only properties with only a Getter also work as conditions. Choose the return type and the value to return when no target exists. See {ref}`Property Editor: Getter / Setter <property-callbacks>` for configuration.
+:::

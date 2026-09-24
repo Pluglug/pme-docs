@@ -1,0 +1,18 @@
+(examples)=
+
+# 使用例とアイデア
+
+カスタマイズの実例を探すには、[PME Treasure](https://pluglug.github.io/ba-pme-treasure/) をご覧ください。Blender Artists で共有されてきたメニュー、操作の組み合わせ、質問と回答を探せます。
+
+- **初めて作る：** {ref}`basic-pie-menu` で、Blender の Apply メニューをパイメニューに組み替えます。
+- **コードを参考にする：** [Code Examples](https://pluglug.github.io/ba-pme-treasure/Guides/code-examples) では、作りたい操作や UI から実例を探せます。
+- **設定を調べる：** {ref}`editor-common-elements` と各エディターのページで、設定項目や使い方を確認できます。
+
+このドキュメントを PME の機能・設定・API の基準とし、Treasure は実例や過去の解決方法を探す補助資料として使います。過去の投稿は対象バージョンが異なる場合があるため、現在の設定名や制約は対応するリファレンスで確認してください。
+
+```{toctree}
+:hidden:
+:maxdepth: 1
+
+コード例 <scripting_workflow>
+```

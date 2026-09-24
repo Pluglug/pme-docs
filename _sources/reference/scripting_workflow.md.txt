@@ -1,0 +1,157 @@
+---
+vocab: developer-facing
+---
+
+(scripting-workflow)=
+
+# Code Examples
+
+Examples of actual configurations and code for PME 2.1. Start with [Writing and Running Code](command_text.md) for the prerequisites and field specifications.
+
+Short snippets are shown as **one line** ready to paste. See the [API Reference](scripting.rst) for functions and arguments, and [Writing and Running Code](command_text.md) for execution requirements.
+
+:::{dropdown} Use this page with an AI assistant
+
+Give the AI this page's URL and describe the action you want, such as “Toggle wireframe display for the selected object from a pie menu.” Include the Blender / PME versions if known.
+
+**For the AI writing the answer:**
+
+- Choose the configuration first. If a Property / Menu slot, Context Router, or Property Stack can do the job, give its setup instructions.
+- When code is needed, answer in this order: **field → code to paste → requirements → verification**. Ask questions only when the target or execution context affects the result and cannot be determined from the request.
+- For standard Command / Custom fields, provide one line within the field's input limit. Do not mix explanations, comments, or alternatives in the same copyable snippet.
+- Present multiline logic as an external file. Separate its filename, location, and the PME call.
+- Check the availability of `L`, `E`, and other names, missing targets, and redraw behavior. Link to API sources and do not claim unexecuted code has been tested.
+:::
+
+## Choose an example
+
+| Goal | Configuration or example |
+|---|---|
+| Execute a Blender operation when an item is selected | [Command](#recipe-command) |
+| Toggle a value | [Toggle a value](#recipe-toggle); use a Property slot for a checkbox |
+| Place a numeric field or button inside a menu | [Custom](#recipe-custom); use a Property slot for one existing value |
+| Make a menu available only under certain conditions | [Poll](#recipe-poll) |
+| Call different operations from one key depending on context | {ref}`context-router-editor` |
+| Display and set several values as one state | {ref}`property-stack-editor` |
+| Reuse a value with calculations or custom reading and writing | {ref}`Property Editor callbacks <property-callbacks>` |
+| Run long or looping logic | {ref}`External scripts <external-command-script>`; {ref}`macro-operator-editor` can also combine operations |
+| Pass a value to the next invocation or another menu | {ref}`Using U <scripting-user-data>` |
+
+See {ref}`Common Editor Elements <editor-common-elements>` for the slot editor and its tabs. To call an existing PME menu, choose it in a Menu slot.
+
+(recipe-command)=
+
+## Execute an operation
+
+**Field:** Edit a pie menu slot and paste this into the **Command** tab's code field.
+
+```python
+bpy.ops.mesh.primitive_cube_add()
+```
+
+**Requirements and check:** Open the pie in the 3D Viewport's Object Mode and select the item. A cube is added. {ref}`basic-pie-menu` also shows how to capture code from Blender operations.
+
+This call omits arguments and uses the operator's defaults. To specify location or size, check the operator arguments for your Blender version.
+
+(recipe-toggle)=
+
+## Toggle a value
+
+**Field:** Pie menu slot → **Command**. This toggles wireframe display for the active object.
+
+```python
+obj = C.active_object; obj is not None and setattr(obj, "show_wire", not obj.show_wire)
+```
+
+**Requirements and check:** Select a mesh in the 3D Viewport's Object Mode and run the item. **Viewport Display → Wireframe** in Object Properties changes; running it again restores the previous state. With no active target, nothing changes.
+
+`show_wire` is the property and `not obj.show_wire` inverts its current value. Before substituting another property, check its owner and type. Use a Property slot to show the checked state, or {ref}`property-stack-editor` to combine several settings.
+
+(recipe-custom)=
+
+## Place an editable value or button
+
+**Field:** Pop-up Dialog slot → **Custom**. This draws a field for the active object's X dimension.
+
+```python
+obj = C.active_object; L.prop(obj, "dimensions", index=0, text="X") if obj is not None else L.label(text="No active object")
+```
+
+**Requirements and check:** Select a mesh in the 3D Viewport's Object Mode and open the dialog. An X field appears; editing it changes the dimension. A label appears when no target exists. `index=0` selects X, `1` selects Y, and `2` selects Z.
+
+**To place an operation button**, paste this into another Custom slot.
+
+```python
+L.operator("mesh.primitive_cube_add", text="Add Cube")
+```
+
+Open the dialog in the 3D Viewport's Object Mode and press the button to add a cube. Custom is evaluated on every redraw, so its code places UI elements; data changes occur when the user operates them.
+
+(recipe-poll)=
+
+## Make a menu available only when a condition is met
+
+**Field:** The menu's **Advanced settings → Poll**. This makes it available only with an active mesh in Mesh Edit Mode.
+
+```python
+obj = C.active_object; return obj is not None and obj.type == 'MESH' and C.mode == 'EDIT_MESH'
+```
+
+**Check:** In the same 3D Viewport, switch the mesh between Edit Mode and Object Mode and invoke the menu. It is available in Edit Mode and unavailable in Object Mode. Depending on presentation and invocation, unavailable items are hidden or shown disabled.
+
+`return` returns the Poll result. This differs from code entered in Command. See [Poll Method](poll_method.md) for combining conditions, or {ref}`context-router-editor` to select a different target for each matching condition.
+
+(scripting-user-data)=
+
+## Pass a value to the next invocation
+
+`U` (User Data) is **temporary shared storage** supplied by PME. You do not need to create it. A value written by one Command can be read by another invocation or another PME menu.
+
+**Write** — Store a value under the name `example_count`.
+
+```python
+U.example_count = 3
+```
+
+**Read** — Use `0` if no value has been stored yet.
+
+```python
+print(U.get("example_count", 0))
+```
+
+Choose your own item name in place of `example_count`. Assign to an item, as in `U.example_count = ...`, rather than replacing `U` with `U = ...`. Use a descriptive name because other scripts share this storage.
+
+| Lifetime | Where to store a value |
+|---|---|
+| Within one operation, such as a Modal's starting value | An ordinary variable shared between slots; see the {ref}`Modal example <modal-shared-variables>` |
+| Across invocations or menus | An item in `U` |
+| Across Blender restarts | A persistent setting such as a [Property Editor](../editors/property_editor.md) property |
+
+```{note}
+`U` is lost when Blender restarts or PME is re-registered. It is not saved in a `.blend` file or PME export. Storing an object or area reference does not guarantee that target will still be valid on the next execution.
+```
+
+:::{dropdown} Advanced: start a Modal adjustment from the last confirmed focal length
+
+Add the following **On Confirm** to the {ref}`focal-length Modal example <modal-save-restore>`. It remembers the value only when confirmed.
+
+```python
+U.focal_length_last = saved_view.lens
+```
+
+Replace **On Invoke** with this line. It stores the current starting value before applying the last confirmed value.
+
+```python
+saved_view = C.space_data; start_lens = saved_view.lens; saved_view.lens = U.get("focal_length_last", start_lens)
+```
+
+`U.get("focal_length_last", start_lens)` reads the previous value if present; on the first run, it uses the current starting value. Leave Property and On Cancel unchanged. Cancel restores this run's starting value without overwriting the previous confirmed value in `U`.
+:::
+
+## More examples
+
+[PME Treasure's Code Examples](https://pluglug.github.io/ba-pme-treasure/Guides/code-examples) covers modifier-based branching, UI layout, state display, and other patterns. The examples here also draw on Treasure. Check the target version and current API when using an older post.
+
+- [Writing and Running Code](command_text.md): one-line syntax, external files, execution context, and errors.
+- [API Reference](scripting.rst): PME functions, variables, and arguments.
+- [Original Author's Videos](original_author_videos.md): feature videos for earlier versions.

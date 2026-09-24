@@ -1,0 +1,852 @@
+<!doctype html>
+<html class="no-js" lang="ja" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="索引" href="../genindex.html"><link rel="search" title="検索" href="../search.html"><link rel="next" title="Context Router Editor" href="context_router_editor.html"><link rel="prev" title="Property Editor" href="property_editor.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.12.19 -->
+        <title>Property Stack Editor - Pie Menu Editor 2.0.5.5 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=6b3a701d" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/editor-overview.css?v=8fac9edf" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  --color-brand-primary: #0d82d0;
+  --color-brand-content: #0d82d0;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-brand-primary: #88c0d0;
+  --color-brand-content: #88c0d0;
+  --color-background-primary: #2e3440;
+  --color-background-secondary: #3b4252;
+  --color-background-hover: #434c5e;
+  --color-background-border: #4c566a;
+  --color-foreground-primary: #eceff4;
+  --color-foreground-secondary: #d8dee9;
+  --color-foreground-muted: #aeb7c5;
+  --color-link: #88c0d0;
+  --color-link-underline: #81a1c1;
+  --color-card-background: #3b4252;
+  --color-card-border: #4c566a;
+  --color-sidebar-background: #2b303b;
+  
+      }
+    }
+  }
+</style>
+
+<script type="text/javascript">
+    (function () {
+        if (window.__PMEBeaconInitialized) {
+            return;
+        }
+
+        window.__PMEBeaconInitialized = true;
+
+        !function(e,t,n){function a(){var e=t.getElementsByTagName("script")[0],n=t.createElement("script");n.type="text/javascript",n.async=!0,n.src="https://beacon-v2.helpscout.net",e.parentNode.insertBefore(n,e)}if(e.Beacon=n=function(t,n,a){e.Beacon.readyQueue.push({method:t,options:n,data:a})},n.readyQueue=[],"complete"===t.readyState)return a();e.attachEvent?e.attachEvent("onload",a):e.addEventListener("load",a,!1)}(window,document,window.Beacon||function(){});
+        window.Beacon('init', 'e458ab6a-6436-4e96-a0b6-038336504b24');
+        window.Beacon('config', {
+            display: {
+                style: 'manual'
+            }
+        });
+
+        window.PMEDocs = window.PMEDocs || {};
+        window.PMEDocs.beaconPrefillTemplates = {
+            supportRequest: [
+                'Summary:',
+                '- What went wrong?',
+                '',
+                'Steps to reproduce:',
+                '1.',
+                '2.',
+                '3.',
+                '',
+                'What happened:',
+                '- Describe the actual result.',
+                '',
+                'Environment:',
+                '- Blender version:',
+                '- PME version:',
+                '- OS:',
+                '',
+                'Attachments:',
+                '- PME setup JSON:',
+                '- Console output / screenshot:',
+                '- Small .blend file (if relevant):',
+                '',
+                'Additional notes:',
+                '- Anything else that may help.'
+            ].join('\n')
+        };
+
+        window.PMEDocs.openSupportBeacon = function (event, templateName) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            if (typeof window.Beacon === 'function') {
+                const prefillText = window.PMEDocs.beaconPrefillTemplates[templateName];
+                if (prefillText) {
+                    window.Beacon('prefill', {
+                        text: prefillText
+                    });
+                }
+
+                window.Beacon('open');
+                window.Beacon('navigate', '/ask/message/');
+                return false;
+            }
+
+            return true;
+        };
+
+        document.addEventListener('click', function (event) {
+            const trigger = event.target.closest('[data-beacon-open]');
+            if (!trigger) {
+                return;
+            }
+
+            window.PMEDocs.openSupportBeacon(event, trigger.dataset.beaconTemplate);
+        });
+    }());
+</script></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Pie Menu Editor 2.0.5.5 ドキュメント</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">Pie Menu Editor 2.0.5.5 ドキュメント</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="検索" name="q" aria-label="検索">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">はじめる</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/installation.html">インストール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/basic_pie_menu.html">基本的なパイメニューの作成</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/examples.html">使用例とアイデア</a><input aria-label="Toggle navigation of 使用例とアイデア" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/scripting_workflow.html">コード例</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">エディタ</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="editor_common_elements.html">エディターの共通要素</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pie_menu_editor.html">Pie Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector_menu_editor.html">Vector Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="regular_menu_editor.html">Regular Menu Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="popup_dialog_editor.html">Pop-up Dialog Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="floating_panel_editor.html">Floating Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sticky_key_editor.html">Sticky Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stack_key_editor.html">Stack Key Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="macro_operator_editor.html">Macro Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modal_operator_editor.html">Modal Operator Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="property_editor.html">Property Editor</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Property Stack Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context_router_editor.html">Context Router Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="side_panel_editor.html">Side Panel Editor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hiding_unused_panels.html">Hiding Unused Panels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interactive_panels.html">Interactive Panels と Extend Panel</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ui_customization.html">UI Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context_menu.html">キャプチャーメニュー</a></li>
+<li class="toctree-l1"><a class="reference internal" href="custom_icons.html">カスタムアイコン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">スクリプティング</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/command_text.html">コードの入力と実行</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/poll_method.html">Poll Method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/scripting.html">API リファレンス</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">参考資料</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_guide.html">キーマップの選び方</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/keymap_duplicates.html">キーマップの重複</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/terminology.html">用語集</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/file_locations.html">保存先とフォルダ構成</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/boot_options.html">起動オプション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/developer_options.html">開発者オプション</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../reference/index.html">リファレンス案内</a><input aria-label="Toggle navigation of リファレンス案内" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../reference/original_author_videos.html">原作者の動画：機能別一覧</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">サポート</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/faq.html#known-issues">既知の問題</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/get_support.html">サポート</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../support_community/changelog.html">Change Log</a></li>
+</ul>
+
+</div>
+</div>
+<nav class="documentation-languages" aria-label="言語">
+  
+  <a href="../../editors/property_stack_editor.html" lang="en" hreflang="en" aria-label="English" title="English"><span aria-hidden="true">🇺🇸</span></a>
+  
+  <a href="property_stack_editor.html" lang="ja" hreflang="ja" aria-label="日本語" title="日本語" aria-current="true"><span aria-hidden="true">🇯🇵</span></a>
+  
+</nav>
+<script>
+(() => {
+  const links = [...document.querySelectorAll('.documentation-languages a')];
+  const targets = links.map(link => link.getAttribute('href'));
+  function syncFragment() {
+    links.forEach((link, index) => { link.href = targets[index] + window.location.hash; });
+  }
+  syncFragment();
+  window.addEventListener('hashchange', syncFragment);
+})();
+</script>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/editors/property_stack_editor.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="property-stack-editor">
+<span id="id1"></span><h1>Property Stack Editor<a class="headerlink" href="#property-stack-editor" title="Link to this heading">¶</a></h1>
+<p><strong>Property Stack</strong> は、複数の Blender の設定を「この作業状態になっているか」という一つの判定にまとめるエディターです。<strong>Getter</strong> で現在の状態を読み、<strong>Setter</strong> で必要な設定をまとめて変更します。判定だけを使うこともできます。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 2.1: </span>複数条件の判定と設定の切り替えを組み合わせる Property Stack を追加。</p>
+</div>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">構成ガイド — 状態の判定と変更を組み立てる（AI 向け）</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><strong>呼び名：Property Stack／種別 ID：<code class="docutils literal notranslate"><span class="pre">CONDITION</span></code>。</strong> 複数条件から現在の真偽値を求め、対応する設定変更を一つのスイッチにまとめます。単純な値の定義には Property、条件で呼び出し先を選ぶ場合は Context Router を使います。</p>
+<ul class="simple">
+<li><p class="sd-card-text"><strong>Getter</strong>：RNA プロパティ、PME Property、別の Property Stack などを条件に使い、すべて／いずれかの一致で判定します。</p></li>
+<li><p class="sd-card-text"><strong>Setter</strong>：Getter の条件から作られる書き込み行を使います。Getter への参加と Setter の有効状態を分け、判定だけに使う条件は Setter を Off にします。折りたたみは表示の切り替えで、書き込みの無効化ではありません。</p></li>
+<li><p class="sd-card-text"><strong>書き込みの意味</strong>：TRUE / FALSE の指定に対応する値を書き、表示は再び Getter で求めます。通常の数値・文字列・単一 Enum は既定で TRUE 側だけ、Boolean の Auto と複数選択 Enum の Add / Remove は両側に作用します。FALSE は以前の値の復元ではありません。</p></li>
+<li><p class="sd-card-text"><strong>成立の保証</strong>：All / Any は Getter の結合方法です。Any にしても Setter が一つの行を選ぶわけではなく、有効な書き込み行が対象です。判定専用の条件や異なる手動値がある場合、書き込み後も Getter が TRUE になるとは限りません。</p></li>
+<li><p class="sd-card-text"><strong>書き込み可否</strong>：Read-only、Need、対象の取得失敗を分けます。有効な行に未解決の問題がある場合、事前確認で書き込み全体が止まります。Auto / Set は値の準備状態で、実行時の成功保証ではありません。</p></li>
+<li><p class="sd-card-text"><strong>配置</strong>：別のメニューの Menu タブから参照し、スイッチとして使えます。スクリプト用のパスは Preview でコピーし、表示名から生成しないでください。</p></li>
+<li><p class="sd-card-text"><strong>用途</strong>：複数の表示設定を一括切り替え／複数条件が揃った状態を表示／While True HUD で状態を通知。</p></li>
+<li><p class="sd-card-text"><strong>入力上限</strong>：Getter は最大 <strong>128 条件</strong>、Setter は最大 <strong>128 行</strong>。</p></li>
+<li><p class="sd-card-text"><strong>パスや比較だけで表せない判定</strong>：<a class="reference internal" href="property_editor.html#property-callbacks"><span class="std std-ref">PME Property の Getter</span></a> で計算した値を、条件スロットの Menu タブから参照します（保存先は Addon Preferences）。Getter のみでも条件に使えます。他の条件と組み合わせる必要がなければ、PME Property 単独の表示・操作で完結できます。<a class="reference internal" href="#property-stack-pme-property"><span class="std std-ref">使い分け</span></a>を参照してください。</p></li>
+<li><p class="sd-card-text"><strong>制約</strong>：通常の Command スロットを上から順に実行する Macro とは異なります。独立したホットキーで処理を実行する前提にしません。書き込み不能な対象や欠けた参照は診断を確認します。</p></li>
+</ul>
+<p class="sd-card-text">判定は <a class="reference internal" href="#property-stack-getter"><span class="std std-ref">Getter</span></a>、変更は <a class="reference internal" href="#property-stack-setter"><span class="std std-ref">Setter</span></a>、色や表示先は <a class="reference internal" href="#property-stack-hud"><span class="std std-ref">While True HUD</span></a>へ。</p>
+</div>
+</details><section id="id2">
+<h2>画面と編集の流れ<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h2>
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__image">
+<img src="../_static/images/editors/overview/property-stack-snap-to-surface.png" width="1736" height="1792" alt="Snap to Surface の編集画面。Getter、展開した Setter、Preview が上から並びます。">
+<a class="pme-overview__spot" style="--x:2.07373%;--y:8.37054%;--w:91.18664%;--h:4.40848%" href="property_stack_editor.html#property-stack-basic" aria-label="N 名前と基本操作の説明へ">
+<span class="pme-overview__number">N</span><span class="pme-overview__tip"><strong>名前と基本操作</strong>設定の組み合わせの名前や有効状態を確認します。</span></a>
+<a class="pme-overview__spot" style="--x:2.07373%;--y:13.61607%;--w:95.91014%;--h:35.71429%" href="property_stack_editor.html#property-stack-getter" aria-label="1 Getterの説明へ">
+<span class="pme-overview__number">1</span><span class="pme-overview__tip"><strong>Getter</strong>現在の状態を判定する条件を組み合わせます。</span></a>
+<a class="pme-overview__spot" style="--x:2.07373%;--y:50.83705%;--w:95.91014%;--h:26.78571%" href="property_stack_editor.html#property-stack-setter" aria-label="2 Setterの説明へ">
+<span class="pme-overview__number">2</span><span class="pme-overview__tip"><strong>Setter</strong>操作時に書き込む値と、行ごとの有効状態を設定します。</span></a>
+<a class="pme-overview__spot" style="--x:2.07373%;--y:79.12946%;--w:95.91014%;--h:18.97321%" href="property_stack_editor.html#property-stack-preview" aria-label="3 Previewの説明へ">
+<span class="pme-overview__number">3</span><span class="pme-overview__tip"><strong>Preview</strong>組み立てたスイッチの表示と操作を確かめ、参照パスをコピーします。</span></a>
+<a class="pme-overview__spot pme-overview__spot--right" style="--x:93.49078%;--y:8.37054%;--w:4.49309%;--h:4.40848%" href="property_stack_editor.html#property-stack-advanced" aria-label="A Advanced settingsの説明へ">
+<span class="pme-overview__number">A</span><span class="pme-overview__tip"><strong>Advanced settings</strong>詳細設定を開き、While True による通知などを設定します。</span></a>
+</div>
+<figcaption>Blender 5.2 / PME 2.1 の開発環境。「Snap to Surface」の設定例。</figcaption>
+</figure>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="#property-stack-getter"><span class="std std-ref">Getter — 今の状態を判定する</span></a></p></li>
+<li><p><a class="reference internal" href="#property-stack-setter"><span class="std std-ref">Setter — 値の変更を設定する</span></a></p></li>
+<li><p><a class="reference internal" href="#property-stack-preview"><span class="std std-ref">Preview — 表示と操作を確かめる</span></a></p></li>
+</ol>
+<p><a class="reference internal" href="#property-stack-basic"><span class="std std-ref">名前と基本操作</span></a> ／ <a class="reference internal" href="#property-stack-advanced"><span class="std std-ref">Advanced settings</span></a></p>
+<section id="getter-setter">
+<span id="property-stack-get-set"></span><h3>Getter と Setter の関係<a class="headerlink" href="#getter-setter" title="Link to this heading">¶</a></h3>
+<p>チェックボックスを見れば、今オンかどうかが分かります。クリックすれば、設定を変えられます。<strong>この「見る」と「変える」を、それぞれ担当するのが Getter と Setter です。</strong></p>
+<ul class="simple">
+<li><p><strong>Getter は、今の状態を見せる役。</strong> Blender の値を読み、条件に合っているかをチェックの有無で表示します。</p></li>
+<li><p><strong>Setter は、操作を受けて設定を変える役。</strong> クリックに応じて、指定した値を Blender に書き込みます。</p></li>
+</ul>
+<figure class="pme-get-set-flow" id="property-stack-get-set-flow">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 376" role="img" aria-labelledby="pme-get-set-title pme-get-set-description">
+  <title id="pme-get-set-title">Getter と Setter がつなぐ、ユーザーと Blender</title>
+  <desc id="pme-get-set-description">上に Blender、下にユーザー、右に Getter、左に Setter。Getter は Blender の現在の値を読み取って判定し、ユーザーに状態を表示する。Setter はユーザーのウィジェット操作を受けて Blender の値を書き込む。</desc>
+  <defs>
+    <marker id="pme-get-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#78bce5"/></marker>
+    <marker id="pme-set-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#7ac6a7"/></marker>
+  </defs>
+  <g transform="translate(520 0) scale(-1 1)" fill="none" stroke-width="3" stroke-linecap="round">
+    <path d="M 204 72 C 144 88 116 110 116 139" stroke="#78bce5" marker-end="url(#pme-get-arrow)"/>
+    <path d="M 116 229 C 116 264 146 290 198 303" stroke="#78bce5" marker-end="url(#pme-get-arrow)"/>
+    <path d="M 316 302 C 376 286 404 270 404 235" stroke="#7ac6a7" marker-end="url(#pme-set-arrow)"/>
+    <path d="M 404 145 C 404 110 374 84 322 71" stroke="#7ac6a7" marker-end="url(#pme-set-arrow)"/>
+  </g>
+  <g class="pme-get-set-flow__endpoint">
+    <rect x="182" y="18" width="156" height="65" rx="32"/>
+    <rect x="182" y="293" width="156" height="65" rx="32"/>
+  </g>
+  <rect x="312" y="145" width="184" height="84" rx="10" fill="#20577a" stroke="#78bce5" stroke-width="2"/>
+  <rect x="24" y="145" width="184" height="84" rx="10" fill="#24634f" stroke="#7ac6a7" stroke-width="2"/>
+  <g text-anchor="middle" font-family="system-ui, sans-serif">
+    <g fill="currentColor">
+      <text x="260" y="44" font-size="16" font-weight="600">Blender</text>
+      <text x="260" y="65" font-size="12">プロパティの値</text>
+      <text x="260" y="320" font-size="16" font-weight="600">ユーザー</text>
+      <text x="260" y="341" font-size="12">見る・クリックする</text>
+    </g>
+    <g fill="#fff">
+      <text x="404" y="181" font-size="23" font-weight="700">Getter</text>
+      <text x="404" y="207" font-size="14">値を表示する</text>
+      <text x="116" y="181" font-size="23" font-weight="700">Setter</text>
+      <text x="116" y="207" font-size="14">値を書き込む</text>
+    </g>
+  </g>
+</svg>
+</figure>
+<p>たとえば、X-Ray と Wireframe を一つのスイッチにまとめます。<strong>両方がオンならチェックが付く</strong>のが Getter、<strong>スイッチを押すと両方の設定が変わる</strong>のが Setter です。ほかの場所で X-Ray をオフにすれば、Getter がその変化を読み取り、チェックも外れます。</p>
+<p>一つのプロパティを扱うウィジェットと同じように、Property Stack では <strong>複数のプロパティの組み合わせを、一つの状態として扱えます。</strong> Getter でその状態になっているかを確認し、Setter で必要な値をまとめて設定します。あちこちに分かれた設定を、一つのスイッチから確認・変更できます。</p>
+</section>
+</section>
+<section id="property-stack-basic">
+<span id="id3"></span><h2>名前と基本操作<a class="headerlink" href="#property-stack-basic" title="Link to this heading">¶</a></h2>
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:1736 / 79;--crop-offset:-8.37053571%">
+<img src="../_static/images/editors/overview/property-stack-snap-to-surface.png" width="1736" height="1792" alt="名前と基本操作。Snap to Surface の名前と有効状態、リンク、タグ、詳細設定のボタン。">
+</div>
+<figcaption>名前と基本操作。</figcaption>
+</figure><p>名前はこの設定の組み合わせを識別する表示名です。スクリプトで参照する Property ID とは分けて扱います。共通の <a class="reference internal" href="editor_common_elements.html#overview-selected"><span class="std std-ref">選択メニューの設定</span></a>を参照してください。</p>
+</section>
+<section id="getter">
+<span id="property-stack-getter"></span><h2>Getter — 現在の状態を判定する<a class="headerlink" href="#getter" title="Link to this heading">¶</a></h2>
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:1736 / 640;--crop-offset:-13.61607143%">
+<img src="../_static/images/editors/overview/property-stack-snap-to-surface.png" width="1736" height="1792" alt="Snap to Surface の Getter。Snap Element に Face を含み、Snap Target が Median、Align Rotation to Target が True であることを判定します。">
+</div>
+<figcaption>Getter — Snap to Surface の条件。</figcaption>
+</figure><p><strong>Add Condition</strong> で条件を追加し、参照する値・比較方法・比較値を指定します。右端のメニューには、モードやオブジェクトの種類などのプリセットがあります。スロット名は条件を見分けるための表示名です。</p>
+<p><strong>Getter の比較値を編集しても、Blender の値は書き換わりません。</strong> 「現在の値がこの条件に合うか」を判定するための設定です。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>判定方法</p></th>
+<th class="head"><p>用途</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>All conditions match</p></td>
+<td><p>複数の設定がすべて目的の値になっていることを表示する</p></td>
+</tr>
+<tr class="row-odd"><td><p>Any condition matches</p></td>
+<td><p>一つ以上の条件が一致していることを表示する</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>判定に参加するのは、<strong>有効で設定が完了した条件</strong>です。参加する条件が一つもなければ FALSE になります。条件を無効にすることと、「値が False か」を調べることは別の操作です。</p>
+<p>数値・文字列・Enum・ベクトルの成分など、対象の型に合う比較を使います。比較方法は Context Router と共通です。型ごとの一覧は <a class="reference internal" href="context_router_editor.html#router-condition-comparison"><span class="std std-ref">比較方法と比較値</span></a>を参照してください。</p>
+<div class="note admonition">
+<p class="admonition-title">読み取りと書き込みの可否</p>
+<ul class="simple">
+<li><p><strong>読み取り専用</strong>のプロパティも、値を取得できれば Getter に使えます。たとえば現在のモードを判定しても、それだけでモードを変更する Setter は作れません。</p></li>
+<li><p><strong>対象を取得できない条件</strong>は一致しません。「False である」「一致しない」という比較でも、取得失敗を一致として扱いません。</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">C.space_data</span></code></strong> などは、評価するエディターによって参照先と利用できるプロパティが変わります。型の指定はパスの解釈に使う情報で、エディターの切り替えではありません。読み取りと書き込みの両方を、実際に使う場所で確認します。</p></li>
+</ul>
+</div>
+<div class="tip admonition" id="property-stack-pme-property">
+<p class="admonition-title">プロパティパスだけでは表せない値や判定</p>
+<p>複数のデータを集計する、値を計算するなど、パスの参照だけでは表せない処理には、通常の <a class="reference internal" href="property_editor.html#property-editor"><span class="std std-ref">PME Property</span></a> を使います。<a class="reference internal" href="property_editor.html#property-callbacks"><span class="std std-ref">Getter</span></a> に Python で処理を書き、Boolean・数値・Enum などの一つの値として返せます。</p>
+<ul class="simple">
+<li><p><strong>一つの値の表示・操作で足りる場合</strong>：PME Property をそのまま使います。別メニューの Menu タブから参照してウィジェットを配置できます。独自の書き込み処理が必要なら、PME Property の Setter を設定します。</p></li>
+<li><p><strong>分岐や他の条件と組み合わせる場合</strong>：条件スロットの <strong>Menu タブ</strong>で PME Property を参照し、返された値を比較します。Context Router では行き先の選択に、Property Stack では Getter の状態判定に使えます。</p></li>
+</ul>
+<p>条件からリンク参照する PME Property は、保存先を <strong>Addon Preferences</strong> にします。Getter のみの読み取り専用プロパティも条件に使えます。戻り値の型と、対象がない場合に返す値を決めてください。設定方法は <a class="reference internal" href="property_editor.html#property-callbacks"><span class="std std-ref">Property Editor の Getter / Setter</span></a> を参照してください。</p>
+</div>
+</section>
+<section id="setter">
+<span id="property-stack-setter"></span><h2>Setter — 条件に対応する変更を決める<a class="headerlink" href="#setter" title="Link to this heading">¶</a></h2>
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:1736 / 480;--crop-offset:-50.83705357%">
+<img src="../_static/images/editors/overview/property-stack-snap-to-surface.png" width="1736" height="1792" alt="Snap to Surface の展開した Setter。Snap Element は Replace: Face で Set、Snap Target は MEDIAN で Auto、Align Rotation to Target は True で Auto。3行とも書き込みが有効です。">
+</div>
+<figcaption>Setter — Snap to Surface の書き込み設定。</figcaption>
+</figure><p>Setter には、Getter の条件に対応する書き込み行が並びます。<strong>左のチェックボックスで書き込みに参加する行を選び、中央で書き込む値、右側で準備状態を確認します。</strong> Setter 見出しの三角は、これらの行を展開・折りたたみます。閉じても書き込みは無効になりません。</p>
+<section id="auto-set-need-off-read-only">
+<span id="property-stack-setter-states"></span><h3>Auto / Set / Need / Off / Read-only<a class="headerlink" href="#auto-set-need-off-read-only" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>表示</p></th>
+<th class="head"><p>意味</p></th>
+<th class="head"><p>設定すること</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Auto</strong></p></td>
+<td><p>Getter の条件から書き込む値が決まっている</p></td>
+<td><p>対象と値を確認する。例：<code class="docutils literal notranslate"><span class="pre">is</span> <span class="pre">10</span></code> なら <code class="docutils literal notranslate"><span class="pre">10</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Set</strong></p></td>
+<td><p>手動で書き込む値や方法を指定している</p></td>
+<td><p>その値で目的の条件を満たせるか確認する</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Need</strong></p></td>
+<td><p>書き込む値を指定する必要がある</p></td>
+<td><p>値を入力するか、判定専用ならその Setter 行を Off にする</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Off</strong></p></td>
+<td><p>この行は書き込まない</p></td>
+<td><p>必要ならチェックボックスで有効にする。Getter の判定には引き続き使える</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Read-only</strong></p></td>
+<td><p>この参照先への直接の書き込みが認められていない</p></td>
+<td><p>Getter の条件として使う。Setter のチェックボックスでは解除できない</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>たとえば <code class="docutils literal notranslate"><span class="pre">&gt;</span> <span class="pre">10</span></code> は、11 でも 20 でも成立します。Getter には十分な条件ですが、Setter には具体的な値が必要なので <strong>Need</strong> になります。<code class="docutils literal notranslate"><span class="pre">20</span></code> を指定すると <strong>Set</strong> になります。</p>
+<p>Setter 見出し右側の表示は、行の状態の要約です。たとえば <strong>Off</strong> は全行が Off、<strong>Need</strong> は値が必要な行があることを示します。Property Stack の現在の TRUE / FALSE は Preview で確認します。</p>
+</section>
+<section id="property-stack-participation">
+<span id="id4"></span><h3>判定だけに使う・書き込みも使う<a class="headerlink" href="#property-stack-participation" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Getter の条件</p></th>
+<th class="head"><p>対応する Setter</p></th>
+<th class="head"><p>動作</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>有効・設定済み</p></td>
+<td><p>Auto / Set で有効</p></td>
+<td><p>判定に使い、操作時には値も書き込む</p></td>
+</tr>
+<tr class="row-odd"><td><p>有効・設定済み</p></td>
+<td><p>Off / Read-only</p></td>
+<td><p>判定にだけ使う</p></td>
+</tr>
+<tr class="row-even"><td><p>有効・設定済み</p></td>
+<td><p>Need</p></td>
+<td><p>判定はできるが、書き込みには値の指定が必要</p></td>
+</tr>
+<tr class="row-odd"><td><p>無効</p></td>
+<td><p>Off</p></td>
+<td><p>判定から外し、対応する書き込みも止める</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>「Object Mode である」を判定に残し、変更したい表示設定だけを書き込む</strong>、といった組み合わせができます。Setter を全行 Off にすれば、状態の表示や While True HUD のための判定として使えます。</p>
+<ul class="simple">
+<li><p><strong>Setter だけを Off にする</strong>と、Getter の条件は変わりません。もう一度有効にすると、その条件と保持されている設定に応じて Auto / Set / Need になります。</p></li>
+<li><p><strong>Getter の条件を無効にする</strong>と、対応する Setter も Off になります。再び判定に加えるときは Setter の状態も確認します。手動で Off にしていた書き込みは、Getter を有効にし直しても Off のままです。</p></li>
+<li><p><strong>PME Property / 別の Property Stack をリンクした条件</strong>の Setter は、初期状態では Off です。有効にした場合も、実際に書けるかはリンク先の設定で決まります。Getter のみの PME Property は判定に使えますが、書き込みにはリンク先の Setter が必要です。</p></li>
+</ul>
+</section>
+<section id="true-false">
+<span id="property-stack-write-values"></span><h3>TRUE / FALSE を指定すると何を書き込むか<a class="headerlink" href="#true-false" title="Link to this heading">¶</a></h3>
+<p>以下は標準の書き込み設定です。<strong>Off の行は、どちらを指定しても変更しません。</strong></p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Setter の種類</p></th>
+<th class="head"><p>TRUE の指定</p></th>
+<th class="head"><p>FALSE の指定</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Boolean の <strong>Auto</strong></p></td>
+<td><p>Getter が一致する値。<code class="docutils literal notranslate"><span class="pre">is</span> <span class="pre">True</span></code> なら True、<code class="docutils literal notranslate"><span class="pre">is</span> <span class="pre">False</span></code> なら False</p></td>
+<td><p>その反対の値</p></td>
+</tr>
+<tr class="row-odd"><td><p>数値・文字列・単一 Enum などの値（手動設定した Boolean を含む）</p></td>
+<td><p>指定した値</p></td>
+<td><p>変更しない</p></td>
+</tr>
+<tr class="row-even"><td><p>複数選択 Enum の <strong>Add</strong></p></td>
+<td><p>指定した候補を追加</p></td>
+<td><p>同じ候補を除去</p></td>
+</tr>
+<tr class="row-odd"><td><p>複数選択 Enum の <strong>Remove</strong></p></td>
+<td><p>指定した候補を除去</p></td>
+<td><p>同じ候補を追加</p></td>
+</tr>
+<tr class="row-even"><td><p>複数選択 Enum の <strong>Replace</strong></p></td>
+<td><p>選択全体を指定した候補に置き換える</p></td>
+<td><p>変更しない</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="note admonition">
+<p class="admonition-title">書き込み後も、表示は Getter で決まる</p>
+<ul class="simple">
+<li><p><strong>All / Any は判定の組み合わせ方</strong>です。Any でも、Setter が一つの条件を選んで書くわけではありません。有効な書き込み行が対象になります。</p></li>
+<li><p><strong>書かない条件は、そのまま判定に残ります。</strong> たとえば Object Mode という条件が一致していなければ、表示設定を書き換えても All の結果は FALSE のままです。手動の書き込み値も、Getter の比較値とは別に確認します。</p></li>
+<li><p><strong>FALSE は元の状態への復元ではありません。</strong> たとえば Add の逆操作は候補の除去です。その候補が操作前から含まれていたかを記憶して戻す処理ではありません。</p></li>
+</ul>
+</div>
+<p>独自の計算や書き込み手順が必要なら、<a class="reference internal" href="property_editor.html#property-callbacks"><span class="std std-ref">PME Property の Getter / Setter</span></a> に処理を定義して参照できます。<a class="reference internal" href="#property-stack-pme-property"><span class="std std-ref">PME Property との使い分け</span></a>も参照してください。</p>
+</section>
+</section>
+<section id="preview-property-id">
+<span id="property-stack-preview"></span><h2>Preview / Property ID<a class="headerlink" href="#preview-property-id" title="Link to this heading">¶</a></h2>
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:1736 / 340;--crop-offset:-79.12946429%">
+<img src="../_static/images/editors/overview/property-stack-snap-to-surface.png" width="1736" height="1792" alt="Snap to Surface の Preview。状態を表示するウィジェットと、参照パス props().snap_to_surface。">
+</div>
+<figcaption>Preview — 状態の確認と参照パス。</figcaption>
+</figure><p>Preview は現在の判定結果を表示し、設定した切り替えを確認する入口です。</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>表示</p></th>
+<th class="head"><p>書き込みの状態</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Toggle: available</strong></p></td>
+<td><p>TRUE 側・FALSE 側の両方に書き込みがある。すべての行が両方向に書くとは限らない</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Toggle: TRUE only</strong></p></td>
+<td><p>TRUE 側だけに書き込みがある。FALSE 側では値を変更しない</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Toggle: unavailable</strong></p></td>
+<td><p>利用可能な書き込みがない、または準備が整っていない。続く理由を確認する</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Need や解決できない参照などが有効な Setter 行に残ると、事前確認で書き込み全体が止まります。</strong> 値や参照先を直すか、書き込みが不要な行を Off にします。Getter で値が読めることと、Setter で書けることは別々に確認してください。</p>
+<p>Auto / Set や Toggle の表示は、実行時の成功を保証するものではありません。実行中に一部の書き込みが失敗しても、それまでの変更がまとめて元に戻るとは限りません。</p>
+<p>Property ID の編集と Lock、参照パスのコピーもここで行います。</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 2.1: </span>表示名と、スクリプトから参照する Property ID を分けて管理します。</p>
+</div>
+<p>ID の文字制限と Lock は <a class="reference internal" href="property_editor.html#property-id"><span class="std std-ref">Property ID</span></a>を参照してください。名前を後から変更する予定がある場合も、スクリプトの参照を維持するかを決めておきます。</p>
+</section>
+<section id="id5">
+<h2>組み立てた設定を確認する<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h2>
+<p>条件がすべて成立する状態、一部だけ成立する状態、対象が存在しない状態を確認します。Setter を使う場合は、真の側・偽の側でどの値が変わり、どの行が何もしないかを確認します。</p>
+</section>
+<section id="advanced-settings">
+<span id="property-stack-advanced"></span><h2>Advanced settings<a class="headerlink" href="#advanced-settings" title="Link to this heading">¶</a></h2>
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:1706 / 790;--crop-offset:-10.53639847%">
+<img src="../_static/images/editors/overview/property-stack-advanced-settings.png" width="1706" height="2088" alt="Local Orientation の Advanced settings。保存先は Addon Preferences。While True で Local を指定し、3D Viewport の上側に Frame を表示する設定。">
+</div>
+<figcaption>Advanced settings — Local Orientation の設定例。</figcaption>
+</figure><p>名前行の右端にある詳細設定ボタンから開きます。保存先の案内と <strong>While True</strong> の通知設定があります。保存先は <strong>Store in Addon Preferences</strong> の固定表示で、Property Editor のように Scene / Object へ切り替える設定ではありません。通知メッセージは固定文、または <code class="docutils literal notranslate"><span class="pre">return</span></code> で文字列を返す Python コードで指定できます。</p>
+<section id="while-true-hud">
+<span id="property-stack-hud"></span><h3>While True HUD — 条件を満たす間の通知<a class="headerlink" href="#while-true-hud" title="Link to this heading">¶</a></h3>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 2.1: </span>条件を満たしている間、指定したエディターにメッセージや枠を表示できます。</p>
+</div>
+<p><strong>While True</strong> を有効にし、メッセージと表示先を設定します。</p>
+<ul class="simple">
+<li><p><strong>Area Type</strong>：通知を表示するエディター。</p></li>
+<li><p><strong>Style / Alignment</strong>：表示方法と配置。</p></li>
+<li><p><strong>Accent Color</strong>：色の使用と通知色。</p></li>
+</ul>
+<p>色付きの例では、どの状態を通知しているかを Getter で確認してから、メッセージや色を調整します。通知を表示する場所と、条件が参照するデータの場所を同じものだと仮定しないでください。</p>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="context_router_editor.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Context Router Editor</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="property_editor.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Property Editor</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Pluglug and contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Property Stack Editor</a><ul>
+<li><a class="reference internal" href="#id2">画面と編集の流れ</a><ul>
+<li><a class="reference internal" href="#getter-setter">Getter と Setter の関係</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#property-stack-basic">名前と基本操作</a></li>
+<li><a class="reference internal" href="#getter">Getter — 現在の状態を判定する</a></li>
+<li><a class="reference internal" href="#setter">Setter — 条件に対応する変更を決める</a><ul>
+<li><a class="reference internal" href="#auto-set-need-off-read-only">Auto / Set / Need / Off / Read-only</a></li>
+<li><a class="reference internal" href="#property-stack-participation">判定だけに使う・書き込みも使う</a></li>
+<li><a class="reference internal" href="#true-false">TRUE / FALSE を指定すると何を書き込むか</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#preview-property-id">Preview / Property ID</a></li>
+<li><a class="reference internal" href="#id5">組み立てた設定を確認する</a></li>
+<li><a class="reference internal" href="#advanced-settings">Advanced settings</a><ul>
+<li><a class="reference internal" href="#while-true-hud">While True HUD — 条件を満たす間の通知</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=b695b4be"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/translations.js?v=4755f45a"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

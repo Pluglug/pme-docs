@@ -1,0 +1,298 @@
+(macro-operator-editor)=
+
+# Macro Operator Editor
+
+**Macro Operator** は、複数の操作を 1 回の実行でまとめて順次実行するエディターです。登録した Macro は名前付きのオペレーターとして Blender に組み込まれ、hotkey や他の PME メニュー、Python から呼び出されます。
+
+
+このページは PME 2.1 の設定を対象にしています。
+
+(macro-configuration-guide)=
+
+:::{dropdown} 構成ガイド — 機能・組み合わせ・活用例（AI 向け）
+
+**呼び名：Macro Operator／種別 ID：`MACRO`。**
+一度の呼び出しで複数のステップを順に実行する機能です。別のキー入力ごとに候補を進める Stack Key と使い分けます。
+
+- **入力**：Command / Menu のスロットを必要な数だけ追加し、実行順に配置します。無効なスロットは対象外です。{ref}`スロット <macro-slots>`へ。
+- **組み合わせ**：Menu で参照する実行用メニューは Sticky Key / Macro Operator / Modal Operator。Popup Dialog の描画をそのまま連続処理のステップとは扱いません。
+- **呼び出し**：ホットキー、別メニューからの呼び出し、外部スクリプトを使えます。外部コードは {ref}`呼び出し方法 <macro-hotkey-settings>`へ。
+- **制約**：各ステップが必要とするエディター、モード、対象が揃う順序を決めます。コマンドの成功や一回の Undo を、Macro にまとめただけで保証しません。
+- **対話的な手順**：ユーザーの確定を待つ操作は、Blender オペレーターとして追跡できるステップに分けます。{ref}`対話操作 <macro-interaction>`へ。
+- **診断**：欠けたオペレーターや参照先は {ref}`診断メッセージ <macro-diagnostics>`を確認します。表示された問題を直してから実行します。
+- **設計例**：モード切り替え→対象の選択→操作。最初の前提と最後の期待状態を決め、途中の取消やエラーで何が残るかも確認します。
+- **変数の共有期間**：一回の Macro 実行中、Python コードのスロット間で共有します。{ref}`保存・処理・復元の組み立て方 <macro-shared-variables>`へ。
+:::
+
+
+## 画面と編集の流れ
+
+```{raw} html
+:file: common/_macro_operator_editor_overview_map.html
+```
+
+1. {ref}`名前と基本操作 <macro-basic-settings>`
+2. {ref}`Advanced settings <macro-advanced-settings>`
+3. {ref}`Keymap / Hotkey <macro-hotkey-settings>`
+4. {ref}`順番に実行するスロット <macro-slots>`
+
+
+一覧で編集対象を選び、名前と有効状態を確認して、呼び出し方とスロットを設定します。
+共通の一覧・検索・タグは [エディターの共通要素](editor_common_elements.md)、
+各部は {ref}`名前 <macro-basic-settings>`、{ref}`キー設定 <macro-hotkey-settings>`、
+{ref}`スロット <macro-slots>`、{ref}`詳細設定 <macro-advanced-settings>`を参照してください。
+
+(macro-basic-settings)=
+
+## 名前と基本操作
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-11.51079137%">
+<img src="../_static/images/editors/overview/macro-operator-blender-5-2.png" width="663" height="278" alt="Box Sel with X-Ray の 名前と基本操作。一連の処理をまとめる Macro の名前と有効状態を確認します。">
+</div>
+<figcaption>名前と基本操作。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+名前と有効状態で編集対象を確認します。タグ・名前変更・参照元などの操作は
+{ref}`選択メニューの設定 <overview-selected>` を参照してください。
+この種別にはメニューのプレビューボタンはありません。
+
+(macro-hotkey-settings)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 65;--crop-offset:-42.08633094%">
+<img src="../_static/images/editors/overview/macro-operator-blender-5-2.png" width="663" height="278" alt="Box Sel with X-Ray の Keymap / Hotkey。使う場所とキーを設定します。この例は 3D View の B キーです。">
+</div>
+<figcaption>Keymap / Hotkey。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+呼び出す場所とキーを設定します。入力欄の操作は {ref}`共通の Hotkey 設定 <hotkey-editor>` を参照してください。
+
+Macro は Blender にオペレーターとして登録されるため、hotkey が未設定でも、メニュー経由 / `open_menu()` / `bpy.ops.pme.invoke_macro(...)` などから呼び出せます。
+
+```{versionadded} 2.0.5
+スクリプトやカスタム UI から PME Macro を呼び出すための `bpy.ops.pme.invoke_macro(...)` を追加しました。呼び出し側で Macro 内の全スロット引数を渡さなくても、PME 側の Macro 定義をそのまま使えます。
+```
+
+(macro-slots)=
+
+## スロット
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 88;--crop-offset:-66.90647482%">
+<img src="../_static/images/editors/overview/macro-operator-blender-5-2.png" width="663" height="278" alt="Box Sel with X-Ray の 順番に実行するスロット。準備、操作、後処理の順に項目を並べた例です。">
+</div>
+<figcaption>順番に実行するスロット。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+スロットは上から順に実行されます。Stack Key のように「次の押下まで待つ」挙動はありません。
+
+- スロットの追加・削除・並び替えが可能です。
+- 個別スロットの有効化/無効化ができます。
+- スロットタイプは Command / Menu の 2 種です。
+- Menu スロットでは PME の **Sticky Key / Macro Operator / Modal Operator** を呼び出せます。Pop-up Dialog / Pie Menu のような対話 UI は Macro の途中から呼び出す対象には適しません。
+
+(macro-shared-variables)=
+
+### 保存 → 処理 → 復元を、別のスロットに分ける
+
+**前の Command で覚えた値を、後の Command で使う。** 一回の Macro の中では変数を共有できるので、一時的な設定変更と後片付けを分けて書けます。
+
+```{mermaid}
+:name: macro-value-memory
+:alt: 一回の Macro 呼び出しで、元の値を覚えて変更し、処理を行い、最後に元の値へ戻す。
+
+flowchart LR
+    A["① 保存して変更"] --> B["② 処理"]
+    B --> C["③ 元へ戻す"]
+    classDef remember fill:#e8f1fb,stroke:#4878aa,color:#172b43;
+    classDef restore fill:#e8f5ed,stroke:#45805d,color:#183f28;
+    class A,B remember;
+    class C restore;
+```
+
+例えば、3D ビューの床グリッドを一時的に隠すなら、次の三つの Command を上から並べます。**一回の呼び出しで順に実行され、次の押下は待ちません。**
+
+**① 復元先と現在値を覚えてから、グリッドを隠す**
+
+```python
+view = C.space_data; start_floor = view.overlay.show_floor; view.overlay.show_floor = False
+```
+
+**② 一時設定の間に行う処理**（ここでは確認用の出力）
+
+```python
+print("一時設定の間に行う処理")
+```
+
+**③ 覚えておいた状態へ戻す**
+
+```python
+view.overlay.show_floor = start_floor
+```
+
+Keymap を **3D View** にして、3D ビューから起動します。この最小例は途中で入力を待たないため、グリッドが隠れている時間は目では追えない場合があります。`print()` は Blender の標準出力へ出ます。
+
+`view` と `start_floor` は自分で付けた名前です。`start_floor` は `banana` でも構いませんが、覚える側と戻す側で同じ名前を使います。
+
+次の独立した呼び出しや別のメニューへ値を渡す場合は、一時的な共有メモ {ref}`U（User Data）<scripting-user-data>` を使えます。
+
+:::{admonition} 共有範囲と復元の条件
+:class: note
+
+- **共有期間**：一回の Macro 内の Python コードは同じ名前空間を使います。新しく Macro を呼び出すと別の名前空間になり、前回の保存値は引き継ぎません。
+- **子 Macro**：Menu スロットで組み込んだ子 Macro も共有します。親子で同じ変数名を使うと上書きされるため、組み合わせるコードの名前も確認します。コードから別途 Macro を起動する場合は新しい実行です。
+- **他の種別**：組み込んだ Sticky Key / Modal Operator の内部変数は、それぞれの名前空間に属します。Macro の変数が自動で渡るわけではありません。
+- **復元先と名前**：この例は、覚えた 3D ビューが最後まで残ることが前提です。PME が提供する `C`、`E`、`menu`、`slot` などを保存先として上書きしません。
+- **途中停止**：後処理スロットは `finally` ではありません。途中のオペレーターの取消、Command の失敗、`stop = True` による停止では復元まで進むとは限らず、変更済みの値も自動では戻りません。
+- **必ず対にする同期処理**：一つのスクリプト内で `try` / `finally` にまとめる方法があります。ただし、そのスクリプトから起動した対話オペレーターの完了を `finally` が待つわけではありません。
+
+:::
+
+(macro-diagnostics)=
+
+### 診断メッセージ
+
+オペレーターや参照先が見つからないなど、PME が検出した構成上の問題はスロット行の警告アイコンから確認できます。警告がないことは、実行時のモード・選択状態で全オペレーターの条件が成立する保証ではありません。実行時のエラーは、その場のコンテキストも確認してください。
+
+```{versionadded} 2.0.5
+現在の Blender 環境で見つからない operator が Macro に含まれている場合、Blender の native Macro 実行に入る前に PME 側で検出し、Macro 全体を安全に停止するようになりました。古い設定、無効化されたアドオン、名前が変わった operator が原因で Blender ごと落ちることがあった既知の問題への対策です。
+```
+
+(macro-advanced-settings)=
+
+## Advanced settings（詳細設定）
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 47;--crop-offset:-23.38129496%">
+<img src="../_static/images/editors/overview/macro-operator-blender-5-2.png" width="663" height="278" alt="Box Sel with X-Ray の Advanced settings。説明文と利用できる条件を設定します。">
+</div>
+<figcaption>Advanced settings。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+歯車から開きます。Description と Poll は {ref}`共通の詳細設定 <editor-extra-settings>` を参照してください。
+
+Macro の Poll は「この Macro 全体を実行してよいか」の判定として評価されます。
+
+---
+
+## コードと入力欄
+
+この種別で使える入力は冒頭の構成ガイドを参照してください。入力欄の操作は
+{ref}`共通のスロットエディタ <slot-editor>`、コードは
+[書き方と入力制限](../reference/command_text.md)、
+[コード例](../reference/scripting_workflow.md)にまとめています。
+
+---
+
+(macro-patterns)=
+
+## 活用例と確認する条件
+
+### 連続操作をまとめる
+
+アクティブなメッシュがあり、Object Mode から始める例です。最初のステップで Mesh Edit Mode へ移り、次で全要素を選択します。
+
+スロット 1（Command）:
+
+```python
+bpy.ops.object.mode_set(mode='EDIT')
+```
+
+スロット 2（Command）:
+
+```python
+bpy.ops.mesh.select_all(action='SELECT')
+```
+
+### 同じオペレーターを違うパラメータで実行する
+
+同じオペレーターでも、それぞれのスロットに異なる引数を設定できます。次は Mesh Edit Mode で面を選択した状態から使う例です。二回目は一回目の結果に対して実行されます。
+
+```python
+bpy.ops.mesh.inset(thickness=0.02)
+```
+
+```python
+bpy.ops.mesh.inset(thickness=0.05)
+```
+
+### Stack Key の各スロットを複数ステップにする
+
+Stack Key の Command スロットから Macro を呼び出すと、巡回する各ステップが複数操作を持てる構成になります。
+
+```python
+open_menu("My Macro Operator")
+```
+
+または `bpy.ops.pme.invoke_macro` を使う形：
+
+```python
+bpy.ops.pme.invoke_macro(pm_name="My Macro Operator")
+```
+
+### 別の Macro / Sticky Key / Modal を呼ぶ
+
+Macro の Menu スロットで PME の他エディターを指定すると、そのオペレーターを Macro の 1 ステップとして組み込めます。複雑な処理を別の Macro に分けたり、Sticky Key / Modal Operator の対話を組み込んだりできます。Stack Key はこの Menu タブの参照対象ではありません。
+
+(macro-interaction)=
+
+### 対話的な操作を含める
+
+Transform のようにユーザーが調整するオペレーターは、開始処理を呼ぶ指定を使います。PME が Blender の Macro ステップとして扱うオペレーターでは、操作の確定後に次へ進む構成にできます。任意の Python コードの途中で非同期処理を始めても、すべての処理を自動で待てるわけではありません。単独のオペレーター呼び出しとしてスロットを分け、確定と取消をそれぞれ試します。
+
+```python
+bpy.ops.transform.resize('INVOKE_DEFAULT')
+```
+
+### 実行する場所と対象を整える
+
+最初に必要なエディター、モード、アクティブ・選択対象を決めます。途中でモードを変更するなら、
+次の操作がそのモードで使える順序にします。エリアを切り替える `focus_area()` などのヘルパーもありますが、
+単に別エリアを選べばすべてのオペレーターが実行できるわけではありません。
+必要な対象が見つからない場合の動作を決め、[コンテキストの確認](../reference/command_text.md)を行います。
+
+```{versionadded} 2.1
+Re-Capture で最近の操作を複数選び、実行した順番で Macro として追加できます。取り込んだ後は引数と実行条件を確認してください。
+```
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+```
+
+## 参考動画（原作者のチャンネル）
+
+[roaoao の動画一覧](../reference/original_author_videos.md)より。旧版の UI・手順を扱う参考動画です。
+
+:::{dropdown} Macro Operator Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/x4HhN4aHCxg" title="Macro Operator Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Macro Operator Editor for Blender — YouTube で開く](https://www.youtube.com/watch?v=x4HhN4aHCxg)
+:::
+
+:::{dropdown} Macro Operator Tutorial by Jimmy Livefjord
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/-RQFK1kqqVw" title="Macro Operator Tutorial by Jimmy Livefjord" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Macro Operator Tutorial by Jimmy Livefjord — YouTube で開く](https://www.youtube.com/watch?v=-RQFK1kqqVw)
+:::

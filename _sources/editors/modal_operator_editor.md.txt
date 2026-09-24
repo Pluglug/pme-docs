@@ -1,0 +1,370 @@
+(modal-operator-editor)=
+
+# Modal Operator Editor
+
+**Modal Operator** builds interactive tools that keep receiving input from invocation until confirmation or cancellation. Use mouse movement, the mouse wheel, and sub-hotkeys to continuously adjust properties or run actions.
+
+
+This page describes PME 2.1 settings.
+
+(modal-configuration-guide)=
+
+:::{dropdown} Configuration guide — features, combinations, and uses (for AI)
+
+**Name: Modal Operator / Type ID: `MODAL`.**
+An interactive tool that receives input until confirmed or canceled. It does not directly edit Blender modal keymaps such as Transform's.
+
+| Input | Purpose | Type ID |
+|---|---|---|
+| Command | Code triggered by a sub-hotkey | `COMMAND` |
+| Property | A property path adjusted by mouse or other input | `PROP` |
+| On Invoke | Startup action | `INVOKE` |
+| On Confirm / On Cancel | Exit actions | `FINISH` / `CANCEL` |
+| On Update | Action after an adjustment | `UPDATE` |
+
+- **Structure**: add the required input, startup, and exit slots; their count is variable. Define the trigger key, each slot's input, and confirm/cancel methods together. See {ref}`inputs and slots <modal-slots>`.
+- **Value adjustment**: check the Property input mode, range, and step. See {ref}`Property <modal-property-input>`.
+- **Constraints**: On Cancel is code you write, not a guarantee that arbitrary Command changes are automatically rolled back.
+- **Combinations**: use as an interactive Macro step. Test how confirmation and cancellation affect Macro continuation.
+- **Example design**: record starting values in On Invoke, adjust with Property, and restore in On Cancel. See {ref}`usage patterns <modal-patterns>`.
+- **Execution requirements**: account for targets disappearing or the area/mode changing during interaction. Lock Mouse controls cursor wrapping; it does not guarantee an arbitrary context.
+- **Variable lifetime**: slots share variables from one invocation through confirmation or cancellation. See {ref}`variable sharing and restoration <modal-shared-variables>`.
+:::
+
+
+## Interface and editing workflow
+
+```{raw} html
+:file: common/_modal_operator_editor_overview_map.html
+```
+
+1. {ref}`Name and basic controls <modal-basic-settings>`
+2. {ref}`Advanced settings <modal-advanced-settings>`
+3. {ref}`Keymap / Hotkey <modal-hotkey-settings>`
+4. {ref}`Action and event slots <modal-slots>`
+
+
+Select a Modal Operator in the list, check its name and enabled state, then configure invocation and slots.
+See [Common Editor Elements](editor_common_elements.md) for lists, search, and tags;
+see {ref}`name <modal-basic-settings>`, {ref}`hotkeys <modal-hotkey-settings>`,
+{ref}`slots <modal-slots>`, and {ref}`advanced settings <modal-advanced-settings>` for each section.
+
+## How Modal Operator works
+
+From its trigger hotkey to confirmation or cancellation, a Modal Operator follows this sequence:
+
+```{mermaid}
+flowchart TD
+    A["Trigger key"] --> B["On Invoke"]
+    B --> C["Wait for input"]
+    C --> D["Matching Command / Property"]
+    D --> E["Corresponding On Update"]
+    E --> C
+    C --> F["Confirm: On Confirm"]
+    C --> G["Cancel: On Cancel"]
+```
+
+On Update runs in response to the corresponding action or value update, rather than before every event.
+Startup runs after input is received; save the runtime event and initial values you need.
+
+---
+
+(modal-basic-settings)=
+
+## Name and basic controls
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-9.27536232%">
+<img src="../_static/images/editors/overview/modal-operator-blender-5-2.png" width="663" height="345" alt="MD Focal Length name and enabled state for the interactive tool.">
+</div>
+<figcaption>Name and basic controls in this example.</figcaption>
+</figure>
+```
+
+Identify the configuration by its name and enabled state. For tags, renaming, references, and related controls,
+see {ref}`selected menu settings <overview-selected>`.
+This type has no menu preview button.
+
+(modal-hotkey-settings)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 64;--crop-offset:-53.62318841%">
+<img src="../_static/images/editors/overview/modal-operator-blender-5-2.png" width="663" height="345" alt="MD Focal Length Keymap and Hotkey settings: Shift + Alt + F in 3D View.">
+</div>
+<figcaption>Keymap / Hotkey settings in this example.</figcaption>
+</figure>
+```
+
+Set where and how to invoke it. See the shared {ref}`Hotkey settings <hotkey-editor>` for input controls.
+
+This hotkey starts the entire modal tool. Configure sub-hotkeys separately on individual slots.
+
+(modal-slots)=
+
+## Slots
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 88;--crop-offset:-73.33333333%">
+<img src="../_static/images/editors/overview/modal-operator-blender-5-2.png" width="663" height="345" alt="MD Focal Length action and event slots, combining startup, focal length adjustment, and cancellation.">
+</div>
+<figcaption>Action and event slots in this example.</figcaption>
+</figure>
+```
+
+Slots are execution rules arranged from top to bottom. Each has:
+
+- A type: Command / Property / On Invoke / On Confirm / On Cancel / On Update.
+- A trigger: sub-hotkey, mouse movement, mouse wheel, or invocation/confirmation/cancellation.
+- Content: Python code or a property path.
+
+Slots can be added, removed, reordered, and disabled.
+
+### On Update scope depends on placement
+
+On Update applies to different inputs according to where it is placed.
+
+- Before all sub-hotkeys: runs for any sub-hotkey.
+- After a Command / Property: On Update slots up to the next Command / Property apply to the preceding item.
+
+A shared On Update at the top runs after the item's own On Update slots. It is not a timer monitoring every screen redraw.
+
+(modal-shared-variables)=
+
+### Share the starting value across slots
+
+**Remember on invocation, restore on cancellation.** Separate slots share variables during one interaction. For 3D Viewport focal length, the flow is:
+
+```{mermaid}
+:name: modal-value-memory
+:alt: Save the starting value 50, adjust to 80, then keep 80 on confirmation or restore 50 on cancellation.
+
+flowchart LR
+    A["Start<br/>Remember 50"] --> B["Adjust<br/>50 → 80"]
+    B --> C["Confirm<br/>Keep 80"]
+    B --> D["Cancel<br/>Restore 50"]
+    classDef remember fill:#e8f1fb,stroke:#4878aa,color:#172b43;
+    classDef keep fill:#e8f5ed,stroke:#45805d,color:#183f28;
+    classDef restore fill:#fff2df,stroke:#b77c28,color:#513512;
+    class A,B remember;
+    class C keep;
+    class D restore;
+```
+
+(modal-save-restore)=
+
+**1. On Invoke — save the target view and starting value**
+
+```python
+saved_view = C.space_data; start_lens = saved_view.lens
+```
+
+**2. Property — adjust focal length** (Mouse Wheel / Step: 1)
+
+```python
+saved_view.lens
+```
+
+**3. On Cancel — restore the saved value**
+
+```python
+saved_view.lens = start_lens
+```
+
+`saved_view` and `start_lens` are variable names you choose. `start_lens` could be `banana`; what matters is **using the same name in On Invoke and On Cancel**. Here, `start_lens` describes the value being saved.
+
+`start_lens` keeps the starting value throughout adjustment. **No On Confirm is needed because confirmation keeps the adjusted value.**
+
+Set Keymap to **3D View**, turn Confirm on Release **off**, and invoke in a perspective 3D Viewport. Adjust with the wheel, confirm with Enter, or cancel with Escape.
+
+(modal-user-data)=
+
+To pass values to a later invocation or another menu, use temporary shared storage {ref}`U (User Data) <scripting-user-data>`.
+
+:::{admonition} Shared scope and restoration requirements
+:class: note
+
+- **Lifetime**: from one invocation to confirmation/cancellation. On Invoke / Command / On Update / On Confirm / On Cancel and Property evaluation/updates share one Python namespace. The next invocation creates a new one.
+- **Example requirements**: `C.space_data` is the originating area's data. The target is 3D Viewport focal length, not a camera, and that view must remain available. Place an enabled On Invoke above Property to initialize the variables.
+- **PME-provided names**: do not overwrite `C`, `E`, `menu`, `slot`, `self`, `confirm`, `cancel`, or similar provided names.
+- **Restoration**: On Cancel writes the value back. Also write it in On Confirm if confirmation should restore it. Initialization failures, disabled exit slots, invalid references, and code errors are not recovered automatically, nor is On Cancel guaranteed for every interruption.
+
+:::
+
+(modal-advanced-settings)=
+(confirm-on-release)=
+
+## Advanced settings
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 115;--crop-offset:-18.84057971%">
+<img src="../_static/images/editors/overview/modal-operator-blender-5-2.png" width="663" height="345" alt="MD Focal Length advanced settings: description, availability, confirmation on release, UI blocking, and mouse wrapping.">
+</div>
+<figcaption>Advanced settings in this example.</figcaption>
+</figure>
+```
+
+Open these with the gear button. See the {ref}`shared advanced settings <editor-extra-settings>` for Description and Poll.
+
+:Confirm On Release:
+  When started by a press event, confirms when the trigger key is released. Off by default. Provide another confirmation method for invocation routes without a key release.
+
+:Block UI:
+  Blocks input to other hotkeys while active. On by default. When off, unrelated events pass to other handlers, so test the operations used alongside it.
+
+:Lock Mouse:
+  Wraps the cursor within the originating area when adjusting a property with the mouse. On by default. This allows continued adjustment at area edges; it does not guarantee a fixed execution context.
+
+```{versionadded} 2.0.4
+Improved cursor return into the originating area during mouse-driven property adjustment with Lock Mouse enabled.
+```
+
+---
+
+## Modal-specific slot types
+
+### Command
+
+Write Python executed when the sub-hotkey is pressed. Assign one sub-hotkey for this slot in its Slot Editor.
+
+```python
+bpy.ops.transform.resize('INVOKE_DEFAULT')
+```
+
+```python
+C.scene.tool_settings.use_proportional_edit = not C.scene.tool_settings.use_proportional_edit
+```
+
+(modal-property-input)=
+
+### Property
+
+Specify a property path and choose how to adjust it. The Property tab offers three input modes.
+
+| Input mode | Behavior |
+|---|---|
+| **Hotkey** | Mouse movement changes the value while the sub-hotkey is held. |
+| **Mouse Move** | Mouse movement alone changes the value. This blocks other sub-hotkeys; combine it with Confirm on Release to provide a confirmation route. |
+| **Mouse Wheel** | Wheel movement increments or decrements the value. Suits Enums and discrete values. |
+
+Numeric Property inputs also provide **Min Value / Max Value / Step**. Adjust the range and increment; Reset restores the referenced property's settings. Inputs vary by type, so do not treat numbers, Booleans, and Enums as identical increment operations.
+
+### On Invoke
+
+Write Python executed when the modal tool starts. Use it to save initial values, begin overlay drawing, or record the starting context.
+
+```python
+saved_view = C.space_data; start_lens = saved_view.lens
+```
+
+See the {ref}`shared starting-value example <modal-save-restore>` for the complete configuration.
+
+### On Confirm
+
+Write Python executed when the user confirms (Enter / Confirm on Release / `confirm()`).
+
+### On Cancel
+
+Restore values here if they must return to their original state on cancellation.
+
+Write Python executed when the user cancels (Escape / right-click / `cancel()`).
+
+### On Update
+
+Write code executed after the corresponding Command / Property action. See {ref}`slots <modal-slots>` for how placement determines scope.
+
+---
+
+## Confirm or cancel from Python
+
+Command and On Update slots can call functions to end the Modal Operator from Python.
+
+````{py:function} confirm()
+:noindex:
+
+Confirms and ends the Modal Operator, running On Confirm.
+
+:return: `True`
+````
+
+````{py:function} cancel()
+:noindex:
+
+Cancels and ends the Modal Operator, running On Cancel.
+
+:return: `True`
+````
+
+```python
+condition_met and confirm()
+```
+
+```python
+invalid_input and cancel()
+```
+
+`condition_met` / `invalid_input` are variables containing your own test results. The confirm/cancel names are supplied during Modal execution; do not copy them unchanged into another execution context.
+
+---
+
+(modal-patterns)=
+
+## Usage patterns and conditions to check
+
+### Continuously adjust brush size with the mouse
+
+Bind brush size in a Property slot, set its input mode to **Mouse Move**, and enable **Confirm on Release**. Movement adjusts the value while the trigger key is held; release confirms it.
+
+### Switch adjustment targets with axis sub-hotkeys
+
+Create several Property slots with different sub-hotkeys, such as `X` / `Y` / `Z`. The key held during the modal operation selects which property to adjust.
+
+### Cycle an Enum with the mouse wheel
+
+Set a Property slot to an Enum such as `C.space_data.shading.type` and choose **Mouse Wheel**. Scrolling cycles through values.
+
+### Insert an interactive adjustment in a Macro
+
+Reference a Modal Operator from a Macro Operator Menu slot to add a step awaiting user input. The Macro does not advance to its next slot until confirmation.
+
+### Call a native Blender modal operator with `release_confirm`
+
+Operators with native `release_confirm`, such as Blender transforms, can be called directly from a Command slot to align their confirmation behavior with PME's.
+
+```python
+bpy.ops.transform.resize('INVOKE_DEFAULT', release_confirm=True)
+```
+
+```{admonition} Difference from Blender's Modal Map
+:class: note
+
+Modal Operator Editor does not directly edit Blender's internal **modal keymaps**, such as the key assignments within Transform or Knife. It builds small interactive tools using PME's modal system.
+```
+
+---
+
+```{admonition} Related pages
+:class: seealso
+
+- [Common Editor Elements](editor_common_elements.md)
+- [Poll Method](../reference/poll_method.md)
+- [Choosing a Keymap](../reference/keymap_guide.md)
+```
+
+## Reference videos (original author's channel)
+
+From [roaoao's videos](../reference/original_author_videos.md). These show an older interface and workflow.
+
+:::{dropdown} Modal Operator Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/aDEX5bix384" title="Modal Operator Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Modal Operator Editor for Blender — Open on YouTube](https://www.youtube.com/watch?v=aDEX5bix384)
+:::

@@ -1,0 +1,27 @@
+項目を実行したときに評価する Python コードを設定します。
+オペレーターを呼び出す場合は、実行するエディター・モード・選択状態に対応した処理を使います。
+
+```python
+# 3D Viewport の Object Mode で立方体を追加する
+bpy.ops.mesh.primitive_cube_add()
+```
+
+:::{admonition} コマンドの記述方法
+:class: important
+
+入力上限は **UTF-8 で 1,024 バイト**です。日本語を含む場合、1,024 文字より短くなります。
+短い単純文は `;` で区切れますが、インデントを持つブロックを機械的に 1 行へ変換しないでください。
+長さの確認と外部スクリプトへの分割は [Command / Custom のコードと入力制限](/reference/command_text.md) を参照してください。
+
+:::
+
+:::{admonition} グローバル変数
+:class: hint
+
+**利用可能なグローバル変数の例：**
+- `C`: PME がスクリプトに提供するコンテキスト
+- `O`: bpy.ops（Blenderのオペレーター）
+- `E`: event（イベント情報）
+
+[Scripting Reference](/reference/scripting.rst) でグローバル変数の説明を確認できます。
+:::

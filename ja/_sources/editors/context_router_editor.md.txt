@@ -1,0 +1,242 @@
+(context-router-editor)=
+
+# Context Router Editor
+
+Blender の操作は、現在のモードやオブジェクトの種類などの状況によって変わります。**Context Router** は、その状況と呼び出したいメニュー・操作の対応を、条件付きの分岐として編集するエディターです。
+
+たとえば同じキーから、メッシュの編集時には Mesh Edit、スカルプト時には Sculpt Tools を開けます。**分岐を上から確認し、最初に条件が一致したターゲットを選びます。**
+
+```{versionadded} 2.1
+条件分岐を画面上で組み立てる Context Router を追加。
+```
+
+:::{dropdown} 構成ガイド — 条件と呼び出し先を設計する（AI 向け）
+
+**呼び名：Context Router／種別 ID：`ROUTER`。** 条件付きの分岐を上から調べ、最初に一致した分岐の対象を選びます。複数の分岐を順番に実行する機能ではありません。
+
+- **入力**：分岐名、条件、条件の組み合わせ、呼び出し先。条件を持たない通常の分岐は常時一致として扱われません。対象外の処理には Otherwise を使います。
+- **入力上限**：通常分岐は最大 **256**、各分岐の条件は最大 **256**。対象の Custom コードは専用欄で最大 **32,768 文字**です。通常の Custom スロットの 1,024 UTF-8 バイト制限とは別です。
+- **対象**：Command / Menu / Hotkey / Custom。Property タブはありません。既存プロパティの表示には、Property スロットを持つメニューを参照する構成を検討します。
+- **Menu の対象**：Pie Menu、Regular Menu、Popup Dialog、Floating Panel、Stack Key、Sticky Key、Macro Operator、Modal Operator、Vector Menu。別の Context Router、Property、Property Stack は、この呼び出し先の選択肢とは区別します。Property / Property Stack は条件の参照元として使えます。
+- **活用**：ホットキーからモード別メニューを開く／Pie Menu や Popup Dialog 内に組み込み、条件に応じて表示内容を変える。
+- **パスや比較だけで表せない判定**：{ref}`PME Property の Getter <property-callbacks>` で計算し、Boolean・数値・Enum などを返す構成にします。条件スロットの Menu タブから参照して比較できます（保存先は Addon Preferences）。分岐が不要なら PME Property 単独で表示・操作する構成も選べます。{ref}`使い分け <router-pme-property>`を参照してください。
+- **判断**：表示用の Custom と実行用の Command を区別します。どの組み込み先でも同じ描画・実行ができるとは仮定せず、対象と展開設定を確認します。
+
+条件の優先順位は {ref}`分岐 <router-branches>`、対象外の処理は {ref}`Otherwise <router-otherwise>`、実例の組み立て方は {ref}`プロパティパスの切り替え <router-recipe>`へ。
+:::
+
+## 画面と編集の流れ
+
+```{raw} html
+:file: common/_context_router_editor_overview_map.html
+```
+
+1. {ref}`名前と基本操作 <router-basic>`
+2. {ref}`Advanced settings <router-advanced>`
+3. {ref}`Keymap / Hotkey <router-hotkey>`
+4. {ref}`分岐と条件 <router-branches>`
+5. {ref}`Otherwise <router-otherwise>`
+
+各分岐に条件と呼び出すメニューを設定し、どの条件にも一致しない場合の動作を Otherwise で決めます。
+
+(router-basic)=
+
+## 名前と基本操作
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-6.06060606%">
+<img src="../_static/images/editors/overview/context-router-blender-5-2.png" width="663" height="528" alt="Obj Mode Router の 名前と基本操作。Router 全体の名前と有効状態を確認します。">
+</div>
+<figcaption>名前と基本操作。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+有効状態と名前を設定します。名前は Router 全体の名前で、各分岐の名前とは別です。操作は {ref}`選択メニューの設定 <overview-selected>`を参照してください。
+
+(router-advanced)=
+
+## Advanced settings
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 47;--crop-offset:-12.31060606%">
+<img src="../_static/images/editors/overview/context-router-blender-5-2.png" width="663" height="528" alt="Obj Mode Router の Advanced settings。Router 全体の説明と利用条件を設定します。">
+</div>
+<figcaption>Advanced settings。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+Description はこの Router の説明、Poll は Router 全体を利用できる条件です。個々の分岐の条件と区別します。共通の {ref}`Description / Poll <editor-extra-settings>`を参照してください。
+
+(router-hotkey)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 65;--crop-offset:-22.15909091%">
+<img src="../_static/images/editors/overview/context-router-blender-5-2.png" width="663" height="528" alt="Obj Mode Router の Keymap / Hotkey。条件による切り替えを呼び出す場所とキーを指定します。">
+</div>
+<figcaption>Keymap / Hotkey。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+Keymap で使う場所、Hotkey でキーと修飾キーを設定します。同じキーから条件に応じて別のメニューを開けます。入力欄は {ref}`共通の Hotkey 設定 <hotkey-editor>`を参照してください。
+
+(router-branches)=
+
+## 分岐と条件
+
+```{raw} html
+:file: common/_context_router_branch_map.html
+```
+
+**ブランチは「条件とターゲット」の組です。** Add Branch で追加し、左端の三角で条件欄を開きます。条件に一致したときに呼び出すメニューや操作を、ターゲットスロットに設定します。
+
+(router-evaluation)=
+
+### 上から順に、最初の一致を選ぶ
+
+```{mermaid}
+:name: router-branch-flow
+:alt: 上から3つのブランチの条件を確認し、最初に一致したターゲットを呼び出します。どれにも一致しなければ最後の Otherwise を選びます。
+
+%%{init: {"flowchart": {"nodeSpacing": 18, "rankSpacing": 22, "padding": 10}, "themeVariables": {"fontSize": "14px"}}}%%
+flowchart TB
+    accTitle: Context Router の分岐の順序
+    accDescr: 上からブランチの条件を確認し、最初に一致したターゲットを呼び出して分岐の選択を終了します。すべて不一致なら最後の Otherwise を選びます。
+    subgraph B1["ブランチ 1"]
+        direction LR
+        C1["Mesh ＋ Object Mode"] -->|一致| T1["Object Mode を開く"]
+    end
+    subgraph B2["ブランチ 2"]
+        direction LR
+        C2["Mesh ＋ Edit Mode"] -->|一致| T2["Mesh Edit を開く"]
+    end
+    subgraph B3["ブランチ 3"]
+        direction LR
+        C3["Sculpt Mode"] -->|一致| T3["Sculpt Tools を開く"]
+    end
+    B1 -->|不一致| B2
+    B2 -->|不一致| B3
+    B3 -->|不一致| O["Otherwise：Set Object Mode"]
+    classDef condition fill:#e8f1fb,stroke:#4878aa,color:#172b43;
+    classDef target fill:#e8f5ed,stroke:#45805d,color:#183f28;
+    classDef fallback fill:#fff2df,stroke:#b77c28,color:#513512;
+    class C1,C2,C3 condition;
+    class T1,T2,T3 target;
+    class O fallback;
+    style B1 fill:transparent,stroke:#8495a5
+    style B2 fill:transparent,stroke:#8495a5
+    style B3 fill:transparent,stroke:#8495a5
+```
+
+上から条件を確認し、**最初の一致で行き先が決まります。どれにも一致しなければ Otherwise** を使います。
+限定的な条件を先に、広い条件を後に置くと、優先順位を整理しやすくなります。
+
+(router-target)=
+
+### A・B. ターゲットとリンク
+
+**A：ターゲットスロット**のアイコンから、Command / Menu / Hotkey / Custom を設定します。横の名前欄はブランチの表示名です。名前を変えても、参照先メニューは変わりません。
+
+**B：リンクボタン**は、Menu を指定したターゲットの参照先を編集するためのボタンです。リンク先メニューの編集画面へ移動します。分岐の並び替えや削除は、行の右端のメニューで行います。
+
+(router-condition-area)=
+
+### C. 条件の組み合わせ
+
+**Branch matches when** で、ブランチ内の条件をどう組み合わせるか選びます。
+
+| 設定 | 一致する条件 |
+|---|---|
+| **All conditions match** | 評価対象の条件がすべて一致する。例：オブジェクトが Mesh **かつ** Object Mode。 |
+| **Any condition matches** | 評価対象の条件のいずれかが一致する。例：Object Mode **または** Edit Mode。 |
+
+**Add Condition** で条件を追加します。画像のブランチは All なので、Obj Type と Mode の両方が一致したときに選ばれます。
+
+:::{admonition} 条件評価の補足
+:class: note
+
+- 評価対象は、有効で設定が完了した条件です。対象が一つもないブランチは一致しません。
+- ターゲットを選んだ時点で分岐の選択は終了します。ターゲットが未設定・参照切れだったり、実行できなかったりしても、次のブランチや Otherwise へ進む仕組みではありません。
+:::
+
+
+(router-condition-presets)=
+
+### D. 条件プリセット
+
+**Add Condition の右端のメニュー**から、よく使う条件を追加できます。たとえば **Active Object Type** でオブジェクトの種類、**Context Mode** でモードを選ぶと、参照先と比較値が設定された条件を追加できます。
+
+プリセットを出発点に、必要な条件を組み合わせます。画像のように「Mesh かつ Object Mode」にする場合は、種類とモードの2条件を用意します。
+
+(router-condition-source)=
+
+### E. プロパティパスとスロット名
+
+左側のアイコンから条件スロットを編集し、**参照するプロパティパス**を指定します。隣の名前欄は条件を見分けるための表示名で、変更しても参照先は変わりません。画像の `Obj Type` と `Mode` は表示名の例です。
+
+`C` は PME が提供するコンテキストです。参照先は、Router を評価する時点の状況によって決まります。
+
+- **アクティブな対象**：`C.active_object.type` は現在のアクティブオブジェクトの種類、`C.mode` は現在のモードを読み取ります。設定時のオブジェクトやモードを固定して記憶するものではありません。
+- **エディターに依存する値**：`C.space_data` の型と利用できるプロパティは、エディターによって変わります。型の指定はパスを解釈するための情報で、実行するエディターを切り替える操作ではありません。Router を使うエディターで、そのパスを読み取れることを確認します。
+- **読み取り専用の値**：値を取得できれば、書き換えられないプロパティも条件判定に使えます。条件の比較値を設定しても、参照先の値は変更されません。
+- **参照できない状態**：対象が存在しない、途中のパスが取得できない、型が合わないなどの場合、その条件は一致しません。アクティブオブジェクトがない状態も確認してください。
+
+(router-pme-property)=
+
+```{include} common/condition_pme_property.md
+```
+
+(router-condition-comparison)=
+
+### F. 比較方法と比較値
+
+右側で **比較方法**と **比較値**を設定します。選べる方法と入力欄は、参照するプロパティの型によって変わります。画像の `is Mesh` は、単一選択 Enum の一致判定です。
+
+| プロパティの型 | 比較方法 | 比較値・判定の意味 |
+|---|---|---|
+| **Boolean** | `is` | True / False を選ぶ。 |
+| **Int / Float** | `is`、`is not`、`<`、`<=`、`>=`、`>` | 数値との一致・不一致・大小を判定する。 |
+| **String** | `is`、`is not`、`contains`、`starts with` | 文字列の一致・不一致・部分一致・前方一致を判定する。 |
+| **Enum（単一選択）** | `is`、`is not`、`in`、`not in` | `is` / `is not` は一つの候補との一致・不一致。`in` / `not in` は、指定した複数候補のいずれかに該当する・しないことを判定する。 |
+| **Enum（複数選択）** | `in`、`not in` | 現在の選択と指定した候補に、一つでも共通項がある・一つもないことを判定する。 |
+
+:::{admonition} 比較するときの注意
+:class: note
+
+- **複数選択 Enum の `in`** は、指定した候補がすべて選ばれているという意味ではありません。一つでも共通していれば一致します。Enum の比較には候補の識別子を使い、画面では対応する表示名を選びます。
+- **Float の `is`** は近似比較ではありません。許容範囲を設ける場合は、下限・上限の条件を **All conditions match** で組み合わせます。
+- **取得できない値**は、`is False`、`is not`、`not in` でも一致に変わりません。「値が False / 比較値と異なる」と「値を取得できない」は別の状態です。
+:::
+
+
+(router-otherwise)=
+
+## Otherwise — 対象外の処理
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 35;--crop-offset:-92.61363636%">
+<img src="../_static/images/editors/overview/context-router-blender-5-2.png" width="663" height="528" alt="Obj Mode Router の Otherwise。どの分岐にも一致しなかったときの処理を指定します。">
+</div>
+<figcaption>Otherwise。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+どの通常分岐にも一致しないときの対象を設定します。例えば、対象外であることを知らせる操作や、基本のメニューに戻る構成に使います。対象を未設定のまま、必ず何かが実行されるとは考えないでください。
+
+(router-recipe)=
+
+## エディターごとに異なるプロパティを扱う
+
+プロポーショナル編集のように、同じ目的でもエディターやモードによってプロパティパスが異なる設定に使えます。
+
+1. エディター・モードごとに、実際に参照する RNA パスを確認します。
+2. それぞれのパスを扱うメニューを用意し、Router の条件と対象に設定します。
+3. 対象がない場合や、対応していないエディターでの Otherwise を決めます。
+4. 各分岐の表示と操作を、その条件が成立する場所で確認します。
+
+Object Mode 以外を一律に Mesh Edit Mode と扱うような条件は避けます。アクティブオブジェクトがない状態も別に確認してください。
