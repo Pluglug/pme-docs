@@ -1,0 +1,105 @@
+(poll-method-guide)=
+
+# Poll Method
+
+メニューの **Poll** は、現在の Blender の状態で、そのメニューを利用できるか判定します。対象メニューの **Advanced settings → Poll** に条件を書きます。
+
+- `return True`：利用可能にする。
+- `return False`：利用不可にする。表示形式や呼び出し方によって、項目が非表示または無効表示になる。
+
+## Keymap と Poll の役割
+
+**Keymap は「どこから呼ぶか」、Poll は「今、使ってよいか」を決めます。** Keymap をホットキーの登録先の「箱」と考えると、その違いを整理できます。
+
+| 設定 | 決めること | 例 |
+|---|---|---|
+| Keymap | ホットキーを登録するエディターやモードの範囲 | Object Mode の操作として登録する |
+| Poll | その時点の状態が、使う条件を満たすか | アクティブなオブジェクトがメッシュなら利用可能 |
+
+Poll が調べる「今の状況」が **コンテキスト**です。`C.mode` はモード、`C.active_object` はアクティブなオブジェクト、`C.area` はエディターのエリアを参照します。
+
+たとえば Object Mode の Keymap に登録し、Poll を「アクティブなオブジェクトがメッシュ」にすると、同じモードでもメッシュとライトで判定結果が変わります。**False は条件に合わないという正常な結果**で、コードのエラーとは異なります。
+
+Keymap の登録先に応じた範囲へ入力が届くことと、Poll が True を返すことは別です。Poll で対象を絞っても Keymap の範囲は広がりません。また、Poll はホットキー以外のメニュー呼び出しでも利用可否を判定します。
+
+## よく使う条件
+
+各コードは **メニューの Poll 欄へ貼る1行**です。使う条件を一つ選びます。
+
+| 利用したい状態 | Poll のコード |
+|---|---|
+| 常に利用可能 | `return True` |
+| Object Mode | `return C.mode == 'OBJECT'` |
+| Mesh Edit Mode | `return C.mode == 'EDIT_MESH'` |
+| アクティブなオブジェクトがある | `return C.active_object is not None` |
+| アクティブなオブジェクトがメッシュ | `obj = C.active_object; return obj is not None and obj.type == 'MESH'` |
+| 3D Viewport | `return C.area is not None and C.area.type == 'VIEW_3D'` |
+
+**確認：** 条件に合う状態と合わない状態を作り、同じメニューを呼び出します。たとえば Mesh Edit Mode の条件なら、メッシュの Edit Mode と Object Mode で確認します。呼び出し自体が届かない場合は [Keymap の設定](keymap_guide.md)も確認してください。
+
+Poll 欄の右側にある **＋** から、よく使う条件を追加する補助メニューも開けます。追加後に条件を確認し、使う状態と使わない状態で試してください。
+
+## 条件を組み合わせる
+
+| 記法 | 意味 |
+|---|---|
+| `a and b` | 両方の条件を満たす |
+| `a or b` | どちらかを満たす |
+| `not a` | 条件を満たさない |
+| `==` / `!=` | 値が等しい / 等しくない |
+| `in` | 指定した候補に含まれる |
+
+**Object Mode または Mesh Edit Mode で利用可能にする：**
+
+```python
+return C.mode in {'OBJECT', 'EDIT_MESH'}
+```
+
+**メッシュがアクティブで、Object Mode のときに利用可能にする：**
+
+```python
+obj = C.active_object; return obj is not None and obj.type == 'MESH' and C.mode == 'OBJECT'
+```
+
+`obj is not None` を先に評価することで、対象がないときに `obj.type` を読まずに済みます。`C.area` や `C.space_data` も、存在と種類を確認してから、そのエディター固有の値を参照します。
+
+## Poll と分岐の使い分け
+
+| 目的 | 設定する場所 |
+|---|---|
+| メニューを利用できる状態を限定する | そのメニューの Poll |
+| 同じキーから状況に応じて別のメニューや操作を呼ぶ | {ref}`context-router-editor` |
+| 項目を実行したときに処理を選ぶ | Command の条件分岐 |
+| 状態に応じて UI の内容を変える | Custom の描画コード |
+
+Poll は繰り返し評価されるため、オブジェクトの追加や設定変更は行わず、状態を読み取って判定します。Poll が通っても、内部で呼ぶ Blender オペレーターの実行条件が整うわけではありません。`poll() failed` は {ref}`実行場所とタイミング <code-operator-context>` を確認してください。
+
+## 利用できないときの見分け方
+
+| 状態 | 意味・確認すること |
+|---|---|
+| メニューが無効 | メニューの有効・無効を切り替える設定を確認する |
+| Poll が False | 正常な判定。モードや対象が条件に合っているか確認する |
+| Poll のコードがエラー | 構文や参照先に問題がある。警告・エラー内容を確認して修正する。False と同じ扱いだと考えない |
+| Poll は True だが呼び出せない | Keymap、キーと修飾キー、マウスのある領域、ほかの操作との競合を確認する |
+
+呼び出せても中の操作が動かない場合は、そのオペレーターが必要とするエディター・モード・対象も確認してください。
+
+## 関連ページ
+
+- [コード例](scripting_workflow.md)：Command / Custom / Poll の設定先と実例。
+- [コードの入力と実行](command_text.md)：実行時の変数、外部ファイル、エラーの調べ方。
+- [キーマップの選び方](keymap_guide.md)：呼び出す場所と入力の関係。
+
+## 参考動画（原作者のチャンネル）
+
+[roaoao の動画一覧](original_author_videos.md)より。旧版の UI・手順を扱う参考動画です。
+
+:::{dropdown} Context Sensitive Menus in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/m8pCPZdK_qc" title="Context Sensitive Menus in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Context Sensitive Menus in Blender — YouTube で開く](https://www.youtube.com/watch?v=m8pCPZdK_qc)
+:::

@@ -1,0 +1,641 @@
+(settings)=
+
+# Settings
+
+**Settings** controls Pie Menu Editor as a whole. Open Pie Menu Editor under Edit > Preferences > Add-ons, then select **Settings** in the **Editor / Settings** tabs at the top.
+
+The ten tabs on the left are grouped by scope: the first five contain **global settings**, the next four contain **editor-specific defaults**, and the last contains **developer settings**.
+
+---
+
+(settings-general)=
+
+## General
+
+General controls PME's interface, menu list width and row count, automatic backups and tags, and expert options. Defaults for individual editors are in the editor-specific tabs below.
+
+**Interface**
+
+(setting-n-panel-preferences)=
+
+### N-Panel Preferences
+
+Shows PME settings in the 3D Viewport's Sidebar (N-Panel). When enabled, a **PME** tab provides access to the main settings without opening the Preferences window.
+
+(setting-expand-slot-tools)=
+
+### Expand Slot Tools
+
+Expands slot tools such as copy, delete, and move when the Slot Editor opens.
+
+:::{image} /../../shared/_static/images/editors/common/slot_tools.png
+:class: img-shadow
+:alt: Expanded Slot Tools
+:width: 80%
+:align: center
+:::
+
+(setting-operator-editor)=
+
+### Operator Editor
+
+Uses the **Operator Properties Editor** in the Command tab, with controls comparable to Blender's Adjust Last Operation (formerly F6). When disabled, it falls back to Blender's generic input fields.
+
+(setting-recent-menu-targets)=
+
+### Recent Menu Targets
+
+Shows **recently invoked menus** as destinations when adding an item through the Widget Context Menu. Enabled by default.
+
+(setting-editor-link-buttons)=
+
+### Editor Link Buttons
+
+Shows a link button beside ordinary Menu slots in the Pop-up Dialog and Floating Panel editors, opening the referenced menu for editing. The same setting also appears in the [Popup Dialog tab](#setting-popup-editor-link-buttons).
+
+When disabled, you can still use **Go to Linked Menu** in the slot's operations menu. The link button inside a Panel Row is always shown. See {ref}`Pop-up Dialog link controls <popup-linked-menu>`.
+
+(setting-persist-tree-state)=
+
+### Persist Tree State
+
+Remembers expanded and collapsed groups in the menu tree after Blender closes.
+
+(setting-show-tree-group-counts)=
+
+### Show Tree Group Counts
+
+Shows the number of menus in tree group rows, such as tag headings.
+
+(setting-list-width)=
+
+### List Width
+
+Width of the menu list on the left of the editor, as a percentage. Range: 1–80; default: 40.
+
+(setting-list-rows)=
+
+### List Rows
+
+Number of visible rows in the menu list. Range: 5–50; default: 10.
+
+(setting-search-keywords)=
+
+### Search Keywords
+
+Chooses what Search / Select matches in addition to menu names. You can select multiple options:
+
+- **Hotkey** — The assigned hotkey text, such as `Ctrl+Shift+A`.
+- **Extend Target** — The destination class ID for Extend Panel / Extend Menu, such as `VIEW3D_MT_object`.
+- **UID** — PME's internal UID string.
+
+Only Hotkey is enabled by default.
+
+**Automation**
+
+(setting-auto-backup)=
+
+### Auto Backup
+
+Creates a backup whenever menu edits are saved. Timestamped files accumulate under the path set in Resources. To keep overwriting one file instead, use [Overwrite Backup File](#setting-overwrite-backup-file).
+
+(setting-auto-tag-new-menus)=
+
+### Auto-Tag New Menus
+
+Automatically assigns the current tag filter to newly created menus, for example when viewing only menus tagged `Modeling`.
+
+**Performance**
+
+(setting-cache-scripts)=
+
+### Cache Scripts
+
+Caches external Python scripts loaded by Custom / Command slots, reducing loading overhead when the same script runs repeatedly.
+
+**Expert**
+
+(setting-show-error-trace)=
+
+### Show Error Trace
+
+Shows traceback information when a slot's Python code raises an exception (Description / Poll / Custom / Command).
+
+(setting-persist-sidearea-tabs)=
+
+### Sidebar Tab Memory (Retired)
+
+PME 2.1 no longer displays or uses this legacy setting. Toggle Side Area does not separately read and restore Sidebar tab names, because accessing this Blender information directly can cause crashes. When {guilabel}`Preserve Side Area State` retains a supported editor's state, the visible panel may return as part of it; this does not provide general memory for all Sidebar tabs. Sidebar visibility and the opened area's width or height are still remembered during the current Blender session. Existing settings can still be loaded.
+
+(setting-show-command-tab-undo)=
+
+### Show Command Tab Undo
+
+Shows the **Undo Previous Command** checkbox in the Command tab. See [Macro Operator Editor](./macro_operator_editor.md) and [Stack Key Editor](./stack_key_editor.md).
+
+(setting-preserve-side-area-space-state)=
+
+### Preserve Side Area State
+
+Restores an editor's working state when reopened after Toggle Side Area closes or switches it. Off by default.
+Supported state includes Outliner search and filters, the Properties context, and the Node Editor's node tree.
+File Browser / Asset Browser are excluded, and remembered state does not survive a Blender restart.
+
+:::{warning}
+This experimental feature may destabilize Blender, and restoration may not work in every Blender version.
+:::
+
+---
+
+(settings-resources)=
+
+## Resources
+
+Chooses where PME stores user resources other than menus: custom icons, exported JSON, external scripts used by Custom slots, and automatic backups. PME creates `icons`, `scripts`, `exports`, and `backups` subfolders under the selected folder.
+
+Since PME 2.0.0, these user resources are stored separately from the add-on itself. Reinstalling or updating the add-on does not delete them.
+
+(setting-resources-open-folder)=
+
+### Open Resource Folder
+
+Opens the current resource root in your operating system's file browser. The folder is created if it does not yet exist.
+
+(setting-resources-root-directory)=
+
+### Root Directory
+
+The root folder for user resources, under `~/Documents/Pie Menu Editor/` by default. You can choose another folder; clearing the field restores the last valid path.
+
+The status row shows the current counts of **scripts / exports / icons / backup** files. If subfolders are missing, **Missing resource folders** appears on the right. Use the reload button ({octicon}`sync`) to initialize them.
+
+Related: [File Locations](../reference/file_locations.md), [Custom Icons](./custom_icons.md)
+
+---
+
+(settings-hotkeys)=
+
+## Hotkeys
+
+Configures PME's own hotkeys and shared input timing: the PME and Widget Context Menu shortcuts, plus HOLD / CHORD / TWEAK time and distance thresholds. Keymap Doctor checks for conflicts with the active Blender keymaps.
+
+(setting-pme-hotkey)=
+
+### PME Hotkey
+
+Opens the {ref}`Capture Menu <capture-menu>` (Quick Capture). The default is **Ctrl+Shift+P**, registered in Blender's **Screen Editing** keymap.
+
+(setting-widget-context-menu-hotkey)=
+
+### Widget Context Menu
+
+Opens the context menu for UI elements captured through Interactive Panels, including buttons, properties, and panels. It provides actions such as adding the widget under the mouse to a PME menu or copying it.
+
+See [Interactive Panels and Extend Panel](./interactive_panels.md) for details.
+
+**Hotkey Modes**
+
+(setting-tweak-mode-threshold)=
+
+### Tweak Mode Threshold
+
+Blender's global **drag distance threshold**, in pixels. Moving the mouse this far is also treated as a drag by PME for TWEAK / CLICK_DRAG modes. This shares Blender's standard Tweak Mode Threshold value.
+
+(setting-hold-mode-timeout)=
+
+### Hold Mode Timeout
+
+Time after a key press before **HOLD mode** is recognized, in milliseconds. Range: 50–1000; default: 200.
+
+(setting-chord-mode-timeout)=
+
+### Chord Mode Timeout
+
+Time allowed for the next key after the first key in **CHORD mode**, in milliseconds. Range: 50–1000; default: 300.
+
+(setting-show-next-key-chord)=
+
+### Show Next Key Chord
+
+Shows a hint with the available next keys while entering a chord.
+
+(setting-experimental-modes)=
+
+### Experimental Modes
+
+Shows experimental Open Modes such as **Click** / **Click Drag** in Hotkey settings. Hidden by default.
+
+Related: {ref}`Hotkey settings <hotkey-editor>`
+
+(setting-keymap-diagnostics)=
+
+### Keymap Doctor
+
+**Scan Keymaps** compares each PME hotkey with Blender's active user keymap and reports conflicts within the same keymap. It also lists empty PME entries, PME entries that may have become embedded in the `active` layer, and hotkeys that could not be fully checked.
+
+Combinations intentionally handled by PME's dispatcher, such as different Hotkey Modes, different chords, or mouse modifiers, are reported as information rather than counted as conflicts. Duplicate Hotkey Modes or chords and extra ghost entries remain conflicts.
+
+Scanning, copying the summary, and exporting a report do not change keymaps. **Clean Up Empty Items** removes only PME entries confirmed to be empty. Conflicting entries are not automatically changed or deleted.
+
+---
+
+(settings-overlay)=
+
+## Overlay
+
+Controls overlays shown while menus run, including the current Stack Key slot, Modal Operator controls, and hints. Adjust font size, colors, position, and fade duration here.
+
+(setting-overlay-font-size)=
+
+### Font Size
+
+Overlay font size in pixels, used for Stack Key and Modal Operator labels. Range: 10–50; default: 24.
+
+(setting-overlay-text-color)=
+
+### Text Color
+
+Main overlay text color, in RGBA. Used for Stack Key slot names and the current Modal Operator mode.
+
+(setting-overlay-secondary-color)=
+
+### Secondary
+
+Secondary text color, in RGBA. Used for Stack Key supporting text and Modal value displays.
+
+(setting-overlay-background-color)=
+
+### Background
+
+Overlay background color, in RGBA. Used only when [Use Background](#setting-overlay-use-background) is enabled.
+
+(setting-overlay-use-background)=
+
+### Use Background
+
+Draws a background panel behind the text.
+
+(setting-overlay-use-shadow)=
+
+### Use Shadow
+
+Adds a drop shadow to the text. Enabled by default.
+
+(setting-overlay-alignment)=
+
+### Alignment
+
+Positions the overlay within the screen, such as top, center, or bottom.
+
+(setting-overlay-offset-x)=
+
+### Offset X
+
+Horizontal offset from the screen edge, in pixels.
+
+(setting-overlay-offset-y)=
+
+### Offset Y
+
+Vertical offset from the screen edge, in pixels.
+
+(setting-overlay-duration)=
+
+### Duration
+
+Overlay display duration in seconds. Range: 1–10; default: 2.
+
+---
+
+(settings-gpu-layout)=
+
+## GPU Layout
+
+Controls PME's custom drawing layer introduced in 2.0.0, used by **Floating Panels** and related UI. Settings include tooltip width, the preferred INVOKE strategy, and debug options.
+
+(setting-tooltip-max-width)=
+
+### Tooltip Max Width
+
+Maximum width of GPULayout tooltip text, in unscaled pixels. Range: 160–1200; default: 420.
+
+(setting-invoke-priority)=
+
+### Invoke Priority
+
+Chooses the default strategy when an operator is invoked without an explicit `invoke_strategy`.
+
+- **Suspend** — Prefers `INVOKE_SUSPEND`, keeping the panel alive.
+- **Afterfunc** — Prefers `INVOKE_AFTERFUNC`: close, invoke, then reopen.
+
+(setting-force-invoke-afterfunc-operators)=
+
+### Force INVOKE_AFTERFUNC Operators
+
+Operator IDs that must use `INVOKE_AFTERFUNC`. Separate IDs such as `bpy.ops.foo.bar` with commas, spaces, or newlines.
+
+(setting-force-invoke-suspend-operators)=
+
+### Force INVOKE_SUSPEND Operators
+
+Operator IDs that must use `INVOKE_SUSPEND`, using the same format as above.
+
+(setting-debug-toggle-keys)=
+
+### Debug Toggle Keys
+
+Enables developer key controls over Floating Panels: `D` for HitTest debugging, `V` for Visible/Culling debugging, and `M` for Metrics debugging.
+
+(setting-sync-fpanel-to-dialog)=
+
+### Sync FPANEL to DIALOG
+
+Opens a DIALOG copy alongside a Floating Panel to compare layouts when checking GPULayout rendering.
+
+(setting-show-unsupported-fpanel-ui)=
+
+### Show Unsupported FPANEL UI
+
+Shows development UI inside Floating Panels that still uses Blender's UILayout because GPULayout does not support it yet. Intended for debugging.
+
+(setting-layout-panel-header-spacing)=
+
+### Layout Panel Header Spacing
+
+Adds space between the header and body when using the header layout of `UILayout.panel()`. Available when `Show Unsupported FPANEL UI` is enabled.
+
+(setting-force-separator-line)=
+
+### Force Separator Line
+
+Chooses whether AUTO separators draw a line or only reserve space.
+
+---
+
+(settings-pie)=
+
+## Pie Menu
+
+Controls Pie Menu appearance and defaults, including titles, restoring the mouse position, and extra slot spacing. Radius and threshold settings share Blender's standard input preferences and can be changed here as well.
+
+(setting-show-title)=
+
+### Show Title
+
+Shows the menu name above the Pie Menu. Enabled by default.
+
+(setting-restore-mouse-position)=
+
+### Restore Mouse Position
+
+Restores the mouse to its starting position after the Pie Menu hotkey is released. When disabled, the mouse remains in the direction of the selected slot.
+
+(setting-extra-pie-slot-gap-size)=
+
+### Extra Pie Slot Gap Size
+
+Spacing for the two extra slots **above** and **below** the pie's eight directions.
+
+(setting-animation-timeout)=
+
+### Animation Timeout (Blender)
+
+The animation duration when a Pie Menu opens. Shared with Blender's standard input preferences.
+
+(setting-initial-timeout)=
+
+### Initial Timeout (Blender)
+
+The delay between opening a Pie Menu and accepting input. Shared with Blender's standard input preferences.
+
+(setting-menu-radius)=
+
+### Menu Radius (Blender)
+
+Pie Menu radius, shared with Blender's standard input preferences. An individual menu's [Radius](./pie_menu_editor.md) setting overrides this value for that menu.
+
+(setting-menu-threshold)=
+
+### Menu Threshold (Blender)
+
+The slot selection threshold (gesture distance), shared with Blender's standard input preferences.
+
+(setting-menu-confirm)=
+
+### Menu Confirm (Blender)
+
+The gesture confirmation threshold, shared with Blender's standard input preferences.
+
+Related: [Pie Menu Editor](./pie_menu_editor.md)
+
+---
+
+(settings-menu)=
+
+## Regular Menu
+
+Controls how Regular Menus (dropdowns) open by default, including whether hovering opens submenus and the delay before they appear.
+
+(setting-open-on-mouse-over)=
+
+### Open on Mouse Over (Blender)
+
+Opens submenus when the mouse hovers over their entries. Shared with Blender's standard input preferences.
+
+(setting-top-level)=
+
+### Top Level
+
+Delay before a top-level menu opens. Applies when [Open on Mouse Over](#setting-open-on-mouse-over) is enabled.
+
+(setting-sub-level)=
+
+### Sub Level
+
+Delay before a submenu opens. Applies when [Open on Mouse Over](#setting-open-on-mouse-over) is enabled.
+
+Related: [Regular Menu Editor](./regular_menu_editor.md)
+
+---
+
+(settings-popup)=
+
+## Popup Dialog
+
+Controls Pop-up Dialog defaults: spacer behavior, link buttons, the initial mode of new dialogs, and maximum Toolbar size.
+
+(setting-use-spacer-separator)=
+
+### Use 'Spacer' Separator by Default
+
+Treats empty slots as **Spacers** (flexible space) by default. When disabled, they become fixed-width separators.
+
+(setting-popup-editor-link-buttons)=
+
+### Editor Link Buttons
+
+The same setting as [Editor Link Buttons in General](#setting-editor-link-buttons).
+
+(setting-default-popup-mode)=
+
+### Default Mode
+
+Chooses **Pie Mode** or **Popup Mode** as the default for new Pop-up Dialogs.
+
+(setting-toolbars-max-width)=
+
+### Max Width (Toolbars)
+
+Maximum width of a vertical Toolbar, in pixels. Default: 60.
+
+(setting-toolbars-max-height)=
+
+### Max Height (Toolbars)
+
+Maximum height of a horizontal Toolbar, in pixels. Default: 60.
+
+Related: [Popup Dialog Editor](./popup_dialog_editor.md)
+
+---
+
+(settings-modal)=
+
+## Modal Operator
+
+Controls default mouse behavior and movement increments for each property type in Modal Operators. These defaults determine which direction and distance of movement changes a value. Override them for an individual Modal Operator in its advanced settings.
+
+(setting-mouse-movement-direction)=
+
+### Mouse Movement Direction
+
+Chooses which mouse movement changes values, such as vertical, horizontal, or distance. Applies to Modal Operators globally.
+
+(setting-mouse-threshold-int)=
+
+### Mouse Threshold (Int)
+
+Mouse movement in pixels required to **change an INT property by 1**. Lower values are more sensitive; higher values require more movement.
+
+(setting-mouse-threshold-float)=
+
+### Mouse Threshold (Float)
+
+Mouse movement for one step of a FLOAT property, based on that property's step value.
+
+(setting-mouse-threshold-bool)=
+
+### Mouse Threshold (Bool)
+
+Threshold for toggling BOOL properties. Enable the toggle on the left to use a threshold and edit the field.
+
+(setting-mouse-threshold-enum)=
+
+### Mouse Threshold (Enum)
+
+Threshold for switching ENUM items. Enable the toggle on the left to use a threshold and edit the field.
+
+Related: [Modal Operator Editor](./modal_operator_editor.md)
+
+---
+
+(settings-developer)=
+
+## Developer
+
+Settings for development and diagnostics, rather than everyday editing. Includes Boot Config, logging, and development flags for backups and exports.
+
+**Boot Config**
+
+(setting-boot-config-open-folder)=
+
+### Open Boot Config Folder
+
+Opens the Boot Config folder in your operating system's file browser.
+
+(setting-enable-import-pme-alias)=
+
+### Enable import pme Alias
+
+Registers `sys.modules['pme']` so external scripts or add-ons can access PME's public API with `import pme`. Takes effect on the next startup.
+
+(setting-enable-init-log)=
+
+### Enable Init Log
+
+Records initialization diagnostics when the add-on starts. Takes effect on the next startup.
+
+(setting-use-bundled-loader-manifest)=
+
+### Use Bundled Loader Manifest
+
+Uses the bundled loader manifest for faster startup. If the manifest is missing or damaged, PME falls back to dynamic discovery. Takes effect on the next startup. Enabled by default.
+
+(setting-auto-save-candidate-on-startup)=
+
+### Auto-Save Candidate on Startup
+
+After a successful startup, saves the dynamically discovered module order as a candidate manifest beside `loader_manifest.json`. Used when maintaining loader manifests.
+
+**Logger**
+
+(setting-logger-open-folder)=
+
+### Open Log Folder
+
+Opens the log output folder in your operating system's file browser.
+
+(setting-logger-use-colors)=
+
+### Use Colors
+
+Colors console output. Enabled by default.
+
+(setting-logger-file-output)=
+
+### File Output (JSONL)
+
+Writes a JSONL log file for each session.
+
+(setting-logger-keep-last)=
+
+### Keep Last
+
+Number of recent log entries retained in the in-memory ring buffer. Range: 0–5000; default: 200.
+
+(setting-logger-categories)=
+
+### Logger Categories
+
+Controls enablement and Log Level for each category. By default, internal and development categories are off; only the user-facing `user_exec` category is on, capturing warnings and errors.
+
+(setting-logger-apply-level)=
+
+### Apply Level / Apply to All
+
+Applies the selected Log Level to **all categories**. Choose a level in the dropdown, then click `Apply to All`.
+
+**Backup**
+
+(setting-overwrite-backup-file)=
+
+### Overwrite Backup File
+
+Makes [Auto Backup](#setting-auto-backup) **overwrite a single file** instead of creating separate timestamped files.
+
+**Export**
+
+(setting-sort-exported-menus)=
+
+### Sort Exported Menus by Name
+
+Sorts exported menus by name. When disabled, export preserves PME's internal order.
+
+---
+
+## Related Pages
+
+- [Common Editor Elements](./editor_common_elements.md)
+- {ref}`Hotkey settings <hotkey-editor>`
+- [Boot Options](../reference/boot_options.md)
+- [Developer Options](../reference/developer_options.md)
+- [File Locations](../reference/file_locations.md)

@@ -1,0 +1,10 @@
+:Poll:
+  「今の Blender の状態で、このメニューを実行してよいか」を Python の式で判定する仕組みです。式の戻り値が `True` ならメニューが実行され、`False` なら hotkey や UI から呼ばれてもスキップされます。
+
+  ```python
+  ao = C.active_object; return ao and ao.type == 'MESH'
+  ```
+
+  Poll は hotkey 経由の呼び出しだけでなく、HOLD / TWEAK / CHORD、`open_menu()` / `pme.invoke_pm()` などのスクリプト経路、editor preview、Popup Dialog や通常メニューの描画、Macro / Modal / Sticky / Floating Panel からの呼び出しでも確認されます。設定しておけば、現在の context では使えないメニューが別経路から実行されてしまうケースを防げます。
+
+  右の {octicon}`plus` から、よく使う条件をその場で追加できる Poll 補助メニューが開きます（モード判定・空 Poll の挿入・Cut / Copy / Paste など）。条件の書き方の入口は [Poll Method の基礎](../reference/poll_method.md) にまとめてあります。

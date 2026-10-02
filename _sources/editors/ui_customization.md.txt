@@ -1,0 +1,98 @@
+```{warning}
+This is a simple port from the [original documentation](https://archive.blender.org/wiki/2015/index.php/User:Raa/Addons/Pie_Menu_Editor/). It will be improved in the future.
+```
+
+(ui-customization)=
+
+# UI Customization
+
+## Group panels
+
+Collect Popup Dialogs or existing Blender panels in an editor's sidebar. See [Side Panel Editor](side_panel_editor.md) for creating, placing, and nesting panels.
+
+---
+
+## Hide unused panels
+
+Hide existing panels in groups. See [Hiding Unused Panels](hiding_unused_panels.md) for adding targets and restoring their original display.
+
+---
+
+(pme-menu-panel-extension)=
+
+## Menu/Panel Extension
+
+Insert your menus into existing Blender menus, panels, or headers.
+Redesigned in PME 2.0.0, this uses dedicated Target, Side, and Order properties. Several menus can share a Target and use Poll to control their visibility.
+
+**Feature details and workflows are documented in [Interactive Panels and Extend Panel](interactive_panels.md).**
+
+- **Pop-up Dialog** extension settings → [Popup Dialog Editor](popup_dialog_editor.md)
+- **Regular Menu** extension settings → [Regular Menu Editor](regular_menu_editor.md)
+
+Older-version reference videos — [original author roaoao's channel](../reference/original_author_videos.md)
+
+:::{dropdown} Extending Panels in Blender
+:open:
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/iO9PzLX6EDQ" title="Extending Panels in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Extending Panels in Blender — Open on YouTube](https://www.youtube.com/watch?v=iO9PzLX6EDQ)
+:::
+
+
+---
+
+(pme-toolbar)=
+
+## PME Toolbar
+
+```{admonition} Note
+:class: warning
+
+It stopped working after 4.3. I am in the process of fixing this.
+```
+
+PME allows you to use the *User Preferences* area as a toolbar when its width or height is minimal:
+
+![PME Toolbar](/../../shared/_static/images/original/toolbars/pme_toolbars.gif)
+
+Older-version reference videos — [original author roaoao's channel](../reference/original_author_videos.md)
+
+:::{dropdown} Toolbars in Blender 2.79
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/PB3wtlZ6AaM" title="Toolbars in Blender 2.79" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Toolbars in Blender 2.79 — Open on YouTube](https://www.youtube.com/watch?v=PB3wtlZ6AaM)
+:::
+
+
+### Naming
+
+Toolbars display popup dialog's layout depending on its name:
+
+```text
+Toolbar <Screen Name> <Position>
+```
+
+Where *Screen Name* and *Position* are optional and *Position* takes one of these values: *Left*, *Right*, *Top*, *Bottom*.
+
+### Examples
+
+| Example | Description |
+|---------|-------------|
+| `Toolbar Top` | Top toolbar, all screens |
+| `Toolbar UV Editing Right` | Right toolbar, *UV Editing* screen |
+| `Toolbar 3D View Full` | Any toolbar, *3D View Full* screen |
+
+### Saving
+
+Toolbar widgets are stored in *User Preferences*. The position and size of the toolbars are stored in *.blend* files. So in order to save your toolbars, you need to use both {menuselection}`File --> User Preferences --> Save User Settings` and {menuselection}`File --> Save Startup File` commands.
+
+By default Blender loads UI stored in *.blend* files. To keep the current UI (including toolbars) you need to uncheck *Load UI* option:
+
+![PME Load UI option](/../../shared/_static/images/original/toolbars/pme_load_ui.png)

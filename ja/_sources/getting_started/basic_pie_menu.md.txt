@@ -1,0 +1,34 @@
+(basic-pie-menu)=
+
+# 基本的なパイメニューの作成
+
+Blender の **Apply（適用）メニューを、自分のパイメニューに組み替えてみましょう。** よく使う操作を直接選べるようにしながら、元のメニューも呼び出せる「Transform Apply Pie」を作ります。
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/s_h4Hp59o9c" title="Pie Menu Editor — Create Your First Pie Menu" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Pie Menu Editor — Create Your First Pie Menu（約3分）](https://youtu.be/s_h4Hp59o9c)
+
+Pie Menu Editor Fork と無料メンテナンス版のどちらでも、同じ手順で進められます。導入がまだの場合は {ref}`インストールガイド <installation>` を参照してください。
+
+## 動画の流れ
+
+| 時間 | やってみること |
+|---|---|
+| [0:13](https://youtu.be/s_h4Hp59o9c?t=13) | **右クリックから作る。** Object Mode で Ctrl+A を押し、Apply メニューの項目を右クリック → Pie Menu Editor → New Menu。パイメニューを作成し、名前を「Transform Apply Pie」にして配置先を選びます。 |
+| [0:40](https://youtu.be/s_h4Hp59o9c?t=40) | **別の方法でコマンドを追加する。** F3 の検索結果を右クリックして追加できます。Info Editor の操作履歴から Python コマンドをコピーし、スロットの Command タブに貼り付ける方法もあります。 |
+| [1:08](https://youtu.be/s_h4Hp59o9c?t=68) | **元のメニューも組み込む。** Interactive Panels を有効にして Apply メニューを開き、下部の PME Tools から「Transform Apply Pie」に追加します。よく使う操作と、元のメニュー全体を一緒に置けます。 |
+| [1:41](https://youtu.be/s_h4Hp59o9c?t=101) | **Ctrl+A で開く。** 作成したパイメニューに Ctrl+A を設定し、Keymap を Object Mode にします。3D ビューの Object Mode で押して、パイメニューが開くことを確認します。 |
+
+```{tip} 元の Apply メニューが開くとき
+同じ Ctrl+A でも、登録先の Keymap によって優先順位が変わります。動画では、PME の **Window** より Blender の **Object Mode** の割り当てが優先されていました。PME 側も **Object Mode** に揃えることで、作成したパイメニューを開けます。
+
+詳しくは {doc}`../reference/keymap_guide` を参照してください。
+```
+
+## 自分の作業に合わせてみる
+
+Apply 以外のメニューや、普段よく使う操作でも試してみてください。設定項目は {ref}`Pie Menu Editor <pie-menu-editor>`、既存メニューの取り込みは {ref}`Interactive Panels <interactive-panels>` にまとめています。
+
+[PME Treasure — Examples & Ideas](https://pluglug.github.io/ba-pme-treasure/) では、コミュニティで共有されてきたカスタマイズ例やアイデアを探せます。

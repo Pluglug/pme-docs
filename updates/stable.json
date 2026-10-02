@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "channel": "stable",
+  "latest_version": "2.0.5.4",
+  "published_at": "2026-07-20T09:40:00Z",
+  "minimum_blender": "5.0.0",
+  "release_notes_url": "https://pie-menu-editor.github.io/pme-docs/support_community/changelog.html#changelog-2-0-5-4",
+  "action_url": "https://pluglug.gumroad.com/l/pie-menu-editor-fork",
+  "action_label": "Get Update",
+  "message": "2.0.5.4 hotfix: extends the Blender 5.1+ expanded-enum crash workaround to Brush Settings embedded in regular Pie menus.\nCustom icon refresh remains temporarily unavailable and is planned to return in 2.1.0."
+}

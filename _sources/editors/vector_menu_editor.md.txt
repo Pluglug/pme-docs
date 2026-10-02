@@ -1,0 +1,125 @@
+(vector-menu-editor)=
+
+# Vector Menu Editor
+
+**Vector Menu** lets you select items through directional mouse movements. You can choose visible items, then use familiar gesture paths without waiting for the menu to appear.
+
+Basic customization—assigning commands, properties, and other menus to slots—follows much the same process as [Pie Menu Editor](pie_menu_editor.md). Its eight directions and extra top and bottom slots combine with Vector Menu's own directional gestures and hierarchy navigation.
+
+:::{admonition} Feature in development
+:class: note
+
+Vector Menu uses **GPULayout**, PME's system for drawing Blender UI layouts on the GPU. [Floating Panel](floating_panel_editor.md) uses the same system.
+
+Vector Menu and GPULayout are in development. Supported widgets, layout APIs, and menu combinations are not identical to Blender's native UI or Pie Menu. See the configuration guide below for current support.
+:::
+
+```{versionadded} 2.1
+Added Vector Menu, including navigation into child Vector Menus and back to a parent.
+```
+
+:::{dropdown} Configuration guide — directional gestures and settings panels (for AI)
+
+**Name: Vector Menu / Type ID: `VMENU`.** Fixed at ten slots: eight directions plus top and bottom extras. The arrangement resembles Pie Menu, but gesture behavior and supported targets differ.
+
+- **Assignments**: Command / Property / Menu / Hotkey / Custom. Unassigned slots remain empty.
+- **Main Menu targets**: Vector Menu, Floating Panel, Macro Operator, and Property Stack. PME Property references have requirements, such as a resolvable static single-select Enum; do not assume arbitrary Properties work in the same way.
+- **Combinations**: link child Vector Menus to build a hierarchy; expand Floating Panels for settings widgets. Do not use the ordinary Menu tab to make a Pie Menu a child.
+- **Directional and extra slots**: top and bottom extras are for interacting with visible UI, distinct from directional hierarchy navigation.
+- **Input**: Custom's `L` provides the supported layout APIs. Do not assume full feature parity with Blender's `UILayout`.
+
+See {ref}`slots <vector-slots>` for placement and {ref}`usage <vector-usage>` for nesting. Do not suggest Pie Menu's Confirm Threshold as a Vector Menu setting.
+:::
+
+## Interface and editing workflow
+
+```{raw} html
+:file: common/_vector_menu_editor_overview_map.html
+```
+
+1. {ref}`Name and basic controls <vector-basic>`
+2. {ref}`Advanced settings <vector-advanced>`
+3. {ref}`Keymap / Hotkey <vector-hotkey>`
+4. {ref}`Directional and extra slots <vector-slots>`
+
+Select a Vector Menu in the list and assign its eight directions and extra slots. Distinguish slots used for hierarchy navigation from those containing UI for directly editing numbers, colors, or other values.
+
+(vector-basic)=
+
+## Name and basic controls
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-7.69230769%">
+<img src="../_static/images/editors/overview/vector-menu-blender-5-2.png" width="663" height="416" alt="Mesh Edit name and basic controls: the Vector Menu name and enabled state.">
+</div>
+<figcaption>Name and basic controls in this example.</figcaption>
+</figure>
+```
+
+These are the shared controls for enabled state, selected menu, name, tags, and advanced settings. Vector Menu has no preview button in its editing area; invoke it through its actual Keymap to check it. See {ref}`selected menu settings <overview-selected>`.
+
+(vector-advanced)=
+
+## Advanced settings
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 47;--crop-offset:-15.62500000%">
+<img src="../_static/images/editors/overview/vector-menu-blender-5-2.png" width="663" height="416" alt="Mesh Edit advanced settings: description and availability condition.">
+</div>
+<figcaption>Advanced settings in this example.</figcaption>
+</figure>
+```
+
+Set Description and Poll. Poll determines availability in the current context. See the shared {ref}`Description settings <menu-description>` for dynamic descriptions.
+
+(vector-hotkey)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 65;--crop-offset:-28.12500000%">
+<img src="../_static/images/editors/overview/vector-menu-blender-5-2.png" width="663" height="416" alt="Mesh Edit Keymap and Hotkey settings. This example uses Q.">
+</div>
+<figcaption>Keymap / Hotkey settings in this example.</figcaption>
+</figure>
+```
+
+Choose the editor's Keymap and trigger key. See the shared {ref}`Hotkey settings <hotkey-editor>` for entering keys and modifiers.
+Standard Open Modes are Press / Hold / Double Click / Click Drag / Key Chords. Interaction takes place while the trigger key is held, so Click, which cannot provide its release, is not offered. Distinguish experimental Click Drag from ordinary Click Drag.
+
+(vector-slots)=
+
+## Directional slots and top/bottom extras
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 226;--crop-offset:-44.71153846%">
+<img src="../_static/images/editors/overview/vector-menu-blender-5-2.png" width="663" height="416" alt="Mesh Edit directional and extra slots: eight directions and two extras. Empty slots retain their positions.">
+</div>
+<figcaption>Directional and extra slots in this example.</figcaption>
+</figure>
+```
+
+The first eight rows are directional slots; the two separated rows below are the top and bottom extras. From left to right are edit, icon, display name, linked-menu navigation, and slot operations. See the shared {ref}`slot list <slot-list>`.
+
+| Placement | Main uses |
+|---|---|
+| Eight directions | Run an action, enter a child Vector Menu, or place settings |
+| Top and bottom extras | Interact with visible UI such as colors, numbers, and settings panels |
+
+Wrap several UI elements in one column or box when placing them in a single Custom slot. See [Code Input and Execution](../reference/command_text.md) for code constraints.
+
+(vector-usage)=
+
+## Separate categories from detailed actions
+
+Link child Vector Menus from a parent's directional slots, grouping related actions in each child. Check the visible hierarchy, including returning to the parent, before trying gesture-only selection.
+
+To adjust detailed settings in place, reference a **Floating Panel** from the Menu tab. It is placed with Expand Panel; width and position are configured on the destination slot. See [Floating Panel Editor](floating_panel_editor.md).
+
+## Check the behavior
+
+In the intended editor and mode, check normal selection, entering a child, returning to the parent, confirming, and canceling. When adding Property, color, or number controls, also check that using them does not interfere with gestures.

@@ -1,0 +1,641 @@
+(settings)=
+
+# Settings
+
+**Settings** は、Pie Menu Editor 全体の挙動を調整する設定画面です。Edit > Preferences > Add-ons から Pie Menu Editor を開き、画面上部の **Editor / Settings** タブの **Settings** 側で表示されます。
+
+左側のタブで 10 枚に分かれています。上の 5 タブが**全体に効く設定**、中央の 4 タブが**各エディター固有のデフォルト**、最下段が**開発者向け**です。
+
+---
+
+(settings-general)=
+
+## General
+
+PME 全体の使い勝手に関わる設定をまとめたタブです。エディター画面の見た目、メニューリストの幅・行数、自動バックアップやタグの自動付与、上級者向けトグルがここに集まります。各エディター固有のデフォルトは、後続のエディター別タブで設定します。
+
+**インターフェース**
+
+(setting-n-panel-preferences)=
+
+### N-Panel Preferences
+
+3D View の N-Panel に PME の設定を表示するかを切り替えます。有効にすると、3D View の N-Panel 内に **PME** タブが追加され、Preferences ウィンドウを開かなくても主要な設定にアクセスできます。
+
+(setting-expand-slot-tools)=
+
+### Expand Slot Tools
+
+スロットエディタを開いたときに、コピー・削除・移動などのスロットツール群を最初から展開して並べるかを切り替えます。
+
+:::{image} /../../shared/_static/images/editors/common/slot_tools.png
+:class: img-shadow
+:alt: Slot Tools 展開時
+:width: 80%
+:align: center
+:::
+
+(setting-operator-editor)=
+
+### Operator Editor
+
+Command タブで **Operator Properties Editor**（Blender の F6 / Adjust Last Operation と同等の入力 UI）を使うかを切り替えます。Off にすると、Blender の汎用フィールド入力にフォールバックします。
+
+(setting-recent-menu-targets)=
+
+### Recent Menu Targets
+
+Widget Context Menu で、PME メニューへ要素を追加する際に、**最近呼んだメニュー**を追加先候補として表示するかを切り替えます。デフォルトで有効です。
+
+(setting-editor-link-buttons)=
+
+### Editor Link Buttons
+
+Pop-up Dialog / Floating Panel エディターの通常の Menu スロットで、参照先メニューへ直接ジャンプするリンクボタンを表示するかを切り替えます。同じ設定は Popup Dialog タブにもあります（[Popup Dialog 側の表示](#setting-popup-editor-link-buttons)）。
+
+OFF にしても、スロットの操作メニューにある **Go to Linked Menu** から移動できます。Panel Row の本文のリンクボタンは、この設定によらず表示されます。{ref}`Pop-up Dialog のリンク操作 <popup-linked-menu>`を参照してください。
+
+(setting-persist-tree-state)=
+
+### Persist Tree State
+
+メニュー一覧のツリー表示で、展開/折りたたみの状態を Blender 終了後も保存するかを切り替えます。
+
+(setting-show-tree-group-counts)=
+
+### Show Tree Group Counts
+
+ツリー表示のグループ行（タグごとの見出しなど）に、含まれるメニュー数を表示するかを切り替えます。
+
+(setting-list-width)=
+
+### List Width
+
+エディター画面左側のメニューリストの幅（%）を指定します。範囲は 1〜80、デフォルトは 40。
+
+(setting-list-rows)=
+
+### List Rows
+
+メニューリストに表示する行数を指定します。範囲は 5〜50、デフォルトは 10。
+
+(setting-search-keywords)=
+
+### Search Keywords
+
+メニューの Search / Select 機能で、メニュー名以外に検索対象に含めるトークンを選びます。以下から複数選択できます。
+
+- **Hotkey** — メニューに割り当てた hotkey 文字列（例: `Ctrl+Shift+A`）
+- **Extend Target** — Extend Panel / Extend Menu の差し込み先クラス ID（例: `VIEW3D_MT_object`）
+- **UID** — PME 内部の uid 文字列
+
+デフォルトは Hotkey のみ。
+
+**自動化**
+
+(setting-auto-backup)=
+
+### Auto Backup
+
+メニューを編集して保存するたびに、自動でバックアップを取るかを切り替えます。Resources タブの保存先パス配下にタイムスタンプ付きで蓄積されます。バックアップを 1 ファイルに上書きしたい場合は [Overwrite Backup File](#setting-overwrite-backup-file) を使います。
+
+(setting-auto-tag-new-menus)=
+
+### Auto-Tag New Menus
+
+タグフィルターをかけた状態（例: `Modeling` だけ表示中）で新規メニューを作成したときに、そのタグを自動で割り当てるかを切り替えます。
+
+**パフォーマンス**
+
+(setting-cache-scripts)=
+
+### Cache Scripts
+
+Custom / Command スロットから読み込む外部 Python スクリプトをキャッシュするかを切り替えます。同じスクリプトを繰り返し評価するメニューで起動コストを下げます。
+
+**Expert**
+
+(setting-show-error-trace)=
+
+### Show Error Trace
+
+スロットの Python 式（Description / Poll / Custom / Command）で例外が出たときに、トレース情報を表示するかを切り替えます。
+
+(setting-persist-sidearea-tabs)=
+
+### Sidebar Tab Memory (Retired)
+
+PME 2.1ではこの旧設定を表示・使用しません。Toggle Side AreaはSidebarのタブ名を別に読み書きして復元しません。Blenderでタブ情報を直接読み取る経路が強制終了につながる場合があるためです。{guilabel}`Preserve Side Area State` が対応するエディターの状態そのものを保持できた場合は、その一部として表示中のパネルが戻ることがありますが、すべてのSidebarタブを対象にした記憶機能ではありません。Sidebarの表示状態と、開いたエリアの幅または高さは、現在のBlenderセッション中は引き続き記憶されます。既存の設定はそのまま読み込めます。
+
+(setting-show-command-tab-undo)=
+
+### Show Command Tab Undo
+
+Command タブに **Undo Previous Command** チェックボックスを表示するかを切り替えます。詳細は [Macro Operator Editor](./macro_operator_editor.md) と [Stack Key Editor](./stack_key_editor.md) を参照してください。
+
+(setting-preserve-side-area-space-state)=
+
+### Preserve Side Area State
+
+Toggle Side Area で閉じたり切り替えたりしたエディターの作業状態を、開き直したときに復元します。初期状態は OFF です。
+Outliner の検索・フィルター、Properties のコンテキスト、Node Editor のノードツリーなどが対象です。
+File Browser / Asset Browser は対象外で、記憶した状態は Blender の再起動後には引き継ぎません。
+
+:::{warning}
+実験的な機能のため、Blender が不安定になったり、バージョンによって復元できなかったりする場合があります。
+:::
+
+---
+
+(settings-resources)=
+
+## Resources
+
+PME がメニュー以外のユーザーデータ（カスタムアイコン、Export 済み JSON、Custom スロットから参照する外部スクリプト、自動バックアップ）を保存する場所を指定するタブです。ここで設定したフォルダ配下に PME がサブディレクトリ（`icons` / `scripts` / `exports` / `backups`）を作り、それぞれの種類のリソースを格納します。
+
+PME 2.0.0 以降は、これらのリソースをアドオン本体のフォルダから分離して、ユーザーリソースとして扱うようになりました。アドオンを再インストール / アップデートしても、ここに置いたデータは消えません。
+
+(setting-resources-open-folder)=
+
+### Open Resource Folder
+
+現在のリソースルートディレクトリを OS のファイルブラウザで開きます。フォルダがまだ存在しない場合は、自動的に作成されます。
+
+(setting-resources-root-directory)=
+
+### Root Directory
+
+ユーザーリソースの保存先ルートディレクトリです。デフォルトは `~/Documents/Pie Menu Editor/` 配下。任意のフォルダに変更でき、空欄にすると直近の有効パスに戻ります。
+
+ステータス行には、現在の **scripts / exports / icons / backup** の数が表示されます。サブフォルダが欠けている場合は、行の右側に **Missing resource folders** が表示され、リロードボタン（{octicon}`sync`）で初期化できます。
+
+関連: [ファイルの保存場所](../reference/file_locations.md)、[Custom Icons](./custom_icons.md)
+
+---
+
+(settings-hotkeys)=
+
+## Hotkeys
+
+PME 自体のホットキーと、共通的なキー入力タイミングをまとめたタブです。PME を初めて開くときの起動 hotkey、Widget Context Menu の hotkey、HOLD / CHORD / TWEAK の判定時間や距離をここで設定します。Keymap Doctor から、現在有効な Blender キーマップとの競合も確認できます。
+
+(setting-pme-hotkey)=
+
+### PME Hotkey
+
+{ref}`キャプチャーメニュー <capture-menu>`（Quick Capture）を開くホットキーです。初期設定は **Ctrl＋Shift＋P**。Blender の **Screen Editing** キーマップに登録されます。
+
+(setting-widget-context-menu-hotkey)=
+
+### Widget Context Menu
+
+Interactive Panels 経由でキャプチャした UI 要素（ボタン / プロパティ / パネル）に対するコンテキストメニューを呼び出すホットキーです。マウス下のウィジェットに対して、PME メニューへの追加・コピーなどの操作を出します。
+
+詳細は [Interactive Panels と Extend Panel](./interactive_panels.md) を参照してください。
+
+**Hotkey Modes**
+
+(setting-tweak-mode-threshold)=
+
+### Tweak Mode Threshold
+
+Blender 全体の **ドラッグ判定距離**（ピクセル）です。マウスをこのピクセル数以上動かすと、PME 側でも「ドラッグ」とみなして TWEAK / CLICK_DRAG モードに切り替わります。Blender 標準の Tweak Mode Threshold と同じ値を共有しています。
+
+(setting-hold-mode-timeout)=
+
+### Hold Mode Timeout
+
+**HOLD モード**の判定時間（ミリ秒）です。キーを押してからこの時間を超えると HOLD 扱いになります。範囲は 50〜1000、デフォルトは 200。
+
+(setting-chord-mode-timeout)=
+
+### Chord Mode Timeout
+
+**CHORD モード**の判定時間（ミリ秒）です。最初のキーを押してからこの時間以内に次のキーを入力すると、CHORD として連続入力が成立します。範囲は 50〜1000、デフォルトは 300。
+
+(setting-show-next-key-chord)=
+
+### Show Next Key Chord
+
+CHORD 入力中に、次に押せるキーをヒントとして画面に表示するかを切り替えます。
+
+(setting-experimental-modes)=
+
+### Experimental Modes
+
+Hotkey 設定の Open Mode に、**Click** / **Click Drag** などの実験的なモードを表示するかを切り替えます。標準では非表示です。
+
+関連: {ref}`Hotkey 設定 <hotkey-editor>`
+
+(setting-keymap-diagnostics)=
+
+### Keymap Doctor
+
+**Scan Keymaps** は、各 PME Hotkey を現在有効な Blender の user keymap と比較し、同じキーマップ内の競合を表示します。あわせて、空の PME キーマップ項目、`active` layer に焼き付いた可能性がある PME 項目、判定を完了できなかった Hotkey も確認できます。
+
+異なる Hotkey Mode、異なる CHORD、mouse modifier など、PME の dispatcher が意図どおり振り分ける組み合わせは競合件数に含めず、情報として区別します。同じ Hotkey Mode や同じ CHORD の重複、余分な ghost 項目は競合として残ります。
+
+スキャン、概要のコピー、レポートの出力はキーマップを変更しません。**Clean Up Empty Items** が削除するのは、空だと確認できた PME 項目だけです。競合項目は自動的に変更・削除されません。
+
+---
+
+(settings-overlay)=
+
+## Overlay
+
+メニュー実行中に画面上に重ねて表示するオーバーレイ（Stack Key の現在スロット名、Modal Operator の操作ガイド、各種ヒントメッセージ）の見た目を調整するタブです。文字サイズ、色、位置、フェード時間をまとめて設定します。
+
+(setting-overlay-font-size)=
+
+### Font Size
+
+オーバーレイ全体のフォントサイズ（ピクセル）です。範囲は 10〜50、デフォルトは 24。Stack Key や Modal Operator のラベルに使用されます。
+
+(setting-overlay-text-color)=
+
+### Text Color
+
+オーバーレイの主テキスト色です。RGBA で指定。Stack Key のスロット名や Modal Operator の現在モードに使われます。
+
+(setting-overlay-secondary-color)=
+
+### Secondary
+
+サブテキストの色です。RGBA で指定。Stack Key の補助テキスト、Modal の値表示などに使われます。
+
+(setting-overlay-background-color)=
+
+### Background
+
+オーバーレイの背景色です。RGBA で指定。[Use Background](#setting-overlay-use-background) が有効なときだけ描画に使われます。
+
+(setting-overlay-use-background)=
+
+### Use Background
+
+テキストの背景パネルを描画するかを切り替えます。
+
+(setting-overlay-use-shadow)=
+
+### Use Shadow
+
+テキストにドロップシャドウを乗せるかを切り替えます。デフォルトで有効です。
+
+(setting-overlay-alignment)=
+
+### Alignment
+
+オーバーレイの画面内アラインメント（上 / 中央 / 下 など）を指定します。
+
+(setting-overlay-offset-x)=
+
+### Offset X
+
+画面端からの横方向オフセット（ピクセル）です。
+
+(setting-overlay-offset-y)=
+
+### Offset Y
+
+画面端からの縦方向オフセット（ピクセル）です。
+
+(setting-overlay-duration)=
+
+### Duration
+
+オーバーレイの表示時間（秒）です。範囲は 1〜10、デフォルトは 2。
+
+---
+
+(settings-gpu-layout)=
+
+## GPU Layout
+
+PME 2.0.0 で導入した独自描画レイヤ（**Floating Panel** や FPANEL 系の UI）の挙動を調整するタブです。tooltip の最大幅、INVOKE オペレーターの優先戦略、デバッグ用トグルなどがここに集まります。
+
+(setting-tooltip-max-width)=
+
+### Tooltip Max Width
+
+GPULayout の tooltip テキストの最大幅（unscaled ピクセル）です。範囲は 160〜1200、デフォルトは 420。
+
+(setting-invoke-priority)=
+
+### Invoke Priority
+
+オペレーターが INVOKE モードで呼ばれ、明示的な `invoke_strategy` 指定がないときの既定戦略を選びます。
+
+- **Suspend** — `INVOKE_SUSPEND`（パネルを生かしたまま）を優先。
+- **Afterfunc** — `INVOKE_AFTERFUNC`（閉じる → invoke → 再オープン）を優先。
+
+(setting-force-invoke-afterfunc-operators)=
+
+### Force INVOKE_AFTERFUNC Operators
+
+`INVOKE_AFTERFUNC` を必ず使う対象のオペレーター ID 列です。`bpy.ops.foo.bar` のような ID を、カンマ・スペース・改行のいずれかで区切って並べます。
+
+(setting-force-invoke-suspend-operators)=
+
+### Force INVOKE_SUSPEND Operators
+
+`INVOKE_SUSPEND` を必ず使う対象のオペレーター ID 列です。指定形式は上と同じ。
+
+(setting-debug-toggle-keys)=
+
+### Debug Toggle Keys
+
+Floating Panel 上で、開発用のキー入力（`D` = HitTest debug、`V` = Visible/Culling debug、`M` = Metrics debug）を受け付けるかを切り替えます。
+
+(setting-sync-fpanel-to-dialog)=
+
+### Sync FPANEL to DIALOG
+
+Floating Panel と並べて、レイアウト比較用の DIALOG コピーを開くかを切り替えます。GPULayout の見た目検証用です。
+
+(setting-show-unsupported-fpanel-ui)=
+
+### Show Unsupported FPANEL UI
+
+Floating Panel 内で、まだ Blender の UILayout 経由で描画している（GPULayout 未対応の）開発用 UI を表示するかを切り替えます。デバッグ目的の項目です。
+
+(setting-layout-panel-header-spacing)=
+
+### Layout Panel Header Spacing
+
+`UILayout.panel()` のヘッダーレイアウトを使ったとき、ヘッダーとボディの間に上スペースを足すかを切り替えます。`Show Unsupported FPANEL UI` を有効にすると現れます。
+
+(setting-force-separator-line)=
+
+### Force Separator Line
+
+AUTO セパレータを「線として描画」するか、「スペース確保のみ」にするかを切り替えます。
+
+---
+
+(settings-pie)=
+
+## Pie Menu
+
+Pie Menu の見た目と既定動作をまとめたタブです。Pie タイトルの有無、マウス位置の復元、Pie 内の追加スロット間隔がここで決まります。半径やしきい値などは Blender 標準のキー操作設定と共通で、同じ値をこのタブから一緒に変更できます。
+
+(setting-show-title)=
+
+### Show Title
+
+Pie Menu の上部にメニュー名を見出しとして描画するかを切り替えます。デフォルトで有効。
+
+(setting-restore-mouse-position)=
+
+### Restore Mouse Position
+
+Pie Menu の hotkey を離した後に、マウス位置を起動時の位置に戻すかを切り替えます。Off にすると、選択したスロットの方向にマウスが残ります。
+
+(setting-extra-pie-slot-gap-size)=
+
+### Extra Pie Slot Gap Size
+
+Pie の 8 方向以外（**上** / **下** の追加スロット 2 個）の間隔を指定します。
+
+(setting-animation-timeout)=
+
+### Animation Timeout (Blender)
+
+Pie Menu が開くときのアニメーション時間です。Blender 標準のキー操作設定と共有しています。
+
+(setting-initial-timeout)=
+
+### Initial Timeout (Blender)
+
+Pie Menu を開いてから入力受付までの遅延時間です。Blender 標準のキー操作設定と共有しています。
+
+(setting-menu-radius)=
+
+### Menu Radius (Blender)
+
+Pie Menu の半径です。Blender 標準のキー操作設定と共有しています。Pie Menu Editor 側で個別に [Radius](./pie_menu_editor.md) を指定すると、そのメニューに限りこの値が上書きされます。
+
+(setting-menu-threshold)=
+
+### Menu Threshold (Blender)
+
+スロット選択のしきい値（フリック判定距離）です。Blender 標準のキー操作設定と共有しています。
+
+(setting-menu-confirm)=
+
+### Menu Confirm (Blender)
+
+フリック確定のしきい値です。Blender 標準のキー操作設定と共有しています。
+
+関連: [Pie Menu Editor](./pie_menu_editor.md)
+
+---
+
+(settings-menu)=
+
+## Regular Menu
+
+Regular Menu（ドロップダウンメニュー）の開き方の既定値をまとめたタブです。マウスホバーでサブメニューを開くか、その遅延時間をここで設定します。
+
+(setting-open-on-mouse-over)=
+
+### Open on Mouse Over (Blender)
+
+メニュー項目にマウスを乗せただけでサブメニューを開くかを切り替えます。Blender 標準のキー操作設定と共有しています。
+
+(setting-top-level)=
+
+### Top Level
+
+トップレベルメニューが開くまでの遅延時間です。[Open on Mouse Over](#setting-open-on-mouse-over) が有効なときだけ意味を持ちます。
+
+(setting-sub-level)=
+
+### Sub Level
+
+サブメニューが開くまでの遅延時間です。[Open on Mouse Over](#setting-open-on-mouse-over) が有効なときだけ意味を持ちます。
+
+関連: [Regular Menu Editor](./regular_menu_editor.md)
+
+---
+
+(settings-popup)=
+
+## Popup Dialog
+
+Pop-up Dialog の既定値をまとめたタブです。Spacer の扱い、ジャンプボタンの表示、新規ダイアログの初期モード、Toolbar モードの最大サイズがここで決まります。
+
+(setting-use-spacer-separator)=
+
+### Use 'Spacer' Separator by Default
+
+空スロット（中身が空のスロット）を、デフォルトで **Spacer**（柔軟な余白）として扱うかを切り替えます。Off の場合は固定幅のセパレータになります。
+
+(setting-popup-editor-link-buttons)=
+
+### Editor Link Buttons
+
+[General タブの Editor Link Buttons](#setting-editor-link-buttons) と同じ設定です。
+
+(setting-default-popup-mode)=
+
+### Default Mode
+
+新規 Pop-up Dialog の既定モードを **Pie Mode** / **Popup Mode** から選びます。
+
+(setting-toolbars-max-width)=
+
+### Max Width (Toolbars)
+
+縦型 Toolbar モードの最大幅（ピクセル）です。デフォルトは 60。
+
+(setting-toolbars-max-height)=
+
+### Max Height (Toolbars)
+
+横型 Toolbar モードの最大高さ（ピクセル）です。デフォルトは 60。
+
+関連: [Popup Dialog Editor](./popup_dialog_editor.md)
+
+---
+
+(settings-modal)=
+
+## Modal Operator
+
+Modal Operator のマウス動作と、各プロパティ型ごとの「動かしたときの単位」をまとめたタブです。マウスをどの方向にどれだけ動かすと値がどれだけ変わるか、ここで全エディター共通の既定が決まります。個別の Modal Operator 側で上書きしたい場合は、その Modal の詳細設定で同じ値を設定できます。
+
+(setting-mouse-movement-direction)=
+
+### Mouse Movement Direction
+
+マウスをどの方向に動かしたときに値を変えるかを選びます（縦 / 横 / 距離 など）。Modal Operator 全体に影響します。
+
+(setting-mouse-threshold-int)=
+
+### Mouse Threshold (Int)
+
+INT プロパティで、値を **1 変えるのに必要なマウス移動量**（ピクセル）です。小さくすると敏感に、大きくすると粗くなります。
+
+(setting-mouse-threshold-float)=
+
+### Mouse Threshold (Float)
+
+FLOAT プロパティの同上です。プロパティの step 値に対する 1 単位分のマウス移動量を指定します。
+
+(setting-mouse-threshold-bool)=
+
+### Mouse Threshold (Bool)
+
+BOOL プロパティのトグルしきい値です。左にあるトグルで「BOOL に対してもしきい値を使うか」を切り替え、その状態でフィールドが有効になります。
+
+(setting-mouse-threshold-enum)=
+
+### Mouse Threshold (Enum)
+
+ENUM プロパティの項目切替しきい値です。左にあるトグルで「ENUM に対してもしきい値を使うか」を切り替え、その状態でフィールドが有効になります。
+
+関連: [Modal Operator Editor](./modal_operator_editor.md)
+
+---
+
+(settings-developer)=
+
+## Developer
+
+開発・診断向けの設定です。普段の編集では使いません。Boot Config（起動オプション）、Logger（ログ）、Backup / Export 用の開発フラグがここに集まります。
+
+**Boot Config**
+
+(setting-boot-config-open-folder)=
+
+### Open Boot Config Folder
+
+Boot Config が保存されているフォルダを OS のファイルブラウザで開きます。
+
+(setting-enable-import-pme-alias)=
+
+### Enable import pme Alias
+
+`sys.modules['pme']` を登録するかを切り替えます。外部スクリプトやアドオンから `import pme` で PME の公開 API にアクセスしたいときに有効化します。次回起動から反映されます。
+
+(setting-enable-init-log)=
+
+### Enable Init Log
+
+アドオン起動時の init 診断ログを記録するかを切り替えます。次回起動から反映されます。
+
+(setting-use-bundled-loader-manifest)=
+
+### Use Bundled Loader Manifest
+
+同梱の loader manifest を使った高速起動を有効にするかを切り替えます。manifest が見つからない / 壊れている場合は、動的検出に自動でフォールバックします。次回起動から反映されます。デフォルトで有効。
+
+(setting-auto-save-candidate-on-startup)=
+
+### Auto-Save Candidate on Startup
+
+起動成功後に、動的検出で得たモジュール順を candidate manifest として `loader_manifest.json` の隣に自動保存するかを切り替えます。loader manifest の整備フローで使います。
+
+**Logger**
+
+(setting-logger-open-folder)=
+
+### Open Log Folder
+
+ログの出力フォルダを OS のファイルブラウザで開きます。
+
+(setting-logger-use-colors)=
+
+### Use Colors
+
+コンソール出力に色を付けるかを切り替えます。デフォルトで有効。
+
+(setting-logger-file-output)=
+
+### File Output (JSONL)
+
+セッションごとに JSONL ログファイルを書き出すかを切り替えます。
+
+(setting-logger-keep-last)=
+
+### Keep Last
+
+メモリ上のリングバッファに残す最近ログの件数です。範囲は 0〜5000、デフォルトは 200。
+
+(setting-logger-categories)=
+
+### Logger Categories
+
+カテゴリ別にログの有効/無効と Log Level を設定します。出荷時の既定では、内部・開発系カテゴリは Off、ユーザー向けの `user_exec` だけが On で警告／エラーを拾います。
+
+(setting-logger-apply-level)=
+
+### Apply Level / Apply to All
+
+選んだ Log Level を**すべてのカテゴリに一括適用**します。プルダウンでレベルを選び、`Apply to All` ボタンで反映します。
+
+**Backup**
+
+(setting-overwrite-backup-file)=
+
+### Overwrite Backup File
+
+[Auto Backup](#setting-auto-backup) で作るバックアップを、タイムスタンプ別ではなく**単一ファイルに上書き**する形で保存するかを切り替えます。
+
+**Export**
+
+(setting-sort-exported-menus)=
+
+### Sort Exported Menus by Name
+
+メニューを Export するときに、メニュー名でソートして書き出すかを切り替えます。Off の場合は PME 内部の順序を保ったまま書き出します。
+
+---
+
+## 参考
+
+- [エディターの共通要素](./editor_common_elements.md)
+- {ref}`Hotkey 設定 <hotkey-editor>`
+- [起動オプション](../reference/boot_options.md)
+- [Developer Options](../reference/developer_options.md)
+- [ファイルの保存場所](../reference/file_locations.md)

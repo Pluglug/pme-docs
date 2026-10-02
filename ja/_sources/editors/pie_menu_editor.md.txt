@@ -1,0 +1,417 @@
+(pie-menu-editor)=
+
+# Pie Menu Editor
+
+**Pie Menu** は、Blender のパイメニューに操作を配置するエディターです。
+8 方向の項目と、追加の上・下 2 スロットを編集できます。
+ショートカットから開くほか、別のメニューの Menu スロットからも呼び出せます。
+
+このページの設定名と制約は PME 2.1 を対象にしています。
+旧版の画像・動画では、現在の UI と配置が異なる場合があります。
+
+(pie-configuration-guide)=
+
+:::{dropdown} 構成ガイド — 機能・組み合わせ・活用例（AI 向け）
+
+**呼び名：Pie Menu（パイメニュー）／種別 ID：`PMENU`。**
+ユーザーへの説明には呼び名を使い、データや実装との照合には種別 ID を使います。
+役割は、Blender 標準のパイメニューを使い、8 方向と上下の追加スロットに割り当てた内容を表示することです。
+スロットは **10 個固定**。空のスロットも位置を保持します。
+
+**スロットに割り当てるもの**
+
+| タブ名 | 割り当てと用途 | 種別 ID |
+|---|---|---|
+| Command | 操作を実行する。単一のオペレーターや、複数処理を行う Python コード | `COMMAND` |
+| Property | RNA プロパティへのパスを指定し、値を表示・変更するウィジェットを配置する | `PROP` |
+| Menu | PME で作成した別のカスタマイズを参照する。参照先により呼び出し・描画の意味が変わる | `MENU` |
+| Hotkey | 実行時のコンテキストに応じたキー割り当てを探し、そのオペレーターを実行する。{ref}`キー入力との違い <pie-hotkey-slot>`に注意 | `HOTKEY` |
+| Custom | Blender の UI レイアウト（`UILayout`）を使い、Python で直接 UI を描画する。`L` がレイアウト。複数要素は一つの column / box にまとめる | `CUSTOM` |
+
+未割り当ては空スロット（`EMPTY`）。コードを提案する場合は、先に
+[コードの書き方と入力制限](../reference/command_text.md)で入力先ごとの制約を確認します。
+
+**Menu で組み合わせる意味 — 代表的な使い分け**
+
+- **Pie Menu → Pie Menu**：ネストしたパイを開く。操作をカテゴリに分け、キーを保持したまま次の階層へ進める構成には、親の **Confirm on Release と正の Confirm Threshold** を使う。{ref}`ネストの設定例 <pie-nested-pattern>` を参照。
+- **Pie Menu → Regular Menu / Popup Dialog**：別のメニューとして開くか、**Expand Regular Menu / Expand Popup Dialog** で中身を Pie 内に配置する。Popup Dialog の展開では、配置先のスロットで幅と位置も調整できる。{ref}`展開の使い分けと条件 <pie-menu-expand>`を参照。
+- **Pie Menu → Property / Property Stack**：参照先が提供するプロパティのウィジェットを配置する。子メニューを開く操作として扱わない。
+
+これは代表例であり、参照先の全一覧ではありません。Menu タブでの参照と、Command からのスクリプト呼び出しは別の経路です。
+
+**活用例と、設計時に決めること**
+
+- **通常のホットキーから開く**：利用するエディター・Keymap とキーを決める。Click Drag の設定値は `TWEAK`。{ref}`Keymap / Hotkey <pie-hotkey-settings>` へ。
+- **Context Router の分岐として使う**：モードや対象に応じて表示する Pie Menu を切り替える。分岐条件と、どれにも一致しない場合の動作を決める。{ref}`コンテキストによる切り替え <pie-context-pattern>` へ。
+- **親の Pie Menu から詳細な操作へ進む**：親にカテゴリ、子に個別操作を割り当てる。クリックで開くか、キーを保持して距離で進むかを決める。{ref}`ネストの設定例 <pie-nested-pattern>` へ。
+
+各操作が使えるエディター・モード・対象の有無は、メニューを組み合わせるだけでは保証されません。
+利用条件は {ref}`Poll <poll-method>`、スロットの配置と編集は {ref}`メニュースロット <pie-slot-controls>` を参照してください。
+:::
+
+## 画面と編集の流れ
+
+```{raw} html
+:file: common/_pie_overview_map.html
+```
+
+1. {ref}`名前と基本操作 <pie-basic-settings>`
+2. {ref}`Advanced settings <pie-advanced-settings>`
+3. {ref}`Keymap / Hotkey <pie-hotkey-settings>`
+4. {ref}`メニュースロット <pie-slot-controls>`
+
+詳細設定と呼び出し方を設定し、10 個のスロットに操作やプロパティを割り当てます。
+
+**Expand Slot Tools** は、各スロットの編集・コピー・移動などの操作を右端に並べる表示設定です。
+操作の意味は {ref}`共通の Expand Slot Tools <expand-slot-tools>` を参照してください。
+名前・タグ・検索・追加など、画面全体の使い方は [エディターの共通要素](editor_common_elements.md) にまとめています。
+ここからは Pie Menu 固有の配置と動作を説明します。
+
+(pie-basic-settings)=
+
+## 名前と基本操作
+
+```{raw} html
+<figure class="pme-overview pme-overview--pie">
+  <div class="pme-overview__crop" style="--crop-ratio:614 / 31;--crop-offset:-6.84210526%">
+    <img src="../_static/images/editors/pie_menu/pie-editor-focused-blender-5-2.png" width="614" height="570" alt="Transform Preset Pie の名前の行。有効状態、プレビュー、メニュー選択、名前、タグ、ドキュメント、詳細設定のボタンが並ぶ。">
+  </div>
+  <figcaption>編集対象の名前と基本操作。</figcaption>
+</figure>
+```
+
+左から **有効／無効 → プレビュー → 選択メニュー → 名前 → タグ → ドキュメント → Advanced settings**。
+
+**メニュー名**はカスタマイズ全体に付ける名前です。画像では **Transform Preset Pie** がこれに当たります。
+この行では、編集対象を識別する名前と有効状態を設定し、プレビューや詳細設定を開けます。
+下の各スロットの表示名とは別です。各ボタンの詳細は {ref}`選択メニューの設定 <overview-selected>` を参照してください。
+
+(pie-advanced-settings)=
+
+## Advanced settings（詳細設定）
+
+```{raw} html
+<figure class="pme-overview pme-overview--pie">
+  <div class="pme-overview__crop" style="--crop-ratio:614 / 156;--crop-offset:-12.80701754%">
+    <img src="../_static/images/editors/pie_menu/pie-editor-focused-blender-5-2.png" width="614" height="570" alt="展開した詳細設定。Description、Poll、Radius、Threshold、Confirm Threshold、Confirm on Release。">
+  </div>
+  <figcaption>Advanced settings を開いた状態。数値はこのメニューの設定例です。</figcaption>
+</figure>
+```
+
+**Advanced settings** では、メニューの説明と利用できる条件、パイの表示半径、項目の選択・確定方法を設定します。
+選択メニューの歯車ボタンから開きます。
+
+- **Description**：このメニューの説明文。Python で動的な説明を返すこともできます。書き方は {ref}`共通の Description <menu-description>` を参照してください。
+- **Poll**：現在のコンテキストでメニューを利用できるかを判定する条件。詳しくは {ref}`共通の Description / Poll <editor-extra-settings>` を参照してください。
+
+Pie Menu 固有の距離と確定方法は、次の設定で調整します。
+
+| 設定 | 意味 | 範囲・既定値 |
+|---|---|---|
+| Radius | メニューの表示半径。選択を判定する距離とは別 | `-1`〜`1000`。`-1` は Blender の現在の設定を使用 |
+| Confirm on Release | 起動キーを離して項目を確定する操作を有効にする | 既定は ON |
+| Threshold | 中心から、方向による選択が始まるまでの距離 | `-1`〜`1000`。`-1` は PME が参照する既定値を使用 |
+| Confirm Threshold | Threshold の外側に加える、距離による確定のための距離 | `-1`〜`1000`。`-1` は既定値、`0` は距離による確定を無効化 |
+
+距離の入力欄の単位はピクセルです。Blender の UI スケールも実際の判定に影響します。
+Threshold と Confirm Threshold は、Confirm on Release が ON のときに表示されます。
+OFF にすると、これらのメニュー個別の距離設定は使用されません。
+
+Radius を Blender の現在値と異なる値にした場合、PME は表示半径を適用するために
+パイメニューのアニメーションを一時的に無効化します。
+
+### 選択距離と表示半径を区別する
+
+次の図は、起動キーを保持して 8 方向の通常の項目を選ぶ操作での距離の関係です。
+Radius は項目を表示するための寸法なので、この確定距離の計算には足しません。
+
+```{mermaid}
+:name: pie-selection-distance
+:alt: 中心から Threshold の距離で方向の選択が始まり、その外側に Confirm Threshold の距離を加えたところが確定の境界になる。
+
+flowchart LR
+    A["中心"] -->|"Threshold"| B["選択開始の境界"]
+    B -->|"Confirm Threshold"| C["距離で確定する境界"]
+```
+
+Confirm Threshold が正値の場合に、この距離による確定を使えます。
+たとえば Threshold を `20`、Confirm Threshold を `40` とすると、
+距離による確定の境界は、UI スケール適用前で中心から `60` です。
+Confirm Threshold を Threshold より大きくする必要はありません。
+境界を越えた瞬間に必ず実行されるのではなく、Blender がマウスの短い停止を検出して確定します。
+
+Confirm on Release も、起動キーを短くタップすれば必ず閉じるという保証ではありません。
+短いタップでは、Blender がクリックで選ぶ操作へ切り替える場合があります。
+
+
+(pie-hotkey-settings)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--pie">
+  <div class="pme-overview__crop" style="--crop-ratio:614 / 76;--crop-offset:-41.05263158%">
+    <img src="../_static/images/editors/pie_menu/pie-editor-focused-blender-5-2.png" width="614" height="570" alt="Keymap が 3D View Generic、Hotkey が Shift C の設定。">
+  </div>
+  <figcaption>呼び出す場所とキー操作の設定例。</figcaption>
+</figure>
+```
+
+上から **Keymap（使う場所）→ Hotkey（起動キー）→ 修飾キー**。左の三角から **Open Mode（開くタイミング）** を設定します。
+
+呼び出す場所を Keymap、キー操作を Hotkey として設定します。
+入力欄の操作は {ref}`共通の Hotkey 設定 <hotkey-editor>` を参照してください。
+
+通常の Open Mode は **Press** / **Hold** / **Double Click** / **Click Drag** / **Key Chords** です。
+Click Drag はドラッグで開くモードです。
+Experimental の項目は通常の選択肢と区別してください。
+
+Open Mode は「いつ開くか」の設定です。開いた後の選択・確定を調整する
+Confirm on Release や Threshold とは別の設定です。
+
+(pie-slot-controls)=
+
+## メニュースロット
+
+```{raw} html
+:file: common/_pie_slot_map.html
+```
+
+上の8行がパイの8方向、間隔を空けた下の2行が追加の上・下スロットに対応します。
+画像は **Expand Slot Tools が ON** で、右端に操作ボタンを展開した状態です。
+
+スロットは、パイメニューに配置する操作やプロパティなどの項目です。
+Pie Menu は 10 個のスロットで構成されます。
+
+- 8 方向（上下左右 + 斜め 4 方向）と、垂直方向の追加スロット 2 個（最上部・最下部）。
+- スロットの位置と数は固定です。項目の中身は **Move Slot** で別の位置と交換できます。
+- スロットの方向は、メニューを起動した画面上の位置を基準にした絶対方向です。
+- 空のままのスロットはパイメニュー上に描画されません。
+
+スロットには次のタイプを設定できます。入力欄の操作やコードの共通説明は
+{ref}`スロットエディタ <slot-editor>` にまとめています。
+
+| タイプ | Pie Menu に配置するもの |
+|---|---|
+| Command | 選ぶと操作を実行する項目 |
+| Property | RNA プロパティへのパスを指定して、値を表示・変更するウィジェット |
+| Menu | PME で作成した別のメニューへのリンク |
+| Hotkey | 実行時のコンテキストに応じたキー割り当てのオペレーターを呼ぶ項目 |
+| Custom | Blender の `UILayout` を使い Python で直接描画する UI。複数要素は一つの column / box にまとめる |
+
+Custom でパイのレイアウト直下に複数の要素を追加すると、後続の項目が使う方向がずれます。
+一つのスロット内の UI をまとめる書き方は、{ref}`スロットタイプ <slot-types>` の Custom を参照してください。
+スロットの編集・アイコン・ラベル・追加ツールは {ref}`共通のスロット一覧 <slot-list>` で説明しています。
+
+(pie-slot-edit)=
+
+### A. スロットを編集
+
+一番左の**方向の矢印**を押すと、{ref}`スロットエディタ <slot-editor>` が開きます。
+Command / Property / Menu などのタブを選び、スロットの中身を設定します。
+この画像では矢印の向きがパイ上の位置を表しています。
+
+(pie-slot-icon)=
+
+### B. アイコン
+
+矢印の右隣は、スロットに表示する**アイコンの設定**です。
+左端のスロット編集ボタンとは別の操作です。
+
+(pie-slot-label)=
+
+### C. 表示名
+
+**Local** などの文字列は、メニューに表示するスロットのラベルです。
+カスタマイズ全体の名前や、Menu タブで指定したリンク先とは区別します。
+
+(pie-slot-link)=
+
+### D. リンク先のカスタマイズへ移動
+
+**鎖のボタン**は、スロットエディタの **Menu** タブでリンクした別のカスタマイズの編集画面へ移動します。
+リンク先の中身を確認・編集するための入口です。リンクする対象の設定は Menu タブで行います。
+リンク先への移動ボタンなので、すべてのスロットに表示されるわけではありません。
+
+(pie-slot-options)=
+
+### E. カスタマイズオプション（Expand Slot Tools）
+
+右端はスロットごとの操作です。この画像は **Settings > General > Expand Slot Tools が ON** のため、
+通常はメニューにまとまっている操作を、個別のアイコンとして展開しています。
+
+左から **Edit Slot / Copy / Move Slot / Enabled・Disabled / Clear**。
+コピー済みのスロットがある場合は **Paste** も表示されます。
+編集内容の設定そのものを展開する機能ではなく、操作ボタンの表示を切り替える設定です。
+詳しくは {ref}`共通の Expand Slot Tools <expand-slot-tools>` を参照してください。
+
+
+---
+
+## 項目を作って確認する
+
+1. 10 個のうち、配置したい方向のスロット編集ボタンを押します。
+2. Command / Property / Menu / Hotkey / Custom から用途に合うタイプを選びます。
+3. 内容・表示名・アイコンを設定して OK で確定します。
+4. 実際に使うエディターからメニューを開き、方向と動作を確認します。
+
+既存のプリセットから項目を作る場合は {ref}`スロットのプリセット <how-to-add-widgets>` を参照してください。
+コードを書く場合は [コードの書き方と入力制限](../reference/command_text.md) で設定先と長さを確認できます。
+プレビューを開けることだけでは、呼び出し元のモードや選択状態で操作が成立する証拠にはなりません。
+
+## 応用的な使い方
+
+(pie-context-pattern)=
+
+### コンテキストに応じて切り替える
+
+```{versionadded} 2.1
+Context Router による条件分岐。
+```
+
+モードや対象オブジェクトに応じてメニューを出し分ける用途には、**Context Router** を使えます。条件の範囲と、どの条件にも一致しない場合の動作を決めてから、
+各分岐の呼び出し先を設定します。
+
+コードで条件を判断する場合も、Object Mode 以外をすべて Mesh Edit Mode と扱ったり、
+アクティブオブジェクトが必ずあると仮定したりしないでください。
+
+(pie-nested-pattern)=
+
+### ネストした Pie Menu — カテゴリから個別操作へ進む
+
+たとえば、親の「モデリング」パイに「選択」「変形」を置き、それぞれ別の Pie Menu へつなぎます。
+親の 8 方向のスロットを **Menu** タブにして、作成済みの子 Pie Menu を指定します。
+子を開くためだけに Command のコードを書く必要はありません。
+
+**起動キーを保持したまま子へ進む構成には、親の Confirm Threshold を使います。**
+親で距離による確定が起きると、選んだ Menu スロットから子が開きます。
+
+1. 親をホットキーから開く設定にし、親の **Confirm on Release** を ON にします。
+2. 親の **Confirm Threshold** を正の値にします。たとえば Threshold `20`、Confirm Threshold `40` は、UI スケール適用前で中心から `60` の確定境界になる設定例です。推奨の固定値ではないので、操作しやすい距離に調整します。
+3. 起動キーを保持したまま子の方向へ動かし、境界の外で短く止めて子へ進みます。単に境界を横切るだけで即座に開く、という判定ではありません。
+
+Confirm Threshold が `0` では、この距離による確定を使えません。
+Radius を変えるだけでも確定距離は変わりません。
+計算と既定値は {ref}`Advanced settings <pie-advanced-settings>` を参照してください。
+この例は **8 方向の Menu スロット**が対象で、上下の追加スロットに同じ方向選択を期待しないでください。
+
+確認するときは、親から子へキーを保持して進めることと、子の目的の操作を確定できることを分けて確認します。
+誤って子へ進むなら親の確定距離を広げ、進みにくいなら狭めます。
+
+(pie-menu-expand)=
+
+### Menu の参照先を開く / 中身を Pie 内に展開する
+
+操作の一覧には **Regular Menu**、複数の設定を行・列に組みたい場合は **Popup Dialog** を作成し、
+Pie のスロットの **Menu** タブで参照先に指定します。
+その場に中身を見せたい場合は、参照するスロット側で展開オプションを ON にします。
+
+| Pie からの参照先 | 展開 OFF | 展開 ON |
+|---|---|---|
+| Regular Menu | 選択して別のメニューを開く | **Expand Regular Menu**：項目を Pie 内へ展開する |
+| Popup Dialog | 選択して別のダイアログを開く | **Expand Popup Dialog**：レイアウトを Pie 内へ展開する |
+
+```{versionadded} 2.1
+**Expand Regular Menu** で、Regular Menu の項目を Pie 内に展開できます。
+```
+他の配置先で表示される **Open on Mouse Over** と混同しないでください。
+Pie Menu からの参照では、展開オプションはホバーで別メニューを開く設定ではありません。
+また、**Expand Slot Tools** は編集画面の操作ボタンを展開する表示設定で、ここでのメニューの展開とは別です。
+
+**Popup Dialog を展開するときの幅と位置**
+
+```{versionadded} 2.1
+展開した Popup Dialog の幅と位置を、配置先のスロットで調整できます。
+```
+
+同じ Popup Dialog を複数の場所で使う場合も、配置先ごとにスロット側で調整できます。
+
+- **Width**：`-1` は自然な幅（Auto）。指定する場合は `100`〜`2000` ピクセル。
+- **Radial Offset**：スロットの方向に沿って外側へ離す距離。Pie Menu では内側への移動は扱いません。
+- この幅・位置の調整は **Pie Menu → Popup Dialog、Expand ON** が対象です。Regular Menu の展開にも同じ設定があるとは扱わないでください。
+
+Popup Dialog 自体の行・列構成は [Popup Dialog Editor](popup_dialog_editor.md) を参照してください。
+
+### スクリプトから別のメニューを呼び出す
+
+Command スロットから名前を指定して呼ぶ場合は、次のように書けます。
+この例には `My Sub Menu` というメニューが必要です。
+
+```python
+open_menu("My Sub Menu")
+```
+
+**Open on Mouse Over** は対応するメニューをホバーで開く設定です。
+Pie の方向選択による子 Pie の呼び出しとは区別して使います。
+
+(pie-hotkey-slot)=
+
+### Hotkey スロットと実際のキー入力の違い
+
+Hotkey スロットは、**実行時のエディターやモードに対応するキーマップ**から、指定したキーと修飾キーに一致する
+有効な **Press** の割り当てを探し、実行可能なオペレーターを呼び出します。
+同じキーでも、実行時のコンテキストやユーザーのキー設定によって結果が変わります。
+
+キーの押下・保持・解放をそのまま再現する機能ではありません。
+Hold や Double Click、モーダル中のキー操作を同じように再生できるとは考えないでください。
+また、PME のメニュー呼び出し用キーはこの検索から除外されます。
+別の PME メニューを開く目的なら **Menu** タブを使います。
+
+### Pie 内のトグル・スライダー・プロパティ
+
+既存の Blender プロパティを表示する場合は、まず **Property スロット**を使います。
+複数の UI 要素を組み合わせる場合は Custom スロットでレイアウトを記述できます。
+次は 3D Viewport 内でグリッドの表示を切り替える例です。
+`C.space_data` が 3D Viewport のものであることを確認してください。
+
+```python
+L.prop(C.space_data.overlay, "show_floor")
+```
+
+プロポーショナル編集のようにエディターやモードによって参照先が異なる設定は、
+ひとつのプロパティパスで全場面を扱えるとは限りません。
+表示する場所と操作対象を分けて調べ、必要に応じて Context Router で切り替えます。
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+- [キーマップの選び方](../reference/keymap_guide.md)
+- [Command / Custom のコードと入力制限](../reference/command_text.md)
+```
+
+## 参考動画（原作者のチャンネル）
+
+[roaoao の動画一覧](../reference/original_author_videos.md)より。旧版の UI・手順を扱う参考動画です。
+
+:::{dropdown} Pie Menu Editor for Blender
+:open:
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/COW109EjBsU" title="Pie Menu Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Pie Menu Editor for Blender — YouTube で開く](https://www.youtube.com/watch?v=COW109EjBsU)
+:::
+
+:::{dropdown} Pie Menu Editor Review by Jimmy Livefjord
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/dWwBbnV1IOs" title="Pie Menu Editor Review by Jimmy Livefjord" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Pie Menu Editor Review by Jimmy Livefjord — YouTube で開く](https://www.youtube.com/watch?v=dWwBbnV1IOs)
+:::
+
+:::{dropdown} Nested Pie Menu, Confirm Threshold and Sticky Keys
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/5zDp586Uy2w" title="Nested Pie Menu, Confirm Threshold and Sticky Keys" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Nested Pie Menu, Confirm Threshold and Sticky Keys — YouTube で開く](https://www.youtube.com/watch?v=5zDp586Uy2w)
+:::

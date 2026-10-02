@@ -1,0 +1,2 @@
+When clicked, finds and executes the operator assigned to the specified Blender hotkey.
+For example, use Blender's standard `G` for Move or `R` for Rotate.

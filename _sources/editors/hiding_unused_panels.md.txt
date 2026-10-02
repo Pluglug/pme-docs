@@ -1,0 +1,178 @@
+(hiding-unused-panels)=
+
+# Hiding Unused Panels
+
+**Hidden Panel Group** collects Blender and add-on panels in a list and hides them together.
+Hide panels you do not use, then turn off the group's hiding settings when you need them again.
+This does not remove panel data or uninstall add-ons.
+
+This page describes PME 2.1 settings.
+
+(hidden-configuration-guide)=
+
+:::{dropdown} Configuration guide — features, combinations, and uses (for AI)
+
+**Name: Hidden Panel Group / Type ID: `HPANEL`.**
+Manages a list of panel class IDs. There are no ordinary Command / Custom code fields.
+
+- **Inputs**: individually searched panels, panels filtered by criteria, or panels captured through Interactive Panels. See {ref}`adding panels <hidden-add-panels>`.
+- **Application**: enabling the group hides its targets. There are no hotkeys, preview, or Description / Poll advanced settings. See {ref}`basic controls <hidden-basic-settings>`.
+- **Constraints**: panel IDs depend on the Blender or add-on version providing them. A configuration cannot necessarily reproduce the same display where those panels are not registered.
+- **Restoration**: disabling the group or removing an entry releases this group's hiding rule. If another enabled group also hides the same panel, release that rule too. See {ref}`restoring panels <hidden-restore>`.
+- **Combinations**: regroup needed panels with Side Panel, then hide their original placements; organize groups by purpose and switch them by tag. See {ref}`usage patterns <hidden-patterns>`.
+- **Validation**: test hiding and restoring in the same editor. An absent panel from a disabled add-on is distinct from a hidden panel.
+:::
+
+## Interface and editing workflow
+
+```{raw} html
+:file: common/_hiding_unused_panels_overview_map.html
+```
+
+1. {ref}`Name and enabled state <hidden-basic-settings>`
+2. {ref}`Target panel list <hidden-slots>`
+
+Select a Hidden Panel Group in the menu list, then add panels to hide in the list on the right.
+See [Common Editor Elements](editor_common_elements.md) for shared list and tag controls.
+
+1. Check the group in {ref}`name and enabled state <hidden-basic-settings>`.
+2. Choose targets from the {ref}`add menu <hidden-add-panels>`.
+3. Check panel names and classes in the {ref}`list information <hidden-slots>`.
+4. Verify that panels disappear and {ref}`return when released <hidden-restore>`.
+
+(hidden-basic-settings)=
+
+## Name and basic controls
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-10.35598706%">
+<img src="../_static/images/editors/overview/hidden-panel-blender-5-2.png" width="663" height="309" alt="Hidden Panel Group (ToolsTab) name and enabled state.">
+</div>
+<figcaption>Name and enabled state in this example.</figcaption>
+</figure>
+```
+
+Name the group to identify the panels it hides. Enabling it hides the listed panels;
+disabling it releases this group's hiding rules.
+See {ref}`selected menu settings <overview-selected>` for name and tag controls.
+
+This type has no Hotkey settings, preview, or advanced settings.
+It does not accept a Poll such as “only in this mode.”
+
+(hidden-slots)=
+
+## Panels to hide
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 240;--crop-offset:-21.03559871%">
+<img src="../_static/images/editors/overview/hidden-panel-blender-5-2.png" width="663" height="309" alt="Hidden Panel Group (ToolsTab) target list with panel names and class IDs, and controls to add or remove targets.">
+</div>
+<figcaption>Target panel list in this example.</figcaption>
+</figure>
+```
+
+| Control | Role |
+|---|---|
+| List | Panels targeted by this group |
+| **＋** | Opens the menu for adding panels |
+| **−** | Removes the selected row and releases this group's hiding rule for it |
+| **×** | Clears the list and releases all hiding rules in this group |
+| **Name / Class / Context / Category** | Chooses which information to display; several can be shown together |
+
+| Display field | Content |
+|---|---|
+| **Name** | Panel display name |
+| **Class** | Blender panel class ID, such as `VIEW3D_PT_view3d_cursor` |
+| **Context** | The panel's configured context |
+| **Category** | The panel's configured sidebar tab name |
+
+Different classes can share a display name. Check Class when sharing configurations or testing behavior.
+
+(hidden-add-panels)=
+
+## Add panels
+
+Choose a method from **＋**.
+
+| Item | Use |
+|---|---|
+| **Hide Panel** | Search for and select one panel |
+| **Hide Panels by ...** | Filter by Space / Region / Context / Category and display-name Mask, then add matching panels together |
+| **Interactive Panels** | Toggles the mode for working from visible panels and other UI |
+
+### Add panels by criteria
+
+**Hide Panels by ...** shows the target panel count before confirmation.
+Mask performs a case-insensitive substring match against panel display names.
+The field does not execute Python or regular expressions.
+Narrow the targets and check the count before adding them.
+
+This route excludes Preferences panels and panels already hidden.
+It does not continuously monitor newly registered panels for future matches.
+
+### Capture a visible panel
+
+Enable [Interactive Panels](interactive_panels.md) to use action menus on visible panels.
+Check the destination Hidden Panel Group, add the panel, then turn Interactive Panels off after editing.
+This mode is shared across PME and also affects capture from other editors.
+
+(hidden-restore)=
+
+## Restore panels and verify
+
+Disable the group or remove its targets from the list. If several groups hide the same panel,
+check that no enabled hiding rule remains.
+
+If a panel still does not appear, check that its add-on is enabled and its original editor, mode, and target data are available.
+Releasing a hiding rule does not satisfy the original panel's own visibility conditions.
+
+(hidden-patterns)=
+
+## Usage patterns and conditions to check
+
+### Separate groups by purpose
+
+Create groups for modeling, animation, and other tasks, with names that identify what they hide.
+Test hiding and restoration with a few panels before expanding the list.
+Properties editor panels can also be targeted, but hiding a panel is not the same as removing an entire Properties tab.
+
+### Switch groups by Tag
+
+Tag groups to enable or disable them together from another Command.
+The following example enables all PME menus tagged `Modeling`.
+Use a dedicated tag if you want to switch only hidden panel groups.
+
+```python
+pm_enable_by_tag("Modeling", True)
+```
+
+Action menus sharing the tag will also change their enabled state.
+
+### Combine with Side Panel
+
+Regroup needed panels with [Side Panel](side_panel_editor.md), then hide the originals.
+Check the relocated panels' display and interaction before hiding their original placements.
+
+---
+
+## Related pages
+
+- [Common Editor Elements](editor_common_elements.md)
+- [Side Panel Editor](side_panel_editor.md)
+- [Interactive Panels and Extend Panel](interactive_panels.md)
+- [Popup Dialog Editor](popup_dialog_editor.md)
+
+## Reference videos (original author's channel)
+
+Older-version reference videos — [original author roaoao's channel](../reference/original_author_videos.md)
+
+:::{dropdown} Hiding unused panels in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/z19c6b7XOWo" title="Hiding unused panels in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Hiding unused panels in Blender — Open on YouTube](https://www.youtube.com/watch?v=z19c6b7XOWo)
+:::
