@@ -1,0 +1,158 @@
+---
+vocab: developer-facing
+---
+
+(scripting-workflow)=
+
+# コード例
+
+実際の設定とコードの例をまとめています。コード欄の前提・仕様は、先に [コードの入力と実行](command_text.md) を参照してください。対象は PME 2.1 です。
+
+短いコードは各欄に貼れる **1 行**で掲載しています。関数や引数を調べるときは [API リファレンス](scripting.rst)、入力上限や実行条件は [コードの入力と実行](command_text.md) を参照してください。
+
+:::{dropdown} AI にこのページを渡して設定を作る
+
+このページの URL と、作りたい操作を伝えてください。たとえば「選択中のオブジェクトのワイヤー表示を、パイメニューから切り替えたい」。使用する Blender / PME のバージョンも分かれば添えます。
+
+**回答を作る AI へ：**
+
+- 最初に設定先を選ぶ。Property / Menu スロット、Context Router、Property Stack などで実現できる場合は、その設定手順を示す。
+- コードが必要なら、**設定先 → 貼り付けるコード → 使う条件 → 確認手順**の順で回答する。対象や実行場所が結果を左右し、依頼から決められない場合だけ質問する。
+- 通常の Command / Custom 欄には、入力上限に収まる1行のコードを出す。説明文やコメント、複数の代替案を同じコピー欄に混ぜない。
+- 複数行の処理は外部ファイルとして示し、ファイル名・配置場所・PME に貼る呼び出しコードを分ける。
+- `L`・`E` などの利用条件、対象がない場合、再描画時の動作を確認する。API の根拠をリンクし、実際に実行していないコードを動作確認済みとしない。
+:::
+
+## 作りたいものから選ぶ
+
+| 作りたいもの | 設定先・実例 |
+|---|---|
+| 項目を選ぶと Blender の操作を実行する | [Command の例](#recipe-command) |
+| 値をオン・オフにする | [値を切り替える](#recipe-toggle)。チェックボックスなら Property スロット |
+| 数値欄やボタンをメニュー内に置く | [Custom の例](#recipe-custom)。既存の値を一つ置くなら Property スロット |
+| 条件を満たすときだけメニューを使えるようにする | [Poll の例](#recipe-poll) |
+| 同じキーから、状況に応じて別の操作を呼ぶ | {ref}`context-router-editor` |
+| 複数の値を一つの状態として表示・設定する | {ref}`property-stack-editor` |
+| 計算や独自の読み書きを伴う値を再利用する | {ref}`Property Editor のコールバック <property-callbacks>` |
+| 長い処理や繰り返しを実行する | {ref}`外部スクリプト <external-command-script>`。操作の組み合わせには {ref}`macro-operator-editor` も利用可能 |
+| 次の呼び出しや別のメニューへ値を渡す | {ref}`U の例 <scripting-user-data>` |
+
+スロットの編集画面とタブは {ref}`エディターの共通要素 <editor-common-elements>`を参照してください。既存の PME メニューを呼ぶだけなら、Menu スロットで呼び出し先を選べます。
+
+(recipe-command)=
+
+## 操作を実行する
+
+**設定先：** パイメニューのスロットを編集し、**Command** タブのコード欄へ貼り付けます。
+
+```python
+bpy.ops.mesh.primitive_cube_add()
+```
+
+**使う条件・確認：** 3D Viewport の Object Mode でパイメニューを開き、この項目を選びます。立方体が追加されます。Blender の操作からコードを取得する方法は {ref}`basic-pie-menu` でも紹介しています。
+
+引数を省略したこの例は、オペレーターの既定値を使います。位置やサイズを指定したい場合は、その Blender バージョンのオペレーター引数を確認します。
+
+(recipe-toggle)=
+
+## 値を切り替える
+
+**設定先：** パイメニューのスロット → **Command**。アクティブなオブジェクトのワイヤー表示を切り替えます。
+
+```python
+obj = C.active_object; obj is not None and setattr(obj, "show_wire", not obj.show_wire)
+```
+
+**使う条件・確認：** 3D Viewport の Object Mode でメッシュを選び、項目を実行します。Object Properties の **Viewport Display → Wireframe** が切り替わり、もう一度実行すると元に戻ります。アクティブな対象がなければ何も変更しません。
+
+`show_wire` が対象のプロパティ、`not obj.show_wire` が現在値の反転です。別の値へ置き換えるときは、所有するデータと型を確認します。チェック状態も表示したい場合は Property スロット、複数の設定をまとめたい場合は {ref}`property-stack-editor` が使えます。
+
+(recipe-custom)=
+
+## 編集できる値やボタンを置く
+
+**設定先：** Pop-up Dialog のスロット → **Custom**。アクティブなオブジェクトの X 寸法を編集する欄を描きます。
+
+```python
+obj = C.active_object; L.prop(obj, "dimensions", index=0, text="X") if obj is not None else L.label(text="No active object")
+```
+
+**使う条件・確認：** 3D Viewport の Object Mode でメッシュを選び、ダイアログを開きます。X の数値欄が現れ、編集すると寸法が変わります。対象がない場合はラベルを表示します。`index=0` は X、`1` は Y、`2` は Z 成分です。
+
+**操作ボタンを置く場合**は、別の Custom スロットに次を貼り付けます。
+
+```python
+L.operator("mesh.primitive_cube_add", text="Add Cube")
+```
+
+Object Mode の 3D Viewport でダイアログを開き、ボタンを押すと立方体が追加されます。Custom は再描画のたびに評価されるため、コードは UI を配置し、データ変更はユーザーが操作したときに行います。
+
+(recipe-poll)=
+
+## 条件を満たすときだけメニューを使う
+
+**設定先：** 対象メニューの **Advanced settings → Poll**。アクティブなメッシュがあり、Mesh Edit Mode のときだけ利用可能にします。
+
+```python
+obj = C.active_object; return obj is not None and obj.type == 'MESH' and C.mode == 'EDIT_MESH'
+```
+
+**確認：** 同じ 3D Viewport で、メッシュの Edit Mode と Object Mode を切り替え、メニューを呼びます。Edit Mode では利用可能、Object Mode では利用不可になります。呼び出す場所や表示形式によって、利用不可の項目は非表示または無効表示になります。
+
+`return` は Poll の判定結果を返します。Command に貼るコードとは異なります。条件を追加する書き方は [Poll Method](poll_method.md)、一致した条件ごとに呼び出し先を変える設定は {ref}`context-router-editor` を参照してください。
+
+(scripting-user-data)=
+
+## 次の呼び出しへ値を渡す
+
+`U`（User Data）は、PME が用意する**一時的な共有メモ**です。自分で作成する必要はなく、ある Command で書いた値を、別の呼び出しや別の PME メニューから読み出せます。
+
+**書き込む** — `example_count` という名前で値を覚えます。
+
+```python
+U.example_count = 3
+```
+
+**読み出す** — まだ書き込んでいなければ、代わりに `0` を使います。
+
+```python
+print(U.get("example_count", 0))
+```
+
+`example_count` は自分で付ける項目名です。`U = ...` と置き換えず、`U.example_count = ...` のように項目へ代入します。他のスクリプトとも共有するため、用途が分かる名前にします。
+
+| 用途 | 値の置き場所 |
+|---|---|
+| Modal の開始値など、同じ一回の操作中だけ使う | スロット間で共有する普通の変数。{ref}`Modal の例 <modal-shared-variables>`を参照。 |
+| 次の呼び出しや別のメニューでも使う | `U` の項目。 |
+| 再起動後も残す設定 | [Property Editor](../editors/property_editor.md) など、永続保存できる設定先。 |
+
+```{note}
+`U` は Blender の再起動や PME の再登録で失われ、`.blend` ファイルや PME のエクスポートには保存されません。オブジェクトやエリアへの参照を入れても、次の実行までその対象が有効である保証はありません。
+```
+
+:::{dropdown} 応用：Modal で前回確定した焦点距離から調整を始める
+
+{ref}`焦点距離を調整する Modal の例 <modal-save-restore>`に、次の **On Confirm** を追加します。確定したときだけ数値を記憶します。
+
+```python
+U.focal_length_last = saved_view.lens
+```
+
+**On Invoke** は次の一行に置き換えます。今回の開始値を先に覚えてから、前回の確定値を適用します。
+
+```python
+saved_view = C.space_data; start_lens = saved_view.lens; saved_view.lens = U.get("focal_length_last", start_lens)
+```
+
+`U.get("focal_length_last", start_lens)` は、前回の値があれば読み出し、初回は今回の開始値を使います。Property と On Cancel は変更しません。取消では今回の開始値に戻り、`U` にある前回の確定値は上書きしません。
+
+:::
+
+## さらに実例を探す
+
+[PME Treasure の Code Examples](https://pluglug.github.io/ba-pme-treasure/Guides/code-examples) では、修飾キーによる分岐、UI の組み立て、状態の表示などの実例を探せます。このページの題材も Treasure のコード例を基にしています。過去の投稿を使うときは、対象バージョンと現在の API を確認してください。
+
+- [コードの入力と実行](command_text.md)：1行の書き方、入力上限、外部ファイル、実行場所、エラーの確認。
+- [API リファレンス](scripting.rst)：PME が提供する関数・変数と引数。
+- [原作者の参考動画](original_author_videos.md)：旧バージョンの機能別動画。

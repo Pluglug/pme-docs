@@ -1,0 +1,10 @@
+:Poll:
+  Uses Python to determine whether this menu can run in the current Blender context. A `True` result allows the menu to run; `False` skips it when called through a hotkey or UI.
+
+  ```python
+  ao = C.active_object; return ao and ao.type == 'MESH'
+  ```
+
+  Poll is checked for hotkey calls, HOLD / TWEAK / CHORD, script calls such as `open_menu()` / `pme.invoke_pm()`, editor previews, Popup Dialog and regular menu drawing, and calls from Macro / Modal / Sticky / Floating Panel. This prevents another invocation route from running a menu that is unavailable in the current context.
+
+  The {octicon}`plus` button on the right opens Poll helpers for common conditions, inserting an empty Poll, and Cut / Copy / Paste. See [Poll Method](../reference/poll_method.md) for writing conditions.

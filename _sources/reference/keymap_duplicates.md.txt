@@ -1,0 +1,194 @@
+(keymap-duplicates)=
+
+# Persistent PME Keymap Duplicates
+
+```{important}
+- “Deleted PME keymap entries return after restarting Blender.”
+- “Empty PME entries remain after uninstalling PME.”
+- “Keymap settings contain many copies of `Call Menu (PME)`.”
+
+These symptoms can result from Blender's Keymap Export/Import flattening the keymap layers, rather than an isolated PME bug. PME registers many shortcuts, which makes the problem particularly visible.
+
+For cleanup, see [Recovery](#keymap-duplicates-recovery). To avoid recurrence, see [Prevention](#keymap-duplicates-prevention).
+```
+
+## Recognizing the symptoms
+
+This page covers the following behavior:
+
+- **Preferences → Keymap** lists several `Call Menu (PME)` entries for the same shortcut.
+- Manually deleted duplicates **return after restarting Blender or saving preferences**.
+- **Empty PME entries remain even after disabling or removing the add-on**.
+- Shortcuts for other add-ons or built-in functions appear to have been taken over by PME, even though you did not intentionally change them.
+- The Keymap Editor shows empty PME entries with no pie menu name or other identifying information.
+
+The community has discussed this issue for years under the name “ghost keymaps.”
+
+## Why this is not specific to PME
+
+Other add-ons using the same registration mechanism can be affected. The underlying issue comes from Blender's keymap system. PME manages many shortcuts for pies, popups, and other menu types, so the symptoms can be more noticeable.
+
+## Why it happens
+
+### Blender's four keymap layers
+
+Blender manages keymaps in four layers.
+
+:::{list-table}
+:header-rows: 1
+:widths: 18 52 15
+
+* - Layer
+  - Role
+  - Saved?
+* - **default**
+  - Factory settings, used when resetting
+  - —
+* - **active**
+  - The current preset, stored in `userpref.blend`
+  - Yes
+* - **addon**
+  - Add-on registrations, rebuilt whenever Blender starts
+  - —
+* - **user**
+  - The UI-visible combination of active and addon. User edits are saved as differences and reapplied at startup
+  - Differences only
+:::
+
+This layering allows add-on assignments, user customizations, and factory resets to coexist.
+
+### Export/Import flattens the layers
+
+**Export Key Configuration**, **Import Key Configuration**, and **Save as Preset** in **Preferences → Keymap** can lead to the following sequence:
+
+1. Pick KeyMaps with any user modification (`km.is_user_modified = True`).
+2. Copy **every item in those KeyMaps**, including add-on items.
+3. Store those copies in the **active** preset.
+
+The critical step is **2**. The flag applies to an entire KeyMap. Editing just one shortcut can therefore save add-on registrations in that KeyMap as part of the user configuration.
+
+### Duplicates appear after startup
+
+Add-ons, including PME, register their shortcuts again in the **addon** layer at startup. Copies created by the preceding process remain in the **active** layer.
+
+The same item then exists in **both active and addon**, appearing as duplicates in the combined **user** layer. Repeated export/import or preset changes can accumulate more copies.
+
+### Why empty entries survive removal
+
+PME identifies its registered shortcuts by `idname` and property values. Export/import can leave entries with missing property information for which `is_property_set()` no longer identifies the expected data.
+
+PME cannot recognize those entries as its own registrations, so they fall outside automatic removal. This is why ghost entries can remain after removing PME itself.
+
+(keymap-duplicates-recovery)=
+
+## Recovery
+
+### 1. Scan with Keymap Doctor
+
+Open **Preferences → Settings → Hotkeys → Keymap Doctor** to inspect empty PME items, PME items embedded in the `active` keyconfig, and conflicts between PME hotkeys and currently active Blender keymaps.
+
+Start with **Scan Keymaps**. The result includes:
+
+- Total empty PME items.
+- Number of affected keymaps.
+- Layers containing the items.
+- Keymaps with the largest counts.
+- Whether the `active` keyconfig contains PME items.
+- Conflicting hotkeys and the other operator in the same keymap.
+- Overlaps handled by PME's dispatcher through Hotkey Mode, CHORD, or mouse modifiers.
+- Hotkeys whose analysis could not be completed.
+
+Use **Copy Summary** for an anonymized summary, or **Open Report Folder** to find the local detailed report. The detailed report includes menu names and internal identifiers; review it before sharing it externally.
+
+Scanning only observes the configuration. It does not change or remove the detected assignments or conflicting operations.
+
+```{important}
+If possible, share **Copy Summary** with support or the forum before using **Clean Up Empty Items**. This helps diagnose the issue. Review detailed reports before sharing them if requested.
+```
+
+### 2. Run Clean Up Empty Items
+
+If the scan finds empty PME entries, run **Clean Up Empty Items**.
+
+This conservatively removes only `wm.pme_user_pie_menu_call` entries whose properties can be established as empty. It leaves normal PME shortcuts and entries with recognizable meaning alone.
+
+One reported cleanup removed **279** empty entries. A lightly affected setup may have only a few, while a long-affected environment can have hundreds.
+
+### 3. Save the cleanup
+
+Removed entries may return after restarting if the changes are not saved. First try:
+
+- **Preferences → bottom-left menu → Save Preferences**.
+
+If the cleanup survives a restart, recovery is complete.
+
+```{caution}
+Some users report that a single Export → Import after cleanup made the removal persist when Save Preferences did not.
+
+Export/Import is also a cause of this issue. If you use this workaround, limit it to one operation immediately after cleanup rather than making it a regular workflow.
+```
+
+### 4. If the problem remains
+
+For deeply entangled duplicates, rebuilding the configuration may be simpler.
+
+1. Back up PME settings with PME's own export function.
+2. Quit Blender.
+3. Rename Blender's **config** folder, or back it up before deleting it.
+4. Start Blender and set up the clean configuration.
+5. Import the settings you need.
+
+Use a command such as **File → Defaults → Show Preferences Location** to locate the settings folder.
+
+### Older PME versions: the legacy script
+
+For versions that do not yet have a Maintenance section, the earlier recovery script is available:
+
+- [`pme_keymap_cleaner.py`](https://gist.github.com/Pluglug/d4246140ab5689373becc11d5353221a)
+
+It uses PME's internal utilities, so run it with **PME installed and enabled**. If you have already uninstalled PME, reinstall it before running the script.
+
+(keymap-duplicates-prevention)=
+
+## Prevention
+
+After cleanup, adjust the workflow that introduced the duplicates.
+
+### 1. Avoid Blender's Keymap Export/Import
+
+The main preventive measure is to avoid Blender's **Keymap Export / Import** and **Save as Preset**, which uses the same mechanism. A single export/import can leave copies that reappear alongside add-on registrations on later startups.
+
+### 2. If you must export, disable add-ons first
+
+When migrating a keymap, temporarily disable **PME and other add-ons that register shortcuts** before exporting. This prevents their registrations from being embedded in the active preset. Import the keymap at the destination before enabling those add-ons as well.
+
+### 3. Manage shortcuts through PME macros
+
+The maintainer recommends using PME macros as a **proxy keymap**:
+
+- Define the operation as a PME macro instead of directly editing Blender's standard keymap.
+- Assign its hotkey in PME.
+- Keep direct changes to Blender's Keymap settings to a minimum.
+
+You can then migrate by exporting PME's settings, avoiding Blender's keymap export/import.
+
+```{note}
+Proxy keymaps add a small amount of PME processing per invocation. For performance-sensitive operations, consider an alternative such as a custom add-on.
+```
+
+### 4. Disable add-on shortcuts instead of deleting them in the UI
+
+Deleting an add-on registration in the Keymap Editor stores a persistent **removal difference**. This can produce surprising behavior:
+
+1. An add-on registers three identical shortcuts.
+2. You delete all three in the UI.
+3. Blender restarts.
+4. The add-on registers the same three shortcuts, but **none appears in the Keymap Editor** because the removal differences remain.
+5. A fourth registration finally appears.
+
+For an unwanted add-on shortcut, **uncheck it to disable it** rather than deleting it.
+
+## Related
+
+- [Choosing a Keymap](keymap_guide.md): selecting a keymap and understanding its scope.
+- [`pme_keymap_cleaner.py` (Gist)](https://gist.github.com/Pluglug/d4246140ab5689373becc11d5353221a)

@@ -1,0 +1,12 @@
+Specify an object property path to display it as a widget.
+For example, `bpy.context.object.location` displays and edits the object's location.
+
+Tool settings referenced with `tool_props()` appear only when available in the target editor, mode, and tool.
+Otherwise they are hidden. Use the Custom tab to specify your own display conditions or alternative content.
+See the [API reference](/reference/scripting.rst#pme-tool-props) for the function's arguments.
+
+:::{admonition} Advanced property operations
+:class: tip
+
+Use [Property Editor](/editors/property_editor.md) when you need indexing or more complex property operations.
+:::

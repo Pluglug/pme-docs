@@ -1,0 +1,22 @@
+Sets Python code evaluated when the UI is drawn.
+`L` is the layout object; use Blender's layout API to build the UI.
+This code also runs on redraw. Place buttons for actions such as adding or removing objects,
+rather than performing those actions directly while drawing.
+
+```python
+# Display a label inside a box
+L.box().label(text="Add Mesh")
+```
+
+```python
+# Arrange several buttons vertically
+col = L.column(); col.operator("mesh.primitive_cube_add", text="Cube"); col.operator("mesh.primitive_uv_sphere_add", text="Sphere")
+```
+
+These are two independent examples. To place several UI elements in one Pie Menu slot,
+wrap them in a single column or box as in the second example.
+Adding multiple elements directly to the pie layout can shift subsequent slots to different directions.
+
+The input limit is **1,024 UTF-8 bytes**.
+See [Code Input and Execution](/reference/command_text.md) for
+length limits, multiline code, and external scripts.
