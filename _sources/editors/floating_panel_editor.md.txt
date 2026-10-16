@@ -1,0 +1,81 @@
+(floating-panel-editor)=
+
+# Floating Panel Editor
+
+**Floating Panel** arranges actions and settings in rows and columns to create a panel you can use while working. Gather several settings in one working panel or embed it in a Vector Menu.
+
+Adding rows and columns, then placing slots inside them, follows the same approach as [Popup Dialog Editor](popup_dialog_editor.md). Use Popup Dialog layout editing as a starting point for building a working panel.
+
+:::{admonition} Feature in development
+:class: note
+
+Floating Panel uses **GPULayout**, PME's system for drawing Blender UI layouts on the GPU. [Vector Menu](vector_menu_editor.md) uses the same system.
+
+Floating Panel and GPULayout are in development. Editing resembles Popup Dialog, but supported widgets, layout APIs, display, and interaction are not identical. See the configuration guide below for current support.
+:::
+
+:::{dropdown} Configuration guide — build a working panel (for AI)
+
+**Name: Floating Panel / Type ID: `FPANEL`.** Place Command / Property / Menu / Hotkey / Custom in a row-and-column layout. Parts of layout editing are shared with Popup Dialog; runtime display and supported UI differ.
+
+- **Property**: place a setting by its RNA path. In Custom, use the layout APIs supported by `L`; do not assume every Blender UI can be drawn unchanged.
+- **Menu**: reference another customization. Use Expand Panel when placing it in Vector Menu.
+- **Uses**: adjust colors and numbers in a working panel, collect frequent actions, or place groups of settings in Vector Menu's directional or extra top/bottom slots.
+- **Design choice**: decide whether to open the panel on its own or expand it in another menu. Width and position for each placement belong to the destination slot.
+
+See {ref}`rows and slots <floating-slots>` for layout, {ref}`Advanced settings <floating-advanced>` for alignment, and {ref}`usage <floating-usage>` for embedding.
+:::
+
+## Interface and editing workflow
+
+Choose a name and hotkey, then add slots to rows to build the panel. Open it in the intended editor and check that its controls address the intended data.
+
+(floating-basic)=
+
+## Name and basic controls
+
+Shared controls include enabled state, preview, name, and tags. See {ref}`selected menu settings <overview-selected>` for each button.
+
+(floating-advanced)=
+
+## Advanced settings
+
+In addition to Description and Poll, configure how property labels and input fields are displayed.
+
+```{versionadded} 2.1
+Added Property Split support for aligning property names and input fields.
+```
+
+**Property Split** separates labels and values into aligned columns. **Property Decorators** controls animation-related decorations and becomes available when Property Split is on. Also check each item's display options. See {ref}`advanced settings <editor-extra-settings>` for the shared description and availability controls.
+
+(floating-hotkey)=
+
+## Keymap / Hotkey
+
+Use Keymap to choose where the panel is available, and Hotkey for the trigger key and modifiers. See the shared {ref}`Hotkey settings <hotkey-editor>`.
+
+(floating-slots)=
+
+## Rows and slots
+
+Add rows and place actions or properties in them. Combine columns and subrows—for example, to show status above a row of action buttons.
+
+- Command: Python code executed when selected.
+- Property: a widget displaying and changing an existing RNA property.
+- Menu: a reference to another customization.
+- Hotkey: finds and invokes an operator from the key assignment at runtime.
+- Custom: UI drawn with Python. Do not change data while drawing.
+
+Row and column editing shares features with {ref}`Popup Dialog layout <popup-layout>`. See [Code Input and Execution](../reference/command_text.md) for code constraints.
+
+(floating-usage)=
+
+## Embed a settings panel in Vector Menu
+
+Choose a Floating Panel in a Vector Menu slot's Menu tab to expand the panel there. Adjust its width and position at the destination.
+
+```{versionadded} 2.1
+The width and position of a Floating Panel embedded in Vector Menu can be adjusted on the destination slot.
+```
+
+Check panels containing colors or numbers both on their own and expanded inside Vector Menu. Verify that input, cancel, and Undo suit the intended workflow.

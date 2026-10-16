@@ -1,0 +1,27 @@
+Sets the Python code evaluated when the item is executed.
+When calling an operator, use one that supports the current editor, mode, and selection.
+
+```python
+# Add a cube in the 3D Viewport's Object Mode
+bpy.ops.mesh.primitive_cube_add()
+```
+
+:::{admonition} Writing commands
+:class: important
+
+The input limit is **1,024 UTF-8 bytes**. Text containing multibyte characters reaches the limit sooner than 1,024 characters.
+Separate short simple statements with `;`; do not mechanically flatten indented blocks into one line.
+See [Code Input and Execution](/reference/command_text.md) for checking length and moving code into an external script.
+
+:::
+
+:::{admonition} Global variables
+:class: hint
+
+**Examples of available globals:**
+- `C`: the context PME provides to scripts
+- `O`: bpy.ops (Blender operators)
+- `E`: event information
+
+See [Scripting Reference](/reference/scripting.rst) for details.
+:::

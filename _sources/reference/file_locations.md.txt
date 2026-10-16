@@ -1,0 +1,263 @@
+(user_resources)=
+
+# File Locations
+
+PME loads scripts and custom icons from registered **resource folders**.
+Each folder has a name and a path. Menu backups and logs have separate save locations.
+
+:::{versionchanged} 2.2.0
+Added named resource folders and paths relative to the folder containing the running Blender executable (for example, `blender.exe` on Windows), with scripts and icons available from every registered folder.
+Moved the settings into the boot config file, extended Quick Locations to all registered folders, and changed Examples to open directly from the package.
+:::
+
+## Resource Folder Structure
+
+**PME uses fixed subfolder names to find resources.** Each registered folder follows this layout:
+
+```text
+Pie Menu Editor/                # Registered folder; its name and location can change
+├── scripts/
+│   ├── autorun/
+│   ├── register/
+│   └── unregister/
+├── icons/                     # Registered as an icon folder (see below)
+└── exports/
+```
+
+| Location | Purpose |
+|----------|---------|
+| `scripts/` | User scripts. You can organize them in subfolders. |
+| `scripts/autorun/` | Scripts run automatically when PME starts or is enabled. |
+| `scripts/register/` | Initialization scripts run after `autorun/`. |
+| `scripts/unregister/` | Cleanup scripts run when PME is disabled. |
+| `icons/` | Custom icons, when this folder is registered under {guilabel}`Custom Icon Directories`. |
+| `exports/` | The Quick Locations destination for menu Import and Export. |
+
+Unused subfolders do not need to exist. The row menu's {guilabel}`Create Subfolders` adds missing
+`scripts/` and `exports/` directories inside an existing resource folder.
+
+**Custom icons are registered separately, under {guilabel}`Custom Icon Directories`.** PME uses the `.png` files
+directly inside each registered icon folder, so a folder of PNG files can be added as it is.
+Adding a resource folder with **+** also adds its `icons/` folder to {guilabel}`Custom Icon Directories` when it exists.
+Icon folders do not follow later changes to resource folders, and the list can be empty; then only the bundled icons are used.
+Create `autorun/`, `register/`, and `unregister/` only when you need automatic script execution.
+Registering or browsing a location does not create subfolders or move existing files.
+
+### Default Location
+
+| OS | Path |
+|----|------|
+| Windows | `%USERPROFILE%\Documents\Pie Menu Editor\` |
+| macOS | `~/Documents/Pie Menu Editor/` |
+| Linux | `$XDG_DOCUMENTS_DIR/Pie Menu Editor/` (fallback: `~/Documents/Pie Menu Editor/`) |
+
+The default folder is outside the add-on package and Blender's config folder.
+Additional resource folders can include shared or read-only locations.
+
+## Register and Manage Folders
+
+Open {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Resources`.
+Use the **+** button in {guilabel}`Script Directories` to choose a folder. The browser starts in your Documents folder, and the chosen folder name fills the {guilabel}`Name` field.
+You can edit {guilabel}`Name` and {guilabel}`Path` directly in the list. Surrounding quotes from a pasted path, such as Windows {guilabel}`Copy as path`, are removed.
+Register the folder that contains `scripts/`. If a registered folder is itself named `scripts`, or directly contains `autorun/`, its row suggests registering the folder that contains it. A folder named `icons` belongs under {guilabel}`Custom Icon Directories`.
+An icon folder that has no PNG files but contains `icons/` suggests registering that `icons/` folder instead.
+
+The menu at the end of each row shows script and icon counts for that location, followed by actions to
+open or choose the folder, create subfolders, or remove its registration.
+**Removal requires confirmation, and the last registration cannot be removed.** Files remain on disk, but slots that use scripts from that folder no longer find them. Its icon folder stays registered; remove it under {guilabel}`Custom Icon Directories` if needed.
+A temporarily unavailable location stays registered. A missing path is shown in red; use the folder button beside it to choose its new location.
+
+The registered name is a display name for the list and Quick Locations. Changing it does not rename a directory or alter saved script references.
+PME uses every registered folder, not only the first entry.
+
+### Quick Locations and Examples
+
+PME's file and folder browsers display {guilabel}`Quick Locations` using the registered names.
+
+| Browser | Destination for a registered name | Additional locations |
+|---------|-----------------------------------|----------------------|
+| Menu Import or Export | That folder's `exports/` | Import also provides {guilabel}`Menu Examples` and {guilabel}`Menu Backups` |
+| Script selection | That folder's `scripts/` | {guilabel}`Script Examples` |
+| Resource or save-location chooser | The registered folder itself | — |
+
+A shortcut changes the browser directory while keeping the filename unchanged.
+Missing destinations appear unavailable; choosing a shortcut does not create a folder.
+
+For the script chooser and its steps, see {ref}`Select an external script in the file browser <external-script-browser>`.
+
+{guilabel}`Menu Examples` and {guilabel}`Script Examples` **open examples directly from the add-on package.**
+PME does not copy them into resource folders. Copies created by 2.1.1 and earlier remain untouched.
+Before editing an example, copy it into one of your own resource folders.
+
+## Absolute and Relative Paths
+
+### Paths in Folder Settings
+
+The folder chooser offers {guilabel}`Absolute` and {guilabel}`Relative` path types.
+Relative paths use **the directory containing the running Blender executable (for example, `blender.exe` on Windows)** as their base.
+The Relative tooltip shows the actual executable name and base directory.
+The chooser's {guilabel}`Go to Relative Path Base` button opens that directory.
+For example, if Blender runs from `/opt/blender/blender`, `../PME-resources` resolves to `/opt/PME-resources`.
+
+This rule applies to resource folders, menu backups, and logs.
+A relative path remains relative after saving and restarting.
+Home-directory and environment-variable expressions are expanded when the path is used.
+Blender's `//` notation follows the operating system's path rules here; it is not relative to the `.blend` file.
+See [Boot Options](boot_options.md) for path syntax and the config file.
+
+### Script References Saved in Slots
+
+Selecting a file inside a registered folder saves **a path relative to that resource folder**.
+For example, selecting `Studio/scripts/modeling/align.py` saves `scripts/modeling/align.py`, and selecting `Studio/tools/align.py` saves `tools/align.py`.
+`scripts/` is an ordinary folder name in this path, not a keyword.
+PME searches every registered folder for that reference when the script runs.
+If no registered folder has the file, PME looks in the add-on package.
+Explicit `assets/examples/scripts/...` references always use the bundled example, even if a registered folder has the same path. Selecting a user file at that reserved path saves an absolute path to keep the selected file.
+References to the examples bundled with PME 1.x, such as `scripts/command_hello_world.py`, and to the copies that 2.1.1 and earlier placed in `scripts/examples/` find the examples bundled with this version.
+
+The folder setting `../PME-resources` and the script reference `scripts/modeling/align.py` use different bases.
+The first locates a resource folder relative to the folder containing the running Blender executable (for example, `blender.exe` on Windows); the second locates a script within the registered folders.
+**Adding a registered name to a script reference does not select a particular resource folder.**
+Files selected outside the registered folders retain absolute paths. Bundled script examples use paths relative to the add-on package.
+
+## Name Conflicts and Automatic Execution
+
+### Conflicting Script References
+
+If a reference such as `scripts/modeling/align.py` matches different files in multiple registered folders,
+PME warns with the candidate paths and **runs none of them**. Registration order does not choose a winner.
+Files at `scripts/modeling/align.py` and `scripts/animation/align.py` have different references despite sharing a filename.
+Change the filename or its subfolder to make a reference unique.
+PME checks the add-on package only when user locations can be inspected and no matching user script exists.
+Different paths to the same physical file count as one candidate.
+
+{guilabel}`Settings` > {guilabel}`Resources` lists every conflicting `.py` path in advance, whether or not a slot uses it.
+The list is updated when you add, change, or remove a folder. It is not checked at startup, to avoid scanning shared or large folders while Blender starts. After restarting Blender, or after adding, renaming, or moving files outside Blender, use the refresh button next to **+** in {guilabel}`Script Directories`.
+If a location cannot be scanned, a warning identifies it and marks the conflict list as incomplete. Check that location and refresh again.
+Files in `scripts/autorun/`, `scripts/register/`, and `scripts/unregister/` are not listed, because all of them run.
+
+Moving or renaming a script does not update saved references automatically.
+The {ref}`read-only resource API <resource-discovery>` also provides registered folders, files, and script resolution results.
+It does not analyze which slots use each file.
+
+### Conflicting Custom Icons
+
+Icons are `.png` files directly inside a registered icon folder, referenced by filename without the extension.
+**Available icons from every icon folder appear together in one list.**
+If different icon folders contain the same icon name, that name is omitted from the selection list.
+{guilabel}`Settings` > {guilabel}`Resources` shows the conflicting names and file paths.
+
+A conflicting name does not fall back to the bundled icon. A unique user icon takes precedence over a bundled icon of the same name.
+Different paths to the same physical file do not count as a conflict.
+
+### Automatic Script Folders
+
+`autorun/`, `register/`, and `unregister/` use a different rule from references saved in slots.
+PME searches these folders and their subfolders for `.py` files in every registered location, then runs each file directly.
+**Different files with the same name in separate locations are both execution candidates.** Only paths to the same physical file are deduplicated.
+
+Adding a folder does not execute its scripts immediately. Automatic script candidates are read the next time PME starts or is re-enabled.
+
+## Save Locations and Migration
+
+Set {guilabel}`Menu Backups` and {guilabel}`Logs` separately in the bottom box of {guilabel}`Resources`.
+These settings are independent of resource folders. Changing a registered name, path, or order does not redirect the outputs.
+**Menu backups contain menu settings.** They do not include script or icon files.
+
+Locations are stored in the [boot config file](boot_options.md).
+A successful save applies immediately and does not require Blender's Save Preferences.
+If saving fails, PME keeps using the last saved settings and displays the unsaved field.
+Changing a path does not move existing files.
+
+Migration from 2.1.1 and earlier preserves the single resource folder, its files, and any configured backup and log destinations.
+Only missing save locations are initialized from that folder's `backups/` and `logs/` subfolders.
+They then remain independent settings and do not follow changes to the resource list.
+
+### Sharing Across Machines
+
+Resource folders can be shared through Syncthing, Dropbox, Git, or another file-sync tool.
+Automatic backup filenames include an environment identifier, for example
+`backup_YYYY.MM.DD_HH.MM.SS_<environment-id>.json`.
+Change detection and retention remain separate for each Blender environment in a shared backup directory.
+Existing backups without an identifier remain in place.
+
+Menu definitions (Pie Menus, Pop-up Dialogs, and other menu settings) are stored separately from resource files.
+To share menu definitions as files, use {guilabel}`Export` > {guilabel}`All Menus` to write them as JSON.
+
+## Folder Layouts by Version
+
+:::{dropdown} Single-Folder Layout (2.1.1 and earlier)
+
+PME 2.1.1 kept scripts, icons, backups, exports, and logs in one resource folder.
+This diagram records that layout:
+
+```text
+Pie Menu Editor/
+├── scripts/                    # User scripts
+│   ├── autorun/                # Scripts run automatically when PME starts
+│   └── examples/               # Examples copied from bundled templates
+│       ├── command_*.py
+│       └── custom_*.py
+├── icons/                      # Custom icons
+├── backups/                    # Automatic backups
+│   └── backup_YYYY.MM.DD_HH.MM.SS_<environment-id>.json
+├── exports/
+│   └── examples/               # Example presets copied on first startup
+│       ├── 3d_view_numpad_pie.json
+│       ├── mesh_select_mode_pie.json
+│       └── ...
+└── logs/                       # Log files
+```
+
+Existing files remain in place after updating to 2.2.0.
+`backups/` and `logs/` remain in use when selected as save locations.
+Examples now open directly from the package; PME no longer copies them into `scripts/examples/` or `exports/examples/`.
+:::
+
+:::{dropdown} File Layout (1.19.2 and earlier)
+
+In PME 1.19.2 and earlier, user resources were stored inside or adjacent to the add-on directory.
+Overwriting or removing the add-on could delete scripts and icons.
+
+### Directory Structure
+
+```text
+addons/
+├── pie_menu_editor/              # Add-on package
+│   ├── scripts/
+│   │   ├── autorun/              # Auto-run scripts on startup
+│   │   │   └── functions.py      # System file
+│   │   └── ...
+│   ├── icons/                    # Custom icons (PNG)
+│   ├── examples/                 # Example configurations
+│   ├── __init__.py
+│   └── ...
+└── pie_menu_editor_data/         # User data (separate from add-on)
+    └── backups/                  # Automatic backups
+```
+
+### Folder Roles
+
+`pie_menu_editor/scripts/autorun/`
+: Scripts that run automatically when PME starts. `functions.py` is a system file.
+
+`pie_menu_editor/icons/`
+: Custom icons (PNG format). Located inside the add-on directory, so may be lost on overwrite updates.
+
+`pie_menu_editor_data/backups/`
+: Automatic backup storage. Located in a separate directory from the add-on, so preserved during overwrite updates.
+
+### Blender Add-on Directory Locations
+
+The `addons/` directory above is located at:
+
+| OS | Path |
+|----|------|
+| Windows | `%APPDATA%\Blender Foundation\Blender\<version>\scripts\addons\` |
+| macOS | `~/Library/Application Support/Blender/<version>/scripts/addons/` |
+| Linux | `~/.config/blender/<version>/scripts/addons/` |
+
+```{seealso}
+For migration steps to PME2, see {ref}`installation`.
+```
+:::

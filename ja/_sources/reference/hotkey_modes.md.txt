@@ -1,0 +1,43 @@
+(hotkey-modes)=
+
+# Hotkey Mode
+
+**どの操作で、いつメニューを開くか。** Hotkey設定の左端のボタンから選びます。
+
+:::{div} pme-hkm-reference
+
+| モード | <span class="hkm-axis"><span>押す</span><span>押したまま</span><span>離す</span><span>次の入力</span></span> | 起動する条件 |
+|---|---|---|
+| ![Press](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pPress.png) **Press** | <span class="hkm-line hkm-at-press" aria-label="押したときに起動"><i></i><i></i><i></i><i></i></span> | 押した瞬間 ※ |
+| ![Hold](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pHold.png) **Hold** | <span class="hkm-line hkm-at-hold hkm-with-note" aria-label="押し続けて設定時間に達したときに起動"><i></i><i></i><i></i><i></i><small class="hkm-dot-note">時間</small></span> | Holdの時間に達する |
+| ![Tweak](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pTweak.png) **Tweak** | <span class="hkm-line hkm-at-hold hkm-with-note" aria-label="押したままマウスを動かし、開始距離を超えたときに起動"><i></i><i></i><i></i><i></i><small class="hkm-dot-note">距離・方向</small></span> | ドラッグ開始の距離を超える<br><small>PMEが判定</small> |
+| ![Double Click](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pDouble.png) **Double Click** | <span class="hkm-line hkm-at-next" aria-label="時間内に2回目を押したときに起動"><i></i><i></i><i></i><i></i></span> | 時間内に2回目を押す |
+| ![Key Chords](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pChord.png) **Key Chords** | <span class="hkm-line hkm-at-next" aria-label="起動キーの後にChordキーを押したときに起動"><i></i><i></i><i></i><i></i></span> | 待ち時間内にChordキーを押す |
+| ![Click](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pClick.png) **Click** | <span class="hkm-line hkm-native hkm-at-release" aria-label="ドラッグせずに離したときに起動"><i></i><i></i><i></i><i></i></span> | ドラッグせずに離す |
+| ![Click Drag](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pDrag.png) **Click Drag** | <span class="hkm-line hkm-native hkm-at-hold hkm-with-note" aria-label="ネイティブの経路では、押したままマウスを動かし、開始距離を超えたときに起動"><i></i><i></i><i></i><i></i><small class="hkm-dot-note">距離・方向</small></span> | ドラッグ開始の距離を超える<br><small>ネイティブの経路ではBlenderが判定</small> |
+
+:::
+
+<span class="hkm-caption">Tweak / Click DragはAny・8方向を指定できます。</span>
+
+(hotkey-mode-combinations)=
+
+## 同じキーに複数のモードを組み合わせる
+
+```{raw} html
+:file: _hotkey_routing.html
+```
+
+**この例ではPressも、押した瞬間には開きません。** PMEが待ち、先に成立した操作へ振り分けます。Double ClickやKey Chordsも同じキーに設定できます。
+
+(hotkey-mode-click-conflicts)=
+
+**Clickは、Press・Hold・Tweak側が入力を処理すると成立しません。** Blenderの判定で短押しとドラッグを分けるなら、Click＋Click Dragを組み合わせます。
+
+Click Dragは、Context Router以外では同じKeymap・キー・修飾キーのPressからPMEが呼び出す場合があります。この経路ではBlenderのドラッグ判定・方向指定を使いません。Context RouterではClick Dragは振り分け対象に入りません。
+
+**Click / Click Dragを表示するには：** {guilabel}`Settings > Hotkeys > Native Click / Click Drag`を有効にします。
+
+<span class="hkm-caption">Releaseは「離す」だけ。Clickには「ドラッグしていない」という条件があります。ReleaseはPMEのモードにはありません。</span>
+
+設定位置は{ref}`ホットキー設定 <hotkey-editor>`、待ち時間やドラッグ開始の距離は{ref}`Settings > Hotkeys <settings-hotkeys>`を参照してください。
