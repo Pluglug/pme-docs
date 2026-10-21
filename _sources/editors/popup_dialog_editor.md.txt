@@ -1,0 +1,533 @@
+(popup-dialog-editor)=
+
+# Pop-up Dialog Editor
+
+**Pop-up Dialog** creates a small popup UI from buttons, properties, sliders, and checkboxes arranged in rows and columns. Unlike Pie Menu and Regular Menu, it lets you design the layout yourself.
+
+
+:::{dropdown} Configuration guide — features, combinations, and uses (for AI)
+
+**Name: Popup Dialog / Type ID: `DIALOG`.** Combines actions and settings in rows and columns, displayed as a dialog or popup. Supports Command / Property / Menu / Hotkey / Custom with additional rows and columns.
+
+- **Assignments**: Property provides an RNA-path widget, Command executes Python, and Custom draws using Blender's `UILayout`.
+- **Menu combinations**: open other menus or expand Regular Menu / Popup Dialog contents. Property / Property Stack references place settings widgets.
+- **Placement**: open from a hotkey, expand inside a Pie Menu, or extend an existing Panel / Header. Distinguish the dialog's own settings from width and position on the referencing slot.
+- **Design**: decide row/column layout separately from popup Mode. Check opening the UI and executing its buttons in the target context separately.
+
+See {ref}`layout <popup-layout>` for rows and columns, {ref}`Extend Target <popup-extend>` for insertion, and {ref}`Advanced settings <popup-advanced>` for display options.
+:::
+
+## Interface and editing workflow
+
+```{raw} html
+:file: common/_popup_dialog_editor_overview_map.html
+```
+
+1. {ref}`Name and basic controls <popup-basic>`
+2. {ref}`Extend Target <popup-extend>`
+3. {ref}`Advanced settings <popup-advanced>`
+4. {ref}`Keymap / Hotkey <popup-hotkey>`
+5. {ref}`Menu slots and layout <popup-layout>`
+
+Set the name, availability, and invocation method, then build the contents with slots.
+
+(popup-basic)=
+
+## Name and basic controls
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-7.44186047%">
+<img src="../_static/images/editors/overview/popup-dialog-blender-5-2.png" width="663" height="430" alt="Viewport Display Menu name, enabled state, preview, and advanced settings controls.">
+</div>
+<figcaption>Name and basic controls in this example.</figcaption>
+</figure>
+```
+
+Controls include enabled state, preview, menu selection, name, tags, documentation, and advanced settings. See {ref}`selected menu settings <overview-selected>`.
+
+(popup-hotkey)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 66;--crop-offset:-51.39534884%">
+<img src="../_static/images/editors/overview/popup-dialog-blender-5-2.png" width="663" height="430" alt="Viewport Display Menu Keymap and Hotkey settings: where and how to invoke it.">
+</div>
+<figcaption>Keymap / Hotkey settings in this example.</figcaption>
+</figure>
+```
+
+Keymap selects where the dialog is available; Hotkey sets the key and modifiers. Open Mode determines the trigger action. See the shared {ref}`Hotkey settings <hotkey-editor>`.
+
+(popup-extend)=
+
+## Extend Target
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/extend-target-topbar.png
+:alt: Extend Target set to TOPBAR_HT_upper_bar, with insertion side, right-region toggle, and display order.
+:width: 100%
+
+Example with TOPBAR_HT_upper_bar as the destination.
+```
+
+
+The row below the top bar inserts this Pop-up Dialog into an existing Blender panel or header.
+
+```{versionadded} 2.0.0
+Redesigned Extend Panel / Extend Header so multiple Pop-up Dialogs / Regular Menus can share a Target.
+```
+
+:Extend Target:
+  Destination Blender class ID, with search. Paste the string obtained through Interactive Panels' **Copy Panel ID**. When unset, the dialog works as an ordinary hotkey-invoked popup.
+
+:Side:
+  Insertion position. **Prepend** adds at the start; **Append** adds at the end. The image uses left and right triangle buttons.
+
+:R:
+  Appears only for `TOPBAR_HT_` targets and toggles insertion into the TOPBAR header's right region.
+
+:Order:
+  Display order for menus sharing a Target. Lower values draw first.
+
+See [Interactive Panels and Extend Panel](./interactive_panels.md) for the insertion workflow.
+
+(popup-advanced)=
+
+## Advanced settings
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 121;--crop-offset:-22.32558140%">
+<img src="../_static/images/editors/overview/popup-dialog-blender-5-2.png" width="663" height="430" alt="Viewport Display Menu advanced settings: description, availability, display mode, width, and property alignment.">
+</div>
+<figcaption>Advanced settings in this example.</figcaption>
+</figure>
+```
+
+Description and Poll set the tooltip and availability. Dynamic Python descriptions are also supported. See the shared {ref}`advanced settings <editor-extra-settings>`.
+
+```{versionadded} 2.1
+Property Split aligns labels and input fields. In addition to the whole-menu setting, individual items can override it.
+```
+
+**Property Split** separates property names from values; **Property Decorators** controls animation-related decorations.
+
+### Display modes
+
+![Popup Dialog mode settings](/../../shared/_static/images/original/popup/pme_popup_mode.png)
+
+Choose one of three modes for the popup's appearance and closing behavior.
+
+:::{table} Mode comparison
+:widths: 50 50 50 50
+:align: left
+
+| Mode | Pie | Dialog | Popup |
+|:------|:-------:|:-------:|:-------:|
+| Closes when the mouse leaves the popup | ❌ | ❌ | ✅ |
+| Closes after interacting with a widget | ✅ | ❌ | ❌ |
+| OK button | ❌ | ✅ | ❌ |
+| Movable | ❌ | ✅ | ✅ |
+| Customizable width | ❌ | ✅ | ✅ |
+:::
+
+(popup-layout)=
+
+## Layout
+
+Build a Pop-up Dialog UI with Blender's row-and-column layout system.
+
+Slots become widgets such as buttons or properties. Split rows into columns and add subcolumns or subrows as needed. Adding, removing, and reordering slots changes the popup layout.
+
+![Layout demonstration](/../../shared/_static/images/original/popup/pme_layout.gif)
+
+<style>
+.layout-colors span {
+    padding: 0 4px;
+    border-radius: 3px;
+    color: white;
+}
+</style>
+
+<div class="layout-colors">
+    <p>
+    In the editor, divide a <span style="background-color:rgb(213, 77, 77)">row</span> into columns, then add <span style="background-color:rgb(45, 100, 178)">subcolumns</span> and <span style="background-color:rgb(65, 178, 42)">subrows</span> as needed.
+    </p>
+</div>
+
+To add a subcolumn, open an item's menu with {kbd}`LMB` and select the *Column* separator. Use *Begin Subrow* and *End Subrow* in the menu to add subrows inside a column.
+
+A Custom slot can use Python layout APIs directly to draw widgets in place of a default button.
+
+This video by original author **roaoao** demonstrates combining rows and columns. Its UI is from an older version, but it shows how to build a complex layout.
+
+:::{dropdown} Popup Dialog with Complex Layout
+:open:
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/MbnaiXBwBJI" title="Popup Dialog with Complex Layout" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog with Complex Layout — Open on YouTube](https://www.youtube.com/watch?v=MbnaiXBwBJI)
+:::
+
+### Expand the layout in a parent popup
+
+![Layout expansion settings](/../../shared/_static/images/original/popup/pme1.14.0_pd_expand.png)
+
+When a Pie Menu or Pop-up Dialog slot references this dialog, choose between opening a separate popup and expanding its layout in the calling menu. Enable **Expand Popup Dialog** in the calling slot's *Menu* tab for expansion.
+
+### Fixed columns
+
+![Fixed columns demonstration](/../../shared/_static/images/original/popup/pme_layout_fixed_columns.png)
+
+**Fixed Columns** gives columns equal widths. It does not set a width in pixels.
+
+### Alignment
+
+![Alignment demonstration](/../../shared/_static/images/original/popup/pme_layout_alignment.gif)
+
+For an unsplit row without columns, choose left, center, or right horizontal button alignment.
+
+---
+
+(popup-slots)=
+
+### Embedded panels and link controls
+
+```{versionadded} 2.0.5
+Added collapsible panels and editor link-button visibility settings. Embedded panels require Blender 4.2 or later.
+```
+
+```{raw} html
+:file: common/_popup_slot_map.html
+```
+
+(popup-panel-row)=
+
+**A. Panel Row** embeds another Pop-up Dialog as a collapsible panel. “Display As” references the dialog used for its contents. Use the body for {ref}`target and initial-state settings <popup-panel-content-menu>` and the rightmost panel icon for {ref}`whole-row actions <popup-panel-row-menu>`.
+
+(popup-linked-menu)=
+
+**B–C. Edit linked content** — chain buttons open the referenced menu for editing.
+
+- **B: ordinary Menu slot**: {ref}`Editor Link Buttons <setting-editor-link-buttons>` controls button visibility. Even when off, **Go to Linked Menu** remains available in the {ref}`slot action menu <popup-item-menu>`.
+- **C: Panel Row body**: the link button is always shown. **Go to Panel Content** is also available in the body menu. Navigation is unavailable if the reference is invalid.
+
+(popup-edit-menus)=
+
+## Edit slots and rows
+
+(popup-slot-editor)=
+
+### Slot contents
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
+```
+:::
+
+:::{tab-item} Property
+:sync: property
+
+```{include} common/slot_types/property.md
+```
+:::
+
+:::{tab-item} Menu
+:sync: menu
+
+```{include} common/slot_types/menu.md
+```
+:::
+
+:::{tab-item} Hotkey
+:sync: hotkey
+
+```{include} common/slot_types/hotkey.md
+```
+:::
+
+:::{tab-item} Custom
+:sync: custom
+
+```{include} common/slot_types/custom.md
+```
+:::
+
+::::
+
+#### Add a slot preset
+
+```{include} common/slot_types/examples.md
+```
+
+---
+
+The **menu opened from a slot button** edits its content, icon, and position. The **menu at the right end of a row** controls the whole row's size, spacing, insertion, and movement. Items vary by slot type and row structure.
+
+(popup-item-menu)=
+
+### Slot actions (PDI)
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/pdi-menu-blender-5-2.png
+:alt: Ordinary slot action menu with Edit Slot, Change Icon, Visible, add/copy/move actions, Separator, and Alignment.
+:width: 440px
+
+An ordinary slot named Button 1.
+```
+
+| Item | Action and availability |
+|---|---|
+| **Edit Slot** | Edits the slot's contents. |
+| **Change Icon** | Changes its icon. |
+| **Hide Text** | Hides the label, leaving only the icon. Available for slots with an icon and for Property slots. |
+| **Visible** | Toggles slot visibility. |
+| **Go to Linked Menu** | Opens the referenced menu for editing. Shown for linked Menu slots; disabled for missing or invalid references. |
+| **← Add Slot / → Add Slot** | Adds a slot to the left / right of the selected slot. |
+| **Split Row** | Splits before this slot. Available after the first slot in an ordinary row without columns or alignment. |
+| **Copy Slot / Paste Slot** | Copies a slot / pastes copied content. Paste Slot appears when a slot has been copied. |
+| **Move Slot** | Chooses a destination. Not shown in a Panel Row header. |
+| **Enabled / Disabled** | Toggles enabled state. The label reflects the current state. |
+| **Remove Slot / Remove Row** | Removes the slot. If it is the only slot, removes the row instead; available when other rows exist. |
+
+**The groups on the right control separators and alignment before the slot.**
+
+| Group | Items and meaning |
+|---|---|
+| **Separator** | **None**: no separator. **Spacer**: adds preceding space except at the row start. **Column**: starts a new column; unavailable in Panel Row headers, aligned rows, and similar cases. |
+| **Column** | **Begin Subrow / End Subrow**: sets or clears the start/end of a horizontal subrow inside a column. Available according to the current structure in ordinary rows with columns. |
+| **Alignment** | **Left / Center / Right**: establishes alignment relative to this position. Available in rows without columns. **Clear** removes existing row alignment. |
+
+(popup-row-menu)=
+
+### Row actions (PDR)
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/pdr-menu-blender-5-2.png
+:alt: Ordinary row menu with Size, Spacer, Fixed Buttons, add row/panel actions, Join Row, copy, move, and remove.
+:width: 260px
+
+Ordinary row action menu.
+```
+
+| Item | Action and availability |
+|---|---|
+| **Size** | Chooses row height and scope. See the size settings below. |
+| **Spacer** | Chooses space above the row and scope. Not shown for the first row. |
+| **Fixed Buttons** | Equalizes button widths in a row without columns, or a subrow inside a column. |
+| **Fixed Columns** | Equalizes column widths. Available for rows with columns; does not enter a fixed pixel width. |
+| **Add Row Above / Below** | Adds an ordinary row above / below the current row. |
+| **Add Panel Above / Below** | Adds a Panel Row above / below the current row. Requires Blender panel-layout support. |
+| **Join Row** | Joins the next ordinary row into this row. Unavailable if there is no next row or it is a Panel Row. Column and alignment separators in the joined rows are also removed. |
+| **Copy Row / Paste Row** | Copies a row / inserts a copied row before the current one. Paste Row appears when a row has been copied. |
+| **Move Row** | Chooses a destination for the entire row. |
+| **Remove Row** | Removes the entire row. Available when other rows exist. |
+
+#### Size — height and scope
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/pdr-size-blender-5-2.png
+:alt: Size submenu with Normal, Large, and Larger for Row, Aligned Rows, and All Rows.
+:width: 354px
+```
+
+**Normal / Large / Larger** use **1 / 1.25 / 1.5 times** the standard height. **Row** affects the current row, **Aligned Rows** affects a contiguous group without spacing, and **All Rows** affects every row.
+
+#### Spacer — space between rows
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/pdr-spacer-blender-5-2.png
+:alt: Spacer submenu with None, Normal, Large, and Larger for Row and All Rows.
+:width: 217px
+```
+
+**None / Normal / Large / Larger** selects progressively wider spacing. **Row** affects space above the current row; **All Rows** affects gaps between all rows. Row's **None** can be unavailable for adjacent rows containing columns.
+
+(popup-panel-content-menu)=
+
+### Panel body actions (PDI)
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/pdi-panel-blender-5-2.png
+:alt: Panel body menu with Edit Panel Target, Go to Panel Content, Default Closed, Header Layout, and panel row copy/move/remove actions.
+:width: 260px
+```
+
+| Item | Action and availability |
+|---|---|
+| **Edit Panel Target** | Sets or changes the dialog used for panel contents. |
+| **Go to Panel Content** | Opens the referenced dialog for editing when the reference is valid. |
+| **Default Closed** | Starts the panel collapsed. |
+| **Header Layout** | Places slots in the panel header. Enabling it adds an initial header slot if needed. |
+| **Copy Panel Row / Paste Row** | Copies the entire panel row / inserts a copied row before it. Paste Row appears when a row has been copied. |
+| **Move Panel Row** | Chooses a destination for the entire panel row. |
+| **Remove Panel Row** | Removes the panel row. Available when other rows exist. |
+
+Turning Header Layout off retains existing header slots but leaves them inactive. Their menu offers **Enable Header Layout** to reuse them and **Delete Inactive Header** to remove them.
+
+(popup-panel-row-menu)=
+
+### Panel row actions (PDR)
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/pdr-panel-blender-5-2.png
+:alt: Panel Row menu with Header Layout, Spacer, ordinary/panel row insertion, copy, move, and remove.
+:width: 260px
+```
+
+**Panel Row** is the row-type heading. This menu manages placement of the entire panel.
+
+| Item | Action and availability |
+|---|---|
+| **Header Layout** | Toggles use of header slots. |
+| **Spacer** | Sets space above the panel row. Available after the first row. |
+| **Add Row Above / Below** | Adds an ordinary row above / below. |
+| **Add Panel Above / Below** | Adds another panel row above / below. |
+| **Copy Panel Row / Paste Row** | Copies the panel row / inserts a copied row before it. Paste Row appears when a row has been copied. |
+| **Move Panel Row / Remove Panel Row** | Moves / removes the entire panel row. Removal is available when other rows exist. |
+
+Ordinary-row **Size / Fixed Buttons / Fixed Columns / Join Row** are not offered for panel rows.
+
+:::{admonition} Opening editing menus from scripts
+:class: note
+
+Use `bpy.ops.pme.pdi_menu('INVOKE_DEFAULT', idx=...)` for slot actions and `bpy.ops.pme.pdr_menu('INVOKE_DEFAULT', row_idx=...)` for row actions. Both target the menu currently selected in PME.
+
+`idx` is a position in the slot collection; `row_idx` is the row-start position in that same collection, not its visible row number. Invoke in an editing context and do not reuse stale positions after switching menus.
+
+:::
+
+---
+
+### Inline editing hotkeys
+
+These edit buttons and rows directly in preview or in a Pop-up Dialog opened while the editor is active.
+
+#### Button actions
+
+:::{table} Button action hotkeys
+:widths: 30 15 15 15 15 15
+:align: left
+
+| Action | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | {kbd}`Alt` | {kbd}`OS` |
+|------|:---:|:---:|:---:|:---:|:---:|
+| Open menu | {kbd}`LMB` | | | | |
+| Edit button | {kbd}`LMB` | | {kbd}`Shift` | | |
+| Add button to the right | {kbd}`LMB` | {kbd}`Ctrl` | | | |
+| Add button to the left | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | | |
+| Remove button | {kbd}`LMB` | {kbd}`Ctrl` | | {kbd}`Alt` | |
+| Change icon | {kbd}`LMB` | | | {kbd}`Alt` | |
+| Clear icon | {kbd}`LMB` | | | {kbd}`Alt` | {kbd}`OS` |
+| Hide text | {kbd}`LMB` | | {kbd}`Shift` | {kbd}`Alt` | |
+| Toggle spacer | {kbd}`LMB` | | | | {kbd}`OS` |
+| Copy button | {kbd}`LMB` | {kbd}`Ctrl` | | | {kbd}`OS` |
+| Paste button | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | | {kbd}`OS` |
+:::
+
+#### Row management
+
+:::{table} Row management actions
+:widths: 30 20 20 20 10
+:align: left
+
+| Action | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | {kbd}`OS` |
+|------|:---:|:---:|:---:|:---:|
+| Open menu | {kbd}`LMB` | | | |
+| Add row below | {kbd}`LMB` | {kbd}`Ctrl` | | |
+| Add row above | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | |
+| Cycle row size | {kbd}`LMB` | | {kbd}`Shift` | |
+| Cycle row spacer | {kbd}`LMB` | | | {kbd}`OS` |
+:::
+
+---
+
+## Advanced uses
+
+### A temporary alternative to the N-Panel
+
+Collect settings in a Pop-up Dialog and invoke it by hotkey to keep them available without a permanent N-Panel presence. Property and Custom slots can use Blender's standard widgets directly.
+
+### Open detailed settings from one Pie Menu slot
+
+Reference the Pop-up Dialog from a Pie Menu's Menu slot to open settings that do not fit in the pie. Enable **Expand Popup Dialog** to draw the layout inside the pie slot rather than in a separate popup.
+
+### Draw in another layout with `draw_menu()`
+
+While `open_menu()` opens a standalone Pop-up Dialog, `draw_menu()` **draws its contents into the current layout**. Reuse a dialog layout in a Panel Group or another Pop-up Dialog.
+
+```python
+draw_menu("Popup Dialog Name")
+draw_menu("Popup Dialog Name", frame=True, dx=10, dy=10)
+```
+
+### Draw an existing Blender panel in Custom
+
+Use the `panel()` helper in a Custom slot's Python layout code to embed native Blender panels. `template_*` widgets can also be used.
+
+```python
+panel("VIEW3D_PT_view3d_properties", frame=True, header=True)
+```
+
+`template_list()` needs both the collection and an Int property storing the selected item index. Use an existing RNA property on the target or define your own.
+
+### Insert with Extend Panel / Extend Header
+
+Set Extend Target to insert this Pop-up Dialog's contents into an existing Blender panel or header. See [Interactive Panels and Extend Panel](./interactive_panels.md).
+
+### Open a Blender editor area with `popup_area`
+
+Separate from Pop-up Dialog Editor, `popup_area` opens an actual Blender editor area—such as Properties, Outliner, or Asset Browser—in a temporary popup window. Use it when you want an existing editor instead of building a layout yourself.
+
+```python
+bpy.ops.pme.popup_area(area='PROPERTIES', width=600, height=800)
+```
+
+```python
+bpy.ops.pme.popup_area(area='ASSETS', width=1000, center=False, height=800)
+```
+
+---
+
+```{admonition} Related pages
+:class: seealso
+
+- [Common Editor Elements](editor_common_elements.md)
+- [Interactive Panels and Extend Panel](interactive_panels.md)
+- [Custom Icons](custom_icons.md)
+- [Poll Method](../reference/poll_method.md)
+- [Choosing a Keymap](../reference/keymap_guide.md)
+```
+
+## Reference videos (original author's channel)
+
+From [roaoao's videos](../reference/original_author_videos.md). These show an older interface and workflow.
+
+:::{dropdown} Popup Dialog Editor
+:open:
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/JdbmDSV9wIU" title="Popup Dialog Editor" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog Editor — Open on YouTube](https://www.youtube.com/watch?v=JdbmDSV9wIU)
+:::
+
+:::{dropdown} Popup Dialog with Panels
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/-fhI2imoo4U" title="Popup Dialog with Panels" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog with Panels — Open on YouTube](https://www.youtube.com/watch?v=-fhI2imoo4U)
+:::
+
+:::{dropdown} Popup Dialog with Custom Layout
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/sF10rVDVo-k" title="Popup Dialog with Custom Layout" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog with Custom Layout — Open on YouTube](https://www.youtube.com/watch?v=sF10rVDVo-k)
+:::

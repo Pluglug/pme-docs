@@ -1,0 +1,370 @@
+(modal-operator-editor)=
+
+# Modal Operator Editor
+
+**Modal Operator** は、hotkey を押してから確定 / 取消するまで 入力を受け取り続ける対話ツールを作成するエディターです。マウス移動・マウスホイール・サブホットキーを入力として、連続的にプロパティを変更したり処理を呼び出したりします。
+
+
+このページは PME 2.1 の設定を対象にしています。
+
+(modal-configuration-guide)=
+
+:::{dropdown} 構成ガイド — 機能・組み合わせ・活用例（AI 向け）
+
+**呼び名：Modal Operator／種別 ID：`MODAL`。**
+開始から確定・取消まで入力を受け取り続ける対話ツールです。Blender の Transform などの modal keymap を直接編集する機能ではありません。
+
+| 入力先 | 用途 | 種別 ID |
+|---|---|---|
+| Command | サブホットキーに対応するコード | `COMMAND` |
+| Property | マウスなどで値を調整するプロパティパス | `PROP` |
+| On Invoke | 開始時の処理 | `INVOKE` |
+| On Confirm / On Cancel | 終了時の処理 | `FINISH` / `CANCEL` |
+| On Update | 調整後の更新処理 | `UPDATE` |
+
+- **構成**：必要な入力や開始・終了処理のスロットを追加します。数は固定ではありません。起動キー、各スロットの入力、確定・取消方法をセットで決めます。{ref}`入力とスロット <modal-slots>`へ。
+- **値の調整**：Property では入力方式、値の範囲、増減量を確認します。{ref}`Property <modal-property-input>`へ。
+- **制約**：On Cancel は自分で書く処理です。任意の Command が行った変更を自動で巻き戻す保証ではありません。
+- **組み合わせ**：Macro の対話ステップとして使えます。確定・取消が Macro の続行に与える影響も試します。
+- **設計例**：On Invoke で初期値を記録し、Property で調整、On Cancel で初期値へ戻す。{ref}`活用例 <modal-patterns>`へ。
+- **実行条件**：編集中に対象が消える場合やエリア・モードが変わる場合を考え、無効な参照を使わないようにします。Lock Mouse はカーソルの移動範囲の設定で、任意の context を保証する機能ではありません。
+- **変数の共有期間**：一回の開始から確定・取消まで、各スロットで共有します。{ref}`変数の共有と復元 <modal-shared-variables>`へ。
+:::
+
+
+## 画面と編集の流れ
+
+```{raw} html
+:file: common/_modal_operator_editor_overview_map.html
+```
+
+1. {ref}`名前と基本操作 <modal-basic-settings>`
+2. {ref}`Advanced settings <modal-advanced-settings>`
+3. {ref}`Keymap / Hotkey <modal-hotkey-settings>`
+4. {ref}`操作とイベントのスロット <modal-slots>`
+
+
+一覧で編集対象を選び、名前と有効状態を確認して、呼び出し方とスロットを設定します。
+共通の一覧・検索・タグは [エディターの共通要素](editor_common_elements.md)、
+各部は {ref}`名前 <modal-basic-settings>`、{ref}`キー設定 <modal-hotkey-settings>`、
+{ref}`スロット <modal-slots>`、{ref}`詳細設定 <modal-advanced-settings>`を参照してください。
+
+## モーダルオペレーターのしくみ
+
+Modal Operator は、起動 hotkey から確定 / 取消までの間、次の順序で動作します。
+
+```{mermaid}
+flowchart TD
+    A["起動キー"] --> B["On Invoke"]
+    B --> C["入力を待つ"]
+    C --> D["対応する Command / Property"]
+    D --> E["対応する On Update"]
+    E --> C
+    C --> F["確定: On Confirm"]
+    C --> G["取消: On Cancel"]
+```
+
+On Update は全イベントに先行する処理ではなく、対応する操作や値の更新に伴って呼ばれます。
+開始処理は入力を受け取った後に実行されるため、実行時のイベントと初期値を必要な範囲で保存します。
+
+---
+
+(modal-basic-settings)=
+
+## 名前と基本操作
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-9.27536232%">
+<img src="../_static/images/editors/overview/modal-operator-blender-5-2.png" width="663" height="345" alt="MD Focal Length の 名前と基本操作。対話操作全体の名前と有効状態を確認します。">
+</div>
+<figcaption>名前と基本操作。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+名前と有効状態で編集対象を確認します。タグ・名前変更・参照元などの操作は
+{ref}`選択メニューの設定 <overview-selected>` を参照してください。
+この種別にはメニューのプレビューボタンはありません。
+
+(modal-hotkey-settings)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 64;--crop-offset:-53.62318841%">
+<img src="../_static/images/editors/overview/modal-operator-blender-5-2.png" width="663" height="345" alt="MD Focal Length の Keymap / Hotkey。呼び出す場所とキーを設定します。この例は 3D View の Shift + Alt + F です。">
+</div>
+<figcaption>Keymap / Hotkey。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+呼び出す場所とキーを設定します。入力欄の操作は {ref}`共通の Hotkey 設定 <hotkey-editor>` を参照してください。
+
+ここで設定するのはモーダル全体を起動する hotkey です。サブホットキーは各スロット側で個別に設定します。
+
+(modal-slots)=
+
+## スロット
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 88;--crop-offset:-73.33333333%">
+<img src="../_static/images/editors/overview/modal-operator-blender-5-2.png" width="663" height="345" alt="MD Focal Length の 操作とイベントのスロット。起動時の処理、操作する値、取消時の処理を組み合わせます。この例は焦点距離です。">
+</div>
+<figcaption>操作とイベントのスロット。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+スロットは「実行ルール」として上から順に並びます。各スロットは次の情報を持ちます。
+
+- タイプ（Command / Property / On Invoke / On Confirm / On Cancel / On Update）
+- トリガー（サブホットキー / マウス移動 / マウスホイール / 開始・確定・取消のタイミング）
+- 実行内容（Python コードまたはプロパティパス）
+
+スロットの追加・削除・並び替え・無効化はすべて可能です。
+
+### On Update の配置位置による対象
+
+On Update は配置位置によって対象が変わります。
+
+- すべてのサブホットキーの前に置いた場合 — どのサブホットキーが押されてもその On Update が走ります。
+- Command / Property の後に置いた場合 — 次の Command / Property より前までの On Update が、その項目の処理に対応します。
+
+先頭の共通 On Update は、対応する項目の後の On Update が処理された後に実行されます。画面の再描画すべてを監視するタイマーとしては使いません。
+
+(modal-shared-variables)=
+
+### スロットをまたいで「開始時の値」を覚える
+
+**開始時に覚え、取消時に戻す。** 別のスロットでも、同じ一回の操作中は変数を共有できます。3D ビューの焦点距離を例にすると、次の流れです。
+
+```{mermaid}
+:name: modal-value-memory
+:alt: 開始時の 50 を覚え、80 に調整した後、確定なら 80 を残し、取消なら 50 に戻す。
+
+flowchart LR
+    A["開始<br/>50 を覚える"] --> B["調整<br/>50 → 80"]
+    B --> C["確定<br/>80 を残す"]
+    B --> D["取消<br/>50 に戻す"]
+    classDef remember fill:#e8f1fb,stroke:#4878aa,color:#172b43;
+    classDef keep fill:#e8f5ed,stroke:#45805d,color:#183f28;
+    classDef restore fill:#fff2df,stroke:#b77c28,color:#513512;
+    class A,B remember;
+    class C keep;
+    class D restore;
+```
+
+(modal-save-restore)=
+
+**① On Invoke — 操作するビューと、開始時の数値を覚える**
+
+```python
+saved_view = C.space_data; start_lens = saved_view.lens
+```
+
+**② Property — 焦点距離を調整する**（Mouse Wheel / Step: 1）
+
+```python
+saved_view.lens
+```
+
+**③ On Cancel — 覚えておいた数値へ戻す**
+
+```python
+saved_view.lens = start_lens
+```
+
+`saved_view` と `start_lens` は、自分で付けた変数の名前です。例えば `start_lens` は `banana`（バナナ）でも構いません。**覚える側の On Invoke と、戻す側の On Cancel で同じ名前を使う**ことが大切です。この例では、何を覚えているか分かるように `start_lens` と名付けています。
+
+調整中も `start_lens` は開始時の数値のままです。**確定時は値を残すため、On Confirm は追加不要です。**
+
+Keymap は **3D View**、Confirm on Release は **OFF** に設定し、透視投影の 3D ビューから起動します。ホイールで調整し、Enter で確定、Escape で取消します。
+
+(modal-user-data)=
+
+次の呼び出しや別のメニューにも値を渡したい場合は、一時的な共有メモ {ref}`U（User Data）<scripting-user-data>` を使えます。
+
+:::{admonition} 共有範囲と復元の条件
+:class: note
+
+- **共有期間**：一回の起動から確定・取消まで。On Invoke / Command / On Update / On Confirm / On Cancel と Property の評価・更新は同じ Python 名前空間を使い、次の起動では新しくなります。
+- **この例の前提**：`C.space_data` は起動元のエリアデータです。対象はカメラではなく 3D ビューの焦点距離で、操作中にそのビューが残っている必要があります。On Invoke を Property より上に置いて有効にし、変数を準備します。
+- **PME が用意する名前**：PME が提供する `C`、`E`、`menu`、`slot`、`self`、`confirm`、`cancel` などを上書きしません。
+- **復元**：On Cancel のコードが書き戻します。確定時にも戻すなら On Confirm にも記述します。初期化の失敗・終了スロットの無効化・無効な参照・コードのエラーを補う自動復元はなく、任意の処理中断で On Cancel が必ず実行される保証もありません。
+
+:::
+
+(modal-advanced-settings)=
+(confirm-on-release)=
+
+## Advanced settings（詳細設定）
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 115;--crop-offset:-18.84057971%">
+<img src="../_static/images/editors/overview/modal-operator-blender-5-2.png" width="663" height="345" alt="MD Focal Length の Advanced settings。説明と利用条件、キーを離したときの確定、UI ブロック、マウスの折り返しを設定します。">
+</div>
+<figcaption>Advanced settings。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+歯車から開きます。Description と Poll は {ref}`共通の詳細設定 <editor-extra-settings>` を参照してください。
+
+:Confirm On Release:
+  押下イベントから起動した場合、起動キーの解放で確定する設定です。既定は OFF。キー解放がない呼び出し経路には、別の確定方法を用意します。
+
+:Block UI:
+  継続中、他のホットキーへの入力をブロックします。既定は ON。OFF では対象外のイベントを他の処理へ渡すため、併用する操作も試してください。
+
+:Lock Mouse:
+  マウスでプロパティを調整するとき、カーソルを起動元エリア内で折り返す設定です。既定は ON。エリア端でも調整を続けるための設定で、処理対象の context を任意に固定する保証ではありません。
+
+```{versionadded} 2.0.4
+Lock Mouse 有効時のマウス移動によるプロパティ調整で、カーソルが起動元エリア内へ戻りやすくなりました。
+```
+
+---
+
+## スロットタイプ（Modal 固有）
+
+### Command
+
+サブホットキーが押されたときに実行する Python コードを書きます。スロットエディタ内でこのスロット用のサブホットキーを 1 つ割り当てます。
+
+```python
+bpy.ops.transform.resize('INVOKE_DEFAULT')
+```
+
+```python
+C.scene.tool_settings.use_proportional_edit = not C.scene.tool_settings.use_proportional_edit
+```
+
+(modal-property-input)=
+
+### Property
+
+プロパティへのパスを指定し、どの入力で変えるかを選びます。Property タブの中で入力モードを 3 つから選択します。
+
+| 入力モード | 挙動 |
+|---|---|
+| **Hotkey** | サブホットキーを押している間、マウス移動で値が変わります。 |
+| **Mouse Move** | サブホットキーは使わず、マウス移動だけで値が変わります。他のサブホットキーを塞ぐため、Confirm on Release と組み合わせて確定経路を確保します。 |
+| **Mouse Wheel** | マウスホイールの上下で値を増減します。列挙型 / 離散値向きです。 |
+
+Property の数値入力には **Min Value / Max Value / Step** もあります。値の範囲と一回の増減量を調整し、Reset で参照プロパティの設定に戻せます。型によって使う入力が異なるため、数値・Boolean・Enum を同じ増減処理として扱わないでください。
+
+### On Invoke
+
+モーダル開始時に実行する Python コードを書きます。初期値の保存、オーバーレイ描画の開始、起動時 context の記録などに使います。
+
+```python
+saved_view = C.space_data; start_lens = saved_view.lens
+```
+
+この例の設定全体は {ref}`スロット間で開始値を覚える例 <modal-save-restore>` を参照してください。
+
+### On Confirm
+
+ユーザーが確定したとき（Enter キー / Confirm on Release / `confirm()` 関数）に実行する Python コードを書きます。
+
+### On Cancel
+
+取消時に元へ戻す必要がある値は、この処理で復元します。
+
+ユーザーが取消したとき（Escape キー / 右クリック / `cancel()` 関数）に実行する Python コードを書きます。
+
+### On Update
+
+対応する Command / Property の操作後に実行するコードを書きます。配置位置による対象の違いは {ref}`スロット <modal-slots>` を参照してください。
+
+---
+
+## Python から確定・取消する
+
+Command スロットや On Update の中から、Modal を Python で終了させる関数が使えます。
+
+````{py:function} confirm()
+:noindex:
+
+Modal Operator を確定して終了します。On Confirm が走ります。
+
+:return: `True`
+````
+
+````{py:function} cancel()
+:noindex:
+
+Modal Operator を取消して終了します。On Cancel が走ります。
+
+:return: `True`
+````
+
+```python
+condition_met and confirm()
+```
+
+```python
+invalid_input and cancel()
+```
+
+`condition_met` / `invalid_input` は自分の判定結果を入れる変数です。確定・取消用の名前は Modal の実行中に提供されるため、別の設定先にそのまま持ち出さないでください。
+
+---
+
+(modal-patterns)=
+
+## 活用例と確認する条件
+
+### マウス移動でブラシサイズを連続調整
+
+Property スロットでブラシサイズをバインドし、入力モードを **Mouse Move**、起動キー設定で **Confirm on Release** を有効にすると、押している間マウス移動で値が変わり、離すと確定する操作になります。
+
+### 軸ごとのサブホットキーで対象を切り替える
+
+複数の Property スロットを並べ、それぞれに別のサブホットキー（`X` / `Y` / `Z` など）を割り当てます。モーダル中にどのキーを押すかで調整対象が切り替わります。
+
+### マウスホイールで列挙プロパティを巡回
+
+Property スロットで列挙型プロパティ（`C.space_data.shading.type` など）を指定し、入力モードを **Mouse Wheel** にします。ホイールを回すと値が次々と切り替わります。
+
+### Macro の途中で対話的な調整を入れる
+
+Macro Operator の Menu スロットに Modal Operator を指定すると、Macro の途中でユーザー入力を待つ調整ステップを挟めます。確定するまで次のスロットには進みません。
+
+### `release_confirm` を渡す Blender ネイティブ Modal の呼び出し
+
+Blender の Transform 系のように、ネイティブ側にも `release_confirm` がある operator は、Command スロットから直接呼び出して PME 側の確定挙動と揃えられます。
+
+```python
+bpy.ops.transform.resize('INVOKE_DEFAULT', release_confirm=True)
+```
+
+```{admonition} Blender の Modal Map との違い
+:class: note
+
+Modal Operator Editor は、Blender 内部の **modal keymap**（Transform や Knife ツール内のキー割り当て表）を直接編集する機能ではありません。PME が用意する Modal 風ミニツールを構築する仕組みです。
+```
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+- [キーマップの選び方](../reference/keymap_guide.md)
+```
+
+## 参考動画（原作者のチャンネル）
+
+[roaoao の動画一覧](../reference/original_author_videos.md)より。旧版の UI・手順を扱う参考動画です。
+
+:::{dropdown} Modal Operator Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/aDEX5bix384" title="Modal Operator Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Modal Operator Editor for Blender — YouTube で開く](https://www.youtube.com/watch?v=aDEX5bix384)
+:::

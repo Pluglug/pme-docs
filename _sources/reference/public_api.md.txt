@@ -1,0 +1,323 @@
+---
+vocab: developer-facing
+orphan: true
+---
+
+(public_api)=
+
+# Public API
+
+PME2 provides a public API for external scripts and other addons.
+
+## Quick Start
+
+```python
+import pme
+
+# Runtime package identity (Legacy add-on or Blender Extension)
+addon_id = pme.ADDON_ID
+
+# Find a menu
+pm = pme.find_pm("My Pie Menu")
+pm = pme.find_pm(uid="pm_9f7c2k3h")
+
+# Invoke a menu
+pme.invoke_pm("My Pie Menu")
+pme.invoke_pm(uid="pm_9f7c2k3h")
+
+# List menus
+all_menus = pme.list_pms()
+pie_menus = pme.list_pms(mode="PMENU", enabled_only=True)
+tags = pme.list_tags()
+
+# Execute code
+result = pme.execute("bpy.ops.mesh.primitive_cube_add()")
+print(result.ok, result.error)
+
+# Evaluate an expression
+value = pme.evaluate("len(C.selected_objects)")
+
+# Validate JSON
+result = pme.validate_json(json_string)
+for err in result.errors:
+    print(err.code, err.message)
+```
+
+## Changes from PME1
+
+| Topic | PME1 | PME2 |
+|------|------|------|
+| Import | `from pie_menu_editor import pme` | `import pme` |
+| Runtime add-on ID | Hard-coded `"pie_menu_editor"` | `pme.ADDON_ID` |
+| Design | Exposed internal module | Public API facade |
+| Menu invocation | `pme.context.open_menu(name)` | `pme.invoke_pm(name)` / `pme.invoke_pm(uid=...)` |
+| Code execution | `pme.context.exe(code)` | `pme.execute(code)` -> `ExecuteResult` |
+| Menu lookup | None | `pme.find_pm()`, `pme.list_pms()` |
+| JSON validation | None | `pme.validate_json()` |
+| Types and constants | None | `pme.types`, `pme.constants` |
+
+## API Reference
+
+### Menu operations
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - Function
+  - Description
+* - `find_pm(name=None, *, uid=None)`
+  - Find a menu by name or uid. Returns `None` when not found
+* - `invoke_pm(pm_or_name=None, *, name=None, uid=None)`
+  - Invoke a menu. Returns `True` on success
+* - `list_pms(mode=None, *, enabled_only=False)`
+  - Return a list of menus as `PMHandle`
+* - `list_tags()`
+  - Return the list of tags currently in use
+```
+
+### Code execution
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - Function
+  - Description
+* - `execute(code, *, extra_globals=None)`
+  - Execute code and return `ExecuteResult`
+* - `evaluate(expr, *, extra_globals=None)`
+  - Evaluate an expression and return the result. Raises on failure
+* - `check_syntax(code, *, mode="exec")`
+  - Syntax-check only. Returns `SyntaxResult`
+```
+
+### Validation
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - Function
+  - Description
+* - `validate_json(json_string, *, strict=False, check_references=True)`
+  - Validate a document against the bundled JSON Schema v2 and PME UID rules. Returns `ValidationResult`
+* - `validate_uid(uid)`
+  - Validate a uid string format
+```
+
+Validation reads the supplied document without changing it or executing its
+Python code. It uses the bundled schema; the document's `$schema` URL is not
+downloaded. `valid=True` means the requested document checks passed. It does not
+guarantee that an import will succeed in the current Blender setup or that the
+stored commands will run successfully.
+
+Structural validation reports one schema failure at a time, prioritizing basic
+type and required-field errors over dependent conditions. Correct it and validate
+again to discover any remaining structural issues. After the document passes
+the schema, validation checks PME UIDs, including agreement between each menu's
+UID prefix and mode, and, when requested, document references. These checks can
+report multiple issues.
+
+The Extension bundles fastjsonschema 2.22.2, but Blender may already have loaded
+its own 2.21 version in the same Python process. The bundled version and the
+active version can therefore differ. Validation uses their shared API without
+replacing Blender's loaded library.
+
+By default, `check_references=True` also checks UID-based MENU targets and PM
+dependencies recognized in Property Stack / Context Router data against the
+menus in the same document. Set it to `False` to skip this reference-check phase,
+for example when a partial export's targets are supplied separately; structural
+and UID checks still run. Legacy name references
+and Blender menu type names are not resolved against the running Blender session.
+
+If logic data cannot be read for reference inspection, the result includes
+`E603`. If reading it requires normalization, the result includes warning `W202`;
+the supplied data remains unchanged. These diagnostics belong to the optional
+reference-check phase.
+
+Recognized legacy PME JSON returns warning `W301`. Its item contents and name
+references have not been validated against Schema v2. With `strict=True`, any
+warning makes `valid` false while remaining in `result.warnings`.
+
+`pme.validation.validate(data, ...)` accepts already-parsed JSON, and
+`pme.validation.validate_file(filepath, ...)` reads a UTF-8 JSON file. Both use
+the same options and validation result as `validate_json`. Inspect `errors` and
+`warnings` for issue codes and paths, or use `result.format_report()`.
+
+(resource-discovery)=
+
+### Resource discovery
+
+```{versionadded} 2.2.0
+Read-only queries for registered folders, script and icon files, and script-reference resolution.
+The API is **Experimental**.
+```
+
+`pme.resources` reads the [resource configuration](file_locations.md) currently used by PME.
+Enable the [`import pme` alias](boot_options.md) before calling it from external scripts.
+
+| Function | Information | Result |
+|----------|-------------|--------|
+| `list_folders()` | Registered names, saved and resolved paths, and folder status | A tuple of `ResourceFolderInfo` in registration order |
+| `list_icon_folders()` | Saved and resolved paths and status of registered icon folders | A tuple of `ResourceFolderInfo` in registration order; `name` is empty |
+| `list_files(kind=None)` | Existing files and locations that could not be scanned | `ResourceFileListing` |
+| `resolve_script(reference)` | Resolution status and candidates for a script reference | `ScriptResolution` |
+
+`list_files()` accepts `None` (both kinds), `"script"`, or `"icon"` for `kind`.
+
+#### Read registered locations and files
+
+The inventory includes unused files. Use the standard `dataclasses.asdict()` function to prepare JSON for an AI client or another tool.
+**Read `files` together with `issues`.** When a location cannot be read, `files` contains a partial inventory.
+
+```python
+from dataclasses import asdict
+import json
+import pme
+
+folders = pme.resources.list_folders()
+listing = pme.resources.list_files()
+
+payload = {
+    "folders": [asdict(folder) for folder in folders],
+    "files": [asdict(item) for item in listing.files],
+    "issues": [asdict(issue) for issue in listing.issues],
+}
+print(json.dumps(payload, ensure_ascii=False, indent=2))
+```
+
+| Result type | Fields |
+|-------------|--------|
+| `ResourceFolderInfo` | `index`, `name`, `raw_path`, `resolved_path`, `status` |
+| `ResourceFileInfo` | `folder`, `kind`, `relative_path`, `absolute_path` |
+| `ResourcePathIssue` | `folder`, `path`, `code` |
+| `ResourceFileListing` | `files`, `issues` (both tuples) |
+
+Results are immutable data. The `folder` field contains the associated `ResourceFolderInfo`.
+`relative_path` is relative to the registered folder, such as `scripts/modeling/align.py`.
+`raw_path` retains the saved spelling; a folder's `resolved_path` is the absolute path resolved against the running Blender executable.
+Names and `index` describe display names and registration order, not stable identities or namespaces.
+
+| Folder `status` | Meaning |
+|-----------------|---------|
+| `available` | The directory can be opened for listing; this does not guarantee that every child can be read |
+| `missing` | The registered location does not exist |
+| `not_directory` | The location is not a directory |
+| `unreadable` | The location cannot be inspected or scanned |
+| `invalid` | The saved path cannot be resolved; `resolved_path` is an empty string |
+
+Scan failures are returned as `ResourcePathIssue.path` and `code`.
+Codes are `missing`, `not_directory`, `unreadable`, and `invalid`.
+A missing registered resource folder or icon folder is an issue.
+
+#### Check a script reference
+
+**When a slot uses a file inside a registered folder, save its path relative to that folder, such as `scripts/...`.** The resolved absolute path identifies the file observed now.
+This example only builds a command string; it neither executes the script nor edits a slot.
+
+```python
+import pme
+
+reference = "scripts/modeling/align.py"
+result = pme.resources.resolve_script(reference)
+
+if result.status == "resolved":
+    command = f"execute_script({reference!r})"
+    print(command)  # execute_script('scripts/modeling/align.py')
+else:
+    print(result.status, result.candidates)
+```
+
+`ScriptResolution` contains `reference`, `status`, `resolved_path`, and `candidates`.
+`resolved_path` is an absolute path only on success, and `None` otherwise.
+`candidates` is a tuple of confirmed matching file paths.
+
+| `status` | Meaning |
+|----------|---------|
+| `resolved` | One unambiguous file was found; read permission and Python syntax have not been validated |
+| `missing` | No matching file was found |
+| `ambiguous` | Multiple distinct files match |
+| `unavailable` | A required location could not be resolved or inspected, so resolution could not be completed |
+
+A relative reference checks every registered folder using the same resolver as script execution.
+Distinct user files are separate candidates even when their contents match. Aliases of the same real file are one candidate.
+The add-on package is considered only when no user candidate exists and user locations could be checked.
+Absolute references are also accepted.
+
+#### Scan scope and updates
+
+- **Scripts:** Recursively scans lowercase `.py` files anywhere in the registered folder, skipping hidden folders and `__pycache__`. Directory symlinks are followed; each real directory is visited once per registered folder.
+- **Icons:** Lists lowercase `.png` files directly in each registered icon folder, excluding the reserved `_intr_` prefix. `relative_path` is the file name. Use `pme.resources.list_icon_folders()` for the icon folders themselves; they have no display name. Conflicting files and names starting with `_`, which are hidden in the Custom picker, are included. **This is not a list of icons confirmed to be selectable or drawable.**
+- **Settings and files:** Uses the active resource configuration and inspects files on each call. Settings-file changes made in an external editor are loaded on the next startup or re-enable.
+
+These functions do not execute scripts, decode images, create directories, or migrate settings.
+Files can change after a query; script execution resolves the reference again.
+Slot-usage analysis and automatic reference updates after moving or renaming files are outside this API's scope.
+
+When no resource folders are configured, `list_folders()`, `list_icon_folders()`, and `list_files()` return empty results without creating a default folder.
+These two functions raise `RuntimeError` if settings cannot be read and no previous valid configuration is available.
+`list_files()` raises `ValueError` for an unsupported `kind`.
+
+### User properties
+
+User properties created with the Property Editor use the same access forms in
+PME commands (`props()`) and through `import pme` (`pme.props()`).
+
+```python
+import pme
+
+# Get the PropertyGroup and access a property as an attribute
+pme.props().MyCounter = 10
+value = pme.props().MyCounter
+
+# Read or write by registered storage ID
+value = pme.props("MyCounter")
+written = pme.props("MyCounter", 10)
+```
+
+`pme.props(name, None)` remains a read operation; it does not write `None`.
+Named access is limited to properties registered by PME. An unregistered name
+returns `None` when read and `False` when written; it is not created as scratch
+storage.
+Code that used `pme.props.MyCounter` in earlier Experimental builds must use
+`pme.props().MyCounter` instead.
+
+### Runtime add-on identity
+
+Use `pme.ADDON_ID` when a Blender API requires the current add-on module ID.
+The value follows the active package identity, including the
+`bl_ext.<repository>.<package>` identity used by Blender Extensions.
+
+```python
+import bpy
+import pme
+
+addon_preferences = bpy.context.preferences.addons[pme.ADDON_ID].preferences
+```
+
+Use `pme.preferences` when only the PME preferences object is needed. Do not
+hard-code `"pie_menu_editor"` in new scripts.
+
+### Backward compatibility
+
+PME1's `pme.context` and the `props()` command global remain available.
+Existing `props()` scripts inside PME command slots continue to work.
+
+```python
+# These still work in PME2
+pme.context.open_menu("My Menu")
+pme.context.event.mouse_x
+pme.context.add_global("my_var", value)
+props("MyCounter", 10)
+```
+
+Prefer `pme.execute()` and `pme.invoke_pm()` for new code.
+
+```{note}
+The public API is currently **Experimental**. The basic interface is intended to stay stable, but smaller details may change in future versions.
+```
+
+```{seealso}
+You must enable `import pme` before using this API. See [Boot Options](boot_options.md).
+```

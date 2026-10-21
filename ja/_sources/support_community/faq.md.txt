@@ -1,0 +1,42 @@
+(faq)=
+
+# FAQ
+
+質問や過去の解決例は、[PME Treasure](https://pluglug.github.io/ba-pme-treasure/) から探せます。このドキュメントを現在の機能・設定の基準とし、Treasure はコミュニティの実例や回答を探す補助資料として案内しています。
+
+以下は旧バージョンの FAQ から引き継いだ投稿へのリンクです。現在の設定名や動作と異なる場合があります。
+
+## Add-on
+
+* [Can I use created pies without the add-on?](https://blenderartists.org/t/addon-pie-menu-editor-1-15-1/662456/1175?u=roaoao)
+
+## Brushes
+
+* [How can I increase/decrease the brush size?](https://blenderartists.org/t/addon-pie-menu-editor-1-15-0/662456/1319?u=roaoao)
+* [How can I increase/decrease the brush strength?](https://blenderartists.org/t/addon-pie-menu-editor-1-15-1/662456/1176?u=roaoao)
+
+## Context Sensitive Tools
+
+* [How to create context sensitive menus?](https://blenderartists.org/t/addon-pie-menu-editor-1-15-1/662456/1145?u=roaoao)
+* [How to set up separate Pie Menus for different Node Editors?](https://blenderartists.org/t/addon-pie-menu-editor-1-15-0/662456/1329?u=roaoao)
+* [Can I use conditions in Property tab?](https://blenderartists.org/t/addon-pie-menu-editor-1-15-0/662456/1287?u=roaoao)
+* [Can I use context sensitive operators in any area?](https://blenderartists.org/t/addon-pie-menu-editor-1-15-0/662456/1345?u=roaoao)
+* [How to create a button with different Click, Ctrl+Click, Shift+Click actions?](https://blenderartists.org/t/addon-pie-menu-editor-1-15-0/662456/1261?u=roaoao)
+
+## Popup Dialogs
+
+* [Is it possible to keep Popup Dialog open?](https://blenderartists.org/t/addon-pie-menu-editor-1-15-0/662456/1270?u=roaoao)
+* [Is it possible to hide OK button?](https://blenderartists.org/t/addon-pie-menu-editor-1-15-0/662456/1267?u=roaoao)
+
+## Widgets
+
+* [How to make a custom drop-down, open-on-mouse-over menu?](https://blenderartists.org/t/addon-pie-menu-editor-1-15-0/662456/1298?u=roaoao)
+* [How to create a toggle button using Property Editor?](https://blenderartists.org/t/addon-pie-menu-editor-1-15-1/662456/1388?u=roaoao)
+
+(known_issues)=
+
+# 既知の問題
+
+症状に近い過去の報告や対処例は、[PME Treasure](https://pluglug.github.io/ba-pme-treasure/) でも探せます。過去の報告が、現在のバージョンでも発生するとは限りません。
+
+修正の記録は {doc}`changelog`、問題が解決しない場合の報告先は {doc}`get_support` を参照してください。

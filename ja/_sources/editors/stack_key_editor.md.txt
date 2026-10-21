@@ -1,0 +1,298 @@
+(stack-key-editor)=
+
+# Stack Key Editor
+
+**Stack Key** は、一つのホットキーで複数の処理を使い分けるエディターです。押すたびに次へ進む使い方と、前回の処理を再使用しながら連打で候補を変える使い方を選べます。1スロットだけにして、短いコードにホットキーを割り当てることもできます。
+
+
+このページは PME 2.1 の設定を対象にしています。
+
+(stack-configuration-guide)=
+
+:::{dropdown} 構成ガイド — 機能・組み合わせ・活用例（AI 向け）
+
+**呼び名：Stack Key／種別 ID：`SCRIPT`。**
+一つのキーで複数の候補を順に使い分ける機能です。一度の呼び出しで連続処理を完了する Macro Operator とは異なります。
+
+- **入力**：Command または Hotkey のスロット。一つから始め、必要に応じて追加・削除・並び替えできます。通常の巡回では有効な項目を使います。
+- **順序**：上から下へ進み、最後の次は先頭です。{ref}`スロット <stack-slots>`へ。
+- **継続の条件**：Remember Slot、Advance On、Repeat Timeout を先に決めます。{ref}`詳細設定 <stack-advanced-settings>`へ。
+- **制約**：コードを入れる場合は [入力上限](../reference/command_text.md)と実行するエディター・モード・対象を確認します。記憶するのはスロット位置で、Blender のデータを保存する機能ではありません。
+- **組み合わせ**：各 Command から Macro を呼べば、候補ごとに連続処理を持てます。メニューを名前で呼ぶ例は {ref}`活用例 <stack-patterns>`へ。
+- **設計例**：通常は前回のツールを再使用し、素早く押したときだけ候補を変えるなら Remember Slot + Quick Repeat。押すたび必ず候補を変えるなら Every Press。
+- **確認**：最初の押下、連打、間隔を空けた押下、別操作を挟んだ押下を分けて試します。Undo Previous Command は履歴への影響も確認します。
+- **変数の共有期間**：同じ巡回を続けている間の Command 間で共有します。スロット位置の記憶とは別です。{ref}`変数の共有とリセット条件 <stack-shared-variables>`へ。
+:::
+
+
+## 画面と編集の流れ
+
+```{raw} html
+:file: common/_stack_key_editor_overview_map.html
+```
+
+1. {ref}`名前と基本操作 <stack-basic-settings>`
+2. {ref}`Advanced settings <stack-advanced-settings>`
+3. {ref}`Keymap / Hotkey <stack-hotkey-settings>`
+4. {ref}`巡回するスロット <stack-slots>`
+
+
+一覧で編集対象を選び、名前と有効状態を確認して、呼び出し方とスロットを設定します。
+共通の一覧・検索・タグは [エディターの共通要素](editor_common_elements.md)、
+各部は {ref}`名前 <stack-basic-settings>`、{ref}`キー設定 <stack-hotkey-settings>`、
+{ref}`スロット <stack-slots>`、{ref}`詳細設定 <stack-advanced-settings>`を参照してください。
+
+(stack-basic-settings)=
+
+## 名前と基本操作
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-8.55614973%">
+<img src="../_static/images/editors/overview/stack-key-blender-5-2.png" width="663" height="374" alt="Tool Stack の 名前と基本操作。候補をまとめる設定の名前と有効状態を確認します。">
+</div>
+<figcaption>名前と基本操作。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+名前と有効状態で編集対象を確認します。タグ・名前変更・参照元などの操作は
+{ref}`選択メニューの設定 <overview-selected>` を参照してください。
+この種別にはメニューのプレビューボタンはありません。
+
+(stack-hotkey-settings)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 64;--crop-offset:-56.68449198%">
+<img src="../_static/images/editors/overview/stack-key-blender-5-2.png" width="663" height="374" alt="Tool Stack の Keymap / Hotkey。使う場所とキーを指定します。この例は Q キーです。">
+</div>
+<figcaption>Keymap / Hotkey。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+呼び出す場所とキーを設定します。入力欄の操作は {ref}`共通の Hotkey 設定 <hotkey-editor>` を参照してください。
+
+(stack-slots)=
+
+## スロット
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 91;--crop-offset:-74.59893048%">
+<img src="../_static/images/editors/overview/stack-key-blender-5-2.png" width="663" height="374" alt="Tool Stack の 巡回するスロット。上から順に使う候補を並べます。この例は3種類の選択ツールです。">
+</div>
+<figcaption>巡回するスロット。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+通常の巡回では、有効なスロットを上から順に使います。Every Press では押下ごとに進み、Quick Repeat では短時間の続け押しで進みます。最後まで進むと先頭に戻ります。
+
+- スロットの追加・削除・並び替えが可能です。
+- 個別スロットの有効化/無効化ができます。
+- 各スロットには表示名が付き、ビューポート上部のヒントテキストにこの名前が表示されます。
+
+```{versionadded} 2.0.5
+スロットごとにアイコンを設定できるようになりました。スロットを呼び出したときの通知にも、スロット名とアイコンが表示されます。
+```
+
+(stack-shared-variables)=
+
+### 一回目で覚え、次の押下で戻す
+
+**一回押すと床グリッドを隠し、もう一回押すと元へ戻す。** 同じ Stack Key を続けて使う間は、前のスロットで覚えた値を次のスロットから読めます。キーを離すだけでは、次のスロットには進みません。
+
+```{mermaid}
+:name: stack-value-memory
+:alt: 一回目の押下で床グリッドの状態を覚えて隠し、次の押下まで待ち、二回目の押下で元の状態へ戻す。
+
+flowchart LR
+    A["一回目<br/>覚えて隠す"] --> B["次の押下を待つ"]
+    B --> C["二回目<br/>元の状態へ戻す"]
+    classDef remember fill:#e8f1fb,stroke:#4878aa,color:#172b43;
+    classDef restore fill:#e8f5ed,stroke:#45805d,color:#183f28;
+    class A,B remember;
+    class C restore;
+```
+
+**① 最初の Command — 元の状態を覚えてから隠す**
+
+```python
+view = C.space_data; start_floor = view.overlay.show_floor; view.overlay.show_floor = False
+```
+
+**② 次の Command — 覚えていれば、その状態へ戻す**
+
+```python
+if "start_floor" in globals(): view.overlay.show_floor = start_floor
+```
+
+Keymap は **3D View**、**Remember Slot / Undo Previous Command は OFF** にします。二つのスロットを有効にし、透視投影の 3D ビューで、別の操作を挟まず同じ Stack Key を二回呼び出します。
+
+`view` と `start_floor` は自分で付けた名前です。`start_floor` は `banana` でも構いませんが、覚える側と戻す側で同じ名前を使います。 二番目の `if` は「開始値を覚えている場合だけ戻す」という確認です。途中から二番目だけを実行しても、元の値を知らなければ復元できません。
+
+次の独立した呼び出しや別のメニューへ値を渡す場合は、一時的な共有メモ {ref}`U（User Data）<scripting-user-data>` を使えます。
+
+:::{admonition} 共有範囲と復元の条件
+:class: note
+
+- **共有期間**：同じ巡回を続ける Command は同じ Python 名前空間を使います。新しい巡回では初期化されます。Remember Slot が OFF の場合、別の Stack Key や Blender オペレーターの実行などが巡回のリセット判定に影響します。
+- **個別の呼び出し**：スロット番号を明示した呼び出しと、一スロットだけの Stack Key は、毎回新しい名前空間を使います。
+- **Quick Repeat**：時間内に次へ進む場合は共有が続きます。時間外に現在のスロットを再実行する場合は、新しい名前空間になります。
+- **Remember Slot**：記憶するのはスロット位置です。変数をメニューごとに分離して保持する設定ではありません。別の Stack Key を挟んだ後も保存値が残ることを前提にしません。
+- **復元先と名前**：この例で覚えた 3D ビューが残っていることが前提です。PME が提供する `C`、`E`、`menu`、`slot` などを保存先として上書きしません。
+- **復元**：二番目を実行しないまま別の操作へ移ると、元へ戻りません。エラーや巡回のリセットを補う自動復元もありません。押下・解放で戻すなら [Sticky Key](sticky_key_editor.md)、確定・取消で分けるなら [Modal Operator](modal_operator_editor.md) の終了スロットを使います。
+
+:::
+
+(stack-advanced-settings)=
+
+## Advanced settings（詳細設定）
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 143;--crop-offset:-17.37967914%">
+<img src="../_static/images/editors/overview/stack-key-blender-5-2.png" width="663" height="374" alt="Tool Stack の Advanced settings。前回の候補を記憶するか、どのタイミングで次へ進むかを設定します。">
+</div>
+<figcaption>Advanced settings。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+歯車から開きます。Description と Poll は {ref}`共通の詳細設定 <editor-extra-settings>` を参照してください。
+
+:Remember Slot:
+  直前に実行したスロット位置を記憶します。無効の場合は、別の Stack Key や Blender オペレーターの実行などで連続操作が途切れると先頭から再開します。クリックなどの入力すべてを「別の操作」として判定するわけではありません。
+
+  ```{versionchanged} 2.0.5
+  従来の {guilabel}`Remember State` を {guilabel}`Remember Slot` に整理しました。
+  ```
+
+:Advance On:
+  Remember Slot 有効時に、次のスロットへ進むタイミングを選びます。
+
+  - **Every Press** — 押すたびに次のスロットへ進みます。
+  - **Quick Repeat** — 短時間に続けて押したときだけ次へ進み、間隔が空いた押下では現在のスロットを再実行します。
+
+  ```{versionadded} 2.0.5
+  Advance On を追加しました。既存の Stack Key 設定は Every Press 相当の動作を保ちます。
+  ```
+
+:Repeat Timeout:
+  Advance On が Quick Repeat のときに使う、「連続押し」と認める時間のしきい値（ミリ秒）。最小値は 1 ms、既定値は 600 ms。
+
+:Undo Previous Command:
+  連続して候補を切り替える際、前の結果を取り消して次のスロットを実行するための設定です。最初の呼び出しやスロットを明示した呼び出しなどでは同じように Undo しません。複数の変更を一つにまとめる機能ではないため、実際の操作と Undo 履歴で結果を確認してください。
+
+---
+
+## ビューポート上部のヒントテキスト
+
+通常の巡回では、現在のスロット名とアイコンを通知で確認できます。有効なスロットが一つだけの構成や、スロットを明示して呼ぶ経路では、巡回用の通知は表示されません。
+
+---
+
+## コードと入力欄
+
+この種別で使える入力は冒頭の構成ガイドを参照してください。入力欄の操作は
+{ref}`共通のスロットエディタ <slot-editor>`、コードは
+[書き方と入力制限](../reference/command_text.md)、
+[コード例](../reference/scripting_workflow.md)にまとめています。
+
+---
+
+(stack-patterns)=
+
+## 活用例と確認する条件
+
+### 2 つのワークスペースを巡回する
+
+`Layout` と `Scripting` というワークスペースが存在する環境の例です。名前を変更している場合は実際の名前に合わせます。
+
+スロット 1:
+
+```python
+C.window.workspace = D.workspaces['Layout']
+```
+
+スロット 2:
+
+```python
+C.window.workspace = D.workspaces['Scripting']
+```
+
+### 1 スロットだけの「hotkey 付き Python コード」
+
+任意の Python コードや `open_menu()` 呼び出しを 1 つのスロットに書き、Stack Key の hotkey に割り当てます。
+
+```python
+open_menu("My Pie Menu")
+```
+
+ブラシ切り替えにも応用できますが、ブラシアセットの扱いは Blender の版とペイントモードで異なります。旧版の `D.brushes` 代入例を使う前に、現在のブラシ切り替え API と対象を確認してください。
+
+### 修飾キーに応じてスロットを呼び分ける
+
+スロットに名前を付けると、外部からスロット名を指定して呼び出せます。`event_mods(E)` は現在のイベントから `""` / `"Ctrl"` / `"Shift"` / `"Ctrl Shift"` のような文字列を返すヘルパーで、スロット名と一致させることで修飾キー別に処理を切り替えられます。
+
+```python
+open_menu("My Stack Key", event_mods(E))
+```
+
+この例は入力イベント `E` が渡される呼び出しで使います。イベントがない評価にそのまま移さず、対応するスロット名が実在することも確認してください。
+
+### コンテキストに応じてスロットを切り替える
+
+```python
+open_menu("My Stack Key", "Command 1") if C.mode == 'OBJECT' else open_menu("My Stack Key", "Command 2")
+```
+
+### 直前の操作を Undo してから別パラメータで再実行
+
+次は Mesh の Edit Mode で、領域選択に使うループを選択済みの場合の例です。選択状態と Undo を含めて確認してください。
+
+Undo Previous Command を有効にすると、直前の結果を巻き戻してから次のスロットを試せます。
+
+スロット 1:
+
+```python
+bpy.ops.mesh.loop_to_region(select_bigger=False)
+```
+
+スロット 2:
+
+```python
+bpy.ops.mesh.loop_to_region(select_bigger=True)
+```
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+- [キーマップの選び方](../reference/keymap_guide.md)
+```
+
+## 参考動画（原作者のチャンネル）
+
+[roaoao の動画一覧](../reference/original_author_videos.md)より。旧版の UI・手順を扱う参考動画です。
+
+:::{dropdown} Stack Keys in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/4wZKiyKE_P4" title="Stack Keys in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Stack Keys in Blender — YouTube で開く](https://www.youtube.com/watch?v=4wZKiyKE_P4)
+:::
+
+:::{dropdown} Blender Stack Key Tutorial by Jimmy Livefjord
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/-rknBwAPypk" title="Blender Stack Key Tutorial by Jimmy Livefjord" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Blender Stack Key Tutorial by Jimmy Livefjord — YouTube で開く](https://www.youtube.com/watch?v=-rknBwAPypk)
+:::

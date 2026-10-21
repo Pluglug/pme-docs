@@ -1,0 +1,259 @@
+(sticky-key-editor)=
+
+# Sticky Key Editor
+
+**Sticky Key** runs separate actions when a key is pressed and released. Pairing saved values with restoration creates a temporary state while the key is held. Its two fixed slots, On Press and On Release, form the press/release pair.
+
+
+This page describes PME 2.1 settings.
+
+(sticky-configuration-guide)=
+
+:::{dropdown} Configuration guide — features, combinations, and uses (for AI)
+
+**Name: Sticky Key / Type ID: `STICKY`.**
+Assigns different actions to press and release. Combine those actions to create a state that lasts only while the key is held.
+
+- **Inputs**: two fixed slots, On Press / On Release, each accepting Command or Hotkey. See {ref}`slots <sticky-slots>`.
+- **Constraints**: slots cannot be reordered, added, removed, or individually disabled. An unset release action does not automatically restore the previous state.
+- **Temporary values**: for a single property assignment, {ref}`Save and Restore Previous Value <sticky-save-restore>` generates save/restore code. The original value is read at runtime.
+- **Combinations**: temporarily switch tools or 3D Viewport display settings. If the intent is to block other processing, check Block UI and the calling context.
+- **Execution requirements**: referenced targets must be valid at press and release, and the trigger key's release must be received. If the workflow changes areas or modes, also define which target should be restored.
+- **Validation**: vary the starting value and repeat press/release to verify restoration of the original value rather than a fixed value. See {ref}`usage patterns <sticky-patterns>`.
+- **Variable lifetime**: Commands share saved values from one press through its release. See {ref}`shared variables and restoration <sticky-shared-variables>`.
+:::
+
+
+## Interface and editing workflow
+
+```{raw} html
+:file: common/_sticky_key_editor_overview_map.html
+```
+
+1. {ref}`Name and basic controls <sticky-basic-settings>`
+2. {ref}`Advanced settings <sticky-advanced-settings>`
+3. {ref}`Keymap / Hotkey <sticky-hotkey-settings>`
+4. {ref}`Press and release slots <sticky-slots>`
+
+
+Select a Sticky Key in the list, check its name and enabled state, then configure invocation and slots.
+See [Common Editor Elements](editor_common_elements.md) for lists, search, and tags;
+see {ref}`name <sticky-basic-settings>`, {ref}`hotkeys <sticky-hotkey-settings>`,
+{ref}`slots <sticky-slots>`, and {ref}`advanced settings <sticky-advanced-settings>` for each section.
+
+(sticky-basic-settings)=
+
+## Name and basic controls
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-12.35521236%">
+<img src="../_static/images/editors/overview/sticky-key-blender-5-2.png" width="663" height="259" alt="Axis Mirror name and basic controls for the press/release configuration.">
+</div>
+<figcaption>Name and basic controls in this example.</figcaption>
+</figure>
+```
+
+Identify the configuration by its name and enabled state. For tags, renaming, references, and related controls,
+see {ref}`selected menu settings <overview-selected>`.
+This type has no menu preview button.
+
+(sticky-hotkey-settings)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 62;--crop-offset:-54.82625483%">
+<img src="../_static/images/editors/overview/sticky-key-blender-5-2.png" width="663" height="259" alt="Axis Mirror Keymap and Hotkey settings: T in Pose.">
+</div>
+<figcaption>Keymap / Hotkey settings in this example.</figcaption>
+</figure>
+```
+
+Set where and how to invoke it. See the shared {ref}`Hotkey settings <hotkey-editor>` for input controls.
+
+Sticky Key requires both press and release events. Standalone Ctrl / Alt / Shift and OS-reserved keys can be affected by platform behavior and Blender Keymap priority. See [Choosing a Keymap](../reference/keymap_guide.md).
+
+(sticky-slots)=
+
+## Slots
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 48;--crop-offset:-79.92277992%">
+<img src="../_static/images/editors/overview/sticky-key-blender-5-2.png" width="663" height="259" alt="Axis Mirror press and release slots. Press is above release; this example sets mirroring True and False.">
+</div>
+<figcaption>Press and release slots in this example.</figcaption>
+</figure>
+```
+
+Sticky Key has two fixed slots with defined roles.
+
+| Order | Slot | Role |
+|---|---|---|
+| 1 | **On Press** | Runs when pressed, such as entering a temporary state |
+| 2 | **On Release** | Runs when released, such as restoring the original state |
+
+Slots cannot be reordered, added, removed, or disabled.
+
+(sticky-save-restore)=
+
+### Save and Restore Previous Value
+
+With a single property assignment in On Press, the slot editor can generate save/restore code. For example, use the following assignment to temporarily hide the 3D Viewport floor grid.
+
+```python
+C.space_data.overlay.show_floor = False
+```
+
+The button rewrites On Press and On Release as follows:
+
+| Destination | Generated action |
+|---|---|
+| On Press | Saves the runtime value in `value`, then assigns the specified value |
+| On Release | Assigns saved `value` back to the same path |
+
+The saved value is read when the Sticky Key is actually pressed, not when you edit it with this button.
+Existing On Release code is also replaced. Check both slots after generation if you already have custom behavior.
+The path must be valid at both times. This example requires `C.space_data` to be a 3D Viewport.
+
+(sticky-shared-variables)=
+
+### Remember on press, restore on release
+
+**Hide the floor grid only while the key is held.** On Release can use a value saved by On Press.
+
+```{mermaid}
+:name: sticky-value-memory
+:alt: Press saves the floor grid state and hides it; releasing the key restores the original state.
+
+flowchart LR
+    A["Press<br/>Save original state"] --> B["While held<br/>Hide grid"]
+    B --> C["Release<br/>Restore state"]
+    classDef remember fill:#e8f1fb,stroke:#4878aa,color:#172b43;
+    classDef restore fill:#e8f5ed,stroke:#45805d,color:#183f28;
+    class A,B remember;
+    class C restore;
+```
+
+**1. On Press Command — save the original state, then hide**
+
+```python
+view = C.space_data; start_floor = view.overlay.show_floor; view.overlay.show_floor = False
+```
+
+**2. On Release Command — restore the state in the same view**
+
+```python
+view.overlay.show_floor = start_floor
+```
+
+Set Keymap to **3D View**, then press and release in a perspective 3D Viewport. If the grid was already hidden, it remains hidden after release.
+
+`view` and `start_floor` are names you choose. `start_floor` could be `banana`, provided save and restore use the same name. The `value` generated by {ref}`Save and Restore <sticky-save-restore>` uses this same variable sharing.
+
+To pass values to another independent invocation or menu, use temporary shared storage {ref}`U (User Data) <scripting-user-data>`.
+
+:::{admonition} Shared scope and restoration requirements
+:class: note
+
+- **Lifetime**: On Press and On Release Commands share a Python namespace. Starting a new Sticky Key when none is active creates a new namespace; previous values are not retained.
+- **Restoration target**: this example stores the originating 3D Viewport in `view` and requires it to remain available. Generated Save and Restore code re-evaluates the same property path on release, so also save the target reference if it can change during the operation.
+- **Names**: do not overwrite PME-provided names such as `C` or `E` to store values.
+- **Restoration**: On Release is not `finally` for arbitrary failures. Ending On Press through `return_value` without continuing skips the normal release wait. There is no automatic recovery for errors before saving, errors in restore code, or interrupted execution.
+
+:::
+
+(sticky-advanced-settings)=
+
+## Advanced settings
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 73;--crop-offset:-25.09652510%">
+<img src="../_static/images/editors/overview/sticky-key-blender-5-2.png" width="663" height="259" alt="Axis Mirror advanced settings: description, availability, and blocking UI while held.">
+</div>
+<figcaption>Advanced settings in this example.</figcaption>
+</figure>
+```
+
+Open these with the gear button. See the {ref}`shared advanced settings <editor-extra-settings>` for Description and Poll.
+
+:Block UI:
+  Prevents input from reaching other tools while Sticky Key is active. Off by default. It does not stop the screen from redrawing.
+
+---
+
+## Code and input fields
+
+See the configuration guide above for supported inputs. Field controls are covered in the
+{ref}`shared Slot Editor <slot-editor>`; code guidance is in
+[Code Input and Execution](../reference/command_text.md) and
+[Code Examples](../reference/scripting_workflow.md).
+
+---
+
+(sticky-patterns)=
+
+## Usage patterns and conditions to check
+
+### Temporarily switch a brush or active tool
+
+Save the current brush or tool and switch it in On Press; restore the saved target in On Release.
+Use Blender's `bpy.ops.wm.tool_set_by_id()` to switch tools and
+`C.workspace.tools.from_space_view3d_mode(C.mode)` to inspect the current tool.
+Define behavior for missing results, a changed mode, or a tool ID unavailable in that mode.
+
+Brush asset handling depends on the Blender version. The older example
+`paint_settings().brush = D.brushes["Draw"]` assumes a brush with that name and a version/mode where assignment is supported.
+Check how to obtain and activate brushes in your environment before using it.
+See {ref}`U examples <scripting-user-data>` for sharing temporary values and {ref}`external-command-script` for external scripts.
+
+### Temporarily switch viewport overlays
+
+Enter the following in On Press and click Save and Restore. The restore code is inserted into On Release automatically.
+
+```python
+C.space_data.overlay.show_floor = False
+```
+
+### Temporarily switch shading mode
+
+```python
+C.space_data.shading.type = 'WIREFRAME'
+```
+
+Save and Restore inserts code in On Release to restore the original shading mode.
+
+---
+
+```{admonition} Related pages
+:class: seealso
+
+- [Common Editor Elements](editor_common_elements.md)
+- [Poll Method](../reference/poll_method.md)
+- [Choosing a Keymap](../reference/keymap_guide.md)
+```
+
+## Reference videos (original author's channel)
+
+From [roaoao's videos](../reference/original_author_videos.md). These show an older interface and workflow.
+
+:::{dropdown} Sticky Key Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/pcFOPWnHC7U" title="Sticky Key Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Sticky Key Editor for Blender — Open on YouTube](https://www.youtube.com/watch?v=pcFOPWnHC7U)
+:::
+
+:::{dropdown} Nested Pie Menu, Confirm Threshold and Sticky Keys
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/5zDp586Uy2w" title="Nested Pie Menu, Confirm Threshold and Sticky Keys" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Nested Pie Menu, Confirm Threshold and Sticky Keys — Open on YouTube](https://www.youtube.com/watch?v=5zDp586Uy2w)
+:::

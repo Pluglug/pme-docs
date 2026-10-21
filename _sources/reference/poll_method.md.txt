@@ -1,0 +1,105 @@
+(poll-method-guide)=
+
+# Poll Method
+
+A menu's **Poll** determines whether it is available in Blender's current state. Enter a condition in that menu's **Advanced settings → Poll** field.
+
+- `return True`: make the menu available.
+- `return False`: make it unavailable. Depending on its presentation and invocation, an item may be hidden or shown disabled.
+
+## Keymap and Poll have different roles
+
+**Keymap determines where a hotkey is registered; Poll determines whether the menu can be used now.** Think of a Keymap as the container holding a hotkey registration.
+
+| Setting | Determines | Example |
+|---|---|---|
+| Keymap | The editor or mode in which the hotkey is registered | Register an Object Mode operation |
+| Poll | Whether the current state meets the requirements | Available when the active object is a mesh |
+
+The current state that Poll reads is the **context**. `C.mode` refers to the mode, `C.active_object` to the active object, and `C.area` to the editor area.
+
+For example, register a menu in the Object Mode keymap and give it a Poll that requires an active mesh. Within the same mode, a mesh and a light produce different results. **False is a normal result meaning that the condition is not met**, not a code error.
+
+Input reaching the registered Keymap scope and Poll returning True are separate requirements. Narrowing the target with Poll does not broaden the Keymap scope. Poll also checks availability when the menu is invoked by something other than a hotkey.
+
+## Common conditions
+
+Each example is **one line to paste into a menu's Poll field**. Choose the condition you need.
+
+| Required state | Poll code |
+|---|---|
+| Always available | `return True` |
+| Object Mode | `return C.mode == 'OBJECT'` |
+| Mesh Edit Mode | `return C.mode == 'EDIT_MESH'` |
+| An active object exists | `return C.active_object is not None` |
+| The active object is a mesh | `obj = C.active_object; return obj is not None and obj.type == 'MESH'` |
+| 3D Viewport | `return C.area is not None and C.area.type == 'VIEW_3D'` |
+
+**Check:** Invoke the same menu in states that satisfy and do not satisfy the condition. For Mesh Edit Mode, test a mesh in Edit Mode and Object Mode. If the invocation does not reach the menu at all, also check the [Keymap settings](keymap_guide.md).
+
+The **＋** to the right of the Poll field opens a helper menu for adding common conditions. Review the resulting condition and test it in both applicable and inapplicable states.
+
+## Combine conditions
+
+| Syntax | Meaning |
+|---|---|
+| `a and b` | Both conditions are met |
+| `a or b` | Either condition is met |
+| `not a` | The condition is not met |
+| `==` / `!=` | Values are equal / not equal |
+| `in` | A value belongs to the specified candidates |
+
+**Make a menu available in Object Mode or Mesh Edit Mode:**
+
+```python
+return C.mode in {'OBJECT', 'EDIT_MESH'}
+```
+
+**Make a menu available when a mesh is active in Object Mode:**
+
+```python
+obj = C.active_object; return obj is not None and obj.type == 'MESH' and C.mode == 'OBJECT'
+```
+
+Checking `obj is not None` first avoids reading `obj.type` when no target exists. Similarly, check the existence and type of `C.area` or `C.space_data` before reading editor-specific values.
+
+## Poll versus branching
+
+| Purpose | Where to configure it |
+|---|---|
+| Limit the states in which a menu is available | That menu's Poll |
+| Invoke different menus or actions from one key according to context | {ref}`context-router-editor` |
+| Choose an operation when an item is executed | A condition in Command |
+| Change UI content according to state | Custom drawing code |
+
+Poll is evaluated repeatedly. Read state and return a result; do not add objects or change settings. Passing Poll does not establish the execution requirements of Blender operators called inside the menu. For `poll() failed`, check {ref}`operator context and timing <code-operator-context>`.
+
+## When a menu is unavailable
+
+| State | Meaning and checks |
+|---|---|
+| Menu disabled | Check the setting that enables or disables the menu |
+| Poll returns False | A normal result; check the mode and target against the condition |
+| Poll code raises an error | A syntax or reference problem; inspect the warning or error and fix it. Do not treat it as equivalent to False |
+| Poll returns True but the menu cannot be invoked | Check the Keymap, key and modifiers, area under the mouse, and conflicts with other operations |
+
+If the menu opens but an operation inside it fails, also check that operator's required editor, mode, and targets.
+
+## Related pages
+
+- [Code Examples](scripting_workflow.md): Command / Custom / Poll configurations and examples.
+- [Writing and Running Code](command_text.md): runtime variables, external files, and errors.
+- [Choosing a Keymap](keymap_guide.md): where input is handled.
+
+## Reference video from the original author's channel
+
+From the [roaoao video index](original_author_videos.md). This video demonstrates an older UI and workflow.
+
+:::{dropdown} Context Sensitive Menus in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/m8pCPZdK_qc" title="Context Sensitive Menus in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Context Sensitive Menus in Blender — Open on YouTube](https://www.youtube.com/watch?v=m8pCPZdK_qc)
+:::
