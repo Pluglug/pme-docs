@@ -1,0 +1,193 @@
+(side-panel-editor)=
+
+# Side Panel Editor
+
+**Side Panel** は、PME の Popup Dialog や既存の Blender パネルを、指定したエディターのサイドバーやヘッダーに配置するエディターです。中身を作る設定と、どこに並べるかの設定を分けて管理できます。
+
+このページは PME 2.1 の設定を対象にしています。
+
+(side-configuration-guide)=
+
+:::{dropdown} 構成ガイド — 機能・組み合わせ・活用例（AI 向け）
+
+**呼び名：Side Panel／種別 ID：`PANEL`。**
+Popup Dialog の中身、または Blender のパネルを常設の UI として並べます。
+
+- **入力**：Add Panel から追加する Popup Dialog の参照、または Blender のパネル ID。一行に一つのパネルを配置します。通常の Command / Custom のタブへコードを書くエディターではありません。
+- **配置**：Space / Region / Context / Category を選びます。タブ名は Category で、PME のメニュー名とは別です。{ref}`配置設定 <side-placement>`へ。
+- **構造**：通常パネルと、その直前の通常パネルに属する Sub-Panel を並べます。{ref}`パネル一覧 <side-slots>`へ。
+- **組み合わせ**：まず Popup Dialog 側でボタンを作り、このエディターで表示先を指定します。既存パネルを移してまとめる場合は、元の表示を {doc}`hiding_unused_panels` で隠す構成も使えます。
+- **制約**：配置を変えても、内部の操作が必要とする Blender のコンテキストは消えません。元のパネルを別のエディターへ置く場合は、値・オペレーター・表示条件を確認します。
+- **設計例**：モデリング用の Popup Dialog を3D Viewportの同じCategoryへ集め、必要に応じてSub-Panelで折りたたむ。{ref}`活用例 <side-patterns>`へ。
+- **確認**：対象エディターとリージョンで表示し、グループの有効／無効、子パネル、実際のボタン操作を試します。
+:::
+
+## 画面と編集の流れ
+
+```{raw} html
+:file: common/_side_panel_editor_overview_map.html
+```
+
+1. {ref}`名前と基本操作 <side-basic-settings>`
+2. {ref}`Advanced settings <side-advanced-settings>`
+3. {ref}`表示先とカテゴリ <side-placement>`
+4. {ref}`パネルと親子関係 <side-slots>`
+
+一覧で Side Panel を選び、右側で配置先を設定してから **Add Panel** で中身を参照します。
+メニュー一覧の操作は [エディターの共通要素](editor_common_elements.md)を参照してください。
+
+1. {ref}`名前と有効状態 <side-basic-settings>`を確認する。
+2. {ref}`Space / Region / Context / Category <side-placement>`を設定する。
+3. {ref}`パネル一覧 <side-slots>`で参照する中身と並びを指定する。
+4. 対象のエディターで表示と各ボタンの動作を確かめる。
+
+(side-basic-settings)=
+
+## 名前と基本操作
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-11.42857143%">
+<img src="../_static/images/editors/overview/side-panel-blender-5-2.png" width="663" height="280" alt="Mesh Edit N-Panel の 名前と基本操作。サイドパネル構成の名前と有効状態を確認します。">
+</div>
+<figcaption>名前と基本操作。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+メニュー名は PME 内でこのパネル構成を識別する名前です。N-Panel のタブ名は下の **Category** で別に設定します。
+有効にすると配置先へ登録し、無効にするとこの構成のパネルを取り外します。
+名前・タグ・参照元などは {ref}`選択メニューの設定 <overview-selected>` を参照してください。
+この種別には Hotkey 設定とプレビューはありません。
+
+(side-placement)=
+
+## 配置設定（Space / Region / Context / Category）
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 42;--crop-offset:-50.71428571%">
+<img src="../_static/images/editors/overview/side-panel-blender-5-2.png" width="663" height="280" alt="Mesh Edit N-Panel の 表示先とカテゴリ。表示するエディター、領域、コンテキストとカテゴリを指定します。">
+</div>
+<figcaption>表示先とカテゴリ。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+| 項目 | 役割 |
+|---|---|
+| **Space** | 配置する Blender エディター |
+| **Region** | エディター内の配置先。N-Panel には **UI (Side Panel)** を使う |
+| **Context** | Blender パネルのコンテキストによる絞り込み。表示先が対応する値を選ぶ |
+| **Category** | サイドバーのタブ名。同じ配置先・Category のパネルは同じタブに並ぶ |
+
+Context は `C.mode` の値をそのまま入力する欄ではありません。候補は Blender に登録されたパネルのコンテキストから作られます。
+特定のモードや選択状態を判定したい場合は Poll を使います。
+Region が **Header** の場合、Context / Category の入力欄は表示されません。
+
+(side-slots)=
+
+## パネル一覧
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 90;--crop-offset:-66.78571429%">
+<img src="../_static/images/editors/overview/side-panel-blender-5-2.png" width="663" height="280" alt="Mesh Edit N-Panel の パネルと親子関係。表示するパネルを並べます。この例は子パネルも含みます。">
+</div>
+<figcaption>パネルと親子関係。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+**Add Panel** から、PME の Popup Dialog または既存の Blender パネルを選びます。
+Popup Dialog のボタンやプロパティは参照先で編集し、ここではパネルのラベル、配置順、親子関係を設定します。
+
+| 操作 | 役割 |
+|---|---|
+| 左のパネル／フォルダーのアイコン | 通常パネルと Sub-Panel を切り替える |
+| ラベル | 配置したパネルの表示名を編集する |
+| 参照先を開くボタン | 対応する Popup Dialog の編集へ移る |
+| 行の操作メニュー | Sub-Panel、Add Panel、Move Panel、Remove |
+
+### Sub-Panel
+
+先頭以外の行を Sub-Panel にすると、その上にある最も近い通常パネルの子になります。
+通常パネルを新しく置くと、それ以降の Sub-Panel はそのパネルの子になります。
+先頭行は Sub-Panel にできません。この構成で表せるのは通常パネルとその子の一階層で、
+Sub-Panel の下へさらに子を作る指定ではありません。
+
+```{mermaid}
+flowchart TD
+    A["Category: My Tools"] --> B["通常パネル: Modeling"]
+    B --> C["Sub-Panel: Selection"]
+    B --> D["Sub-Panel: Modifiers"]
+    A --> E["通常パネル: View"]
+```
+
+親と子の展開状態や表示は、実際の配置先で確認してください。
+
+(side-advanced-settings)=
+
+## Advanced settings（詳細設定）
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 73;--crop-offset:-23.21428571%">
+<img src="../_static/images/editors/overview/side-panel-blender-5-2.png" width="663" height="280" alt="Mesh Edit N-Panel の Advanced settings。説明と利用条件、アイコンボタンの幅を設定します。">
+</div>
+<figcaption>Advanced settings。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+歯車から開きます。Description と Poll は {ref}`共通の詳細設定 <editor-extra-settings>` を参照してください。
+Poll では、このパネル構成を使えるコンテキストを判定します。
+
+**Use Wide Icon Buttons** は、アイコンだけのボタンを幅のあるボタンとして配置する設定です。
+アイコン画像そのものを横に引き伸ばす機能ではありません。
+
+(side-patterns)=
+
+## 活用例と確認する条件
+
+### 自分用 N-Panel タブを作る
+
+Popup Dialog を用意し、Side Panel の Space を **3D View**、Region を **UI (Side Panel)**、
+Category を目的のタブ名にします。Add Panel で Popup Dialog を追加し、3D Viewport のサイドバーを開いて確認します。
+複数の Side Panel を同じ Category へ置く場合は、同じ名前のタブの中に並びます。
+
+### ヘッダーにボタン群を置く
+
+Region を **Header** にし、ボタン群を作った Popup Dialog を参照します。
+ヘッダーは横方向の限られた領域なので、表示量を絞り、幅が狭い場合も確認します。
+Context / Category によるタブ配置とは使い分けます。
+
+### モードや状態で表示を切り替える
+
+Poll に表示条件を書きます。たとえばアクティブなオブジェクトがあるか、Mesh Edit Mode かなどを判定します。
+パネルが表示されることだけでなく、中のオペレーターがその場所で実行できることも確認します。
+
+### 既存のパネルをまとめる
+
+Add Panel の Blender パネル選択や [Interactive Panels](interactive_panels.md) から取り込めます。
+既存パネルの表示先だけを変えた場合、そのパネルが元のエディターから読む値や条件が不足することがあります。
+最初は一つずつ追加し、値の表示と編集を確かめます。
+
+---
+
+## 関連ページ
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Popup Dialog Editor](popup_dialog_editor.md)
+- [Interactive Panels と Extend Panel](interactive_panels.md)
+- [Hiding Unused Panels](hiding_unused_panels.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+
+## 参考動画（原作者のチャンネル）
+
+参考動画（旧版） — [原作者 roaoao のチャンネル](../reference/original_author_videos.md)
+
+:::{dropdown} Side Panel Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/BGs0de6ZYdw" title="Side Panel Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Side Panel Editor for Blender — YouTube で開く](https://www.youtube.com/watch?v=BGs0de6ZYdw)
+:::

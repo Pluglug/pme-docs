@@ -1,0 +1,34 @@
+(basic-pie-menu)=
+
+# Create Your First Pie Menu
+
+**Turn Blender’s Apply menu into your own pie menu.** Build “Transform Apply Pie” with direct access to your most-used actions while keeping the full original menu available.
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/s_h4Hp59o9c" title="Pie Menu Editor — Create Your First Pie Menu" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Pie Menu Editor — Create Your First Pie Menu (about 3 minutes)](https://youtu.be/s_h4Hp59o9c)
+
+The same steps work with both Pie Menu Editor Fork and the free maintenance version. If you have not installed PME yet, see the {ref}`installation guide <installation>`.
+
+## In the Video
+
+| Time | What to try |
+|---|---|
+| [0:13](https://youtu.be/s_h4Hp59o9c?t=13) | **Create a pie from a right-click.** In Object Mode, press Ctrl+A, right-click an item in the Apply menu, and choose Pie Menu Editor → New Menu. Create a pie menu, name it “Transform Apply Pie,” and choose a slot. |
+| [0:40](https://youtu.be/s_h4Hp59o9c?t=40) | **Add commands in other ways.** Right-click an F3 search result to add it. You can also copy a Python command from the Info Editor’s history and paste it into a slot’s Command tab. |
+| [1:08](https://youtu.be/s_h4Hp59o9c?t=68) | **Include the original menu.** Enable Interactive Panels, open the Apply menu, and use PME Tools at the bottom to add it to “Transform Apply Pie.” Keep your most-used actions and the full menu together. |
+| [1:41](https://youtu.be/s_h4Hp59o9c?t=101) | **Open it with Ctrl+A.** Assign Ctrl+A to your pie and set its Keymap to Object Mode. Try it in the 3D Viewport in Object Mode. |
+
+```{tip} If the original Apply menu opens
+The keymap you choose affects which Ctrl+A binding takes priority. In the video, Blender’s **Object Mode** binding takes priority over PME’s **Window** binding. Setting PME to **Object Mode** as well lets the new pie open.
+
+See {doc}`../reference/keymap_guide` for details.
+```
+
+## Make It Your Own
+
+Try the same process with another menu or actions you use often. See {ref}`Pie Menu Editor <pie-menu-editor>` for settings and {ref}`Interactive Panels <interactive-panels>` for adding existing menus.
+
+Browse [PME Treasure — Examples & Ideas](https://pluglug.github.io/ba-pme-treasure/) for customizations and ideas shared by the community.

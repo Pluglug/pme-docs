@@ -1,0 +1,533 @@
+(popup-dialog-editor)=
+
+# Pop-up Dialog Editor
+
+**Pop-up Dialog** は、ボタン・プロパティ・スライダー・チェックボックスを行と列で組み立てた小さな UI パネルを、その場でポップアップとして表示するエディターです。Pie Menu や Regular Menu と異なり、レイアウトを自分で構成できます。
+
+
+:::{dropdown} 構成ガイド — 機能・組み合わせ・活用例（AI 向け）
+
+**呼び名：Popup Dialog／種別 ID：`DIALOG`。** 行・列に操作と設定をまとめ、ダイアログやポップアップとして表示します。Command / Property / Menu / Hotkey / Custom を使い、行・列を追加して構成します。
+
+- **割り当て**：Property は RNA パスによる設定ウィジェット、Command は操作を実行する Python、Custom は Blender の `UILayout` を使う描画コードです。
+- **Menu の組み合わせ**：別のメニューを開くほか、Regular Menu / Popup Dialog を展開できます。Property / Property Stack の参照は設定ウィジェットの配置です。
+- **配置**：ホットキーから開く／Pie Menu の中へ展開する／既存の Panel・Header へ差し込む。展開先の幅・位置は、参照するスロット側の設定と区別します。
+- **設計**：レイアウトの行・列と、ポップアップの Mode を分けて決めます。画面が開くことと、そのコンテキストでボタンが実行できることは別に確認します。
+
+行と列は {ref}`レイアウト <popup-layout>`、差し込みは {ref}`Extend Target <popup-extend>`、表示の設定は {ref}`Advanced settings <popup-advanced>`へ。
+:::
+
+## 画面と編集の流れ
+
+```{raw} html
+:file: common/_popup_dialog_editor_overview_map.html
+```
+
+1. {ref}`名前と基本操作 <popup-basic>`
+2. {ref}`Extend Target <popup-extend>`
+3. {ref}`Advanced settings <popup-advanced>`
+4. {ref}`Keymap / Hotkey <popup-hotkey>`
+5. {ref}`メニュースロットとレイアウト <popup-layout>`
+
+名前と利用条件、呼び出し方を設定し、スロットでメニューの内容を組み立てます。
+
+(popup-basic)=
+
+## 名前と基本操作
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-7.44186047%">
+<img src="../_static/images/editors/overview/popup-dialog-blender-5-2.png" width="663" height="430" alt="Viewport Display Menu の 名前と基本操作。編集対象の名前と有効状態を確認し、プレビューや詳細設定を開きます。">
+</div>
+<figcaption>名前と基本操作。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+有効状態、プレビュー、選択メニュー、名前、タグ、ドキュメント、詳細設定の操作です。各ボタンは {ref}`選択メニューの設定 <overview-selected>`を参照してください。
+
+(popup-hotkey)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 66;--crop-offset:-51.39534884%">
+<img src="../_static/images/editors/overview/popup-dialog-blender-5-2.png" width="663" height="430" alt="Viewport Display Menu の Keymap / Hotkey。呼び出す場所とキーを設定します。">
+</div>
+<figcaption>Keymap / Hotkey。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+使う場所を Keymap、起動キーと修飾キーを Hotkey で設定します。Open Mode は開くタイミングです。入力欄は {ref}`共通の Hotkey 設定 <hotkey-editor>`を参照してください。
+
+(popup-extend)=
+
+## Extend Target
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/extend-target-topbar.png
+:alt: Extend Target に TOPBAR_HT_upper_bar を指定した例。差し込み位置、右リージョンへの切り替え、表示順を設定できます。
+:width: 100%
+
+TOPBAR_HT_upper_bar を差し込み先に指定した例。
+```
+
+
+トップバー直下にあり、Blender の既存パネル / ヘッダーにこの Pop-up Dialog を差し込むための行です。
+
+```{versionadded} 2.0.0
+Extend Panel / Extend Header を再設計し、同じ Target に複数の Pop-up Dialog / Regular Menu を重ねられるようになりました。
+```
+
+:Extend Target:
+  差し込み先の Blender クラス ID。検索付きで、Interactive Panels の **Copy Panel ID** で取得した文字列をそのまま貼り付けできます。未指定の場合は通常の hotkey 呼び出し型として動作します。
+
+:Side:
+  差し込み位置。**Prepend** は先頭、**Append** は末尾に追加します。画像では左右の三角ボタンで選びます。
+
+:R:
+  Target が `TOPBAR_HT_` の場合に限り表示され、TOPBAR ヘッダーの右リージョンに差し込むかを切り替えます。
+
+:Order:
+  同じ Target に複数のメニューが差し込まれている場合の表示順。値が小さいほど先に描画されます。
+
+差し込み手順の詳細は [Interactive Panels と Extend Panel](./interactive_panels.md) を参照してください。
+
+(popup-advanced)=
+
+## Advanced settings
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 121;--crop-offset:-22.32558140%">
+<img src="../_static/images/editors/overview/popup-dialog-blender-5-2.png" width="663" height="430" alt="Viewport Display Menu の Advanced settings。説明、利用条件、表示モード、幅、プロパティの配置を設定します。">
+</div>
+<figcaption>Advanced settings。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+Description と Poll は、説明文と利用条件の設定です。Python による動的な説明も使えます。共通の {ref}`詳細設定 <editor-extra-settings>`を参照してください。
+
+```{versionadded} 2.1
+Property Split でラベルと入力欄を整列できます。メニュー全体の設定に加え、項目ごとの切り替えも使えます。
+```
+
+**Property Split** はプロパティ名と値を分けて表示し、**Property Decorators** はアニメーションに関する装飾表示を設定します。
+
+### 表示モード
+
+![ポップアップダイアログのモード設定](/../../shared/_static/images/original/popup/pme_popup_mode.png)
+
+ポップアップの見た目と閉じ方を 3 つのモードから選びます。
+
+:::{table} モード比較
+:widths: 50 50 50 50
+:align: left
+
+| モード | Pie | Dialog | Popup |
+|:------|:-------:|:-------:|:-------:|
+| マウスをポップアップ外に移動すると閉じる | ❌ | ❌ | ✅ |
+| ポップアップ内のウィジェットを操作すると閉じる | ✅ | ❌ | ❌ |
+| OK ボタン | ❌ | ✅ | ❌ |
+| 移動可能 | ❌ | ✅ | ✅ |
+| 幅をカスタマイズ可能 | ❌ | ✅ | ✅ |
+:::
+
+(popup-layout)=
+
+## レイアウト
+
+Blender の行と列のレイアウトシステムをそのまま使い、Pop-up Dialog の UI を組み立てます。
+
+スロットはボタンやプロパティなどのウィジェットになります。行を列に分け、必要に応じてサブ列・サブ行を追加します。スロットの追加・削除・並び替えは、ポップアップの見た目に反映されます。
+
+![レイアウトのデモンストレーション](/../../shared/_static/images/original/popup/pme_layout.gif)
+
+<style>
+.layout-colors span {
+    padding: 0 4px;
+    border-radius: 3px;
+    color: white;
+}
+</style>
+
+<div class="layout-colors">
+    <p>
+    エディタ上では、<span style="background-color:rgb(213, 77, 77)">行</span>に対して列を設定し、必要に応じて<span style="background-color:rgb(45, 100, 178)">サブ列</span>と<span style="background-color:rgb(65, 178, 42)">サブ行</span>を追加していきます。
+    </p>
+</div>
+
+サブ列を追加するには、いずれかのボタンで {kbd}`LMB` を押してメニューを開き、*Column* セパレータを選択します。サブ列にさらにサブ行を追加するには、メニューにある *Begin Subrow* と *End Subrow* を使います。
+
+Custom スロットで Python のレイアウト API を直接書けば、デフォルトのボタンの代わりに任意のウィジェットを描画できます。
+
+行・列を組み合わせた配置の参考に、原作者 **roaoao** の動画を紹介します。旧版の UI ですが、複雑なレイアウトを組み立てる流れを確認できます。
+
+:::{dropdown} Popup Dialog with Complex Layout
+:open:
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/MbnaiXBwBJI" title="Popup Dialog with Complex Layout" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog with Complex Layout — YouTube で開く](https://www.youtube.com/watch?v=MbnaiXBwBJI)
+:::
+
+### レイアウトを親ポップアップに展開する
+
+![レイアウト展開設定](/../../shared/_static/images/original/popup/pme1.14.0_pd_expand.png)
+
+別の Pie Menu や Pop-up Dialog のスロットからこの Pop-up Dialog を呼んだとき、独立ポップアップとして開くか、呼び出し元のメニューにレイアウトを展開するかを選べます。呼び出し元側で *Menu* タブの **Expand Popup Dialog** を有効にすると、展開動作になります。
+
+### 固定列
+
+![固定列のデモンストレーション](/../../shared/_static/images/original/popup/pme_layout_fixed_columns.png)
+
+**Fixed Columns** を有効にすると、列幅を揃えます。ピクセル数を指定する設定ではありません。
+
+### 配置
+
+![配置のデモンストレーション](/../../shared/_static/images/original/popup/pme_layout_alignment.gif)
+
+行に列がない（行を分割していない）場合、その行内のボタンの水平方向の配置を左寄せ / 中央 / 右寄せから選べます。
+
+---
+
+(popup-slots)=
+
+### パネルの組み込みとリンク操作
+
+```{versionadded} 2.0.5
+折りたたみパネルと、エディターのリンクボタンの表示設定が追加されました。パネルの組み込みには Blender 4.2 以降が必要です。
+```
+
+```{raw} html
+:file: common/_popup_slot_map.html
+```
+
+(popup-panel-row)=
+
+**A. Panel Row** — 別の Pop-up Dialog を、開閉できるパネルとして組み込みます。「Display As」がパネルの中身として参照するダイアログです。本文から {ref}`参照先や初期状態 <popup-panel-content-menu>`、右端のパネルアイコンから {ref}`行全体の操作 <popup-panel-row-menu>`を設定します。
+
+(popup-linked-menu)=
+
+**B・C. リンク先を編集** — 鎖のボタンから、参照先メニューの編集画面へ移動します。
+
+- **B：通常の Menu スロット**では、{ref}`Editor Link Buttons <setting-editor-link-buttons>` でボタンの表示を切り替えます。OFF でも {ref}`スロットの操作メニュー <popup-item-menu>`の **Go to Linked Menu** から移動できます。
+- **C：Panel Row の本文**のボタンは常時表示されます。本文の操作メニューの **Go to Panel Content** からも移動できます。参照先が無効な場合は移動できません。
+
+(popup-edit-menus)=
+
+## スロットと行の編集
+
+(popup-slot-editor)=
+
+### スロットの内容
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
+```
+:::
+
+:::{tab-item} Property
+:sync: property
+
+```{include} common/slot_types/property.md
+```
+:::
+
+:::{tab-item} Menu
+:sync: menu
+
+```{include} common/slot_types/menu.md
+```
+:::
+
+:::{tab-item} Hotkey
+:sync: hotkey
+
+```{include} common/slot_types/hotkey.md
+```
+:::
+
+:::{tab-item} Custom
+:sync: custom
+
+```{include} common/slot_types/custom.md
+```
+:::
+
+::::
+
+#### スロットを追加する（プリセット）
+
+```{include} common/slot_types/examples.md
+```
+
+---
+
+**スロットのボタンから開くメニュー**は、内容・アイコン・位置を編集します。**行の右端から開くメニュー**は、行全体の大きさ・余白・追加・移動を扱います。選んだスロットの種類や行の構成に応じて、項目が変わります。
+
+(popup-item-menu)=
+
+### スロットの操作（PDI）
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/pdi-menu-blender-5-2.png
+:alt: 通常スロットの操作メニュー。Edit Slot、Change Icon、Visible、スロットの追加・コピー・移動、Separator、Alignment が並びます。
+:width: 440px
+
+通常スロット「Button 1」の例。
+```
+
+| 項目 | 操作・表示条件 |
+|---|---|
+| **Edit Slot** | スロットの内容を編集する。 |
+| **Change Icon** | アイコンを変更する。 |
+| **Hide Text** | 表示名を隠し、アイコンだけにする。アイコンがあるスロット、または Property スロットで表示。 |
+| **Visible** | スロットの表示状態を切り替える。 |
+| **Go to Linked Menu** | 参照先メニューを編集対象として開く。リンク先のある Menu スロットで表示。参照切れなどでは無効になる。 |
+| **← Add Slot / → Add Slot** | 選択スロットの左 / 右に追加する。 |
+| **Split Row** | このスロットの手前で行を分割する。列分割・位置揃えのない通常行の、先頭以外で表示。 |
+| **Copy Slot / Paste Slot** | スロットをコピー / コピーした内容を貼り付ける。Paste Slot はスロットをコピー済みの場合に表示。 |
+| **Move Slot** | スロットの移動先を選ぶ。Panel Row のヘッダーでは表示されない。 |
+| **Enabled / Disabled** | スロットの有効・無効を切り替える。表示名は現在の状態によって変わる。 |
+| **Remove Slot / Remove Row** | スロットを削除する。行内に一つしかない場合は行の削除になり、他の行がある場合に表示される。 |
+
+**右側のグループは、スロットの手前の区切りや配置を設定します。**
+
+| グループ | 項目と意味 |
+|---|---|
+| **Separator** | **None**：区切りなし。**Spacer**：手前に余白を入れる（行頭以外）。**Column**：ここから新しい列にする（Panel Row のヘッダーや位置揃えのある行などでは表示されない）。 |
+| **Column** | **Begin Subrow / End Subrow**：列の中で横に並べるサブ行の開始 / 終了位置を指定・解除する。列のある通常行で、現在の構造に応じて表示。 |
+| **Alignment** | **Left / Center / Right**：この位置を基準に左・中央・右の配置を作る。列分割のない行で表示。**Clear**：行の位置揃えを解除する（設定済みの場合）。 |
+
+(popup-row-menu)=
+
+### 行の操作（PDR）
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/pdr-menu-blender-5-2.png
+:alt: 通常行の操作メニュー。Size、Spacer、Fixed Buttons、行とパネルの追加、Join Row、コピー・移動・削除が並びます。
+:width: 260px
+
+通常行の操作メニュー。
+```
+
+| 項目 | 操作・表示条件 |
+|---|---|
+| **Size** | 行の高さと適用範囲を選ぶ。下のサイズ設定を参照。 |
+| **Spacer** | 行の上側の余白と適用範囲を選ぶ。先頭行には表示されない。 |
+| **Fixed Buttons** | ボタンの幅を揃える。列なしの行、または列内のサブ行に作用する。 |
+| **Fixed Columns** | 列幅を揃える。列分割がある行で表示。ピクセル数を入力して固定する設定ではない。 |
+| **Add Row Above / Below** | 現在の行の上 / 下に通常行を追加する。 |
+| **Add Panel Above / Below** | 現在の行の上 / 下に Panel Row を追加する。Blender のパネルレイアウト機能が使える環境で表示。 |
+| **Join Row** | 次の通常行を現在の行へ結合する。次の行がない場合や Panel Row の場合は表示されない。結合する行の列・位置揃えの区切りも取り除かれる。 |
+| **Copy Row / Paste Row** | 行をコピー / コピーした行を現在の行の手前に挿入する。Paste Row は行をコピー済みの場合に表示。 |
+| **Move Row** | 行全体の移動先を選ぶ。 |
+| **Remove Row** | 行全体を削除する。他の行がある場合に表示。 |
+
+#### Size — 高さと適用範囲
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/pdr-size-blender-5-2.png
+:alt: Size サブメニュー。Row、Aligned Rows、All Rows のそれぞれに Normal、Large、Larger が並びます。
+:width: 354px
+```
+
+**Normal / Large / Larger** は、それぞれ標準の **1 / 1.25 / 1.5 倍**の高さです。**Row** は現在の行、**Aligned Rows** は余白なしで連続する行のまとまり、**All Rows** は全行に適用します。
+
+#### Spacer — 行間の余白
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/pdr-spacer-blender-5-2.png
+:alt: Spacer サブメニュー。Row と All Rows に None、Normal、Large、Larger が並びます。
+:width: 217px
+```
+
+**None / Normal / Large / Larger** で、余白なしから段階的に広い余白を選びます。**Row** は現在の行の上側、**All Rows** は全行の行間に適用します。列を持つ隣接行では、Row の **None** が選べない場合があります。
+
+(popup-panel-content-menu)=
+
+### パネル本体の操作（PDI）
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/pdi-panel-blender-5-2.png
+:alt: パネル本体の操作メニュー。Edit Panel Target、Go to Panel Content、Default Closed、Header Layout、パネル行のコピー・移動・削除が並びます。
+:width: 260px
+```
+
+| 項目 | 操作・表示条件 |
+|---|---|
+| **Edit Panel Target** | パネルの中身として使う参照先ダイアログを指定・変更する。 |
+| **Go to Panel Content** | 参照先ダイアログを編集対象として開く。参照先が有効な場合に利用できる。 |
+| **Default Closed** | パネルを初期状態で閉じて表示する。 |
+| **Header Layout** | パネルのヘッダーにスロットを配置する。有効にすると、必要に応じて最初のヘッダースロットが追加される。 |
+| **Copy Panel Row / Paste Row** | パネル行全体をコピー / コピー済みの行を手前へ挿入する。Paste Row は行をコピー済みの場合に表示。 |
+| **Move Panel Row** | パネル行全体の移動先を選ぶ。 |
+| **Remove Panel Row** | パネル行全体を削除する。他の行がある場合に表示。 |
+
+Header Layout を OFF にしても、既存のヘッダースロットは削除されず、使われない状態で保持されます。そのスロットのメニューでは **Enable Header Layout** で再び使用し、**Delete Inactive Header** で不要なヘッダースロットを削除できます。
+
+(popup-panel-row-menu)=
+
+### パネル行の操作（PDR）
+
+```{figure} /../../shared/_static/images/editors/popup_dialog/pdr-panel-blender-5-2.png
+:alt: Panel Row の行メニュー。Header Layout、Spacer、通常行とパネル行の追加、コピー・移動・削除が並びます。
+:width: 260px
+```
+
+**Panel Row** は行の種類を示す見出しです。このメニューは、パネル全体の配置を扱います。
+
+| 項目 | 操作・表示条件 |
+|---|---|
+| **Header Layout** | ヘッダー用スロットを使用するか切り替える。 |
+| **Spacer** | このパネル行の上側の余白を設定する。先頭行以外で表示。 |
+| **Add Row Above / Below** | 上 / 下に通常行を追加する。 |
+| **Add Panel Above / Below** | 上 / 下に別のパネル行を追加する。 |
+| **Copy Panel Row / Paste Row** | パネル行をコピー / コピー済みの行を手前に挿入する。Paste Row は行をコピー済みの場合に表示。 |
+| **Move Panel Row / Remove Panel Row** | パネル行全体を移動 / 削除する。削除は他の行がある場合に表示。 |
+
+通常行の **Size / Fixed Buttons / Fixed Columns / Join Row** は、パネル行には表示されません。
+
+:::{admonition} スクリプトから編集メニューを開く場合
+:class: note
+
+スロットの操作は `bpy.ops.pme.pdi_menu('INVOKE_DEFAULT', idx=...)`、行の操作は `bpy.ops.pme.pdr_menu('INVOKE_DEFAULT', row_idx=...)` です。どちらも PME で現在選択しているメニューを対象にします。
+
+`idx` はスロットを保持するコレクションの位置、`row_idx` は同じコレクション内の行開始位置です。見た目の「何行目」という番号とは異なります。編集用のコンテキストで呼び出し、別のメニューに切り替えた後の古い位置を使わないでください。
+
+:::
+
+---
+
+### インライン編集ホットキー
+
+プレビュー画面や、エディタ起動中に開かれた Pop-up Dialog 上で直接ボタンや行を編集するためのホットキーです。
+
+#### ボタン操作
+
+:::{table} ボタン操作のホットキー
+:widths: 30 15 15 15 15 15
+:align: left
+
+| 機能 | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | {kbd}`Alt` | {kbd}`OS` |
+|------|:---:|:---:|:---:|:---:|:---:|
+| メニューを開く | {kbd}`LMB` | | | | |
+| ボタンを編集 | {kbd}`LMB` | | {kbd}`Shift` | | |
+| 右にボタンを追加 | {kbd}`LMB` | {kbd}`Ctrl` | | | |
+| 左にボタンを追加 | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | | |
+| ボタンを削除 | {kbd}`LMB` | {kbd}`Ctrl` | | {kbd}`Alt` | |
+| アイコンを変更 | {kbd}`LMB` | | | {kbd}`Alt` | |
+| アイコンをクリア | {kbd}`LMB` | | | {kbd}`Alt` | {kbd}`OS` |
+| テキストを非表示 | {kbd}`LMB` | | {kbd}`Shift` | {kbd}`Alt` | |
+| スペーサーを切り替え | {kbd}`LMB` | | | | {kbd}`OS` |
+| ボタンをコピー | {kbd}`LMB` | {kbd}`Ctrl` | | | {kbd}`OS` |
+| ボタンを貼り付け | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | | {kbd}`OS` |
+:::
+
+#### 行の管理
+
+:::{table} 行の管理操作
+:widths: 30 20 20 20 10
+:align: left
+
+| 機能 | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | {kbd}`OS` |
+|------|:---:|:---:|:---:|:---:|
+| メニューを開く | {kbd}`LMB` | | | |
+| 下に行を追加 | {kbd}`LMB` | {kbd}`Ctrl` | | |
+| 上に行を追加 | {kbd}`LMB` | {kbd}`Ctrl` | {kbd}`Shift` | |
+| 行サイズを切り替え | {kbd}`LMB` | | {kbd}`Shift` | |
+| 行スペーサーを切り替え | {kbd}`LMB` | | | {kbd}`OS` |
+:::
+
+---
+
+## 応用的な使い方
+
+### N パネル代替としての一時パネル
+
+普段は閉じておきたい設定群を Pop-up Dialog にまとめ、hotkey で呼び出すと、N パネルに常駐させずに同等の操作面を確保できます。Property スロットや Custom スロットに Blender 標準のウィジェットをそのまま並べられます。
+
+### Pie Menu の 1 スロットから詳細パネルを開く
+
+Pie Menu の Menu スロットからこの Pop-up Dialog を指定すると、Pie に収まらない詳細設定をその場で開けます。**Expand Popup Dialog** を有効にしておくと、独立ポップアップではなく Pie のスロット領域内にレイアウトを展開します。
+
+### `draw_menu()` で別レイアウトに描き込む
+
+`open_menu()` が Pop-up Dialog を独立ポップアップとして開くのに対し、`draw_menu()` は **現在の layout にその中身を描画する**ヘルパーです。Panel Group や別の Pop-up Dialog から、既存の Pop-up Dialog レイアウトを再利用できます。
+
+```python
+draw_menu("Popup Dialog Name")
+draw_menu("Popup Dialog Name", frame=True, dx=10, dy=10)
+```
+
+### Blender の既存パネルを Custom スロットで描く
+
+Custom スロットの Python レイアウトから `panel()` ヘルパーで Blender ネイティブのパネルを直接埋め込めます。`template_*` 系のウィジェットも同様に使えます。
+
+```python
+panel("VIEW3D_PT_view3d_properties", frame=True, header=True)
+```
+
+`template_list()` を使う場合は、一覧のコレクションに加え、選択中の項目番号を保持する Int プロパティが必要です。対象に存在する RNA プロパティか、自分で定義したプロパティを指定します。
+
+### Extend Panel / Extend Header による差し込み
+
+Extend Target を設定すると、Blender の既存パネルやヘッダーにこの Pop-up Dialog の中身がそのまま差し込まれます。詳細は [Interactive Panels と Extend Panel](./interactive_panels.md) を参照してください。
+
+### `popup_area` で Blender エディタ領域を開く
+
+`popup_area` は Pop-up Dialog Editor とは別機能で、Blender のエディタ領域そのもの（Properties、Outliner、Asset Browser など）を一時的なポップアップウィンドウとして開きます。レイアウトを自分で組まずに、既存のエディタ画面をそのまま使いたい場合の経路です。
+
+```python
+bpy.ops.pme.popup_area(area='PROPERTIES', width=600, height=800)
+```
+
+```python
+bpy.ops.pme.popup_area(area='ASSETS', width=1000, center=False, height=800)
+```
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Interactive Panels と Extend Panel](interactive_panels.md)
+- [Custom Icons](custom_icons.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+- [キーマップの選び方](../reference/keymap_guide.md)
+```
+
+## 参考動画（原作者のチャンネル）
+
+[roaoao の動画一覧](../reference/original_author_videos.md)より。旧版の UI・手順を扱う参考動画です。
+
+:::{dropdown} Popup Dialog Editor
+:open:
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/JdbmDSV9wIU" title="Popup Dialog Editor" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog Editor — YouTube で開く](https://www.youtube.com/watch?v=JdbmDSV9wIU)
+:::
+
+:::{dropdown} Popup Dialog with Panels
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/-fhI2imoo4U" title="Popup Dialog with Panels" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog with Panels — YouTube で開く](https://www.youtube.com/watch?v=-fhI2imoo4U)
+:::
+
+:::{dropdown} Popup Dialog with Custom Layout
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/sF10rVDVo-k" title="Popup Dialog with Custom Layout" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Popup Dialog with Custom Layout — YouTube で開く](https://www.youtube.com/watch?v=sF10rVDVo-k)
+:::

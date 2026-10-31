@@ -1,0 +1,265 @@
+(regular-menu-editor)=
+
+# Regular Menu Editor
+
+**Regular Menu** creates dropdown menus with items arranged vertically, in the same form as Blender's dropdown and context menus.
+
+
+:::{dropdown} Configuration guide — features, combinations, and uses (for AI)
+
+**Name: Regular Menu / Type ID: `RMENU`.** A variable number of vertically arranged slots, optionally organized with columns and separators. Supports Command / Property / Menu / Hotkey / Custom.
+
+- **Assignments**: Command executes Python, Property displays an RNA-path widget, and Custom draws with Blender's `UILayout`. Hotkey invokes an operator from the key assignment at runtime.
+- **Menu combinations**: behavior depends on the target and options: open another menu, place a Property / Property Stack switch, or expand a Regular Menu.
+- **Placement**: invoke from a hotkey, extend an existing Blender menu, or expand inside a Pie Menu or Popup Dialog. Check the destination class and runtime editor/mode.
+- **Uses**: named lists of actions and tool menus grouped in columns. Consider Pie Menu / Vector Menu for directional selection.
+
+See {ref}`menu combinations <regular-composition>` for expansion, {ref}`Extend Target <regular-extend>` for insertion, and {ref}`menu slots <regular-slots>` for items.
+:::
+
+## Interface and editing workflow
+
+```{raw} html
+:file: common/_regular_menu_editor_overview_map.html
+```
+
+1. {ref}`Name and basic controls <regular-basic>`
+2. {ref}`Extend Target <regular-extend>`
+3. {ref}`Advanced settings <regular-advanced>`
+4. {ref}`Keymap / Hotkey <regular-hotkey>`
+5. {ref}`Menu slots <regular-slots>`
+
+Set the name, availability, and invocation method, then build the menu from slots.
+
+(regular-basic)=
+
+## Name and basic controls
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-5.16962843%">
+<img src="../_static/images/editors/overview/regular-menu-blender-5-2.png" width="663" height="619" alt="My Help Menu name and enabled state, with preview and advanced settings controls.">
+</div>
+<figcaption>Name and basic controls in this example.</figcaption>
+</figure>
+```
+
+Controls include enabled state, preview, menu selection, name, tags, documentation, and advanced settings. See {ref}`selected menu settings <overview-selected>`.
+
+(regular-hotkey)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 67;--crop-offset:-28.27140549%">
+<img src="../_static/images/editors/overview/regular-menu-blender-5-2.png" width="663" height="619" alt="My Help Menu Keymap and Hotkey settings for standalone invocation. No key is assigned in this example.">
+</div>
+<figcaption>Keymap / Hotkey settings in this example.</figcaption>
+</figure>
+```
+
+Use Keymap to select where the menu is available, and Hotkey for the trigger key and modifiers. Open Mode determines the trigger action. See the shared {ref}`Hotkey settings <hotkey-editor>`.
+
+(regular-extend)=
+
+## Extend Target
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 25;--crop-offset:-10.33925687%">
+<img src="../_static/images/editors/overview/regular-menu-blender-5-2.png" width="663" height="619" alt="My Help Menu Extend Target, insertion side, and order. This example appends to the Help menu.">
+</div>
+<figcaption>Extend Target settings in this example.</figcaption>
+</figure>
+```
+
+
+This row directly below the top bar inserts the Regular Menu into an existing Blender menu.
+
+```{versionadded} 2.0.0
+Multiple Pop-up Dialogs / Regular Menus can share an Extend Target.
+```
+
+:Extend Target:
+  The destination Blender menu class ID, such as `VIEW3D_MT_object`. No insertion occurs when it is unset.
+
+:Side:
+  Insertion position: **▲** is the start of the target menu; **▼** is the end.
+
+:Order:
+  Display order when several menus share a Target. Lower values come first.
+
+You can also obtain the destination ID through [Interactive Panels](./interactive_panels.md).
+
+(regular-slots)=
+
+## Menu slots
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__image" style="grid-template-columns:repeat(2, 1fr)">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 370;--crop-offset:-39.74151858%">
+<img src="../_static/images/editors/overview/regular-menu-blender-5-2.png" width="663" height="619" alt="My Help Menu slots arranged vertically with headings and separators.">
+</div>
+<a class="pme-overview__spot" style="--x:1.96%;--y:91.62%;--w:87.93%;--h:6.22%" href="#regular-add-slot" aria-label="A Add a slot below">
+<span class="pme-overview__number">A</span><span class="pme-overview__tip"><strong>Add Slot</strong>Adds a slot at the bottom of this column.</span></a>
+<a class="pme-overview__spot pme-overview__spot--right" style="--x:94.72%;--y:0.54%;--w:3.62%;--h:97.30%" href="#regular-add-column" aria-label="B Add a column to the right">
+<span class="pme-overview__number">B</span><span class="pme-overview__tip"><strong>Add Column</strong>Adds a column to the right to organize items across several columns.</span></a>
+</div>
+<figcaption>A: add a slot below. B: add a column to the right.</figcaption>
+</figure>
+```
+
+Slots appear as menu items from top to bottom in each column. Use the following controls according to the direction you want to expand:
+
+- <span id="regular-add-slot"></span>**A. Add Slot below — add an item**: appends an item to that column, extending it vertically.
+- <span id="regular-add-column"></span>**B. Rightmost ＋ — Add Column**: adds a column after the last one. For example, separate selection tools on the left from transform tools on the right. Use Add Slot below each new column to add its items.
+
+- Slot order becomes display order.
+- Slots can be added, removed, and reordered.
+- Disabled slots are omitted from the displayed menu.
+- An unassigned slot (empty slot type) draws a separator.
+- Reference another menu with a Menu slot to create a submenu.
+
+(regular-advanced)=
+
+## Advanced settings
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 73;--crop-offset:-15.83198708%">
+<img src="../_static/images/editors/overview/regular-menu-blender-5-2.png" width="663" height="619" alt="My Help Menu advanced settings: description, availability, and title display.">
+</div>
+<figcaption>Advanced settings in this example.</figcaption>
+</figure>
+```
+
+Description and Poll set the tooltip and availability condition. Python can provide a dynamic description. See the shared {ref}`advanced settings <editor-extra-settings>`.
+
+:Show title:
+  Toggles the menu name as a heading at the top of the menu.
+
+---
+
+(regular-composition)=
+
+## Combining menus
+
+```{versionadded} 2.1
+A Regular Menu can be expanded inside a Pie Menu, Popup Dialog, or another Regular Menu.
+```
+
+Select a Regular Menu in the calling slot's Menu tab and enable **Expand Regular Menu** to draw its contents inline. With this off, it opens when selected.
+Distinguish this from placements that offer **Open on Mouse Over**.
+
+When placing an existing Blender menu, you can likewise choose a dropdown or expanded contents. A reference to a PME Regular Menu is different from specifying a Blender menu class.
+
+## Slot Editor
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
+```
+:::
+
+:::{tab-item} Property
+:sync: property
+
+```{include} common/slot_types/property.md
+```
+:::
+
+:::{tab-item} Menu
+:sync: menu
+
+```{include} common/slot_types/menu.md
+```
+:::
+
+:::{tab-item} Hotkey
+:sync: hotkey
+
+```{include} common/slot_types/hotkey.md
+```
+:::
+
+:::{tab-item} Custom
+:sync: custom
+
+```{include} common/slot_types/custom.md
+```
+:::
+
+::::
+
+---
+
+## Advanced uses
+
+### Expand inside a Pie Menu
+
+Opening a Regular Menu from a Pie Menu slot combines radial selection with a list. Choose the **Menu tab** in the Pie Menu Slot Editor and link the Regular Menu. Enable **Expand Regular Menu** on that slot to place its contents in the pie; leave it off for a submenu that opens when selected.
+
+### Dynamic dropdowns and Enums
+
+A one-line Custom slot can call Blender's `prop_menu_enum` directly. This is a typical way to display an Enum property as a dropdown menu.
+
+```python
+L.prop_menu_enum(C.object, "display_type")
+```
+
+### Draw in another layout with `draw_menu()`
+
+While `open_menu()` opens a Regular Menu as a new popup, `draw_menu()` **draws its contents in the current layout**. Use it to reuse a Regular Menu in a Pop-up Dialog or Panel Group.
+
+```python
+draw_menu("Regular Menu Name")
+```
+
+### A launcher for Stack Keys and Macro Operators
+
+List Stack Keys or Macro Operators in a Regular Menu to create a command list. The two approaches below use different invocation routes.
+
+- **Direct Menu slot reference** — target the Stack Key or Macro in a Menu slot. For a Macro, this preserves the route that supports adjusting arguments in Blender's **Adjust Last Operation** (F9) panel.
+- **`open_menu()` from a Command slot** — execute `open_menu("Name")` in Command. Use this when code should control which menu is called, such as through a condition.
+
+```python
+open_menu("My Macro Operator")
+```
+
+### Combine Extend Menus
+
+```{versionadded} 2.0.0
+Several Regular Menus can share an Extend Target and use Poll to control which ones appear.
+```
+
+See [Interactive Panels and Extend Panel](interactive_panels.md) for Extend Target / Side / Order and adding items through Interactive Panels.
+
+---
+
+```{admonition} Related pages
+:class: seealso
+
+- [Common Editor Elements](editor_common_elements.md)
+- [Interactive Panels and Extend Panel](interactive_panels.md)
+- [Poll Method](../reference/poll_method.md)
+- [Choosing a Keymap](../reference/keymap_guide.md)
+```
+
+## Reference videos (original author's channel)
+
+From [roaoao's videos](../reference/original_author_videos.md). These show an older interface and workflow.
+
+:::{dropdown} Menu Editor
+:open:
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/bvDADkqMLEw" title="Menu Editor" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Menu Editor — Open on YouTube](https://www.youtube.com/watch?v=bvDADkqMLEw)
+:::

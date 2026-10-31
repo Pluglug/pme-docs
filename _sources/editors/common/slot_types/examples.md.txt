@@ -1,0 +1,7 @@
+:::{image} /../../shared/_static/images/editors/common/slot_examples.png
+:alt: PME Slot Examples
+:width: 40%
+:align: right
+:::
+
+Use the rightmost hamburger menu ({octicon}`three-bars`) to add one of the supplied slot functions.
