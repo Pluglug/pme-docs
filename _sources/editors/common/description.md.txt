@@ -1,0 +1,23 @@
+**Description**
+
+Sets the text shown in a menu or slot's tooltip.
+Enter plain text, or enable the script toggle {octicon}`code` on the right to enter
+**Python code that returns the description with `return`**.
+
+```python
+return f"Active: {C.active_object.name if C.active_object else '(none)'}"
+```
+
+This example displays the active object's name, or `(none)` when there is no active object.
+
+```{admonition} Returning a description from Python
+:class: tip
+
+- **`return` is required.** A string expression alone does not return a description.
+- The code runs when a description is requested, independently of the Command executed when an item is clicked.
+- Use it to read the current state. Put operations that add or remove objects, change settings, or otherwise modify data in Command.
+- Returning `None`, or an evaluation failure, falls back to the default tooltip. Errors are reported in the console.
+```
+
+In a plain-text description, `\n` inserts a line break in the tooltip.
+If a menu call has no description, the called menu's name is displayed.

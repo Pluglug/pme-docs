@@ -1,0 +1,236 @@
+---
+vocab: developer-facing
+---
+
+(boot_options)=
+
+# 起動オプション
+
+```{versionadded} 2.0.3
+```
+
+PME には、Blender の起動時に読み込まれる設定ファイル `boot_config.json` があります。
+通常の Preferences とは別に管理され、**アドオンの登録処理よりも前に** 読み込まれます。
+
+```{note}
+Developerタブの起動オプションは **次回の Blender 起動から** 有効になります。
+Resourcesのパス設定は、保存に成功するとすぐに反映されます。
+```
+
+## 設定の場所
+
+{guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Developer` タブから設定できます。
+
+```{tip}
+{guilabel}`Open Boot Config Folder` ボタンで、`boot_config.json` があるフォルダを直接開けます。
+```
+
+| OS | PME 2.1 Extensionの `boot_config.json` |
+|----|-----------------------------------------|
+| Windows | `%APPDATA%\Blender Foundation\Blender\<version>\config\pie_menu_editor\extension\boot_config.json` |
+| macOS | `~/Library/Application Support/Blender/<version>/config/pie_menu_editor/extension/boot_config.json` |
+| Linux | `~/.config/blender/<version>/config/pie_menu_editor/extension/boot_config.json` |
+
+ExtensionとLegacy add-onは別の設定ファイルを使います。Legacy add-onのファイルは
+同じ`pie_menu_editor`フォルダー直下の`boot_config.json`です。通常はパスを手入力せず、
+{guilabel}`Open Boot Config Folder`を使ってください。
+
+このファイルはアドオンの更新では上書きされません。
+[ユーザーリソース](file_locations.md) とも独立した保存先です。
+
+---
+
+## リソースパスの保存項目
+
+```{versionadded} 2.2.0
+複数のリソースフォルダーと、バックアップ・ログの保存先を `boot_config.json` で管理します。
+```
+
+通常は {guilabel}`Settings` > {guilabel}`Resources` で編集します。
+ファイルを直接編集する場合は、次の項目を使います。
+
+| 項目 | 値と役割 |
+|------|----------|
+| `resources.folders` | 1件以上のフォルダーを持つ配列。配列の順序が一覧と Quick Locations の表示順になります。 |
+| 各フォルダーの `name` | 空でない、一意の文字列。表示名に使い、スクリプトの名前空間にはなりません。 |
+| 各フォルダーの `path` | フォルダーパスを表す空でない文字列。すべての登録先を利用します。 |
+| `resources.icons` | アイコン用フォルダーの配列。各要素の `path` は、PNG ファイルをカスタムアイコンとして使うフォルダーです。空の配列にもできます。 |
+| `backup.directory` | メニューバックアップの保存先を表す空でない文字列。スクリプトやアイコンのファイルはバックアップに含みません。 |
+| `logs.directory` | 診断ログの保存先を表す空でない文字列。 |
+
+バックアップとログは独立したパスです。リソースフォルダーの名前・パス・登録順を変更しても追従しません。
+各フォルダー内の固定構成とファイルの認識規則は、[保存先とフォルダ構成](file_locations.md)を参照してください。
+
+以下は**リソース設定部分の例**です。既存の `boot_config.json` 全体を置き換えず、他の項目を残して追加・更新してください。
+
+```json
+{
+  "resources": {
+    "folders": [
+      {"name": "Pie Menu Editor", "path": "/Users/example/Documents/Pie Menu Editor"},
+      {"name": "Studio", "path": "../Shared/PME"}
+    ],
+    "icons": [
+      {"path": "/Users/example/Documents/Pie Menu Editor/icons"},
+      {"path": "../Shared/PME/icons"}
+    ]
+  },
+  "backup": {
+    "directory": "/Users/example/Documents/Pie Menu Editor/backups"
+  },
+  "logs": {
+    "directory": "/Users/example/Documents/Pie Menu Editor/logs"
+  }
+}
+```
+
+### 相対パス
+
+フォルダーとアイコン用フォルダーの `path`・`backup.directory`・`logs.directory` は、いずれも絶対パスと相対パスに対応します。
+相対パスの基準は **`os.path.dirname(bpy.app.binary_path)`**、つまり実行中の Blender 実行ファイルがあるディレクトリです。
+`.blend` ファイル、作業ディレクトリ、boot config の保存先は基準にしません。
+macOS ではこの基準が Blender アプリケーションの内部になる場合があります。
+フォルダー選択画面の {guilabel}`Go to Relative Path Base` で実際の基準を開けます。
+
+入力した文字列をそのまま保存し、利用時に解決します。保存値を絶対パスへ置き換えることはありません。
+ホームディレクトリと環境変数は、解決時に展開します。
+`//` は OS の絶対パス・UNC の規則に従い、Blender の `.blend` 相対パスとしては解釈しません。
+Windows の `C:resources` のようなドライブ相対パスは受け付けません。
+完全な絶対パスか、Blender 実行ファイルのディレクトリからの相対パスを使ってください。
+
+存在しないフォルダーも設定として保持できます。
+設定を読む・Quick Locations で閲覧する操作では作成せず、既定の場所へ自動的に置き換えることもありません。
+
+### 既存設定の引き継ぎ
+
+既存の `resources.folders` があれば、その一覧を使います。未設定の場合は、2.1.1 以前の単一フォルダー設定を一覧に引き継ぎます。
+バックアップ先・ログ先も設定済みの値を保持します。未設定の保存先だけ、先頭フォルダーの `backups/`・`logs/` を一度補います。
+以後は独立した保存先となります。ファイルの移動やコピーは行いません。
+`resources.icons` が無い場合は、各リソースフォルダーの `icons/` を一度だけ登録します。先頭のフォルダーは常に、2番目以降は「フォルダーを読めて `icons/` が無い」場合を除いて登録します。
+このとき先頭のフォルダーが存在して `icons/` が無ければ、既定のアイコンの置き場所として作成します。
+空の `resources.icons` はそのまま保持します。
+
+### 保存と反映
+
+| 編集方法 | 反映されるタイミング |
+|----------|----------------------|
+| Resources画面 | `boot_config.json` の保存成功後、すぐに反映。Blender の Save Preferences は不要です。 |
+| 外部エディター | 次の Blender 起動、または PME の再有効化時に読み込みます。 |
+
+保存に失敗した場合は最後に保存できた設定を使い続け、未保存の編集を画面に残します。
+PME がリソース項目を保存するときも、ファイル内の他の JSON 項目は保持します。
+
+---
+
+## `import pme` を有効にする
+
+外部スクリプトやアドオンから [Public API](public_api.md) を `import pme` で利用するには、明示的な有効化が必要です。
+
+### 手順
+
+1. {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Developer` を開く
+2. {guilabel}`Enable import pme Alias` を ON にする
+3. Blender を再起動する
+
+```python
+# 有効化後、外部スクリプトから利用可能
+import pme
+pme.invoke_pm("My Pie Menu")
+```
+
+### なぜ明示的に有効化が必要なのか
+
+Blender Extensionの実装package名は、インストール元に応じて
+`bl_ext.<repository>.pie_menu_editor`のように変わります。`import pme`は、その物理名を
+外部スクリプトへ固定せずに使うため、PMEがBlender processへ登録する短いエイリアスです。
+
+このエイリアスはprocess全体で共有されるtop-level名なので、必要なユーザーだけが有効にする
+オプトイン方式です。この設定はエイリアスの有効化だけを制御します。Public API自体は
+引き続きExperimentalです。
+
+```{note}
+エイリアスを有効にすると、Extensions画面に次の警告が表示されることがあります。
+
+- `Policy violation with top level module: pme`
+- `Policy violation with top level module: pme.constants`
+
+これは、Extensionの`bl_ext...` namespace外にtop-level名でmoduleが登録された場合に
+Blenderが表示する警告です。PMEのオプトインエイリアスでは想定内の表示であり、PMEの
+有効化失敗や`import pme`の故障を意味しません。エイリアスを利用できていれば追加対応は
+不要です。エイリアスを使わない場合は、この設定をOFFにしてBlenderを再起動してください。
+```
+
+```{seealso}
+[Public API リファレンス](public_api.md) — `import pme` で利用できる関数の一覧
+```
+
+---
+
+## 初期化ログを有効にする
+
+PME の起動時に問題が発生した場合、初期化ログを有効にすると原因の特定に役立ちます。
+
+### Settings から有効にする（推奨）
+
+1. {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Developer` を開く
+2. {guilabel}`Enable Init Log` を ON にする
+3. Blender を再起動する
+4. {guilabel}`Window` > {guilabel}`Toggle System Console`（Windows）またはターミナルからの起動（macOS/Linux）でコンソール出力を確認する
+
+### `boot_config.json` を直接編集して有効にする
+
+起動トラブルで Preferences から設定できない場合や、外部ファイルから次回起動用の設定を切り替えたい場合は、`boot_config.json` を直接編集できます。
+
+```json
+{
+  "version": 1,
+  "enable_public_api_alias": false,
+  "init_log_enabled": true,
+  "persistence_backend": "prefs",
+  "dev": {
+    "use_loader_manifest": true,
+    "auto_generate_candidate": false
+  }
+}
+```
+
+既存の `boot_config.json` がある場合は、`init_log_enabled` を `true` に変更してください。
+変更は次回の Blender 起動から有効になります。
+
+### コマンドラインで 1 回だけ有効にする
+
+設定を変更せず、1 回だけ初期化ログを出力したい場合:
+
+```bash
+# macOS / Linux
+blender --python-expr "import sys; sys.argv.append('--pme-log-init')" --
+
+# Windows
+blender.exe --python-expr "import sys; sys.argv.append('--pme-log-init')" --
+```
+
+```{tip}
+コマンドライン引数 `--pme-log-init` は Settings の設定より優先されます。
+boot_config.json を変更せずに一時的にログを取りたいときに便利です。
+```
+
+### ログの確認方法
+
+初期化ログは以下の場所で確認できます:
+
+- **Blender のシステムコンソール** — 起動直後のログがリアルタイムで表示されます
+- **Preferences のログビューア** — {guilabel}`Preferences` > {guilabel}`Settings` > {guilabel}`Log` タブで、ring buffer に保存されたログを確認できます
+
+---
+
+## 設定のリセット
+
+起動オプションだけを戻す場合は、Developerタブで変更してください。
+`boot_config.json` を削除するとリソースフォルダー・バックアップ先・ログ先も失われるため、
+ファイル全体をリセットする前にコピーを保存してください。
+
+```{warning}
+読めないファイルや不正なリソース項目は自動で上書きしません。
+PMEは直前のパス、利用できなければ従来のPreferences設定・既定パスを使い、警告を表示します。
+元ファイルを修正した後に再起動・再有効化してください。
+```

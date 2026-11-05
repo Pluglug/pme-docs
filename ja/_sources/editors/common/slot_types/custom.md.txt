@@ -1,0 +1,23 @@
+UI を描画するときに評価する Python コードを設定します。
+`L` はレイアウトオブジェクトで、Blender のレイアウト API を使って UI を構築できます。
+再描画でも実行されるため、オブジェクトの追加・削除などの処理を直接書かず、
+その処理を実行するボタンを配置します。
+
+```python
+# ボックス内にラベルを表示
+L.box().label(text="メッシュを追加")
+```
+
+```python
+# 複数のボタンを縦に配置
+col = L.column(); col.operator("mesh.primitive_cube_add", text="立方体"); col.operator("mesh.primitive_uv_sphere_add", text="球")
+```
+
+上は独立した二つの例です。Pie Menu の 1 スロットに複数の UI 要素を置く場合は、
+二つ目の例のように、一つの column や box の中にまとめてください。
+パイのレイアウト直下へ複数の要素を追加すると、後続スロットの方向がずれる原因になります。
+
+Custom の本文には、PME 独自の文字数上限はありません。
+GPU メニュー（Floating Panel / Vector Menu）の通常 Command と Context Router の Command Target で運ぶ文字列（本文または文字列引数）は、それぞれ **4,096 文字**までで、超過は実行されず `operator_property_string_too_long` 診断になります。
+[コードの入力と実行](/reference/command_text.md) で、
+入力操作、複数行、外部スクリプトの扱いを確認できます。

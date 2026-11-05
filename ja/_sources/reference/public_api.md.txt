@@ -1,0 +1,315 @@
+---
+vocab: developer-facing
+orphan: true
+---
+
+(public_api)=
+
+# Public API
+
+PME2 では、外部スクリプトやアドオンから PME の機能を利用するための公開 API を提供しています。
+
+## クイックスタート
+
+```python
+import pme
+
+# 実行中のpackage identity（Legacy add-on／Blender Extension）
+addon_id = pme.ADDON_ID
+
+# メニューを探す
+pm = pme.find_pm("My Pie Menu")
+pm = pme.find_pm(uid="pm_9f7c2k3h")
+
+# メニューを呼び出す
+pme.invoke_pm("My Pie Menu")
+pme.invoke_pm(uid="pm_9f7c2k3h")
+
+# メニュー一覧
+all_menus = pme.list_pms()
+pie_menus = pme.list_pms(mode="PMENU", enabled_only=True)
+tags = pme.list_tags()
+
+# コード実行
+result = pme.execute("bpy.ops.mesh.primitive_cube_add()")
+print(result.ok, result.error)
+
+# 式評価
+value = pme.evaluate("len(C.selected_objects)")
+
+# JSON 検証
+result = pme.validate_json(json_string)
+for err in result.errors:
+    print(err.code, err.message)
+```
+
+## PME1 からの変更点
+
+| 観点 | PME1 | PME2 |
+|------|------|------|
+| インポート | `from pie_menu_editor import pme` | `import pme` |
+| runtime add-on ID | `"pie_menu_editor"` の固定値 | `pme.ADDON_ID` |
+| 設計 | 内部モジュールの露出 | 公開 API ファサード |
+| メニュー呼び出し | `pme.context.open_menu(name)` | `pme.invoke_pm(name)` / `pme.invoke_pm(uid=...)` |
+| コード実行 | `pme.context.exe(code)` | `pme.execute(code)` → `ExecuteResult` |
+| メニュー検索 | なし | `pme.find_pm()`, `pme.list_pms()` |
+| JSON 検証 | なし | `pme.validate_json()` |
+| 型・定数 | なし | `pme.types`, `pme.constants` |
+
+## API リファレンス
+
+### メニュー操作
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - 関数
+  - 説明
+* - `find_pm(name=None, *, uid=None)`
+  - 名前または uid でメニューを検索。見つからなければ `None`
+* - `invoke_pm(pm_or_name=None, *, name=None, uid=None)`
+  - メニューを呼び出す。成功時 `True`
+* - `list_pms(mode=None, *, enabled_only=False)`
+  - メニュー一覧を `PMHandle` のリストで返す
+* - `list_tags()`
+  - 使用中のタグ一覧を返す
+```
+
+### コード実行
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - 関数
+  - 説明
+* - `execute(code, *, extra_globals=None)`
+  - コードを実行し `ExecuteResult` を返す
+* - `evaluate(expr, *, extra_globals=None)`
+  - 式を評価して結果を返す。失敗時は例外
+* - `check_syntax(code, *, mode="exec")`
+  - 構文チェックのみ。`SyntaxResult` を返す
+```
+
+### 検証
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - 関数
+  - 説明
+* - `validate_json(json_string, *, strict=False, check_references=True)`
+  - 同梱の JSON Schema v2 と PME の UID 規則に対して文書を検証。`ValidationResult` を返す
+* - `validate_uid(uid)`
+  - uid 文字列のフォーマットを検証
+```
+
+検証は入力文書を書き換えず、含まれる Python コードも実行しません。同梱の Schema
+を使い、文書の `$schema` URL は取得しません。`valid=True` は要求された文書検査に
+合格したことを表します。現在の Blender 環境での Import 成功や、保存されたコマンドの
+実行成功を保証するものではありません。
+
+構造検証では、一度に一つの Schema 違反を返し、基本的な型や必須項目の誤りを、
+それらに依存する条件の違反より優先します。修正して再検証すると、残っている問題を確認できます。
+Schema に適合した後で PME の UID（メニューの UID 接頭辞と mode の一致を含む）と、
+要求された文書内参照を検査します。これらの検査では複数の問題を返す場合があります。
+
+Extension には fastjsonschema 2.22.2 を同梱していますが、同じ Python プロセスで Blender
+自身の 2.21 系が先に読み込まれている場合があります。同梱版と実際に使用する版は必ずしも
+一致しません。検証は両者に共通の API を使い、Blender が読み込んだライブラリを置換しません。
+
+既定の `check_references=True` では、UID による MENU の参照先と、Property Stack /
+Context Router データから依存先として認識できる PM について、同じ文書に含まれるかも調べます。
+参照先を別途用意する部分的な Export などでは、`False` にして参照検査の段階を省略できます。
+その場合も構造と UID の検査は行います。旧形式の名前参照や Blender のメニュー型名を、実行中の
+Blender に照会して解決することはありません。
+
+参照検査のために logic データを読み取れない場合は `E603`、読取り時に正規化が必要な場合は
+警告 `W202` を返します。入力データは変更しません。これらは任意の参照検査に属する診断です。
+
+認識できる旧形式の PME JSON には警告 `W301` を返します。その項目内容や名前参照を
+Schema v2 で検証したという意味ではありません。`strict=True` では、警告を
+`result.warnings` に残したまま、警告が一件でもあれば `valid` が偽になります。
+
+解析済みの JSON には `pme.validation.validate(data, ...)`、UTF-8 の JSON ファイルには
+`pme.validation.validate_file(filepath, ...)` を使えます。どちらも `validate_json` と
+同じオプションと検証結果を使います。問題のコードとパスは `errors` / `warnings` から、
+表示用レポートは `result.format_report()` から確認できます。
+
+(resource-discovery)=
+
+### リソースの照会
+
+```{versionadded} 2.2.0
+登録フォルダー、スクリプト・アイコンの一覧、スクリプト参照の解決結果を取得する読み取り専用 API です。
+API の安定性は **Experimental** です。
+```
+
+`pme.resources` は、PME が現在使用している[リソース設定](file_locations.md)を参照します。
+外部スクリプトから使う場合は、先に [`import pme` エイリアス](boot_options.md)を有効にしてください。
+
+| 関数 | 取得する情報 | 戻り値 |
+|------|--------------|--------|
+| `list_folders()` | 登録名・保存パス・解決後のパス・フォルダーの状態 | 登録順の `ResourceFolderInfo` の tuple |
+| `list_icon_folders()` | 登録したアイコン用フォルダーの保存パス・解決後のパス・状態 | 登録順の `ResourceFolderInfo` の tuple。`name` は空 |
+| `list_files(kind=None)` | 登録先に存在するファイルと、走査できなかった場所 | `ResourceFileListing` |
+| `resolve_script(reference)` | 指定したスクリプト参照の解決状態と候補 | `ScriptResolution` |
+
+`list_files()` の `kind` は、`None`（両方）・`"script"`・`"icon"` を受け付けます。
+
+#### 登録場所と素材を取得する
+
+未使用のファイルも一覧に含まれます。AI や外部ツールへ渡す JSON は、標準の `dataclasses.asdict()` で作成できます。
+**`files` と `issues` を合わせて確認してください。** 読み取れなかった場所がある場合、`files` は部分的な一覧です。
+
+```python
+from dataclasses import asdict
+import json
+import pme
+
+folders = pme.resources.list_folders()
+listing = pme.resources.list_files()
+
+payload = {
+    "folders": [asdict(folder) for folder in folders],
+    "files": [asdict(item) for item in listing.files],
+    "issues": [asdict(issue) for issue in listing.issues],
+}
+print(json.dumps(payload, ensure_ascii=False, indent=2))
+```
+
+| 結果の型 | フィールド |
+|----------|------------|
+| `ResourceFolderInfo` | `index`、`name`、`raw_path`、`resolved_path`、`status` |
+| `ResourceFileInfo` | `folder`、`kind`、`relative_path`、`absolute_path` |
+| `ResourcePathIssue` | `folder`、`path`、`code` |
+| `ResourceFileListing` | `files`、`issues`（いずれも tuple） |
+
+結果は変更不可のデータです。`folder` は所属先の `ResourceFolderInfo` を保持します。
+`relative_path` は `scripts/modeling/align.py` のように、登録フォルダーからのパスです。
+`raw_path` は保存した表記を保持し、フォルダーの `resolved_path` は実行中の Blender を基準に解決した絶対パスです。
+名前と `index` は表示・登録順の情報で、永続的な識別子や名前空間ではありません。
+
+| フォルダーの `status` | 意味 |
+|----------------------|------|
+| `available` | ディレクトリを開いて一覧を取得できる。配下の全ファイルの読取成功までは保証しない |
+| `missing` | 登録先が存在しない |
+| `not_directory` | 指定先がディレクトリではない |
+| `unreadable` | 指定先を確認・走査できない |
+| `invalid` | 保存されたパスを解決できない。`resolved_path` は空文字列 |
+
+走査の問題は `ResourcePathIssue.path` と `code` で返します。
+`code` は `missing`・`not_directory`・`unreadable`・`invalid` です。
+登録したリソースフォルダーやアイコン用フォルダー自体の不在は、問題として返します。
+
+#### スクリプト参照を確認する
+
+**登録フォルダー内のファイルをスロットから使う場合は、`scripts/...` のような登録フォルダーからの相対パスを保存します。** 解決結果の絶対パスは、現在どのファイルに対応するかを確認するための情報です。
+次の例はコマンド文字列を作るだけで、スクリプトを実行したりスロットを書き換えたりはしません。
+
+```python
+import pme
+
+reference = "scripts/modeling/align.py"
+result = pme.resources.resolve_script(reference)
+
+if result.status == "resolved":
+    command = f"execute_script({reference!r})"
+    print(command)  # execute_script('scripts/modeling/align.py')
+else:
+    print(result.status, result.candidates)
+```
+
+`ScriptResolution` は `reference`・`status`・`resolved_path`・`candidates` を持ちます。
+`resolved_path` は成功時だけ絶対パスを持ち、それ以外は `None` です。
+`candidates` は確認できた該当ファイルのパスの tuple です。
+
+| `status` | 意味 |
+|----------|------|
+| `resolved` | 参照先を一意に特定できた。ファイルの読取権限・Python構文の正しさは未検証 |
+| `missing` | 該当ファイルが見つからない |
+| `ambiguous` | 異なる実ファイルが複数該当する |
+| `unavailable` | 必要な場所を解決・確認できず、参照先を確定できない |
+
+相対参照は、スクリプト実行と同じ処理で全登録先を確認します。
+異なるユーザーファイルは内容が同一でも別候補です。同じ実ファイルへの別パスは一候補として扱います。
+ユーザー候補がなく、ユーザー側の場所を確認できた場合だけ、アドオン本体の中へ進みます。
+絶対パス参照も受け付けます。
+
+#### 走査範囲と更新
+
+- **スクリプト:** 登録フォルダー全体の小文字拡張子 `.py` を再帰走査します。隠しフォルダーと `__pycache__` は走査しません。ディレクトリのシンボリックリンクもたどり、同じ実ディレクトリは登録フォルダーごとに一度だけ走査します。
+- **アイコン:** 登録した各アイコン用フォルダーの直下にある、小文字拡張子 `.png` を列挙します。予約接頭辞 `_intr_` は除外します。`relative_path` はファイル名です。アイコン用フォルダー自体は `pme.resources.list_icon_folders()` で取得でき、表示名はありません。衝突するファイルや、Custom の選択一覧では非表示になる `_` 始まりの名前も返します。**この一覧はアイコンの選択・描画可否の判定結果ではありません。**
+- **設定とファイル:** 実行中の有効なリソース設定を使い、ファイル状態は呼出しごとに確認します。外部エディターによる設定ファイルの変更は、次の起動・再有効化で読み込みます。
+
+これらの関数は、スクリプト実行・画像のデコード・ディレクトリ作成・設定移行を行いません。
+一覧取得や解決後にファイルが変わる可能性があるため、スクリプト実行時には参照を再解決します。
+スロットでの利用箇所解析、移動・改名への自動追従は対象外です。
+
+登録フォルダーが未設定の場合、`list_folders()`・`list_icon_folders()`・`list_files()` は既定フォルダーを作らず空の結果を返します。
+設定を読み取れず過去の有効な設定もない場合は、この2関数が `RuntimeError` を送出します。
+`list_files()` の未対応 `kind` は `ValueError` です。
+
+### ユーザープロパティ
+
+Property Editor で作成したユーザープロパティには、Command 内の `props()` と
+`import pme` の `pme.props()` のどちらからも同じ方法でアクセスできます。
+
+```python
+import pme
+
+# PropertyGroup を取得して属性として読み書きする
+pme.props().MyCounter = 10
+value = pme.props().MyCounter
+
+# 登録済みstorage IDを指定して読み書きする
+value = pme.props("MyCounter")
+written = pme.props("MyCounter", 10)
+```
+
+`pme.props(name, None)` は従来どおり読み取りです。`None` を値として書き込む
+操作にはなりません。名前によるアクセスはPMEが登録したproperty専用です。
+未登録名は読み取り時に `None`、書き込み時に `False` を返し、scratch storageを
+作成しません。以前の Experimental API で使えた
+`pme.props.MyCounter` は `pme.props().MyCounter` に変更してください。
+
+### Runtime add-on identity
+
+Blender APIへ実行中のadd-on module IDを渡す必要がある場合は
+`pme.ADDON_ID`を使います。Blender Extensionでは
+`bl_ext.<repository>.<package>`を含む現在のpackage identityを返します。
+
+```python
+import bpy
+import pme
+
+addon_preferences = bpy.context.preferences.addons[pme.ADDON_ID].preferences
+```
+
+PMEのPreferences objectだけが必要な場合は`pme.preferences`を使ってください。
+新しいscriptで`"pie_menu_editor"`を固定値として書かないでください。
+
+### 後方互換
+
+PME1 の `pme.context` と Command global の `props()` は引き続き利用可能です。
+既存の Command タブ内の `props()` スクリプトはそのまま動作します。
+
+```python
+# これらは PME2 でもそのまま使える
+pme.context.open_menu("My Menu")
+pme.context.event.mouse_x
+pme.context.add_global("my_var", value)
+props("MyCounter", 10)
+```
+
+新規コードでは `pme.execute()` / `pme.invoke_pm()` の利用を推奨します。
+
+```{note}
+Public API は現在 **Experimental** です。基本的なインターフェースは安定していますが、細部は今後のバージョンで変更される可能性があります。
+```
+
+```{seealso}
+`import pme` を利用するには事前の有効化が必要です。手順は [起動オプション](boot_options.md) を参照してください。
+```

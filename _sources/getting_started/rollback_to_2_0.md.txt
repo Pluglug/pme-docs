@@ -1,0 +1,23 @@
+:orphan:
+
+(install-2-1-rollback)=
+
+# Return to PME 2.0.5.x
+
+Returning from PME 2.1 to PME 2.0.5.x is different from a normal update.
+Restore the JSON file that you exported before migrating to PME 2.1.
+
+1. Uninstall the PME 2.1 Extension.
+2. Exit Blender, then start it again.
+3. Install and enable the PME 2.0.5.x Legacy Add-on that you used previously.
+4. Import the JSON file that you exported before migrating to PME 2.1.
+
+```{warning}
+JSON exported from PME 2.1 may contain features that PME 2.0.5.x does not support.
+Importing PME 2.1 JSON directly into PME 2.0.5.x is not a supported rollback procedure.
+
+This procedure restores the state saved before migration. Menus added or edited in PME 2.1
+will not be restored.
+```
+
+[Back to Installation](installation.md)
