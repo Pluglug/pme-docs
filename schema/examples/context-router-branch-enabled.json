@@ -1,0 +1,117 @@
+{
+  "$schema": "https://pluglug.github.io/pme-docs/schema/pme2-2.0.json",
+  "schema_version": "2.0",
+  "addon_version": "2.1.0",
+  "menus": [
+    {
+      "uid": "rt_aaaaaaaa",
+      "name": "Branch Enable Example",
+      "mode": "ROUTER",
+      "enabled": true,
+      "settings": {},
+      "items": [],
+      "extensions": {
+        "pme": {
+          "logic": {
+            "version": 2,
+            "branches": [
+              {
+                "branch_uid": "branch_a",
+                "name": "Object Mode A",
+                "enabled": false,
+                "combine_mode": "all",
+                "conditions": [
+                  {
+                    "condition_uid": "condition_a",
+                    "enabled": true,
+                    "authoring_state": "complete",
+                    "label": "Object Mode",
+                    "source": {
+                      "kind": "rna_path",
+                      "root": "context",
+                      "segments": [
+                        {
+                          "kind": "attr",
+                          "name": "mode"
+                        }
+                      ],
+                      "detected_type": "enum",
+                      "readonly": true,
+                      "owner_type": null
+                    },
+                    "op": "equals",
+                    "value": "OBJECT",
+                    "value_type": "enum"
+                  }
+                ],
+                "target": {
+                  "action": {
+                    "type": "command",
+                    "value": "print('Branch A')",
+                    "opts": {
+                      "undo": false
+                    }
+                  },
+                  "fallback_name": "Branch A"
+                }
+              },
+              {
+                "branch_uid": "branch_b",
+                "name": "Object Mode B",
+                "enabled": true,
+                "combine_mode": "all",
+                "conditions": [
+                  {
+                    "condition_uid": "condition_b",
+                    "enabled": true,
+                    "authoring_state": "complete",
+                    "label": "Object Mode",
+                    "source": {
+                      "kind": "rna_path",
+                      "root": "context",
+                      "segments": [
+                        {
+                          "kind": "attr",
+                          "name": "mode"
+                        }
+                      ],
+                      "detected_type": "enum",
+                      "readonly": true,
+                      "owner_type": null
+                    },
+                    "op": "equals",
+                    "value": "OBJECT",
+                    "value_type": "enum"
+                  }
+                ],
+                "target": {
+                  "action": {
+                    "type": "command",
+                    "value": "print('Branch B')",
+                    "opts": {
+                      "undo": false
+                    }
+                  },
+                  "fallback_name": "Branch B"
+                }
+              }
+            ],
+            "otherwise": {
+              "name": "Otherwise",
+              "target": {
+                "action": {
+                  "type": "command",
+                  "value": "print('Otherwise')",
+                  "opts": {
+                    "undo": false
+                  }
+                },
+                "fallback_name": "Otherwise"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

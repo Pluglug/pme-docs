@@ -1,0 +1,1946 @@
+---
+vocab: developer-facing
+orphan: true
+---
+
+(public_api)=
+
+# Public API
+
+PME2 provides a public API for external scripts and other addons.
+
+(public-api-import)=
+
+## Import the running API
+
+The examples use `import pme`, the optional short alias configured in
+[Boot Options](boot_options.md). When that alias is disabled, use the enabled
+add-on's package name without changing the startup configuration or reloading
+Blender:
+
+```python
+import bpy
+import importlib
+
+packages = [
+    addon.module for addon in bpy.context.preferences.addons
+    if addon.module.rsplit(".", 1)[-1] == "pie_menu_editor"
+]
+if len(packages) != 1:
+    raise RuntimeError(f"Select the enabled PME package: {packages}")
+pme = importlib.import_module(packages[0] + ".api")
+print(pme.ADDON_ID)
+```
+
+This also works for a Blender Extension installed as
+`bl_ext.<repository>.pie_menu_editor`. If several packages are listed, identify
+the intended installation before editing. All examples below can use the `pme`
+variable returned by this explicit import; the short alias is not required.
+When using it, omit `import pme` from the following snippets.
+
+## Quick Start
+
+```python
+import pme
+
+# Runtime package identity (Legacy add-on or Blender Extension)
+addon_id = pme.ADDON_ID
+
+# Find a menu
+pm = pme.find_pm("My Pie Menu")
+pm = pme.find_pm(uid="pm_9f7c2k3h")
+
+# Invoke a menu
+pme.invoke_pm("My Pie Menu")
+pme.invoke_pm(uid="pm_9f7c2k3h")
+
+# List menus
+all_menus = pme.list_pms()
+pie_menus = pme.list_pms(mode="PMENU", enabled_only=True)
+tags = pme.list_tags()
+
+# Execute code
+result = pme.execute("bpy.ops.mesh.primitive_cube_add()")
+print(result.success, result.error_message)
+
+# Evaluate an expression
+value = pme.evaluate("len(C.selected_objects)")
+
+# Validate JSON
+result = pme.validate_json(json_string)
+for err in result.errors:
+    print(err.code, err.message)
+```
+
+## Changes from PME1
+
+| Topic | PME1 | PME2 |
+|------|------|------|
+| Import | `from pie_menu_editor import pme` | `import pme` |
+| Runtime add-on ID | Hard-coded `"pie_menu_editor"` | `pme.ADDON_ID` |
+| Design | Exposed internal module | Public API facade |
+| Menu invocation | `pme.context.open_menu(name)` | `pme.invoke_pm(name)` / `pme.invoke_pm(uid=...)` |
+| Code execution | `pme.context.exe(code)` | `pme.execute(code)` -> `ExecuteResult` |
+| Menu lookup | None | `pme.find_pm()`, `pme.list_pms()` |
+| JSON validation | None | `pme.validate_json()` |
+| Types and constants | None | `pme.types`, `pme.constants` |
+
+## API Reference
+
+### Menu operations
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - Function
+  - Description
+* - `find_pm(name=None, *, uid=None)`
+  - Find a menu by name or uid. Returns `None` when not found
+* - `invoke_pm(pm_or_name=None, *, name=None, uid=None)`
+  - Request a menu invocation. `True` means the request returned without error; verify display and actions separately
+* - `list_pms(mode=None, *, enabled_only=False)`
+  - Return a list of menus as `PMHandle`
+* - `list_tags()`
+  - Return the list of tags currently in use
+* - `create_pm(spec, *, request_refresh=None)`
+  - Create the default shape of a menu from `PmCreationSpec` and return `PmCreationResult`
+```
+
+`PMHandle` contains `uid`, `name`, `mode`, `enabled`, and `tag`. Find a menu by
+name for discovery, then retain its UID for subsequent operations. Use
+`pme.editing.read_pm(uid)` to read its saved slots.
+
+`create_pm()` creates the editor's default contents. Explicit `slots` and `data`
+in `PmCreationSpec` are not accepted by this function; create the menu, then edit
+its contents through `pme.editing`.
+
+```python
+created = pme.create_pm(pme.PmCreationSpec(mode_id="VMENU", name="Mesh Tools"))
+print(created.accepted, created.pm_uid, created.diagnostics)
+if created.accepted:
+    menu = pme.editing.read_pm(created.pm_uid)
+```
+
+`accepted=True` means the menu was created. If `diagnostics` includes
+`refresh_failed`, read the returned UID instead of repeating creation. The
+result does not mean Preferences were saved to disk or the menu was invoked.
+
+(local-menu-editing)=
+
+### Local menu editing
+
+`pme.editing` reads and edits saved definitions from Blender's main Python
+thread after PME has finished loading. It can be called from the Console, Text
+Editor, or an existing Blender tool that runs Python there. These functions do
+not execute the authored actions or save Preferences to disk. The API is
+**Experimental**.
+
+Use an initialized **GUI session** for menu creation and editing. PME's
+`--background` registration does not initialize the temporary Preferences and
+editor state used by these workflows; background JSON validation is separate.
+There is no public initialization-status/wait API yet. A fixed startup delay,
+or retrying arbitrary `RuntimeError` exceptions, does not prove readiness.
+Wait for PME's normal Preferences editor to be available before running the
+authoring examples in the Console or Text Editor.
+
+The compatibility boundary is the UID-addressed operation, its documented inputs,
+conflict checks, and observable result. Internal implementations may change while
+preserving the saved format and normal UI normalization. Read the operation's
+result and diagnostics to distinguish completion, rejection, partial application,
+and an unknown outcome; after an unexpected exception or unknown outcome, read
+again before deciding whether to retry. Changes to failure residual state or stale
+detection are observable behavior changes, even when the function signature stays
+the same. A batch does not promise atomicity, Blender Undo, execution success, or
+disk persistence. Save through Blender's **Save Preferences** when needed, then
+verify after restart.
+
+When editing many menus through an external tool, use small batches and retain
+results and progress between calls. A tool timeout does not cancel Blender's
+work or prove that nothing changed. Wait for the running call to finish, then
+read the target menus before deciding which changes, if any, to retry.
+
+| Function | Result |
+|---|---|
+| `read_pm(pm_uid, *, slot_uids=None)` | One menu's saved definition; filter slot details by UID while retaining the complete layout rows |
+| `slot_fields()` | Accepted Slot Editor input names, types, enum choices, and descriptions |
+| `update_pm(pm_uid, changes, *, expected=None)` | Update menu name, description, description format, or Poll source |
+| `update_tags(pm_uids, *, add=(), remove=(), expected=None, dry_run=False)` | Add and remove tag names across explicit menu UIDs through one batch |
+| `update_hotkey(pm_uid, changes, *, expected=None, dry_run=False)` | Update a complete hotkey binding through partial field input, or preview the change |
+| `update_slots(pm_uid, edits, *, expected_version=None, expected=None)` | Per-slot results for a mapping of slot UID to changed input fields |
+| `clear_slots(pm_uid, slot_uids, *, expected_version=None, expected=None)` | Clear slot contents through the normal Clear operation, retaining their UIDs and positions |
+| `add_slot(pm_uid, *, kind=None, before_uid=None, after_uid=None, expected_version=None, expected=None, use_spacer=False, dry_run=False, header_anchor_uid=None, edge=None)` | Add one default item relative to another slot UID or into a Panel header, or preview the addition |
+| `remove_slot(pm_uid, slot_uid, *, expected_version=None, expected=None, dry_run=False)` | Remove one item, or preview its removal |
+| `move_slot(pm_uid, slot_uid, *, before_uid=None, after_uid=None, expected_version=None, row_ref=None, edge=None, new_row=None, expected=None, use_spacer=False, dry_run=False, header_anchor_uid=None)` | Move one item before/after another, or move a Pop-up Dialog/Floating Panel item to a row end, new row, or Panel header |
+| `swap_slots(pm_uid, slot_uid, other_slot_uid, *, expected_version=None, expected=None, dry_run=False)` | Exchange two fixed-slot items or two ordinary layout items, or check whether the exchange is allowed |
+| `transfer_slot(source_pm_uid, source_slot_uid, destination_pm_uid, *, destination_slot_uid=None, before_uid=None, after_uid=None, row_ref=None, edge=None, new_row=None, use_spacer=False, header_anchor_uid=None, expected=None, dry_run=False)` | Move contents between menus and return both saved results |
+| `add_row(pm_uid, *, before_row_ref=None, after_row_ref=None, expected_version=None, expected=None, dry_run=False)` | Add a layout row and a default button |
+| `add_panel(pm_uid, *, before_row_ref=None, after_row_ref=None, expected_version=None, expected=None, dry_run=False)` | Add a Layout Panel row with its default anchor |
+| `remove_row(pm_uid, row_ref, *, expected_version=None, expected=None, dry_run=False)` | Remove a whole layout row, including its contents |
+| `move_row(pm_uid, row_ref, *, before_row_ref=None, after_row_ref=None, expected_version=None, expected=None, dry_run=False)` | Move a whole layout row before or after another row |
+| `split_row(pm_uid, row_ref, *, before_uid, expected_version=None, expected=None, dry_run=False)` | Split an ordinary layout row before an item or spacer |
+| `join_rows(pm_uid, first_row_ref, second_row_ref, *, expected_version=None, expected=None, dry_run=False)` | Join two adjacent ordinary layout rows in the supplied order |
+| `update_row(pm_uid, row_ref, changes, *, scope="row", expected_version=None, expected=None, dry_run=False)` | Change saved row settings for one row or a group of rows |
+| `update_spacer(pm_uid, *, slot_uid=None, before_uid=None, after_uid=None, prop, value, expected_version=None, expected=None, dry_run=False)` | Change one spacer setting, creating an adjacent spacer when needed |
+| `align_slot(pm_uid, slot_uid, alignment, *, expected_version=None, expected=None, dry_run=False)` | Place an item in a row alignment section or clear its outer alignment boundaries |
+| `update_router(pm_uid, *, branches=(), otherwise=None, expected_digest=None, dry_run=False)` | Validate or update a Context Router through its own authoring operation |
+| `remove_router_branch(pm_uid, branch_uid, *, expected_digest=None, dry_run=False)` | Remove one branch, including the last branch, preserving Otherwise |
+| `move_router_branch(pm_uid, branch_uid, *, before_uid=None, after_uid=None, expected_digest=None, dry_run=False)` | Move one branch relative to another local branch UID |
+| `update_property_stack(pm_uid, *, logic, expected_digest=None, dry_run=False)` | Validate or replace a Property Stack's complete logic |
+| `add_property_stack_row(pm_uid, *, expected_digest=None, dry_run=False)` | Append an empty condition row using the normal editor's authoring operation |
+| `update_property_stack_row(pm_uid, condition_uid, fields, *, expected_digest=None, dry_run=False)` | Edit one condition and update its related SET entry |
+| `remove_property_stack_row(pm_uid, condition_uid, *, expected_digest=None, dry_run=False)` | Remove one condition and its related SET entry |
+
+Pop-up Dialog and Floating Panel item and whole-row editing are described below.
+Clear empties a slot; it does not remove it.
+
+#### Move one list item
+
+For an editable flat list, supply exactly one anchor UID. This moves the last item
+before the first while retaining every item's UID and saved content:
+
+
+```python
+before = pme.editing.read_pm(pm_uid)
+result = pme.editing.move_slot(
+    pm_uid, before["slots"][-1]["uid"],
+    before_uid=before["slots"][0]["uid"], expected_version=before["version"],
+)
+print(result["status"], result["before_order"], result["after_order"])
+```
+
+Use `after_uid` to place it after another item. Already being at the requested
+position, including a self anchor, returns `status="unchanged"` and
+`committed=False` without incrementing the version or refreshing the editor.
+Missing or ambiguous UIDs and stale versions are rejected before moving.
+Malformed input raises `TypeError` or `ValueError`. Other items retain their
+relative order. `slots` contains the target's saved values before and after;
+`side_effects` includes other changed readback values, including their indexes.
+Normal editor hooks run on a changed order, including Macro registration.
+Hook failure restores the UID order, but does not promise to revert every
+callback effect. Inspect the returned diagnostics and readback. A refresh
+exception can occur after commit: read the menu again before retrying.
+This does not save Preferences or provide Blender Undo.
+
+#### Exchange two fixed-slot items
+
+`swap_slots` exchanges the positions of two items in a fixed-slot menu. Each UID
+moves with its saved values; the intervening items stay in place. Both UIDs are
+resolved before writing and the version increments once. The same UID twice
+returns `unchanged`, `committed=False`, without changing the version. `slots`
+contains both items with before/after readback; `before_order` and `after_order`
+show the full order. Apply or editor-hook failure restores order, but arbitrary
+hook field changes can remain in the readback. It does not save Preferences or
+provide Blender Undo. After an exception, read back before retrying because
+refresh can fail after commit.
+
+```python
+before = pme.editing.read_pm(pm_uid)
+result = pme.editing.swap_slots(
+    pm_uid, before["slots"][0]["uid"], before["slots"][2]["uid"],
+    expected_version=before["version"],
+)
+```
+
+#### Check a move or exchange without changing it
+
+Pass `dry_run=True` to `move_slot` or `swap_slots` to use the same preflight
+checks as execution and the normal editor. An allowed change returns
+`status="validated"`; an already satisfied position returns `"unchanged"`;
+an unavailable destination returns `"rejected"` with a diagnostic reason.
+All three return `committed=False`. Layout moves use the same query mechanism,
+with the row targets and additional readback described below.
+Flat-list moves continue to accept `dry_run=True`; a non-`None` `expected`
+raises `TypeError` for flat-list moves and fixed-slot exchanges.
+
+```python
+before = pme.editing.read_pm(pm_uid)
+checked = pme.editing.swap_slots(
+    pm_uid, before["slots"][0]["uid"], before["slots"][2]["uid"],
+    expected_version=before["version"], dry_run=True,
+)
+print(checked["status"], checked["diagnostics"])
+```
+
+The query does not change saved values, UIDs, order, versions, selection or an
+open Slot Editor draft. It does not run editor hooks or request a refresh.
+`before_order`, `after_order`, and slot `before` / `after` describe the current
+saved state, so they remain equal; they are not a prediction of a committed
+move. A successful query does not reserve the destination or prove that later
+registration or refresh will succeed. Call the same operation without
+`dry_run=True` to execute it; the operation checks the current state again.
+
+#### Read a resolved Popup insertion position
+
+Pop-up Dialog and Floating Panel `add_slot` and `move_slot` results include
+`insertion_position`. For `transfer_slot`, read `result["to"]["insertion_position"]`.
+The shared operation records the position it resolved for both queries and
+execution. It describes a gap in the saved order **before** the operation:
+
+| Field | Meaning |
+|---|---|
+| `basis` | Always `"before"` |
+| `index` | Gap index from 0 through the number of saved slots, including structural slots |
+| `previous_slot_uid` | Slot immediately before the gap, or `None` at the start |
+| `next_slot_uid` | Slot immediately after the gap, or `None` at the end |
+| `row_ref` | The before-state row containing the previous slot; at index 0, the markerless first row if present; otherwise `None` |
+| `new_row` | `"END"` for a new final row target, otherwise `None` |
+
+For saved order `[row, A, COLUMN, B]`, inserting after A resolves to index 2
+between A and COLUMN; inserting before B resolves to index 3 between COLUMN
+and B. The result keeps structural slot UIDs, so callers can distinguish the
+two sides of that boundary without recalculating the input position.
+
+A new-row target reports the before-state end index with `row_ref=None`.
+It allocates no future row reference or UID. Source removal, spacer insertion
+and cleanup can change the final item index. The recorded position keeps its
+before basis after success or failure; inspect the existing `after` values
+and orders for the actual saved result. An unchanged move can still report
+the requested gap, including the source UID as a neighbor.
+
+An unresolved early rejection returns `None`. A rejection after position
+resolution can include a position; `status` and `diagnostics` determine whether
+the operation is allowed. Shared Popup results for swaps, removals and row
+operations use `None`, as do transfers to non-Popup menus. A fresh preflight
+rejection never borrows a position from the earlier check.
+
+This field records saved insertion boundaries. General column/subrow nesting
+and a layout tree are not provided. Queries retain the current saved values in
+`before_rows` and `after_rows`; they do not predict cleanup.
+
+
+#### Transfer contents to another menu
+
+`transfer_slot` moves one item's contents, including `enabled`, between two
+menus. It uses the normal Paste rules for accepted content and field conversion.
+The two menus must be different; use `move_slot` or `swap_slots` within one menu.
+
+- For a fixed destination, supply `destination_slot_uid` for an empty slot.
+  The destination keeps its UID. A Sticky slot is empty when its mode is
+  `COMMAND` and its command text is empty.
+- For a flat-list destination, supply exactly one of `before_uid` / `after_uid`.
+  The inserted item receives a new UID. An empty list takes neither anchor.
+- For a Pop-up Dialog / Floating Panel destination, use `before_uid` /
+  `after_uid`, a current `row_ref` with `edge="START"` / `"END"`, or
+  `new_row="END"`. An explicit ordinary row may be empty. An empty menu also
+  accepts no position. These forms are exclusive; a new item receives a new UID.
+- For a Panel header destination, supply `header_anchor_uid` with a relative
+  `before_uid` / `after_uid` or `edge="START"` / `"END"`. The header role is
+  required for transfers even when Header Layout is on. Moving into an off
+  header leaves it off and reports `header_layout_disabled` with its anchor UID.
+- `use_spacer` defaults to `False`, independently of Preferences. `True` uses
+  the normal Move spacer rules for item-relative and row-edge positions.
+  A new final row uses the existing row settings rules without an extra spacer.
+- A fixed source is cleared while retaining its UID and enabled state.
+  A Sticky source also regains its default On Press / On Release name and empty
+  command. A list source is removed, even when it is the last item.
+- Regular Menu labels and layout markers can be anchors, but cannot be the
+  contents being transferred. Layout Panel anchors are not transferable items;
+  their ordinary header items can be moved out, including from an off header.
+
+For a flat-list destination, query first and pass the complete returned
+`expected` value to the same call:
+
+```python
+destination = pme.editing.read_pm(destination_pm_uid)
+position = ({"after_uid": destination["slots"][-1]["uid"]}
+            if destination["slots"] else {})
+checked = pme.editing.transfer_slot(
+    source_pm_uid, source_slot_uid, destination_pm_uid,
+    **position, dry_run=True,
+)
+if checked["status"] == "validated":
+    result = pme.editing.transfer_slot(
+        source_pm_uid, source_slot_uid, destination_pm_uid,
+        **position, expected=checked["expected"],
+    )
+    print(result["status"], result["from"], result["to"])
+    print(result["moved"], result["effects"], result["loss"])
+```
+
+For a fixed destination, replace `position` with
+`{"destination_slot_uid": empty_slot_uid}`. Position arguments are exclusive.
+For an empty or populated Panel header, use
+`{"header_anchor_uid": panel_anchor_uid, "edge": "END"}` instead. For an
+ordinary layout row, use `{"row_ref": current_row_ref, "edge": "END"}`.
+`expected` is an opaque snapshot of both menus and the relevant reference facts;
+keep it intact. It can be round-tripped through JSON. No separate
+`expected_version` argument is needed. Passing `None` skips comparison with a
+prior snapshot, while retaining current-state validation.
+
+The query returns the actual unchanged values in each side's `before` / `after`.
+It allocates no UID, initializes no version, and runs no editor hooks or refresh.
+Predicted conversions appear in `effects`; dynamic Macro icons and registration
+are observed after execution. Both saved writes happen before the editor hooks.
+A successful transfer increments each menu's version once and returns the actual
+addresses in `moved`.
+
+For a layout side, `before_rows` / `after_rows` describe its actual saved rows.
+The query does not predict cleanup or new UIDs. Transfer cleans up the affected
+insertion/removal boundaries and an emptied source row, retaining unrelated
+empty rows and distant spacers. If the markerless first row becomes empty, its
+following row marker is absorbed as in ordinary Move. This differs from the
+explicit `remove_row` operation. Moving the last content out can leave an empty
+menu; moving the last header item out retains the anchor and its empty header.
+Re-read row references after changes.
+
+If `transfer_rows_readback_failed` is reported, that side's `after_rows` is
+`None`; the saved operation status is retained. Read the rows again rather than
+retrying a transfer that already committed.
+
+`layout_panel` is not copied. It remains on a fixed source, and is lost with a
+removed list source; `loss` reports the saved value and disposition. An open
+draft for the source, fixed destination, or a layout marker that cleanup would
+remove or rewrite rejects the operation. Unrelated
+drafts, clipboard and selection are retained. Missing or ambiguous menu
+references retain their raw values with warnings; uniquely resolved references
+that become invalid in the destination are rejected before writing.
+
+Inspect `diagnostics` on rejection or failure. `restored_failure` means both
+saved item collections match their prior snapshots after recovery; Macro
+registration is reported separately in `effects`. `unknown` means recovery or
+readback could not establish that result, and unreadable `after` values are
+`None`. Read again before deciding what to do; do not automatically retry.
+Refresh failure keeps a committed result. The operation does not save
+Preferences to disk or provide Blender Undo.
+
+#### Read and move layout items
+
+For a Pop-up Dialog or Floating Panel, `read_pm()` also returns `rows` in saved
+order. `slot_uids` filters only the `slots` details: `rows` still describes the
+whole menu. An empty menu has `rows=[]`. Reading does not add row markers,
+repair UIDs, initialize a version, or change the layout.
+
+Each row includes `row_ref`, `slot_uids` (including its marker, if present),
+`has_marker`, `raw_text`, `settings`, `defaulted_fields`, `diagnostics`, and
+`spacers`. Spacer entries describe saved column/subrow boundaries as well as
+spacing. A row without a marker has `raw_text=None` and default settings;
+its first item's command is not treated as row settings. Unknown saved text
+remains available in the raw values. `panel` is either `None` or a dictionary
+with `anchor_uid`, interpreted `options`, `header_uids`, and the raw saved
+`layout_panel` value with `layout_panel_present`. Saved header items remain in
+the readback when **Header Layout** is off or an item is disabled.
+
+A `row_ref` has `kind="marker"` or `"first_item"` and a `slot_uid`. It refers
+to the row's current head, not a permanent row ID. Moving that head or adding
+or removing a marker can invalidate the reference. Use the returned
+`after_rows` or read again to obtain current references; an old reference is
+not redirected to a different row.
+
+For ordinary items, the existing **Move** choices are available through:
+
+- `swap_slots(pm_uid, slot_uid, other_slot_uid)` to exchange two items with
+  their UIDs and saved contents, without cleaning up empty rows or spacers.
+- `move_slot(..., before_uid=...)` or `after_uid=...` to insert an item
+  immediately before or after another stored item.
+- `move_slot(..., row_ref=..., edge="START")` or `edge="END"` to move an item
+  to that row's left or right end.
+- `move_slot(..., new_row="END")` to move it to a new final row.
+
+An explicit `row_ref` may select an empty ordinary row.
+
+Supply exactly one destination form. Mixing forms raises `ValueError`;
+`new_row` is a position string, not a bool. `use_spacer` is an explicit bool,
+defaulting to `False`; it does not inherit the Preferences setting. Item-relative,
+row-end, and new-row moves retain the normal editor's empty-row and spacer cleanup.
+The moved item's UID and content, the current selection, and an open Slot
+Editor draft remain attached to their existing items.
+
+Item-relative positions use the anchor's saved index. They do not skip column,
+subrow, or spacer markers: `after_uid=A` and `before_uid=B` can be different
+positions when markers separate A and B. A self anchor or an immediately adjacent
+stored item that already satisfies the position returns `unchanged`, without
+adding spacers, cleaning up, incrementing the version, or refreshing.
+The normal **Move** chooser offers item-relative before/after controls alongside
+the existing item exchange, row-end controls, and **Add Row**.
+
+This example uses a known ordinary `slot_uid` and a last row that accepts
+normal items:
+
+```python
+before = pme.editing.read_pm(pm_uid)
+row_ref = before["rows"][-1]["row_ref"]
+checked = pme.editing.move_slot(
+    pm_uid, slot_uid, row_ref=row_ref, edge="END",
+    expected_version=before["version"], dry_run=True,
+)
+if checked["status"] == "validated":
+    result = pme.editing.move_slot(
+        pm_uid, slot_uid, row_ref=row_ref, edge="END",
+        expected_version=checked["version"], expected=checked["expected"],
+    )
+    print(result["status"], result["after_rows"], result["structure_changes"])
+```
+
+Pass the complete `expected` from the layout Add, Remove, move, or exchange query unchanged.
+It compares saved contents and structure as well as order; a version alone
+does not detect every edit. A filtered `read_pm()` result or an edited settings
+dictionary is not a substitute. Non-`None` `expected` is not accepted for flat
+list moves or fixed-slot exchanges and raises `TypeError`.
+
+Layout results retain the usual `slots`, `before_order`, `after_order`, and
+`version`, and add `version_before`, `version_after`, `before_rows`,
+`after_rows`, `created_uids`, `deleted_uids`, `moved_uids`, `structure_changes`,
+`expected`, and `recovery`. `version` is the resulting version.
+`structure_changes` reports the actual row and spacer changes, including
+cleanup beyond the source row. Dry-run before/after values remain the current
+saved state and the changed UID lists are empty. The query does not predict
+complete cleanup results or allocate future UIDs.
+
+If final readback fails, `diagnostics` includes `popup_readback_failed` while
+preserving the operation's original `status` and `recovery`. Unreadable
+`after_order` or `after_rows` is `None`, not a copy of the before value. If only
+row readback fails, `after_order` still reports the observed order. Without a
+final saved-state snapshot, the changed UID lists are empty rather than inferred; this
+does not prove that nothing changed. Read again before deciding whether to retry.
+
+| Layout result status | Meaning |
+|---|---|
+| `validated` | The query accepts the operation; nothing was written |
+| `unchanged` | No saved change; the version does not increase |
+| `committed` | Saved changes were read back and the version increased once |
+| `rejected` | The operation was refused before writing; inspect `diagnostics` |
+| `restored_failure` | The operation failed and its saved values and order were restored |
+| `unknown` | Restoration could not be confirmed; read again before deciding what to do |
+
+Only `committed` sets `committed=True`; `False` with `unknown` does not prove
+that nothing changed. `recovery` is `not_needed`, `restored`, or `unknown`.
+Refresh failures remain separate from a committed saved change. An existing
+row-end no-op may still refresh the editor; item-relative no-ops and dry-runs do not. Moving a
+single item to a new row can finish unchanged after cleanup. These operations
+do not save Preferences or provide Blender Undo.
+
+Use `add_slot` and `remove_slot` for item membership, as described below.
+Use the row operations below to move or remove a whole Layout Panel row, and the
+settings operations to change layout settings. Individual header items use the
+Panel header positions described below. A Panel's owning anchor cannot be
+removed, moved, or exchanged as an individual item.
+
+#### Add, remove, move, split, and join layout rows
+
+The five row operations accept Pop-up Dialog and Floating Panel. Pass current
+`row_ref` values from `read_pm()["rows"]`; these are references to saved row heads,
+not permanent row IDs. Normal editor actions and API calls use the same operation.
+
+| Operation | Saved result |
+|---|---|
+| `add_row` | Add a row marker and the menu's default button. Use at most one position; omitting both appends, including to an empty menu. Existing row size/spacing inheritance follows **Add Row**. |
+| `remove_row` | Remove the selected marker and all contents. Retain the next row's marker and settings. Removing the last row leaves an empty menu. |
+| `move_row` | Supply exactly one `before_row_ref` or `after_row_ref`. Move the complete row with its settings and item UIDs. No item-move cleanup runs. |
+| `split_row` | The item or spacer named by `before_uid` starts a new right row with default settings and no new button. The left row keeps its settings. Remove one immediately preceding spacer, as in **Split**; retain other contents. |
+| `join_rows` | The supplied rows must still be adjacent in that order. Keep the first row's settings; remove the second marker and its whole COLUMN/ALIGNER spacers. Retain other contents and spacers. |
+
+Layout Panel Move/Remove includes its anchor and all header items, including
+disabled items and items hidden by **Header Layout**. Panel rows cannot be split
+or joined. Removal rejects a draft on an item being deleted; unrelated drafts,
+selection, and the row clipboard stay in place.
+
+Split accepts the first item as `before_uid`, leaving an empty left row. It can
+also split at a saved structural spacer, which remains on the right. A row marker
+itself is not an inner split point. Column and alignment rows are accepted except
+when the split newly places the first ALIGNER after the first COLUMN on the right:
+that would lose the alignment root. The `aligner_without_root` rejection leaves
+the saved row unchanged. Selecting the alignment spacer itself can retain the
+root. Existing malformed rows are not automatically repaired. The normal UI keeps
+its existing choice placement, including no **Split** entry on the first item.
+
+An explicit edit creates a missing marker only when needed to retain a row
+boundary. It preserves existing item UIDs and command text. A self move or an
+already-satisfied position is `unchanged`, without marker creation, version
+increments, or refresh. Reading and dry-run never create markers.
+
+```python
+before = pme.editing.read_pm(pm_uid)
+checked = pme.editing.add_row(
+    pm_uid, expected_version=before["version"], dry_run=True,
+)
+if checked["status"] == "validated":
+    added = pme.editing.add_row(
+        pm_uid, expected_version=checked["version"], expected=checked["expected"],
+    )
+    print(added["status"], added["after_rows"], added["created_row_refs"])
+```
+
+All five operations use the complete saved `expected` snapshot and version
+described above. Dry-run reports actual unchanged values without allocating
+future UIDs. Apply rechecks the current rows and saved values.
+
+Row results additionally include `created_row_refs`, `deleted_row_refs`, and
+`moved_row_refs`, derived from actual before/after rows. A moved reference means
+its saved start index changed, including shifts caused by another row's edit.
+When a missing marker is created, `structure_changes` includes
+`{"kind": "row_ref", "before": old_ref, "after": new_ref}` for the retained row.
+Use `after_rows` or read again for subsequent calls. If row readback fails, the
+row-change lists cannot establish what changed. The same status, recovery,
+refresh-diagnostic, disk-save, and Undo rules as layout item operations apply.
+
+#### Create a Layout Panel and edit its header
+
+`add_panel` accepts Pop-up Dialog and Floating Panel. Use at most one current
+`before_row_ref` or `after_row_ref`; omit both to append, including to an empty
+menu. It creates the same default Panel as **Add Panel**: a new row and
+MENU anchor named `Panel`, an empty body target, a fresh panel ID, and both
+`default_closed` and `use_header_layout` set to `False`. A missing marker is
+added only where needed to retain the existing row boundary and command text.
+
+Pass `expected_version`, the complete `expected` returned by its dry-run, and
+`dry_run` as for other layout operations. Preview allocates no UID. Use the
+actual `after_rows`, `created_uids`, and row references after commit. Set the
+anchor's name and `menu_target_uid` through `update_slots`, using its saved UID;
+do not construct a `layout_panel` dictionary or row marker yourself.
+
+Panel settings remain the existing `update_slots` fields
+`layout_panel_default_closed` and `layout_panel_use_header_layout`. They are
+strict bools. Switching an empty header from OFF to ON creates one initial
+button. Removing or moving out its last item leaves it empty: another Save,
+rename, or unchanged `True` does not refill it. OFF preserves all saved header
+items. Normal changed saves retain the editor's anchor normalization, including
+`enabled=True`; `enabled` is not an `update_slots` input field. Slot updates
+keep their existing sequential, non-atomic save and failure behavior.
+
+For header Add or Move, obtain the existing `panel.anchor_uid` from `rows` and
+pass it as `header_anchor_uid`. Combine it with exactly one position:
+
+- `before_uid` or `after_uid` of a saved item in that header. Saved spacers count
+  as positions, so intervening markers are not skipped.
+- `edge="START"` or `edge="END"` to insert after the anchor or at the header's
+  end. Use an edge when the header is empty.
+
+Do not combine a header position with `row_ref` or `new_row`. A Panel row
+reference does not implicitly mean its header. Moving from an ordinary row or
+another header requires `header_anchor_uid`; relative rearrangement inside the
+same header works without it. Existing relative Add within an ON header remains
+available without the qualifier; OFF header Add requires it.
+
+This example moves a known ordinary `slot_uid` to the end of a chosen header:
+
+```python
+before = pme.editing.read_pm(pm_uid)
+panel = next(row["panel"] for row in before["rows"] if row["panel"])
+anchor_uid = panel["anchor_uid"]
+checked = pme.editing.move_slot(
+    pm_uid, slot_uid, header_anchor_uid=anchor_uid, edge="END",
+    expected_version=before["version"], dry_run=True,
+)
+if checked["status"] == "validated":
+    moved = pme.editing.move_slot(
+        pm_uid, slot_uid, header_anchor_uid=anchor_uid, edge="END",
+        expected_version=checked["version"], expected=checked["expected"],
+    )
+    print(moved["status"], moved["diagnostics"], moved["after_rows"])
+```
+
+Use the same destination arguments with `add_slot`. `swap_slots` needs only its
+two item UIDs to exchange ordinary/header items or items in different headers;
+it does not apply Add or Move cleanup. A raw Panel anchor cannot be moved into
+another header. The owning anchor and header move or are removed together
+through the row operations. A second raw anchor already stored inside a header
+can be explicitly removed as an item; this does not authorize inserting one.
+
+Header editing works while **Header Layout** is OFF and does not enable it.
+Inspect `header_layout_disabled` in `diagnostics` with its `anchor_uid`, along
+with the actual saved rows. Preferences shows the individual saved items for
+editing while runtime menus keep them hidden. The anchor menu provides Add for
+an empty header, and Move offers header START/END positions. Ctrl+Alt removes
+one header item; **Delete Inactive Header** remains an explicit bulk action.
+
+#### Change row settings, spacing, and alignment
+
+These operations accept Pop-up Dialog and Floating Panel. Normal editor settings
+and API calls share the same saved operation. Use current row references and slot
+UIDs from `read_pm()`; no row or spacer text needs to be assembled by the caller.
+
+`update_row` takes a partial `changes` mapping:
+
+| Field | Values |
+|---|---|
+| `size` | `"NORMAL"`, `"LARGE"`, `"LARGER"` |
+| `vspacer` | `"NONE"`, `"NORMAL"`, `"LARGE"`, `"LARGER"` |
+| `fixed_col`, `fixed_but` | Python `True` or `False` |
+| `align` | `"LEFT"`, `"CENTER"`, `"RIGHT"` — the saved row/subrow default, separate from alignment boundaries |
+
+The default `scope="row"` changes the specified row. `"aligned_rows"` selects
+the current group connected by `vspacer="NONE"`, including its top row.
+`"all_rows"` includes the implicit first row and accepts `row_ref=None`; an
+empty menu stays empty. Group operations retain the editor's per-field skips
+for Panel settings that do not apply. Panel row `vspacer` remains editable.
+
+Existing column spacing rules still apply: all-row `vspacer="NONE"` keeps
+`"NORMAL"` at column boundaries, and adding a column can adjust the current
+and next row. Compare actual `before_rows` and `after_rows`. The operation
+compares effective settings after these adjustments: a true no-op leaves raw
+text, UIDs, version, and refresh unchanged. A missing row marker is created
+only when needed to store a changed row setting, preserving the first command.
+Changed settings use the editor's existing encoding, which can normalize or
+drop unknown query keys on the affected marker; unrelated raw values remain.
+
+`update_spacer` takes exactly one target:
+
+- `slot_uid`: update that existing spacer itself, including a leading, trailing,
+  or intermediate spacer. A row marker or content item is not a spacer.
+- `before_uid` / `after_uid`: name a content item. Update its immediately adjacent
+  spacer on that side, or create one at that position. Unlike `add_slot`, an
+  existing adjacent spacer is updated rather than inserting another item.
+  The neighbor is confined to the same row. Leading and trailing positions are
+  allowed, and insertion before an implicit first item does not add a row marker.
+
+Use `prop="hsep"` with `"NONE"`, `"SPACER"`, `"COLUMN"`, or `"ALIGNER"`,
+or `prop="subrow"` with `"NONE"`, `"BEGIN"`, or `"END"`. One call changes
+one property because the editor's cleanup depends on operation order. Clearing
+BEGIN also clears the following matching END up to the next BEGIN, COLUMN, or
+row. Removing the last column boundary retains the editor's subrow cleanup;
+setting COLUMN on an END spacer clears END. NONE removes a spacer when no
+effective settings remain. Subrows do not require an explicit COLUMN marker.
+
+`align_slot` accepts `"LEFT"`, `"CENTER"`, `"RIGHT"`, or `None`. It moves or
+creates alignment boundaries; it does not write the row's `align` field. With
+columns, the requested item must precede the first COLUMN and no ALIGNER may
+follow that COLUMN. Otherwise inspect `item_in_column_region` or
+`aligners_after_column` and use `update_spacer` for explicit structural editing.
+This limit belongs to this convenience operation, not to saved layout data.
+`None` clears the existing outer boundaries (up to two), even when the item is
+after a column; it does not promise to remove every ALIGNER in imported data.
+An edit that newly creates `aligner_without_root` is rejected before writing.
+
+Existing Panel header spacing and alignment remain editable when Header Layout
+is off; editing does not enable it. Panel anchors, header COLUMN, and Panel
+subrows keep their operation-specific restrictions. Panel creation and new
+header structure operations are separate from these settings.
+
+```python
+before = pme.editing.read_pm(pm_uid)
+row_ref = before["rows"][0]["row_ref"]
+checked = pme.editing.update_row(
+    pm_uid, row_ref, {"size": "LARGE", "fixed_but": True},
+    expected_version=before["version"], dry_run=True,
+)
+if checked["status"] == "validated":
+    changed = pme.editing.update_row(
+        pm_uid, row_ref, {"size": "LARGE", "fixed_but": True},
+        expected_version=checked["version"], expected=checked["expected"],
+    )
+    print(changed["status"], changed["after_rows"], changed["structure_changes"])
+```
+
+All three use the complete saved `expected` snapshot and session version,
+strict boolean `dry_run`, actual before/after rows and UID changes, and the
+same recovery and refresh diagnostics as row operations. A preview allocates
+no future UID and does not promise rendering success. A committed change bumps
+the version once; no-op, preview, and preflight rejection do not. Read current
+row references after edits. These calls preserve unrelated selection, drafts,
+and clipboards; rewriting or deleting a draft's target is a conflict.
+They do not save Preferences to disk or add Undo.
+
+If `align_slot` cannot calculate its changes from the saved data, it returns
+`rejected` with the exception details and `recovery="not_needed"`, leaving
+saved values unchanged. The original traceback remains available in the console.
+
+#### Read one menu and update a slot
+
+`read_pm()` returns ordinary Python values rather than live Blender objects.
+The menu dictionary contains `uid`, `name`, `mode`, `enabled`, `data`, `description`,
+`description_is_expr`, `poll_cmd`,
+`hotkey`, `tags`, `version`, `editable_slots`, and `slots`. Each slot contains its `uid`,
+`index`, and saved fields such as `name`, `mode`, `text`, `icon`, and `auto_icon`.
+`index` describes its current position; writes select the slot by UID.
+The slot's `layout_panel` dictionary also records its saved Layout Panel options.
+Pop-up Dialog and Floating Panel definitions additionally include the complete
+`rows` structure described above.
+
+The following example updates a known slot UID. Obtain `pm_uid` and `slot_uid`
+by finding the requested menu and inspecting its slots first.
+
+```python
+before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+slot = before["slots"][0]
+result = pme.editing.update_slots(
+    pm_uid,
+    {slot_uid: {
+        "mode": "COMMAND",
+        "cmd": "bpy.ops.wm.tool_set_by_id(name='builtin.knife')",
+        "auto_icon": True,
+    }},
+    expected_version=before["version"],
+    expected={slot_uid: slot},
+)
+print(result)
+after = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+```
+
+Editing uses the normal Slot Editor's inputs, not raw saved-field assignment:
+
+| Edit field | Meaning |
+|---|---|
+| `mode` | Slot mode, such as `COMMAND`, `PROP`, `MENU`, or `CUSTOM` |
+| `cmd`, `prop`, `custom` | Command source, property path, or Custom source; use these instead of saved `text` |
+| `name`, `icon`, `auto_icon` | Label, manual icon, and Auto Icon choice |
+| `description`, `description_is_expr` | Description and its expression setting |
+| `menu_target_uid` | The target menu UID for a Menu slot |
+| `modal_input` | Modal-specific input fields; inspect `slot_fields()` for their names |
+
+Other supported inputs and enum choices are available from `slot_fields()`.
+Menu types whose `editable_slots` is false use their own editors; Router
+branches use `update_router()`, and Property callbacks are not normal slots.
+
+For a child-menu link, use the child's observed UID. Choose an icon appropriate
+to its category; a Vector Menu draws its own Nest arrow. This example changes
+the target and icon while retaining the slot's current label and presentation:
+
+```python
+before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+old_icon = before["slots"][0]["icon"]
+icon_flags = old_icon[:len(old_icon) - len(old_icon.lstrip("#!^"))]
+result = pme.editing.update_slots(pm_uid, {slot_uid: {
+    "mode": "MENU", "menu_target_uid": child_uid,
+    "icon": icon_flags + "TOOL_SETTINGS", "auto_icon": False,
+}}, expected_version=before["version"], expected={slot_uid: before["slots"][0]})
+```
+
+For an icon-only edit, omit `mode` and `menu_target_uid`. Existing presentation
+settings stay in place; do not change a Submenu to a Button just to change its
+icon. `menu_presentation` describes Regular Menu placement; Nest gestures and
+Pie Menu confirmation settings are separate. Check the displayed icon, entry
+into the child, selection, and exit in the intended menu.
+Use a Blender icon identifier such as `TOOL_SETTINGS`, an empty string/`NONE` for
+no icon, or `@filename` for a [custom PNG icon](../editors/custom_icons.md).
+`icon` includes leading display flags: `#` (icon only), `!` (hidden), and `^`
+(checkbox style where supported). They are not separate readback fields. The
+example retains the existing prefix unchanged when replacing the icon name.
+An unknown icon name can be saved and later display a fallback icon.
+
+Unspecified input fields start from the slot's current values. The changed
+slot still undergoes normal editor normalization; inspect its `before` and
+`after` dictionaries. A VMENU Command edit preserves other slots and their order,
+but editor-specific saves can update related fields, such as Macro slot icons.
+Those changes appear in the per-slot `before`/`after` values or in `side_effects`.
+Structural settings also retain the normal UI's effects: switching an empty Layout
+Panel header from OFF to ON adds its initial slot. Saving an already-ON empty
+header does not refill it. When the collection changes, the result includes
+`structure_changes` with `before_order` and `after_order` UID lists. Inspect that
+change as well as the requested slot. This is different from a raw field patch
+or replacing a menu through JSON Import.
+Loading an `EMPTY` slot into the normal editor starts it as `COMMAND`; an edit
+without `mode` can therefore create a Command slot. A blank `name` can be filled
+from the editor's suggestion. Inspect the normalized readback instead of assuming
+those inputs remain empty.
+
+`expected_version` detects changes through PME's versioned editing operations.
+It is session-local and is not a complete change detector. `expected`
+additionally compares the supplied saved fields. Passing the full slot returned
+by `read_pm()` checks all of those observed fields; passing a subset checks only
+that subset. On `stale_version` or `stale_slot`, read again and reconcile the
+intended change before retrying.
+
+| Editing operation | Conflict check |
+|---|---|
+| `update_slots` / `clear_slots` | Use `expected_version` and saved-field `expected` together |
+| `add_slot` | `expected_version` and the complete saved snapshot in the addition dry-run's `expected` |
+| `add_panel` and layout row/settings operations | `expected_version` and the complete `expected` returned by that operation's dry-run |
+| Flat-list `remove_slot` | `expected_version` and any subset of the target slot's saved fields in `expected`; the removal dry-run returns all target fields |
+| Layout `remove_slot` / `move_slot` / `swap_slots` | `expected_version` and the complete `expected` returned by that operation's dry-run |
+| `transfer_slot` | The complete `expected` returned by the same transfer's dry-run, covering both menus |
+| `update_pm` | `expected`: a subset of the four metadata fields, not the whole `read_pm()` result |
+| `delete_pms` | The complete `expected` returned by a deletion dry-run |
+| `duplicate_pm` | The complete `expected` returned by a duplication dry-run: collection version and source saved digest |
+| `update_hotkey` | `expected`: the complete 13-field `read_pm()["hotkey"]` snapshot |
+| `set_enabled` | `expected`: every requested UID mapped to its saved bool, as returned by its dry-run |
+| `update_tags` | The complete dry-run `expected`, covering target memberships and registry definitions before synchronization |
+| `update_router` / `update_property_stack` | `expected_digest` from that definition's most recent read |
+
+#### Add a menu description or rename it
+
+`update_pm()` accepts only `name`, `description`, `description_is_expr`, and
+`poll_cmd`. Menu descriptions are separate from slot descriptions:
+
+```python
+before = pme.editing.read_pm(pm_uid)
+fields = ("name", "description", "description_is_expr", "poll_cmd")
+result = pme.editing.update_pm(pm_uid, {
+    "description_is_expr": False,
+    "description": "Mesh tools. Unmatched contexts keep Blender's shortcut.",
+}, expected={key: before[key] for key in fields})
+print(result)
+```
+
+`expected` compares any supplied subset of those four saved fields before
+editing. Renaming uses normal PME handling for Menu-slot links, Popup-related
+Panel-item names, the tree, and hotkey registration. Command/Custom/Poll source
+strings and Router `fallback_name` are neither rewritten nor listed in
+`side_effects`; review known name-based calls affected by the rename. Inspect
+the actual name and affected slots in the result. Description format is
+applied before an explicitly supplied description. Other normal callbacks can
+also change saved values. Fields commit sequentially: inspect `fields`,
+`pending`, `before`/`after`, diagnostics, and `side_effects` before retrying.
+`changed_fields` includes callback changes observed in the final readback.
+The overall `status` is `committed`, `partial`, or `rejected`; each `fields` entry
+has `committed`, `unchanged`, or `rejected` status. No-op fields count as completed.
+Enabled state, hotkeys, and editor-specific settings are not accepted input
+fields. The operation does not evaluate the Poll or description source.
+Renaming a Property Stack whose Property ID is not locked can regenerate that
+ID. Read `property_stack.registered_property_id` again after renaming and update
+widgets that embed the old ID; their source is not rewritten automatically.
+As in the UI, invalid Poll source can be saved with `poll_compile_error` in
+diagnostics; a committed save does not mean the Poll works.
+Name normalization is reported as `name_adjusted` with requested and actual names.
+`poll_cmd` is appended to `def poll(cls, context):`. A single-line body such as
+`"return context.mode == 'EDIT_MESH'"` is valid directly. Only a multiline body
+needs a leading newline and indentation on its body lines.
+This differs from slot `cmd`/`prop`/`custom` syntax errors, which are rejected
+before saving that slot. Neither syntax check proves runtime behavior.
+
+#### Delete one or more menus
+
+`delete_pms(pm_uids, *, expected=None, dry_run=False)` uses the same batch
+deletion as the normal editor's Selected Remove. Pass an iterable of menu UID
+strings, including a one-element list for one menu. A single string, an empty
+iterable, duplicate UIDs, and invalid input types are rejected before writing.
+The operation processes targets in their current collection order.
+
+```python
+preview = pme.editing.delete_pms([pm_uid], dry_run=True)
+print(preview["status"], preview["references"], preview["diagnostics"])
+if preview["status"] == "ready":
+    result = pme.editing.delete_pms([pm_uid], expected=preview["expected"])
+    print(result["status"], result["removed_uids"], result["recovery"])
+```
+
+The dry-run does not change saved values, versions, selection, drafts or host
+registration. `before` and `after` contain the same saved values, and
+`committed` is false. It checks the current targets and returns the planned
+active menu; it does not reserve them or prove that teardown will succeed.
+
+Pass the complete returned `expected` unchanged. It contains
+`collection_version`, `collection_digest`, `target_digests`, and
+`references_digest`. These compare the collection identity and order, the
+targets' saved contents, and saved references to the targets. They can detect
+changes that do not increment the collection version. A stale result requires
+a new read and a decision about the intended deletion. Without `expected`,
+the operation uses the state at the start of the call and still rechecks it
+before removing each target.
+
+References are reported but are not removed or rewritten. A surviving menu can
+therefore retain a broken link to a deleted menu. The report includes saved
+Router and Property Stack references even when disabled or incomplete.
+Static source inspection cannot find every dynamically constructed reference;
+coverage warnings do not prohibit deletion. An open draft owned by a target
+blocks deletion before writing. A draft owned by another menu remains intact.
+An active menu outside the target set keeps its UID; deleting the active menu
+uses the normal batch selection rule.
+
+`selection_before` and `selection_after` distinguish the active UID, selected
+UIDs, and tree row. `active_visible` reports the current region's last-rendered
+evidence (`visibility_scope="last_rendered_region"`), or `None` when unavailable.
+It does not prove that a refresh has already drawn the final state. Filters
+are not cleared to reveal a surviving menu.
+
+| `status` | Meaning |
+|---|---|
+| `ready` | Dry-run checks passed; nothing was removed |
+| `rejected` | Refused before writing; inspect `diagnostics` |
+| `committed` | Requested menus were removed from the collection |
+| `restored_failure` | Deletion failed and the existing limited recovery was confirmed |
+| `unknown` | Recovery could not be confirmed; inspect the final state before retrying |
+
+Inspect `before`, `after`, `removed_uids`, `remaining_target_uids`, selection,
+and diagnostics together. A removed target has `after[uid] = None`. Recovery
+of saved data and recovery of host registration are separate: a restored
+definition does not prove that every editor resource was restored. A display
+refresh failure after deletion keeps the committed result. This operation
+does not save Preferences to disk or provide Blender Undo.
+
+`remaining_uids` is the observed final collection order. Any
+`recovery.hotkey_observation` describes the existing deletion checkpoint and
+PME registry records only; an absent record does not prove that every native
+Blender keymap item or other editor resource has been removed.
+
+#### Duplicate a menu
+
+`duplicate_pm(source_pm_uid, *, name=None, expected=None, dry_run=False)`
+duplicates one saved menu through the normal Duplicate operation. The copy is
+inserted immediately after its source in collection order, regardless of the
+active menu or the displayed sort order.
+
+```python
+preview = pme.editing.duplicate_pm(pm_uid, name="Working copy", dry_run=True)
+print(preview["status"], preview["not_inherited"])
+if preview["status"] == "validated":
+    result = pme.editing.duplicate_pm(
+        pm_uid, name="Working copy", expected=preview["expected"],
+    )
+    print(result["status"], result["created"], result["diagnostics"])
+```
+
+The new menu and its items receive new UIDs. Item contents, item `enabled`,
+tags, and the normal editor-specific copy behavior are retained. Menu `key`,
+`any`, `ctrl`, `shift`, `alt`, `oskey`, `key_mod`, and menu `enabled`
+are listed in `not_inherited`: the copy starts enabled with an unassigned
+hotkey. Property Stack HUD appearance follows the existing copy behavior, with
+monitoring disabled. References inside the copy retain their existing targets.
+
+`name=None` or `name=""` uses the source name as its base. A supplied string
+goes through the normal unique-name creation step, without trimming or a second
+rename. `created` reports the actual `pm_uid`, `name`, and collection
+`index` after creation; it is `None` during dry-run.
+
+Dry-run does not create UIDs, initialize a version, change selection, register
+the copy, or materialize saved HUD settings. Its complete `expected` contains
+`collection_version`, `source_pm_uid`, and `source_digest`. Pass it back
+unchanged; it survives a JSON round trip. It checks the observed source's saved
+values and collection version, including source edits that bypass version
+updates. It does not reserve a name or freeze the entire collection order.
+Invalid input shapes raise `TypeError` or `ValueError`; missing or ambiguous
+sources and changed preconditions are rejected before writing.
+
+The API preserves the active menu UID, selection, open draft, and the same Tree
+occurrence when that row still exists. The normal UI instead selects the copy.
+`selection_before` and `selection_after` expose the observed selection;
+visibility uses the last rendered region and can be unknown. A hidden result
+does not select another menu.
+
+`before` and `after` contain actual `pm_uids`, `source`, and `created`
+saved snapshots, with `before["created"]` always `None`. Inspect the
+collection versions and diagnostics alongside these values.
+
+| `status` | Meaning |
+|---|---|
+| `validated` | Dry-run passed; nothing was written |
+| `rejected` | Refused before writing |
+| `committed` | The existing Duplicate operation committed |
+| `restored_failure` | Applying failed; the original UID order, active UID, and source saved values were read back unchanged |
+| `unknown` | The outcome or recovery could not be confirmed; inspect the actual state before retrying |
+
+Refresh or optional readback failures do not undo a confirmed commit. Unavailable
+readbacks are `None` with diagnostics. `recovery` describes only the existing
+duplicate rollback and its saved-data checks, not restoration of all editor
+registrations or host resources. This operation neither saves Preferences to
+disk nor provides Blender Undo.
+
+#### Change a menu hotkey
+
+`update_hotkey()` shares normal Preferences hotkey handling. It accepts a partial
+mapping of saved fields; omitted fields keep their current values. Pass the
+complete `hotkey` snapshot as `expected` to reject changes made since the read.
+This operation does not use a slot document version for hotkey freshness.
+
+```python
+before = pme.editing.read_pm(pm_uid)["hotkey"]
+changes = {"key": "F6", "ctrl": True, "open_mode": "PRESS"}
+preview = pme.editing.update_hotkey(
+    pm_uid, changes, expected=before, dry_run=True,
+)
+if preview["status"] == "ready":
+    result = pme.editing.update_hotkey(pm_uid, changes, expected=before)
+    print(result["after"], result["registration"])
+```
+
+| Fields | Accepted values |
+|---|---|
+| `key`, `key_mod`, `chord`, `open_mode`, `drag_dir`, `tweak_dir` | Current PMItem RNA enum identifiers |
+| `ctrl`, `shift`, `alt`, `oskey`, `any`, `repeat` | Booleans, not integers |
+| `km_name` | A keymap-name string, using the same separators as Preferences |
+
+Unknown fields, invalid types or enum values, and incomplete or extra fields in
+`expected` raise `TypeError` or `ValueError` before writing. `expected=None`
+explicitly uses the current binding. A snapshot mismatch returns `rejected`
+with `stale_hotkey`; read again and reconcile the intended change before retrying.
+
+Keymap names are normalized against current user keymaps only when `km_name`
+is supplied. Editing another field preserves imported names that are not yet
+available. Explicit `open_mode="CHORDS"` changes a `NONE` chord to `A`; other
+explicit open modes clear the chord to `NONE`. An omitted `open_mode` preserves
+the stored chord. Inspect `adjustments` and `proposed` for these normalizations.
+Unsafe combinations are rejected before writing. Collision observations are
+warnings and do not prohibit saving.
+
+The result separates saved values from Blender registration:
+
+- `ready` is a successful dry-run: `committed=False`, `after=before`, and no
+  `changed_fields`. Only `proposed` and `planned_fields` describe the intended change.
+- `unchanged` means the saved values already match. It does not repair registration.
+- `rejected` explains why nothing was committed, including a verified restoration
+  after a saved-value readback mismatch.
+- `committed` means all proposed saved fields were read back successfully.
+  `before`, `after`, and `changed_fields` describe the actual saved result.
+
+`registration` has `status`, `required`, `lanes`, and `diagnostics`. Its status is
+`not_required`, `registered`, `partial`, or `unknown`. Each lane reports its
+keymap/event, expected projection, observed registration, and discrepancy.
+Disabled menus, unassigned keys, and Vector Menu CLICK can correctly require no
+hotkey registration. Remaining handles prevent a clean `not_required` result.
+Registration verifies owned addon KMI and required mouse-modifier observers;
+it does not prove final user-keymap priority, input delivery, Poll, or execution.
+For dry-run, registration describes the current binding, not the proposed one.
+
+The operation preserves selection and the Slot Editor draft, and neither saves
+Preferences to disk nor provides Undo. Owner or refresh exceptions propagate;
+the saved binding may already have changed. Inspect the exception details and
+read the binding again before retrying. Existing mouse-modifier recovery is
+local and does not guarantee atomic restoration of every hotkey field.
+
+#### Enable or disable menus
+
+`set_enabled(pm_uids, enabled, *, expected=None, dry_run=False)` shares the
+normal editor's batch enable/disable operation. Pass a non-string iterable of
+unique menu UID strings and one bool for all targets. Targets are processed in
+collection order. An empty iterable returns `unchanged`. `enabled` and `dry_run`
+must be booleans, not integers.
+
+```python
+preview = pme.editing.set_enabled([pm_uid], False, dry_run=True)
+print(preview["status"], preview["before"], preview["planned_uids"])
+if preview["status"] == "validated":
+    result = pme.editing.set_enabled(
+        [pm_uid], False, expected=preview["expected"],
+    )
+    print(result["status"], result["after"], result["registration"])
+    print(result["diagnostics"])
+```
+
+`expected` must map exactly the requested UIDs to their saved bools. Invalid
+input shapes, duplicate UIDs, and invalid types raise `TypeError` or `ValueError`.
+Missing or ambiguous targets and a mismatch with `expected` return `rejected`
+before writing. `expected=None` uses the state at the start of the call. A later
+apply resolves and checks again; dry-run does not reserve the targets or prove
+that their callbacks will succeed.
+
+`before`, `after`, and the returned `expected` are UID-to-bool mappings.
+`expected` copies `before`, including after a successful apply; it is not a
+snapshot of the new state. `after` is the actual readback, and can omit a target
+that could not be read, with a diagnostic. For dry-run, `after` remains the
+current saved state. `planned_uids` identifies proposed changes separately from
+`attempted_uids` and `changed_uids`; dry-run leaves the latter two empty.
+
+| `status` | Meaning |
+|---|---|
+| `validated` | Dry-run checks passed and changes are planned; nothing was written |
+| `unchanged` | No saved bool needs changing; no setters run and registration is not repaired |
+| `committed` | All requested saved bools were applied and read back |
+| `rejected` | Refused before writing; inspect `diagnostics` |
+| `restored_failure` | Applying failed and recovery of the saved enabled values was confirmed |
+| `unknown` | Recovery could not be confirmed; inspect the actual state before retrying |
+
+`committed` is true only for status `committed`. Recovery covers enabled values,
+not every saved field or editor resource. Inspect `before`, `after`,
+`attempted_uids`, `changed_uids`, `reason`, `rollback_reason`, and diagnostics
+together after a failure.
+
+`registration[uid]` reports the currently observed **hotkey** state with
+`scope="hotkey"` and status `not_required`, `registered`, `partial`, or `unknown`.
+It uses the same keymap/event and mouse-observer checks described for
+`update_hotkey()` above. Disabled menus, unassigned keys, and Vector Menu CLICK
+can correctly require no hotkey registration. During dry-run this is the
+current registration, not a prediction after enabling. It does not verify all
+Macro, Property, Property Stack, or Panel resources, Poll, Getter/Setter, or
+action execution. A registration warning or unknown observation does not change
+a committed saved-value result into a top-level `unknown`.
+
+Selection and open drafts stay in place, including a draft owned by a target.
+`selection` and `visibility` each report `before` and `after`. Visibility has
+`scope="last_rendered_region"`; it can be `unknown` and does not prove a new
+frame has drawn. Filters are preserved even if a target becomes hidden.
+This operation does not save Preferences to disk or provide Blender Undo.
+
+#### Add or remove tags
+
+`editing.update_tags(pm_uids, *, add=(), remove=(), expected=None, dry_run=False)`
+applies the same tag changes to explicit menu UIDs. It shares the existing tag
+membership writer with normal UI operations and supports name editing when the
+tag registry is inactive. It does not delete tag definitions.
+
+```python
+targets = [first_pm_uid, second_pm_uid]
+preview = pme.editing.update_tags(
+    targets, add=["Review"], remove=["Draft"], dry_run=True,
+)
+if preview["status"] == "validated":
+    result = pme.editing.update_tags(
+        targets, add=["Review"], remove=["Draft"], expected=preview["expected"],
+    )
+    print(result["status"], result["after"], result["synchronized"])
+print(pme.editing.read_pm(first_pm_uid)["tags"])
+```
+
+Pass non-string iterables of strings. Duplicate menu UIDs, duplicate effective
+add names, duplicate exact remove names, or names present in both inputs are
+rejected with `ValueError` before synchronization or writing. Invalid input
+types raise `TypeError` or `ValueError`; `dry_run` must be a bool.
+
+Names retain the existing membership rules: add trims its input, remove uses
+the exact supplied name, and case and Unicode are preserved. A comma in an add
+input contributes multiple names; a comma in a remove input is not split.
+For example, `add=["A,B"], remove=["B"]` is a conflict. Single empty or
+`"Untagged"` additions are existing no-ops, reported in `ignored_names`; they
+still participate in duplicate-input checks. There is no additional name-length
+limit. Existing membership or a missing removal can still normalize saved raw
+order and duplicates, so inspect actual changes instead of comparing name sets.
+
+`read_pm()["tags"]` is the sorted, unique list of names represented by the
+current saved raw text, without synchronization. Empty raw text returns `[]`;
+a saved empty-name membership and a literal `"Untagged"` remain distinct.
+This does not change `PMHandle.tag`, `PMItem.get_tags()`, or `list_tags()`.
+
+Dry-run checks inputs, target resolution, and the pure name transformation. It
+does not synchronize, allocate UIDs, predict new definitions, or prove that a
+later write will succeed. Pass its complete JSON-compatible `expected` back
+unchanged: `activated`, `targets_digest`, and `definitions_digest`. Membership
+raw text, references, projection stamps, and registry definitions are compared
+before normal synchronization. A stale expected is rejected without writing.
+Empty changes or an empty target set return `unchanged` after this check, without
+synchronization or refresh.
+
+`before` and `after` contain actual target values, including raw text, names,
+references, and projection stamps. `changed_uids` describes the batch change
+after synchronization. `synchronized` separately records the normal synchronization
+changes, including other menus and definitions; it can be present even when the
+requested batch is `unchanged`. These two phases are not one atomic transaction.
+
+| `status` | Meaning |
+|---|---|
+| `validated` | Read-only checks passed; no values were written |
+| `unchanged` | No requested batch change; inspect `synchronized` separately |
+| `rejected` | Refused with unchanged saved tag data; inspect diagnostics |
+| `committed` | The existing batch writer successfully applied the requested changes |
+| `unknown` | A phase failed without a complete operation receipt; inspect actual values before retrying |
+
+`recovery.carrier_matches` compares saved tag data with the stated `baseline`:
+`before` for synchronization failure or `after_synchronize` for batch failure.
+True proves saved-data equality only. `attempted=null` means rollback execution
+is unknown; this API does not infer `restored_failure` from matching values.
+Optional readback or refresh failure does not reverse an already successful
+batch result. Missing observations and refresh deferral appear in diagnostics.
+
+The active menu UID, selected UID set, and open draft are retained. The same Tree
+occurrence is retained when it remains available and refresh succeeds. Selection
+visibility retains its last-rendered scope; `active_hidden_by_list_filter` is a
+separate current mode/tag/new/health-filter observation, excluding name search
+and collapsed rows. Unknown observations are `None`. This call does not save
+Preferences to disk.
+
+#### Clear contents without deleting a direction
+
+Use Clear rather than setting the Slot Editor's mode to `EMPTY`:
+
+```python
+before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+result = pme.editing.clear_slots(pm_uid, [slot_uid],
+    expected_version=before["version"], expected={slot_uid: before["slots"][0]})
+print(result)
+```
+
+Clear retains the slot's UID, position, and enabled state, and resets contents,
+references, icons, and descriptions using the normal UI rules. The owning editor
+must support `EMPTY` (`clear_unsupported` otherwise); layout structure entries
+are rejected as `structural_slot` and need their normal layout editor. In a Regular Menu,
+clearing a content item leaves a separator, not a removed list item.
+The batch result and partial-save behavior below
+also apply to Clear. A refresh exception can occur after content was cleared;
+read the target again before retrying.
+
+#### Add or remove one item
+
+For a Regular Menu with at least two items, this inserts a default item after
+the second one. The operation returns the new UID; use `update_slots()` to author
+its contents separately. Omit both position arguments to append, or use
+`before_uid` to insert before a known item. Do not pass both anchors. The same
+position arguments apply to Pop-up Dialog and Floating Panel items, without
+skipping intervening layout markers. An empty menu accepts an addition without
+an anchor and does not receive an implicit row marker.
+
+```python
+before = pme.editing.read_pm(pm_uid)
+anchor_uid = before["slots"][1]["uid"]
+checked = pme.editing.add_slot(
+    pm_uid, after_uid=anchor_uid, expected_version=before["version"], dry_run=True,
+)
+if checked["status"] != "validated":
+    raise RuntimeError(checked["diagnostics"])
+added = pme.editing.add_slot(
+    pm_uid, after_uid=anchor_uid,
+    expected_version=checked["version"], expected=checked["expected"],
+)
+print(added)
+if not added["committed"]:
+    raise RuntimeError(added["diagnostics"])
+new_uid = added["slots"][0]["uid"]
+```
+
+Regular Menu kinds are `ITEM` (the default), `LABEL`, `SPACER`, `SEPARATOR`, and
+`COLUMN`, with the same initial values as the UI. For Macro, Modal, and Stack Key,
+omit `kind` to use the editor's normal Add initialization. Unknown or inapplicable
+kinds are rejected with `slot_kind_unsupported`.
+
+For Pop-up Dialog and Floating Panel, omit `kind` or use `kind="BUTTON"` for a
+normal empty Command item. `use_spacer=True` adds the usual automatic spacer:
+before an anchor the saved sequence is new item, spacer, anchor; after it the
+sequence is anchor, spacer, new item. The default is `False`, independent of
+Preferences. Flat lists reject `use_spacer=True` with `unsupported_position`;
+Regular Menu's `kind="SPACER"` remains a separate item kind.
+`use_spacer` and `dry_run` accept only bools, not `0`, `1`, or `None`.
+
+Fixed-slot menus use `clear_slots()` instead of insertion or deletion (`fixed_slots`).
+Menus with `editable_slots=False` use their dedicated authoring editor. Removal
+can delete the last variable item and leave an empty saved list, including in
+Pop-up Dialog and Floating Panel. It does not insert a replacement row or item.
+Layout removal rejects the item currently open in the Slot Editor before writing;
+unrelated drafts, selection, and clipboard contents are retained.
+
+Each call handles one item and returns `before_order` and `after_order` UID lists,
+`version`, and the target's `before`/`after` values in `slots`. The added item's
+`before` is `None`; the removed item's `after` is `None`. Other changes, including
+shifted indexes, appear in `side_effects`. Remaining content items retain their
+UIDs and relative order. Layout cleanup is operation-specific: Add leaves markers
+alone, Move uses its normal empty-row/spacer cleanup, and Remove merges nearby
+markers and removes subrow boundaries when the affected row has fewer than two
+columns. Layout results include the observed `after_rows` and `structure_changes`.
+An automatic spacer appears in `created_uids` and structure changes; the new main
+item is always `slots[0]["uid"]`.
+
+For flat-list removal, `expected` retains its saved-field subset contract. For
+example, `{"name": observed_name}` checks only the name; `{}` adds no condition.
+The following example passes all observed target fields:
+
+```python
+before = pme.editing.read_pm(pm_uid, slot_uids=[new_uid])
+removed = pme.editing.remove_slot(pm_uid, new_uid,
+    expected_version=before["version"], expected=before["slots"][0])
+print(removed)
+```
+
+For layout removal, use the complete saved snapshot from a removal query instead
+of a `read_pm()["slots"]` entry:
+
+```python
+checked = pme.editing.remove_slot(pm_uid, slot_uid, dry_run=True)
+if checked["status"] == "validated":
+    removed = pme.editing.remove_slot(
+        pm_uid, slot_uid, expected_version=checked["version"],
+        expected=checked["expected"],
+    )
+    print(removed["status"], removed["after_rows"], removed["structure_changes"])
+```
+
+Add accepts a full saved snapshot for flat lists and layouts. Layout Remove
+also compares the full snapshot; flat Remove compares only the supplied target
+fields. Pass the query's `expected` unchanged. A version alone cannot detect every
+raw edit. Snapshot mismatches return `stale_popup` for layouts, `stale_snapshot`
+for flat Add, or `stale_slot` for flat Remove. Missing fields in a full snapshot
+are not filled in automatically.
+
+Add/Remove queries return `validated` or `rejected` with `committed=False`.
+They do not allocate UIDs, change saved values or versions, run editor hooks, or
+refresh the editor. Add queries have `slots=[]`; Remove queries show the same
+target before and after. Their `expected` can be passed to the same operation
+without `dry_run=True`. They do not predict final labels, cleanup, or hook success.
+
+A rejected flat-list operation can leave editor callback changes reported in `side_effects`;
+this is not a promise to roll back every callback. A refresh exception can happen
+after the membership change committed. Preserve its traceback and reread the menu
+before retrying. Layout operations report saved-state restoration through
+`restored_failure` or `unknown`, as described above. These functions do not save
+Preferences to disk or provide Blender Undo.
+
+#### Interpret the result
+
+Slots are saved independently, in the mapping's order. The batch is **not
+atomic**: the first rejected save stops later slots, while earlier commits
+remain. Inspect these fields before retrying:
+
+| Result field | Meaning |
+|---|---|
+| `status` | `committed`, `partial`, or `rejected` |
+| `committed` | All requested slots completed without rejection; an empty edit is unchanged |
+| `slots` | Each attempted slot's `uid`, `status`, `before`, `after`, `reports`, and diagnostics when present |
+| `pending` | Slot UIDs whose explicit save was not attempted; earlier editor callbacks may still have changed them |
+| `version` | The current menu version after the operation |
+| `diagnostics` | Request-level issues such as stale input |
+| `structure_changes` | Present only when slot structure changes; `before_order` and `after_order` list the slot UIDs |
+| `side_effects` | Changes not already covered by `slots` entries, including changes to pending slots; each entry contains `uid`, `before`, and `after` |
+
+For example, saving one Macro slot can update an icon on a later slot before
+that slot's own save is attempted. If the batch stops first, the later UID stays
+in `pending` and its change appears in `side_effects`. Pending does not mean unchanged.
+
+A slot's status is `committed`, `rejected`, or `unchanged`. An unexpected
+exception keeps its traceback and adds the already-committed UIDs; inspect the
+affected menu before repeating the operation. Syntax diagnostics identify the
+edit field and location without stripping or reindenting the source.
+
+Check diagnostics even when `status` is `committed`; warnings can describe
+normalization or a saved definition that still needs attention. Invalid request
+types, fields, or values can raise `TypeError` / `ValueError` during preflight.
+Exceptions from an editor or callback can also use those types after saving
+has started. Do not infer "nothing changed" from the exception class: preserve
+its traceback and notes, and reread the target before retrying.
+
+Readback verifies the saved definition. Check display and actions in the
+intended editor and mode separately. For the example above, successful Knife
+selection changes the active tool; it does not cut geometry by itself.
+
+#### Update Context Router branches
+
+For a Router, `read_pm()` also returns `router`, containing `logic`, `digest`,
+and `diagnostics`. Pass that digest to `update_router()` to check that its saved
+definition still matches the one read.
+
+`router["logic"]` is a dictionary with `branches` (an ordered list) and
+`otherwise`. Each branch contains `branch_uid`, `name`, `enabled`, `combine_mode`,
+`conditions`, and `target`. Each condition contains its `condition_uid` and
+saved inputs such as `source`, `op`, `value`, and `value_type`.
+
+Use `move_router_branch()` with exactly one of `before_uid` / `after_uid` to
+change priority, or `remove_router_branch()` to delete a branch. Both identify
+branches within the specified Router and preserve the remaining branch contents,
+condition UIDs, and Otherwise. They do not change the selected menu or its draft.
+The normal Branch menu's **Move Up**, **Move Down**, and **Remove Branch** use
+the same operation rules, retaining the UI's existing saved-value normalization.
+
+```python
+snapshot = pme.editing.read_pm(router_uid)["router"]
+branches = snapshot["logic"]["branches"]  # Inspect names and UIDs first.
+result = pme.editing.move_router_branch(
+    router_uid, branches[-1]["branch_uid"], before_uid=branches[0]["branch_uid"],
+    expected_digest=snapshot["digest"],
+)
+print(result["status"], result["diagnostics"])
+```
+
+Read again before another edit and use the new digest. Moving to the current
+position, including a self anchor, returns `unchanged` without writing.
+`dry_run=True` returns `validated` with `candidate` and no `after`, even for
+an unchanged move. Other statuses follow `update_router`: `committed`,
+`rejected`, or `unknown`; read back before retrying an unknown result.
+Neither operation runs targets, saves Preferences to disk, or provides Undo.
+
+Create a Router with mode ID `ROUTER`. To leave an unmatched shortcut to Blender's
+normal handling, set Otherwise to **Pass Through** with `{"pass": True}`:
+
+```python
+created = pme.create_pm(pme.PmCreationSpec("ROUTER", name="Mode Router"))
+if not created.accepted:
+    raise RuntimeError(created.diagnostics)
+router_uid = created.pm_uid
+before = pme.editing.read_pm(router_uid)["router"]
+result = pme.editing.update_router(
+    router_uid, otherwise={"pass": True}, expected_digest=before["digest"],
+)
+print(result["status"], result["diagnostics"])
+```
+
+Pass Through is meaningful for the invocation route: test the original shortcut's
+behavior when no branch matches. For an existing Router, use its observed UID
+instead of creating another menu.
+
+Each entry in `branches` updates the branch identified by `branch_uid`.
+Omit `branch_uid` to append a new branch. Unmentioned branches and fields stay
+unchanged. Supplying `conditions` replaces that branch's entire condition list:
+include existing `condition_uid` values for rows that should retain their
+identity. New branches and conditions receive UIDs when omitted.
+
+This example adds a branch for Mesh Edit Mode in the 3D Viewport to a known
+`router_uid`, calling the menu identified by `target_uid`:
+
+```python
+def enum_condition(*attributes, value):
+    return {
+        "source": {
+            "kind": "rna_path", "root": "context",
+            "segments": [{"kind": "attr", "name": part} for part in attributes],
+            "detected_type": "enum", "readonly": True, "owner_type": None,
+        },
+        "op": "equals", "value": value, "value_type": "enum",
+    }
+
+before = pme.editing.read_pm(router_uid)["router"]
+result = pme.editing.update_router(
+    router_uid,
+    branches=[{
+        "name": "Edit Mesh", "combine_mode": "all",
+        "conditions": [enum_condition("area", "type", value="VIEW_3D"),
+                       enum_condition("mode", value="EDIT_MESH")],
+        "target": {"action": {"type": "menu", "value": target_uid, "opts": {}},
+                   "fallback_name": "Mesh Tools"},
+    }],
+    expected_digest=before["digest"],
+)
+print(result["status"], result["diagnostics"])
+```
+
+The helper above describes attribute-only paths; it is not a parser for Python
+expressions. Conditions and targets use PME's existing JSON-compatible logic
+values. Use individual conditions for ordinary context checks and a helper
+Property for a computed value that those checks cannot express.
+
+The existing [Schema v2 definitions](https://github.com/pie-menu-editor/pie-menu-editor-fork-dev/blob/pme2-dev/src/pie_menu_editor/assets/schema/pme2-2.0.json)
+are the vocabulary reference (`PmeLogicValueSource`, `PmeLogicConditionRow`,
+`ContextRouterConditionRow`, and `ContextRouterTargetAction`):
+
+| Field | Vocabulary |
+|---|---|
+| `source.kind` | `rna_path`, `condition_ref`, `pm_property_ref` |
+| `source.root` | `context`, `paint_settings`, `pme_preferences`; `pm` for PM references |
+| `value_type` | `bool`, `int`, `float`, `string`, `enum`, `enum_set`, or `None` when unconfigured |
+| `op` | `is_true`, `is_false`, `equals`, `not_equals`, `lt`, `le`, `ge`, `gt`, `contains`, `starts_with`, `equals_any`, `not_equals_any` |
+| Target `action.type` | `menu`, `command`, `hotkey`, `custom` |
+
+These values must form a valid combination for the source and comparison.
+Use canonical RNA `segments` as above; PM references use a UID-backed `path`.
+Invocation-event modifier conditions have their own Schema variant.
+
+To edit an existing condition, read its branch and condition UIDs. This example
+changes the second condition of the first branch created above from `EDIT_MESH`
+to `OBJECT`. For another Router, inspect the returned names, sources, and values
+to choose the intended branch and condition first.
+
+```python
+from copy import deepcopy
+
+router = pme.editing.read_pm(router_uid)["router"]
+branch = router["logic"]["branches"][0]
+print(branch["branch_uid"], branch["conditions"])
+condition_uid = branch["conditions"][1]["condition_uid"]
+conditions = deepcopy(branch["conditions"])
+next(c for c in conditions if c["condition_uid"] == condition_uid)["value"] = "OBJECT"
+result = pme.editing.update_router(
+    router_uid,
+    branches=[{"branch_uid": branch["branch_uid"], "conditions": conditions}],
+    expected_digest=router["digest"],
+)
+print(result["status"], result["diagnostics"])
+```
+
+The copied list retains the other conditions and every existing `condition_uid`.
+The update replaces this branch's condition list; passing only the changed row
+would remove the omitted conditions. Branch fields not supplied, including its
+target and position, remain unchanged.
+
+An **active Mesh** is not necessarily a **selected Mesh**. An `active_object.type`
+condition alone does not implement a selected-only requirement. That check can
+use an existing Property Getter such as
+`return C.active_object is not None and C.active_object.select_get()`, referenced
+by a `pm_property_ref` condition. This editing API does not create or edit Property
+callbacks; the Router recipe alone does not complete that selected-only requirement.
+
+Omitting `otherwise` retains its current setting; a supplied dictionary updates
+only its specified fields. New branches default to enabled, `combine_mode="all"`,
+and no conditions or target. An empty ordinary branch is not an unconditional
+match. Branch order remains significant: the first match wins.
+
+The result contains `status`, `candidate`, `before`, `after`, `dry_run`, and
+`diagnostics`. Add `dry_run=True` to validate the requested changes without
+saving: `status="validated"` returns the candidate logic with `after=None`.
+It does not evaluate conditions or execute targets. Normal saves return
+`committed`, `rejected`, or `unknown`; `before`/`after` contain logic and digest
+when available. On `unknown` or a readback failure, read again before retrying.
+To save a Router preview, repeat the original `branches` / `otherwise` inputs
+and digest with `dry_run=False`. Preview UIDs are provisional; do not resubmit
+the candidate's newly allocated branch UIDs as if they already existed.
+
+An unresolved menu target produces `router_target_menu_unresolved` as a warning
+with its target UID and branch/Otherwise address; it does not prevent saving.
+Decoder diagnostics can also carry branch and row addresses. Check diagnostics
+even after validation or commit. Invoke the saved Router in matching and
+nonmatching contexts separately; authoring does not prove branch execution.
+
+#### Edit one Property Stack condition
+
+The row operations use the same authoring and save operations as the normal
+Property Stack editor. Add appends an enabled, incomplete row and returns its
+`condition_uid`; it does not create a SET entry until a definition is authored.
+Update accepts a `fields` dictionary with `source`, `op`, `value`, `value_type`,
+`label`, and/or `enabled`. Omitted fields are retained, and `authoring_state` is
+derived by the editor's existing rules. The UID cannot be changed.
+
+```python
+before = pme.editing.read_pm(stack_uid)["property_stack"]
+added = pme.editing.add_property_stack_row(stack_uid,
+    expected_digest=before["digest"])
+if added["status"] != "committed":
+    raise RuntimeError(added)
+row_uid = added["condition_uid"]
+updated = pme.editing.update_property_stack_row(stack_uid, row_uid, {
+    "source": {"kind": "rna_path", "root": "context", "detected_type": "int",
+               "readonly": False, "segments": [
+                   {"kind": "attr", "name": "scene"},
+                   {"kind": "attr", "name": "frame_current"}]},
+    "op": "equals", "value": 1, "value_type": "int", "label": "First frame",
+}, expected_digest=added["after"]["digest"])
+print(updated["status"], updated["diagnostics"])
+```
+
+Definition updates also create or update the corresponding derived SET entry.
+Label-only changes leave the write plan intact; enabled changes follow the
+editor's existing SET rules. Independent writes, other rows, combine mode,
+false policy, HUD settings, and Property IDs are retained. No Getter or Setter
+is executed by these authoring calls.
+
+An explicit source-only definition has `op`, `value`, and `value_type` set to
+`None`; it remains incomplete and removes its derived SET entry. An empty row
+can have its label/enabled state edited, but a definition update requires a
+non-null source. To remove an observed row, including the last one:
+
+```python
+current = pme.editing.read_pm(stack_uid)["property_stack"]
+removed = pme.editing.remove_property_stack_row(stack_uid, row_uid,
+    expected_digest=current["digest"])
+```
+
+Removal also removes that row's derived SET entry. These calls return the same
+`before`, `after`, `candidate`, `diagnostics`, and status fields as
+`update_property_stack`, plus `condition_uid`. A dry run returns `validated`
+without writing; its added UID is only a candidate until committed. A same-value
+update returns `unchanged` without saving. Unknown or ambiguous row UIDs, stale
+digests, and invalid fields are rejected. If reading existing storage repaired
+meaning or identity, row operations reject the implicit repair; inspect the
+diagnostics and use an explicit full-logic replacement if that repair is wanted.
+Read back after an `unknown` result or an exception before retrying. Preferences
+disk saving and Blender Undo are separate from these calls.
+
+#### Author a Property Stack and show its state
+
+For mode `CONDITION`, `read_pm()` includes `property_stack`: `logic`, `digest`,
+`property_id` (saved ID), `registered_property_id` (currently registered ID),
+`diagnostics`, and the separate `while_true_hud` settings. Reading does not
+evaluate Getter or run Setter. Use the registered ID for a widget; do not derive
+it from the menu name or assume registration succeeded.
+If saved logic cannot be decoded, `logic` is `None`; inspect its diagnostics
+before editing rather than rebuilding the stack from an empty definition.
+
+`update_property_stack()` replaces the complete existing PropertyStackLogic
+shape: `version`, `combine_mode`, `predicate_rows`, and `write_plan`. It does not
+change Property IDs or HUD settings; putting HUD fields inside `logic` is rejected.
+For a new stack, the small local helper below describes two Boolean settings.
+TRUE selects Surface (Connected on, Projected off); FALSE writes nothing:
+
+```python
+created = pme.create_pm(pme.PmCreationSpec("CONDITION", name="Surface"))
+if not created.accepted:
+    raise RuntimeError(created.diagnostics)
+stack_uid = created.pm_uid
+before = pme.editing.read_pm(stack_uid)["property_stack"]
+
+def fixed_bool(uid, property_name, value):
+    source = {"kind": "rna_path", "root": "context", "detected_type": "bool",
+              "readonly": False, "segments": [{"kind": "attr", "name": part}
+              for part in ("scene", "tool_settings", property_name)]}
+    row = {"condition_uid": uid, "enabled": True, "authoring_state": "complete",
+           "label": property_name, "source": source,
+           "op": "is_true" if value else "is_false", "value": None, "value_type": "bool"}
+    entry = {"entry_uid": "set_" + uid, "kind": "derived", "status": "manual_resolved",
+             "derived_from_condition_uid": uid, "source": source,
+             "value": value, "value_type": "bool", "custom_set_body": "",
+             "enum_set_write_mode": None, "enum_set_write_values": []}
+    return row, entry
+
+pairs = [fixed_bool("connected", "use_proportional_connected", True),
+         fixed_bool("projected", "use_proportional_projected", False)]
+logic = {"version": 1, "combine_mode": "all",
+         "predicate_rows": [row for row, entry in pairs],
+         "write_plan": {"false_policy": "no_op", "entries": [entry for row, entry in pairs]}}
+check = pme.editing.update_property_stack(stack_uid, logic=logic,
+    expected_digest=before["digest"], dry_run=True)
+if check["status"] != "validated":
+    raise ValueError(check["diagnostics"])
+result = pme.editing.update_property_stack(stack_uid, logic=check["candidate"],
+    expected_digest=before["digest"])
+if result["status"] != "committed":
+    raise RuntimeError(result["diagnostics"])
+stack = pme.editing.read_pm(stack_uid)["property_stack"]
+property_id = stack["registered_property_id"]
+if not property_id:
+    raise RuntimeError(f"Property Stack is not registered: {stack['diagnostics']}")
+
+# Known destination menu and slot UIDs, obtained by read_pm above.
+slot_before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+result = pme.editing.update_slots(pm_uid, {slot_uid: {"mode": "CUSTOM",
+    "custom": f"L.prop(props(), {property_id!r}, text='Surface', toggle=True)"}},
+    expected_version=slot_before["version"], expected={slot_uid: slot_before["slots"][0]})
+```
+
+The helper is for a new stack. An existing stack's read `logic` is the storage
+decoder's normalized view, not raw stored JSON. Review diagnostics with
+`scope="current_storage"` first: `property_stack_storage_normalized` reports the changed
+`path`, original `input`, and returned `normalized` value. The view can omit
+unsupported or stale entries, or disable writes. Once those changes are understood,
+copy the view, edit the intended row or entry, and submit it with the read digest.
+`input_present` / `normalized_present` distinguish added or removed fields.
+Preserve all other values, `condition_uid`, `entry_uid`, and each
+`derived_from_condition_uid` relationship. Omitted rows and entries are removed.
+Unlike Router appends, this full-logic input requires explicit, unique local
+UIDs; the API does not allocate missing IDs or silently repair duplicates.
+
+Choose FALSE behavior per setting. These examples use `false_policy="no_op"`,
+but a Boolean `auto_resolved` entry still writes its inverse on FALSE:
+
+| Intended operation | TRUE | FALSE / write-entry choice |
+|---|---|---|
+| Surface or Volume preset | Set both Boolean values | No writes: fixed Boolean entries use `manual_resolved` |
+| 3D Step Snap | Global Snap on, selected transform on, INCREMENT | Turn only the transform off: its Boolean entry is `auto_resolved`; other fixed values stay manual |
+| UV Step Snap | UV Snap on, selected transform on, INCREMENT | Turn UV Snap off: its Boolean entry is `auto_resolved`; other fixed values stay manual |
+
+For Enum sets, a `manual_resolved` entry with `enum_set_write_mode="replace"`
+and `enum_set_write_values=["INCREMENT"]` replaces the set on TRUE and makes no
+FALSE write. Test Getter against extra set members as well as the desired set.
+FALSE does not restore a previous state. See the [Property Stack guide](../editors/property_stack_editor.md)
+for evaluation-only rows and the different write modes.
+
+Results contain `status`, `candidate`, `before`, `after`, and `diagnostics`.
+`validated` means a dry-run candidate passed input checks without being saved;
+`committed` means saved in memory; `rejected` means it was not accepted; `unknown`
+requires a new read before retrying. Inspect the candidate and diagnostics for
+normalization. Diagnostics with `scope="input"` concern the submitted logic;
+meaning-preserving canonicalization is reported, while required UID repair,
+discarded entries, or altered write status are rejected. Existing-storage
+diagnostics are carried into the update as `scope="current_storage"` warnings;
+they do not by themselves reject it. Input validation does not undo normalization
+already applied while reading the saved definition.
+Dry-run does not evaluate sources, check runtime writability, execute a Setter,
+or test a widget. This recipe's normal foreground input is **unverified** here.
+Check actual values, checked state, direction selection/release, and unrelated
+settings separately; Preferences disk saving is also a separate operation.
+
+### Code execution
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - Function
+  - Description
+* - `execute(code, *, extra_globals=None)`
+  - Execute code and return `ExecuteResult`
+* - `evaluate(expr, *, extra_globals=None)`
+  - Evaluate an expression and return the result. Raises on failure
+* - `check_syntax(code, *, mode="exec")`
+  - Syntax-check only. Returns `SyntaxResult`
+```
+
+### Validation
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - Function
+  - Description
+* - `validate_json(json_string, *, strict=False, check_references=True)`
+  - Validate a document against the bundled JSON Schema v2 and PME UID rules. Returns `ValidationResult`
+* - `validate_uid(uid)`
+  - Validate a uid string format
+```
+
+Validation reads the supplied document without changing it or executing its
+Python code. It uses the bundled schema; the document's `$schema` URL is not
+downloaded. `valid=True` means the requested document checks passed. It does not
+guarantee that an import will succeed in the current Blender setup or that the
+stored commands will run successfully.
+
+Structural validation reports one schema failure at a time, prioritizing basic
+type and required-field errors over dependent conditions. Correct it and validate
+again to discover any remaining structural issues. After the document passes
+the schema, validation checks PME UIDs, including agreement between each menu's
+UID prefix and mode, and, when requested, document references. These checks can
+report multiple issues.
+
+The Extension bundles fastjsonschema 2.22.2, but Blender may already have loaded
+its own 2.21 version in the same Python process. The bundled version and the
+active version can therefore differ. Validation uses their shared API without
+replacing Blender's loaded library.
+
+By default, `check_references=True` also checks UID-based MENU targets and PM
+dependencies recognized in Property Stack / Context Router data against the
+menus in the same document. Set it to `False` to skip this reference-check phase,
+for example when a partial export's targets are supplied separately; structural
+and UID checks still run. Legacy name references
+and Blender menu type names are not resolved against the running Blender session.
+
+If logic data cannot be read for reference inspection, the result includes
+`E603`. If reading it requires normalization, the result includes warning `W202`;
+the supplied data remains unchanged. These diagnostics belong to the optional
+reference-check phase.
+
+Recognized legacy PME JSON returns warning `W301`. Its item contents and name
+references have not been validated against Schema v2. With `strict=True`, any
+warning makes `valid` false while remaining in `result.warnings`.
+
+`pme.validation.validate(data, ...)` accepts already-parsed JSON, and
+`pme.validation.validate_file(filepath, ...)` reads a UTF-8 JSON file. Both use
+the same options and validation result as `validate_json`. Inspect `errors` and
+`warnings` for issue codes and paths, or use `result.format_report()`.
+
+(resource-discovery)=
+
+### Resource discovery
+
+```{versionadded} 2.2.0
+Read-only queries for registered folders, script and icon files, and script-reference resolution.
+The API is **Experimental**.
+```
+
+`pme.resources` reads the [resource configuration](file_locations.md) currently used by PME.
+Use the [short alias or explicit package import](#import-the-running-api) when calling it from external scripts.
+
+| Function | Information | Result |
+|----------|-------------|--------|
+| `list_folders()` | Registered names, saved and resolved paths, and folder status | A tuple of `ResourceFolderInfo` in registration order |
+| `list_icon_folders()` | Saved and resolved paths and status of registered icon folders | A tuple of `ResourceFolderInfo` in registration order; `name` is empty |
+| `list_files(kind=None)` | Existing files and locations that could not be scanned | `ResourceFileListing` |
+| `resolve_script(reference)` | Resolution status and candidates for a script reference | `ScriptResolution` |
+
+`list_files()` accepts `None` (both kinds), `"script"`, or `"icon"` for `kind`.
+
+#### Read registered locations and files
+
+The inventory includes unused files. Use the standard `dataclasses.asdict()` function to prepare JSON for an AI client or another tool.
+**Read `files` together with `issues`.** When a location cannot be read, `files` contains a partial inventory.
+
+```python
+from dataclasses import asdict
+import json
+import pme
+
+folders = pme.resources.list_folders()
+listing = pme.resources.list_files()
+
+payload = {
+    "folders": [asdict(folder) for folder in folders],
+    "files": [asdict(item) for item in listing.files],
+    "issues": [asdict(issue) for issue in listing.issues],
+}
+print(json.dumps(payload, ensure_ascii=False, indent=2))
+```
+
+| Result type | Fields |
+|-------------|--------|
+| `ResourceFolderInfo` | `index`, `name`, `raw_path`, `resolved_path`, `status` |
+| `ResourceFileInfo` | `folder`, `kind`, `relative_path`, `absolute_path` |
+| `ResourcePathIssue` | `folder`, `path`, `code` |
+| `ResourceFileListing` | `files`, `issues` (both tuples) |
+
+Results are immutable data. The `folder` field contains the associated `ResourceFolderInfo`.
+`relative_path` is relative to the registered folder, such as `scripts/modeling/align.py`.
+`raw_path` retains the saved spelling; a folder's `resolved_path` is the absolute path resolved against the running Blender executable.
+Names and `index` describe display names and registration order, not stable identities or namespaces.
+
+| Folder `status` | Meaning |
+|-----------------|---------|
+| `available` | The directory can be opened for listing; this does not guarantee that every child can be read |
+| `missing` | The registered location does not exist |
+| `not_directory` | The location is not a directory |
+| `unreadable` | The location cannot be inspected or scanned |
+| `invalid` | The saved path cannot be resolved; `resolved_path` is an empty string |
+
+Scan failures are returned as `ResourcePathIssue.path` and `code`.
+Codes are `missing`, `not_directory`, `unreadable`, and `invalid`.
+A missing registered resource folder or icon folder is an issue.
+
+#### Check a script reference
+
+**When a slot uses a file inside a registered folder, save its path relative to that folder, such as `scripts/...`.** The resolved absolute path identifies the file observed now.
+This example only builds a command string; it neither executes the script nor edits a slot.
+
+```python
+import pme
+
+reference = "scripts/modeling/align.py"
+result = pme.resources.resolve_script(reference)
+
+if result.status == "resolved":
+    command = f"execute_script({reference!r})"
+    print(command)  # execute_script('scripts/modeling/align.py')
+else:
+    print(result.status, result.candidates)
+```
+
+`ScriptResolution` contains `reference`, `status`, `resolved_path`, and `candidates`.
+`resolved_path` is an absolute path only on success, and `None` otherwise.
+`candidates` is a tuple of confirmed matching file paths.
+
+| `status` | Meaning |
+|----------|---------|
+| `resolved` | One unambiguous file was found; read permission and Python syntax have not been validated |
+| `missing` | No matching file was found |
+| `ambiguous` | Multiple distinct files match |
+| `unavailable` | A required location could not be resolved or inspected, so resolution could not be completed |
+
+A relative reference checks every registered folder using the same resolver as script execution.
+Distinct user files are separate candidates even when their contents match. Aliases of the same real file are one candidate.
+The add-on package is considered only when no user candidate exists and user locations could be checked.
+Absolute references are also accepted.
+
+#### Scan scope and updates
+
+- **Scripts:** Recursively scans lowercase `.py` files anywhere in the registered folder, skipping hidden folders and `__pycache__`. Directory symlinks are followed; each real directory is visited once per registered folder.
+- **Icons:** Lists lowercase `.png` files directly in each registered icon folder, excluding the reserved `_intr_` prefix. `relative_path` is the file name. Use `pme.resources.list_icon_folders()` for the icon folders themselves; they have no display name. Conflicting files and names starting with `_`, which are hidden in the Custom picker, are included. **This is not a list of icons confirmed to be selectable or drawable.**
+- **Settings and files:** Uses the active resource configuration and inspects files on each call. Settings-file changes made in an external editor are loaded on the next startup or re-enable.
+
+These functions do not execute scripts, decode images, create directories, or migrate settings.
+Files can change after a query; script execution resolves the reference again.
+Slot-usage analysis and automatic reference updates after moving or renaming files are outside this API's scope.
+
+When no resource folders are configured, `list_folders()`, `list_icon_folders()`, and `list_files()` return empty results without creating a default folder.
+These two functions raise `RuntimeError` if settings cannot be read and no previous valid configuration is available.
+`list_files()` raises `ValueError` for an unsupported `kind`.
+
+### User properties
+
+User properties created with the Property Editor use the same access forms in
+PME commands (`props()`) and through `import pme` (`pme.props()`).
+
+```python
+import pme
+
+# Get the PropertyGroup and access a property as an attribute
+pme.props().MyCounter = 10
+value = pme.props().MyCounter
+
+# Read or write by registered storage ID
+value = pme.props("MyCounter")
+written = pme.props("MyCounter", 10)
+```
+
+`pme.props(name, None)` remains a read operation; it does not write `None`.
+Named access is limited to properties registered by PME. An unregistered name
+returns `None` when read and `False` when written; it is not created as scratch
+storage.
+Code that used `pme.props.MyCounter` in earlier Experimental builds must use
+`pme.props().MyCounter` instead.
+
+### Runtime add-on identity
+
+Use `pme.ADDON_ID` when a Blender API requires the current add-on module ID.
+The value follows the active package identity, including the
+`bl_ext.<repository>.<package>` identity used by Blender Extensions.
+
+```python
+import bpy
+import pme
+
+addon_preferences = bpy.context.preferences.addons[pme.ADDON_ID].preferences
+```
+
+Use `pme.preferences` when only the PME preferences object is needed. Do not
+hard-code `"pie_menu_editor"` in new scripts.
+
+### Backward compatibility
+
+PME1's `pme.context` and the `props()` command global remain available.
+Existing `props()` scripts inside PME command slots continue to work.
+
+```python
+# These still work in PME2
+pme.context.open_menu("My Menu")
+pme.context.event.mouse_x
+pme.context.add_global("my_var", value)
+props("MyCounter", 10)
+```
+
+Prefer `pme.execute()` and `pme.invoke_pm()` for new code.
+
+```{note}
+The public API is currently **Experimental**. The basic interface is intended to stay stable, but smaller details may change in future versions.
+```
+
+```{seealso}
+The optional `import pme` alias is configured in [Boot Options](boot_options.md).
+An [explicit package import](#import-the-running-api) also provides this API.
+```

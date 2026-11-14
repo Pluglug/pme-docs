@@ -1,0 +1,1784 @@
+---
+vocab: developer-facing
+orphan: true
+---
+
+(public_api)=
+
+# Public API
+
+PME2 では、外部スクリプトやアドオンから PME の機能を利用するための公開 API を提供しています。
+
+(public-api-import)=
+
+## 実行中の API を読み込む
+
+例では、[Boot Options](boot_options.md) で設定できる短縮エイリアス `import pme` を使います。
+エイリアスが無効な場合も、有効化済みアドオンのパッケージ名から読み込めます。
+起動設定の変更や Blender の再読み込みは不要です。
+
+```python
+import bpy
+import importlib
+
+packages = [
+    addon.module for addon in bpy.context.preferences.addons
+    if addon.module.rsplit(".", 1)[-1] == "pie_menu_editor"
+]
+if len(packages) != 1:
+    raise RuntimeError(f"Select the enabled PME package: {packages}")
+pme = importlib.import_module(packages[0] + ".api")
+print(pme.ADDON_ID)
+```
+
+`bl_ext.<repository>.pie_menu_editor` としてインストールした Blender Extension にも使えます。
+複数の候補がある場合は、編集するインストール先を確認してください。以下の例は、この方法で
+取得した `pme` 変数でも実行できます。短縮エイリアスは必須ではありません。
+この方法を使う場合は、以下のコード例の `import pme` を省いてください。
+
+## クイックスタート
+
+```python
+import pme
+
+# 実行中のpackage identity（Legacy add-on／Blender Extension）
+addon_id = pme.ADDON_ID
+
+# メニューを探す
+pm = pme.find_pm("My Pie Menu")
+pm = pme.find_pm(uid="pm_9f7c2k3h")
+
+# メニューを呼び出す
+pme.invoke_pm("My Pie Menu")
+pme.invoke_pm(uid="pm_9f7c2k3h")
+
+# メニュー一覧
+all_menus = pme.list_pms()
+pie_menus = pme.list_pms(mode="PMENU", enabled_only=True)
+tags = pme.list_tags()
+
+# コード実行
+result = pme.execute("bpy.ops.mesh.primitive_cube_add()")
+print(result.success, result.error_message)
+
+# 式評価
+value = pme.evaluate("len(C.selected_objects)")
+
+# JSON 検証
+result = pme.validate_json(json_string)
+for err in result.errors:
+    print(err.code, err.message)
+```
+
+## PME1 からの変更点
+
+| 観点 | PME1 | PME2 |
+|------|------|------|
+| インポート | `from pie_menu_editor import pme` | `import pme` |
+| runtime add-on ID | `"pie_menu_editor"` の固定値 | `pme.ADDON_ID` |
+| 設計 | 内部モジュールの露出 | 公開 API ファサード |
+| メニュー呼び出し | `pme.context.open_menu(name)` | `pme.invoke_pm(name)` / `pme.invoke_pm(uid=...)` |
+| コード実行 | `pme.context.exe(code)` | `pme.execute(code)` → `ExecuteResult` |
+| メニュー検索 | なし | `pme.find_pm()`, `pme.list_pms()` |
+| JSON 検証 | なし | `pme.validate_json()` |
+| 型・定数 | なし | `pme.types`, `pme.constants` |
+
+## API リファレンス
+
+### メニュー操作
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - 関数
+  - 説明
+* - `find_pm(name=None, *, uid=None)`
+  - 名前または uid でメニューを検索。見つからなければ `None`
+* - `invoke_pm(pm_or_name=None, *, name=None, uid=None)`
+  - 呼び出し要求が例外なく戻った場合は `True`。メニューの表示とアクションの実行は別に確認する
+* - `list_pms(mode=None, *, enabled_only=False)`
+  - メニュー一覧を `PMHandle` のリストで返す
+* - `list_tags()`
+  - 使用中のタグ一覧を返す
+* - `create_pm(spec, *, request_refresh=None)`
+  - `PmCreationSpec` から既定の構成でメニューを作り、`PmCreationResult` を返す
+```
+
+`PMHandle` は `uid`、`name`、`mode`、`enabled`、`tag` を持ちます。名前でメニューを探し、
+以降の操作には取得した UID を使います。保存済みスロットは
+`pme.editing.read_pm(uid)` で読み取れます。
+
+`create_pm()` は、そのエディターの既定の内容を作成します。`PmCreationSpec` に明示した
+`slots` と `data` は、この関数では受け付けません。メニューを作成してから `pme.editing` で
+内容を編集します。
+
+```python
+created = pme.create_pm(pme.PmCreationSpec(mode_id="VMENU", name="Mesh Tools"))
+print(created.accepted, created.pm_uid, created.diagnostics)
+if created.accepted:
+    menu = pme.editing.read_pm(created.pm_uid)
+```
+
+`accepted=True` は、メニューを作成したことを表します。`diagnostics` に `refresh_failed` が
+ある場合も、作成を繰り返さず、返された UID で結果を読み取ってください。この結果は
+Preferences のディスク保存やメニューの呼び出し成功を意味しません。
+
+(local-menu-editing)=
+
+### ローカルでのメニュー編集
+
+`pme.editing` は、PME の読み込みが完了した Blender のメイン Python スレッドで、
+保存済みの定義を読み取り、編集します。Console、Text Editor、または同じ場所で Python を
+実行する既存の Blender ツールから呼べます。作成したアクションの実行や Preferences の
+ディスク保存は行いません。API の安定性は **Experimental** です。
+
+メニューの作成・編集には、初期化済みの **GUI セッション**を使ってください。
+現在の `--background` 登録では、これらの操作に必要な一時 Preferences と Editor の
+状態が初期化されません。background での JSON 検証は別の操作です。
+初期化状態の照会・待機を行う公開 API はまだありません。固定秒数の待機や、任意の
+`RuntimeError` の再試行は完了確認にはなりません。PME の通常の Preferences エディターが
+利用できる状態になってから、Console または Text Editor で例を実行してください。
+
+互換性の境界は、UID で対象を指定する操作、その入力、競合確認、観測できる結果です。
+内部実装を変更しても、保存形式と通常 UI の正規化結果を保ちます。操作ごとの結果と診断を読み、
+完了・拒否・部分適用・結果不明を区別してください。想定外の例外や結果不明の後は、再試行を
+判断する前に読み直します。失敗後に残る状態や stale 検出の変更は、関数の呼び方が同じでも
+観測可能な挙動変更です。一括操作の原子性、Blender Undo、実行成功、ディスク保存は保証しません。
+必要なときは Blender の **Save Preferences** で保存し、再起動後に確認してください。
+
+外部ツールから多数のメニューを編集するときは、小さな単位に分け、呼び出しごとの結果と進捗を
+記録してください。ツールのタイムアウトは Blender 側の処理を取り消すものでも、未変更の証拠でも
+ありません。実行中の処理が終わってから対象を読み直し、再試行が必要な変更を判断します。
+
+| 関数 | 戻り値 |
+|---|---|
+| `read_pm(pm_uid, *, slot_uids=None)` | 一つのメニューの保存定義。スロット詳細をUIDで絞っても行構造は全体を返す |
+| `slot_fields()` | Slot Editor が受け付ける入力名・型・Enum 候補・説明 |
+| `update_pm(pm_uid, changes, *, expected=None)` | メニュー名、説明、説明の形式、Poll 本文の更新 |
+| `update_tags(pm_uids, *, add=(), remove=(), expected=None, dry_run=False)` | 明示したメニューUID集合へ、タグ名の追加・解除を一括適用 |
+| `update_hotkey(pm_uid, changes, *, expected=None, dry_run=False)` | 部分的な入力からホットキー全体を検査して更新、または変更を照会 |
+| `update_slots(pm_uid, edits, *, expected_version=None, expected=None)` | スロット UID と変更フィールドの対応に対する、スロットごとの結果 |
+| `clear_slots(pm_uid, slot_uids, *, expected_version=None, expected=None)` | 通常の Clear 操作で内容を消去し、スロットの UID と位置を保持 |
+| `add_slot(pm_uid, *, kind=None, before_uid=None, after_uid=None, expected_version=None, expected=None, use_spacer=False, dry_run=False, header_anchor_uid=None, edge=None)` | 別のスロットUIDの前後やPanel headerへ既定項目を1件追加、または追加を照会 |
+| `remove_slot(pm_uid, slot_uid, *, expected_version=None, expected=None, dry_run=False)` | 項目を1件削除、または削除を照会 |
+| `move_slot(pm_uid, slot_uid, *, before_uid=None, after_uid=None, expected_version=None, row_ref=None, edge=None, new_row=None, expected=None, use_spacer=False, dry_run=False, header_anchor_uid=None)` | 項目を別項目の前後へ移動、またはPop-up Dialog／Floating Panelの項目を行端・新しい行・Panel headerへ移動 |
+| `swap_slots(pm_uid, slot_uid, other_slot_uid, *, expected_version=None, expected=None, dry_run=False)` | 固定枠または通常のレイアウト項目を2件入れ替え、または入れ替えできるかを照会 |
+| `transfer_slot(source_pm_uid, source_slot_uid, destination_pm_uid, *, destination_slot_uid=None, before_uid=None, after_uid=None, row_ref=None, edge=None, new_row=None, use_spacer=False, header_anchor_uid=None, expected=None, dry_run=False)` | 項目の内容を別メニューへ移し、両側の保存結果を返す |
+| `add_row(pm_uid, *, before_row_ref=None, after_row_ref=None, expected_version=None, expected=None, dry_run=False)` | レイアウト行と既定ボタンを追加 |
+| `add_panel(pm_uid, *, before_row_ref=None, after_row_ref=None, expected_version=None, expected=None, dry_run=False)` | 既定anchorを持つLayout Panel行を追加 |
+| `remove_row(pm_uid, row_ref, *, expected_version=None, expected=None, dry_run=False)` | 内容を含むレイアウト行全体を削除 |
+| `move_row(pm_uid, row_ref, *, before_row_ref=None, after_row_ref=None, expected_version=None, expected=None, dry_run=False)` | レイアウト行全体を別行の前後へ移動 |
+| `split_row(pm_uid, row_ref, *, before_uid, expected_version=None, expected=None, dry_run=False)` | 通常レイアウト行を項目またはspacerの直前で分割 |
+| `join_rows(pm_uid, first_row_ref, second_row_ref, *, expected_version=None, expected=None, dry_run=False)` | 指定した順序で隣接する通常レイアウト行を結合 |
+| `update_row(pm_uid, row_ref, changes, *, scope="row", expected_version=None, expected=None, dry_run=False)` | 一行または行の集合の保存設定を変更 |
+| `update_spacer(pm_uid, *, slot_uid=None, before_uid=None, after_uid=None, prop, value, expected_version=None, expected=None, dry_run=False)` | spacerの設定を一つ変更し、必要なら隣接位置に生成 |
+| `align_slot(pm_uid, slot_uid, alignment, *, expected_version=None, expected=None, dry_run=False)` | 項目を行の揃え区分へ配置、または外側の揃え境界を解除 |
+| `update_router(pm_uid, *, branches=(), otherwise=None, expected_digest=None, dry_run=False)` | Context Router 専用の編集処理による検証または更新 |
+| `remove_router_branch(pm_uid, branch_uid, *, expected_digest=None, dry_run=False)` | Otherwiseを保ち、最後の1件を含む分岐を削除 |
+| `move_router_branch(pm_uid, branch_uid, *, before_uid=None, after_uid=None, expected_digest=None, dry_run=False)` | 同じRouter内の分岐UIDを基準に順序を変更 |
+| `update_property_stack(pm_uid, *, logic, expected_digest=None, dry_run=False)` | Property Stack のロジック全体の検証または置換 |
+| `add_property_stack_row(pm_uid, *, expected_digest=None, dry_run=False)` | 通常エディターと同じ処理で空の条件行を追加 |
+| `update_property_stack_row(pm_uid, condition_uid, fields, *, expected_digest=None, dry_run=False)` | 条件行を1件更新し、対応するSET設定も更新 |
+| `remove_property_stack_row(pm_uid, condition_uid, *, expected_digest=None, dry_run=False)` | 条件行と対応するSET設定を削除 |
+
+Pop-up DialogとFloating Panelの項目・行全体の編集は後述します。
+Clear はスロットを空にする操作であり、スロット自体は削除しません。
+
+#### 一覧項目を1件移動する
+
+行構造を持たない編集可能な一覧では、移動先の前後どちらか一方の UID を指定します。
+次の例は、全項目の UID と保存内容を保ったまま、最後の項目を先頭項目の前へ移動します。
+
+
+```python
+before = pme.editing.read_pm(pm_uid)
+result = pme.editing.move_slot(
+    pm_uid, before["slots"][-1]["uid"],
+    before_uid=before["slots"][0]["uid"], expected_version=before["version"],
+)
+print(result["status"], result["before_order"], result["after_order"])
+```
+
+後ろへ置く場合は `after_uid` を使います。既に指定位置にある場合（自分自身を基準に
+指定した場合を含む）は、`status="unchanged"`、`committed=False` を返し、version と
+画面更新は増えません。不明・曖昧な UID と古い version は移動前に拒否します。
+入力形式が不正なら `TypeError` または `ValueError` です。他の項目の相対順序は保持します。
+`slots` は対象の前後の保存値、`side_effects` は位置番号を含む周辺の読戻し変更を返します。
+順序が変わった場合は、Macro 再登録を含む通常の Editor 処理を通ります。
+その処理が失敗した場合は UID の順序を復旧しますが、任意の callback の副作用すべてを
+戻す保証ではありません。診断と読戻しを確認してください。画面更新の例外は確定後にも
+起きるため、再試行の前に再取得します。Preferences 保存や Blender Undo は行いません。
+
+#### 固定枠の2項目を入れ替える
+
+`swap_slots` は固定枠の2項目の位置を交換します。UIDと保存値が一緒に移り、
+間の項目は元の位置に残ります。両方のUIDを変更前に解決し、versionは一度増えます。
+同じUID同士なら `unchanged`、`committed=False` でversionは不変です。
+`slots` に両項目の前後の保存値、`before_order` / `after_order` に全順序を返します。
+移動やEditor hookの失敗時は順序を戻しますが、hookによる任意fieldの変更は
+読戻しに残る場合があります。Preferencesのdisk保存やBlender Undoは行いません。
+確定後のrefreshで例外になることがあるため、再実行前に読み戻してください。
+
+```python
+before = pme.editing.read_pm(pm_uid)
+result = pme.editing.swap_slots(
+    pm_uid, before["slots"][0]["uid"], before["slots"][2]["uid"],
+    expected_version=before["version"],
+)
+```
+
+#### 移動・入れ替えを保存せず確認する
+
+`move_slot` / `swap_slots` に `dry_run=True` を渡すと、実行時および通常エディターと
+同じ事前判定を使います。変更可能なら `status="validated"`、既に指定位置なら
+`"unchanged"`、移動先を受け付けない場合は理由付きの `"rejected"` を返します。
+いずれも `committed=False` です。レイアウト項目の移動も同じ照会方法を使い、
+後述の行指定と追加の読み戻し結果を返します。
+行構造を持たない一覧の移動も引き続き `dry_run=True` を受け付けます。この一覧移動と
+固定枠交換では、`None` 以外の `expected` は `TypeError` になります。
+
+```python
+before = pme.editing.read_pm(pm_uid)
+checked = pme.editing.swap_slots(
+    pm_uid, before["slots"][0]["uid"], before["slots"][2]["uid"],
+    expected_version=before["version"], dry_run=True,
+)
+print(checked["status"], checked["diagnostics"])
+```
+
+照会は保存値・UID・順序・version・選択・編集中のSlot Editorの内容を変更せず、
+Editor hookや画面更新も実行しません。`before_order` / `after_order` と、各slotの
+`before` / `after` は現在の保存状態なので同じ値です。実行後の予測ではありません。
+照会成功は移動先の予約や、その後の登録・画面更新の成功保証ではありません。
+実行する場合は同じ操作を `dry_run=True` なしで呼び出します。その時点の状態を再検査します。
+
+#### Popupの解決済み挿入位置を読む
+
+Pop-up Dialog／Floating Panelの`add_slot`・`move_slot`は、結果の
+`insertion_position`へ解決済み位置を返します。`transfer_slot`では
+`result["to"]["insertion_position"]`を読みます。照会・実行とも同じ操作本体が
+解決した位置で、操作**前**の保存順にある隙間を表します。
+
+| field | 意味 |
+|---|---|
+| `basis` | 常に`"before"` |
+| `index` | 構造slotを含めた保存slot数に対する0〜Nの挿入境界 |
+| `previous_slot_uid` | 境界の直前slot。先頭では`None` |
+| `next_slot_uid` | 境界の直後slot。末尾では`None` |
+| `row_ref` | beforeで直前slotを含む行。index 0ではmarkerなし先頭行があればその行、それ以外は`None` |
+| `new_row` | 新しい末尾行への挿入では`"END"`、それ以外は`None` |
+
+保存順が`[row, A, COLUMN, B]`なら、Aの直後はindex 2のAとCOLUMNの間、
+Bの直前はindex 3のCOLUMNとBの間です。構造slotのUIDも残るため、入力の位置規則を
+再計算せず、境界のどちら側を本体が選んだか確認できます。
+
+新しい行への挿入では、beforeの末尾indexと`row_ref=None`を返します。
+未来の行参照やUIDは発行しません。source除去・spacer追加・cleanupで最終item indexは
+変わる場合があります。成功・失敗の後もこの位置はbefore基準のままで、実際の保存結果は
+既存の`after`と順序から読みます。未変更の移動も要求された隙間を返し、隣接UIDにsource
+自身が現れる場合があります。
+
+位置が未解決の早期拒否では`None`です。位置解決後の拒否は位置を含む場合があり、
+操作の可否は`status`と`diagnostics`で判断します。共通のPopup結果を使う交換・削除・行操作と、
+Popup以外への転送は`None`です。実行直前の再検査で拒否した場合、以前の照会位置を補いません。
+
+このfieldが示すのは保存上の挿入境界です。一般的な列/subrowの入れ子帰属やlayout treeは
+未提供です。照会時の`before_rows`と`after_rows`は現在の保存値で、cleanup後を予測しません。
+
+
+#### 内容を別のメニューへ移す
+
+`transfer_slot` は `enabled` を含む1項目の内容を別メニューへ移します。
+内容の受入と保存値の変換は通常Pasteの規則を使います。元と先は異なるメニューを
+指定し、同じメニュー内では `move_slot` / `swap_slots` を使います。
+
+- 固定先は空き枠の `destination_slot_uid` を指定し、その枠のUIDを保持します。
+  Stickyでは `COMMAND` かつ本文が空なら空きです。
+- 平坦な可変リストの先は `before_uid` / `after_uid` の一方を指定し、新UIDで挿入します。
+  空のリストにはanchorを指定しません。
+- Pop-up Dialog／Floating Panelの先は `before_uid` / `after_uid`、現在の
+  `row_ref` と `edge="START"` / `"END"`、または `new_row="END"` を指定します。
+  明示した通常行は空でも受け入れます。空メニューは位置省略も可能です。
+  これらの形式は排他的で、挿入項目には新UIDを発行します。
+- Panel headerの先は `header_anchor_uid` と、相対位置の `before_uid` /
+  `after_uid` または `edge="START"` / `"END"` を指定します。転送ではHeader Layoutが
+  ONでも役割指定が必要です。OFFのheaderへ入れても自動ONにせず、anchor UIDと
+  `header_layout_disabled` 診断を返します。
+- `use_spacer` の既定はPreferencesと独立した `False` です。`True` は項目相対位置と
+  行端で通常Moveのspacer規則を使います。新末尾行は既存の行設定規則を使い、
+  追加のspacerは作りません。
+- 固定元はUIDとenabledを保持して内容を消去します。Stickyは空のCOMMANDと
+  既定のOn Press／On Release名に戻ります。可変元は最後の1件でも削除します。
+- Regular Menuのラベルや構造マーカーはanchorにできますが、移す内容にはできません。
+  Layout Panel anchor自体も転送対象ではありません。header内の通常項目は、OFFでも
+  他のメニューへ持ち出せます。
+
+平坦な可変リストの先へ移す場合は、まず照会し、返された `expected` 全体を同じ呼出へ渡します。
+
+```python
+destination = pme.editing.read_pm(destination_pm_uid)
+position = ({"after_uid": destination["slots"][-1]["uid"]}
+            if destination["slots"] else {})
+checked = pme.editing.transfer_slot(
+    source_pm_uid, source_slot_uid, destination_pm_uid,
+    **position, dry_run=True,
+)
+if checked["status"] == "validated":
+    result = pme.editing.transfer_slot(
+        source_pm_uid, source_slot_uid, destination_pm_uid,
+        **position, expected=checked["expected"],
+    )
+    print(result["status"], result["from"], result["to"])
+    print(result["moved"], result["effects"], result["loss"])
+```
+
+固定先では `position` を `{"destination_slot_uid": empty_slot_uid}` に置き換えます。
+位置引数は排他的です。空または項目のあるPanel headerなら
+`{"header_anchor_uid": panel_anchor_uid, "edge": "END"}`、通常のレイアウト行なら
+`{"row_ref": current_row_ref, "edge": "END"}` に置き換えます。
+`expected` は両メニューと関係する参照のsnapshotなので、
+中身を組み替えずそのまま渡してください。JSON経由の往復もできます。
+別の `expected_version` 引数はありません。`None` は過去snapshotとの比較を省きますが、
+現在値の事前検査は行います。
+
+照会時の各側の `before` / `after` は実際の同じ保存値です。UID発行、version初期化、
+Editor hook、画面更新は行いません。変換予測は `effects` に置き、Macroの動的iconと
+登録は実行後に観測します。両側の保存書込みが終わってからEditor hookを呼びます。
+成功時は各メニューのversionを一回増やし、実住所を `moved` に返します。
+
+レイアウト側の `before_rows` / `after_rows` は実際の保存行を示します。
+照会では片付け後の構造や新UIDを予測しません。転送は挿入・削除点の近傍と空になった
+元行を整理し、無関係な空行や離れたspacerを残します。markerなし先頭行が空になると、
+通常Moveと同様に次の行markerを吸収します。明示的な `remove_row` とは異なります。
+最後の内容を持ち出すと空メニューになり、最後のheader項目を持ち出すとanchorと
+空headerを残します。変更後は行参照を読み直してください。
+
+`transfer_rows_readback_failed` が出た側の `after_rows` は `None` になりますが、
+保存操作のstatusは保持します。commit済みの転送を再試行せず、行を読み直してください。
+
+`layout_panel` はコピーしません。固定元には残り、可変元では項目削除とともに失われます。
+`loss` に保存値と処置を返します。元・固定先・片付けで削除や書換えを行うレイアウトmarkerを
+編集中なら拒否し、無関係なdraft・
+clipboard・選択は保持します。欠落・曖昧なメニュー参照はraw値を残して警告し、
+一意な参照が移動先で新たに不適合になる場合は書込み前に拒否します。
+
+拒否・失敗では `diagnostics` を確認してください。`restored_failure` は復旧後の両側の
+全項目保存値が以前のsnapshotに一致した意味で、Macro登録の観測は `effects` に分けます。
+`unknown` は復旧・読戻しでその結果を確定できなかった意味です。読めない `after` は
+`None` になります。自動再試行せず、現在値を読み直して判断してください。
+画面更新だけの失敗はcommit済み結果を保持します。Preferencesのディスク保存と
+Blender Undoは行いません。
+
+#### 行構造を読み、レイアウト項目を移動する
+
+Pop-up DialogとFloating Panelの `read_pm()` は、保存順の `rows` も返します。
+`slot_uids` が絞るのは `slots` の詳細だけで、`rows` はメニュー全体を表します。
+空のメニューは `rows=[]` です。読取りでは行マーカーの追加、UID修復、versionの初期化、
+レイアウトの変更を行いません。
+
+各行は `row_ref`、`slot_uids`（行マーカーがあればそれも含む）、`has_marker`、
+`raw_text`、`settings`、`defaulted_fields`、`diagnostics`、`spacers` を持ちます。
+spacerの情報には空間だけでなく、保存済みの列・subrow境界も含みます。
+行マーカーがない行は `raw_text=None` と既定の設定を返し、先頭項目のコマンドを
+行設定として解釈しません。未知の保存文字列もraw値に残ります。
+`panel` は `None` または `anchor_uid`、解釈済みの `options`、`header_uids`、
+raw保存値の `layout_panel` とその有無を示す `layout_panel_present` を持つ辞書です。
+**Header Layout** が無効、または項目が無効でも、保存済みのheader項目を読み取れます。
+
+`row_ref` は `kind="marker"` または `"first_item"` と `slot_uid` を持ちます。
+現在の行先頭を指す参照であり、永続的な行IDではありません。先頭項目の移動や行マーカーの
+追加・削除で失効する場合があります。結果の `after_rows` または再取得した定義から
+現在の参照を取り直してください。古い参照を別の行へ付け替えることはありません。
+
+通常項目では、エディターの **Move** に対応する操作を利用できます。
+
+- `swap_slots(pm_uid, slot_uid, other_slot_uid)` はUIDと保存内容を伴って2項目を交換します。
+  この交換では空行やspacerの整理を行いません。
+- `move_slot(..., before_uid=...)` または `after_uid=...` は、保存されている別項目の
+  直前・直後へ挿入します。
+- `move_slot(..., row_ref=..., edge="START")` または `edge="END"` は、指定行の左端・右端へ移動します。
+- `move_slot(..., new_row="END")` は、新しい末尾行へ移動します。
+
+明示した `row_ref` では、空の通常行も移動先にできます。
+
+移動先の形式はちょうど1つ指定します。混在させると `ValueError` です。
+`new_row` は位置を表す文字列でありboolではありません。`use_spacer` は明示するboolで、
+既定値は `False` です。Preferencesの設定を自動で引き継ぎません。項目前後・行端・新行への移動は、
+通常エディターと同じ空行・spacer整理を行います。移動項目のUIDと内容、現在の選択、
+開いているSlot Editorの編集中内容は、それぞれ既存の項目に結び付いたままです。
+
+項目前後の位置は、基準項目の保存indexで決まります。column・subrow・spacerのマーカーを
+飛ばさないため、AとBの間にマーカーがある場合、`after_uid=A` と `before_uid=B` は異なる
+位置です。自分自身を基準にした場合や、保存上直隣の項目を指定して既に同じ位置になる場合は
+`unchanged` となり、spacer追加・整理・version更新・画面更新を行いません。
+通常の **Move** 選択画面でも、既存の項目交換・行端・**Add Row** に加え、各項目の前後への
+挿入先を選べます。
+
+次の例は、確認済みの通常項目 `slot_uid` を、通常項目を受け入れる末尾行へ移動します。
+
+```python
+before = pme.editing.read_pm(pm_uid)
+row_ref = before["rows"][-1]["row_ref"]
+checked = pme.editing.move_slot(
+    pm_uid, slot_uid, row_ref=row_ref, edge="END",
+    expected_version=before["version"], dry_run=True,
+)
+if checked["status"] == "validated":
+    result = pme.editing.move_slot(
+        pm_uid, slot_uid, row_ref=row_ref, edge="END",
+        expected_version=checked["version"], expected=checked["expected"],
+    )
+    print(result["status"], result["after_rows"], result["structure_changes"])
+```
+
+レイアウト項目の追加・削除・移動・交換の照会が返す `expected` 全体を、そのまま実行時に渡します。
+これは順序に加えて保存内容と構造を比較します。versionだけではすべての編集を検出できません。
+絞り込んだ `read_pm()` の結果や、加工したsettings辞書では代用できません。
+通常の一覧移動・固定枠交換に `None` 以外の `expected` を渡すと `TypeError` になります。
+
+レイアウト操作の結果には通常の `slots`、`before_order`、`after_order`、`version` に加え、
+`version_before`、`version_after`、`before_rows`、`after_rows`、`created_uids`、
+`deleted_uids`、`moved_uids`、`structure_changes`、`expected`、`recovery` が入ります。
+`version` は操作後の版です。`structure_changes` は移動元以外の空行整理も含む、実際の
+行・spacer変更を返します。dry-runのbefore/afterは現在の保存状態のまま、変更UIDの列は空です。
+整理後の完全な構造を予測したり、将来のUIDを発行したりする照会ではありません。
+
+最終読戻しに失敗すると、元の適用・復旧の `status` と `recovery` を維持したまま、
+`diagnostics` に `popup_readback_failed` が入ります。読めない `after_order` や
+`after_rows` は `None` となり、before値では代用しません。行構造だけ読めない場合は、
+`after_order` に観測できた順序が残ります。最終保存snapshotを取得できなかった場合は、
+変更UIDを推定せず空の列を返します。未変更の証拠ではありません。再試行を判断する前に読み直してください。
+
+| レイアウト操作のstatus | 意味 |
+|---|---|
+| `validated` | 照会で操作を受け入れた。書込みなし |
+| `unchanged` | 保存変更なし。versionは増えない |
+| `committed` | 保存変更を読み戻し、versionが一度増えた |
+| `rejected` | 書込み前に拒否した。`diagnostics`を確認する |
+| `restored_failure` | 操作は失敗したが、保存値と順序を復元した |
+| `unknown` | 復元を確認できない。次の操作を決める前に読み直す |
+
+`committed=True` になるのは `committed` だけです。`unknown` の `False` は未変更の証拠ではありません。
+`recovery` は `not_needed`、`restored`、`unknown` のいずれかです。
+画面更新の失敗と保存変更の確定は別に扱います。既存の行端への移動は無変更でも画面更新を
+行う場合がありますが、項目相対のno-opとdry-runでは行いません。単独項目を新行へ移動しても、整理後に元と
+同じ保存状態となる場合があります。Preferencesの保存やBlender Undoは行いません。
+
+項目の追加・削除には、後述の `add_slot` / `remove_slot` を使います。Layout Panel行全体の
+移動・削除には次の行操作、レイアウト設定には設定操作を使います。header項目には後述の
+Panel header位置指定を使います。Panelを所有するanchorの単独削除・移動・入れ替えはできません。
+
+#### レイアウト行の追加・削除・移動・分割・結合
+
+五つの行操作はPop-up DialogとFloating Panelを受け付けます。`read_pm()["rows"]` の現在の
+`row_ref`を渡します。これは保存されている行先頭への参照であり、永続的な行IDではありません。
+通常エディターとAPIは同じ操作本体を使います。
+
+| 操作 | 保存結果 |
+|---|---|
+| `add_row` | 行markerとそのメニューの既定ボタンを追加。位置は最多1つ指定し、両方省略すると空メニューを含む末尾へ追加。既存行からのsize・spacing継承は **Add Row** と同じ。 |
+| `remove_row` | 対象markerと内容全体を削除し、次行のmarker・設定を保持。最後の行を削除すると空メニューになる。 |
+| `move_row` | `before_row_ref` または `after_row_ref` をちょうど1つ指定。設定・項目UIDを伴って行全体を移動し、項目移動のcleanupは行わない。 |
+| `split_row` | `before_uid`の項目またはspacerから先を新しい右行へ移す。右行は標準設定・ボタン追加なし、左行は設定保持。**Split** と同じく直前spacerを一つ削除し、それ以外の内容は保持。 |
+| `join_rows` | 指定した2行が今もその順序で隣接している場合に結合。前行の設定を保ち、後行markerとCOLUMN／ALIGNERのspacer全体を削除。それ以外の内容・spacerを保持。 |
+
+Layout Panel行のMove／Removeには、anchorとすべてのheader項目が含まれます。無効な項目や
+**Header Layout** で非表示の項目も対象です。Panel行の分割・結合は受け付けません。
+削除する項目を編集中ならRemoveを拒否します。無関係な編集中内容、選択、行clipboardは保持します。
+
+Splitでは先頭項目を `before_uid` に指定でき、左側は空行として残ります。保存済みの構造spacerも
+分割点にでき、そのspacer自体は右側へ残ります。行marker自身は行内の分割点ではありません。
+列や揃えを持つ行も受け付けます。ただし、分割によって右側の最初のALIGNERが最初のCOLUMNより
+後になり、元行にあった揃えの起点を失う場合は `aligner_without_root` で拒否し、保存値を保ちます。
+揃えのspacer自体を分割点にすると起点を残せます。既に不正な行を自動修復する操作ではありません。
+通常UIの提示位置は従来どおりで、先頭項目には **Split** を表示しません。
+
+明示した編集で行境界を保つために必要な場合だけ、欠けているmarkerを作ります。既存項目のUIDや
+command本文は保持します。自分自身への移動や既に指定位置にある場合は `unchanged` となり、
+marker生成・version更新・画面更新を行いません。読取りとdry-runではmarkerを作りません。
+
+```python
+before = pme.editing.read_pm(pm_uid)
+checked = pme.editing.add_row(
+    pm_uid, expected_version=before["version"], dry_run=True,
+)
+if checked["status"] == "validated":
+    added = pme.editing.add_row(
+        pm_uid, expected_version=checked["version"], expected=checked["expected"],
+    )
+    print(added["status"], added["after_rows"], added["created_row_refs"])
+```
+
+五操作とも前述の完全な保存snapshot `expected` とversionを使います。dry-runは現在の未変更値を
+返し、将来のUIDを発行しません。実行時に現在の行と保存値を改めて検査します。
+
+行操作の結果には、実際のbefore／after行から求めた `created_row_refs`、`deleted_row_refs`、
+`moved_row_refs` も入ります。移動は保存上の行開始indexの変化を意味し、別行の編集による位置ずれも
+含みます。欠けたmarkerを生成した場合、`structure_changes` に、保持した行についての
+`{"kind": "row_ref", "before": old_ref, "after": new_ref}` が入ります。続く呼出しには
+`after_rows` または再読取りで得た参照を使ってください。行の読戻しが失敗した場合、行変更の列だけでは
+何が変わったかを確定できません。status、復旧、画面更新の診断、ディスク保存、Undoの境界は
+レイアウト項目操作と同じです。
+
+#### Layout Panelを作成し、headerを編集する
+
+`add_panel` はPop-up DialogとFloating Panelを受け付けます。現在の `before_row_ref` または
+`after_row_ref` を最多一つ指定し、両方省略すると空メニューを含む末尾へ追加します。
+**Add Panel** と同じ既定値で新しい行とMENU anchorを作ります。名前は `Panel`、
+本文の参照先は空、Panel IDは新規、`default_closed` / `use_header_layout` は両方 `False`。
+必要な行境界にだけmarkerを追加し、既存の本文を保持します。
+
+他のレイアウト操作と同じく、`expected_version`、dry-runが返した完全な `expected`、
+`dry_run` を使います。照会はUIDを生成しません。確定後の実際の `after_rows`、`created_uids`、
+行参照を読み、anchorの名前と `menu_target_uid` は保存UIDを使って `update_slots` で設定します。
+`layout_panel` 辞書や行markerを呼出し側で組み立てる必要はありません。
+
+Panel設定は既存の `update_slots` のbool入力 `layout_panel_default_closed` /
+`layout_panel_use_header_layout` を使います。空headerをOFFからONへ切り替えると最初のボタンを
+一つ作ります。最後の項目を削除・持出しした後は空を保ち、通常Save・名前変更・同値 `True` で
+補充しません。OFFでも保存header項目は保持します。変更保存時は既存の `enabled=True` を含む
+anchor正規化を維持します。`enabled` は `update_slots` の入力fieldではありません。
+Slot更新の逐次・非atomicな保存と失敗時の契約は変わりません。
+
+headerへ追加・移動するには、`rows` の既存 `panel.anchor_uid` を `header_anchor_uid` として渡し、
+次の位置をちょうど一つ組み合わせます。
+
+- そのheader内の保存項目を指定する `before_uid` / `after_uid`。spacerも位置として数え、
+  間のmarkerを飛ばしません。
+- anchor直後の `edge="START"`、またはheader末尾の `edge="END"`。空headerにはedgeを使います。
+
+header位置に `row_ref` / `new_row` は併用できず、Panel行参照を暗黙のheader指定としては扱いません。
+一般行や別headerからの移動では `header_anchor_uid` が必要です。同header内の相対並べ替えには
+不要です。ON header内の既存の相対Addは修飾子なしでも使え、OFFへのAddでは修飾子が必要です。
+
+次の例は既知の通常項目 `slot_uid` を、選んだheaderの末尾へ移します。
+
+```python
+before = pme.editing.read_pm(pm_uid)
+panel = next(row["panel"] for row in before["rows"] if row["panel"])
+anchor_uid = panel["anchor_uid"]
+checked = pme.editing.move_slot(
+    pm_uid, slot_uid, header_anchor_uid=anchor_uid, edge="END",
+    expected_version=before["version"], dry_run=True,
+)
+if checked["status"] == "validated":
+    moved = pme.editing.move_slot(
+        pm_uid, slot_uid, header_anchor_uid=anchor_uid, edge="END",
+        expected_version=checked["version"], expected=checked["expected"],
+    )
+    print(moved["status"], moved["diagnostics"], moved["after_rows"])
+```
+
+`add_slot` も同じ宛先引数を使います。`swap_slots` は二つの項目UIDだけで一般項目／header項目／
+別headerの項目を入れ替え、AddやMoveの整理を行いません。raw Panel anchorを別headerへ移入する
+ことはできません。実ownerのanchorとheaderは行操作で一緒に移動・削除します。既にheader内に保存
+された2個目のraw anchorは個別に明示削除できますが、新規挿入を許可する意味ではありません。
+
+**Header Layout** がOFFでも編集でき、自動ONにはしません。`diagnostics` の
+`header_layout_disabled` とその `anchor_uid`、実際の保存rowsを確認してください。
+Preferencesでは保存項目を個別に編集でき、runtimeメニューでは非表示を維持します。
+空headerのAddはanchorメニューから、MoveはheaderのSTART/ENDから選びます。
+Ctrl+Altはheader項目一つを削除し、**Delete Inactive Header** は明示的な全削除として残ります。
+
+#### 行設定・間隔・揃えを変更する
+
+Pop-up DialogとFloating Panelを対象に、通常エディターの設定とAPIが同じ保存操作を使います。
+`read_pm()` から現在のrow_refとslot UIDを取得してください。呼出し側でrowやspacerの保存文字列を
+組み立てる必要はありません。
+
+`update_row` の `changes` は、次の部分mappingです。
+
+| field | 値 |
+|---|---|
+| `size` | `"NORMAL"`、`"LARGE"`、`"LARGER"` |
+| `vspacer` | `"NONE"`、`"NORMAL"`、`"LARGE"`、`"LARGER"` |
+| `fixed_col`、`fixed_but` | Pythonの `True` または `False` |
+| `align` | `"LEFT"`、`"CENTER"`、`"RIGHT"`。行／subrowの既定寄せで、揃え境界とは別 |
+
+既定の `scope="row"` は指定行、`"aligned_rows"` は `vspacer="NONE"` でつながる現在の行群を
+上端行も含めて対象にします。`"all_rows"` は暗黙先頭行も含み、`row_ref=None` を受け付けます。
+空メニューに行を作ることはありません。行群操作では、Panelに適用できないfieldを飛ばす既存の
+規則を保ちます。Panel行の `vspacer` は編集できます。
+
+列境界の行間補正も維持します。全行の `vspacer="NONE"` は列境界で `"NORMAL"` となり、
+COLUMN追加は現在行と次行の行間を補正する場合があります。実際の `before_rows` と `after_rows` を
+比較してください。補正後の実効値が同じならraw文字列・UID・version・refreshを変えません。
+markerless行は、行設定の実変更を保存するために必要な場合だけmarkerを作り、先頭の本文を保ちます。
+変更する設定には既存エディターのencodeを使うため、対象markerの未知query keyが整理・消去される
+場合があります。無関係なraw保存値は変えません。
+
+`update_spacer` は、次の対象指定をちょうど一つ受け取ります。
+
+- `slot_uid`：先頭・末尾・連続spacerの途中も含む、既存spacerそのもの。row markerや内容項目は対象外です。
+- `before_uid`／`after_uid`：内容項目を指定し、その側の直隣にあるspacerを更新、なければその位置へ生成。
+  `add_slot` と異なり、隣にspacerがあるときは追加せず更新します。隣接範囲は同じ行に限ります。
+  行頭・末尾も受け付け、暗黙先頭項目の前へ追加するだけならrow markerは生成しません。
+
+`prop="hsep"` の値は `"NONE"`／`"SPACER"`／`"COLUMN"`／`"ALIGNER"`、`prop="subrow"` は
+`"NONE"`／`"BEGIN"`／`"END"` です。片付けの結果が操作順に依存するため、一回に一つのpropertyを
+変更します。BEGIN解除は次BEGIN／COLUMN／行までにある対応ENDも解除します。最後の列境界を外す
+ときの既存subrow整理、ENDのあるspacerへCOLUMNを設定したときのEND解除も維持します。
+NONEで有効設定が空になればspacerを削除します。subrowに明示的なCOLUMN markerは必須ではありません。
+
+`align_slot` は `"LEFT"`／`"CENTER"`／`"RIGHT"`／`None` を受け、揃え境界を生成・移動します。
+行の `align` fieldを書く操作とは異なります。列がある場合、対象項目が最初のCOLUMNより前にあり、
+COLUMNの後にALIGNERがない必要があります。それ以外は `item_in_column_region` または
+`aligners_after_column` の理由を確認し、`update_spacer` で保存構造を明示編集してください。
+この条件は便利操作の意味に対するもので、保存レイアウト全体の制限ではありません。
+`None` は項目が列の後でも既存の外側境界を最多二つ解除します。importしたデータ内の全ALIGNERを
+必ず消す意味ではありません。`aligner_without_root` を新たに作る編集は保存前に拒否します。
+
+Panel headerの既存の間隔・揃えはHeader LayoutがOFFでも編集でき、自動的にONにはしません。
+Panel anchor、headerのCOLUMN、Panel subrowの操作別制約は維持します。Panel作成と新しいheaderの
+構造操作は、この設定操作とは別です。
+
+```python
+before = pme.editing.read_pm(pm_uid)
+row_ref = before["rows"][0]["row_ref"]
+checked = pme.editing.update_row(
+    pm_uid, row_ref, {"size": "LARGE", "fixed_but": True},
+    expected_version=before["version"], dry_run=True,
+)
+if checked["status"] == "validated":
+    changed = pme.editing.update_row(
+        pm_uid, row_ref, {"size": "LARGE", "fixed_but": True},
+        expected_version=checked["version"], expected=checked["expected"],
+    )
+    print(changed["status"], changed["after_rows"], changed["structure_changes"])
+```
+
+三操作とも完全な保存snapshot `expected` とsession version、厳密なboolの `dry_run`、実際の
+before／after行とUID差分、行操作と同じ復旧・refresh診断を使います。照会は将来のUIDを作らず、
+描画成功も保証しません。実変更のversion増分は一回で、同値・照会・事前拒否では進みません。
+編集後は現在のrow_refを読み直してください。無関係な選択・draft・clipboardを保ち、draft対象の
+書換・削除は競合として扱います。Preferencesのディスク保存やUndoは追加しません。
+
+`align_slot` が保存データから変更を計算できない場合は、例外の詳細と
+`recovery="not_needed"` を伴う `rejected` を返し、保存値を変更しません。
+元のtracebackはconsoleにも残します。
+
+#### 一つのメニューを読み、スロットを変更する
+
+`read_pm()` は、生きた Blender オブジェクトではなく、通常の Python 値を返します。
+メニューの辞書には `uid`、`name`、`mode`、`enabled`、`data`、`description`、
+`description_is_expr`、`poll_cmd`、`hotkey`、`tags`、
+`version`、`editable_slots`、`slots` があります。各スロットには `uid`、`index` と、
+`name`、`mode`、`text`、`icon`、`auto_icon` などの保存値が入ります。
+`index` は現在の位置を表します。変更対象の指定には UID を使います。
+スロットの `layout_panel` 辞書には、保存済みの Layout Panel 設定も含まれます。
+Pop-up DialogとFloating Panelの定義には、前述のメニュー全体の `rows` も含まれます。
+
+次の例は、確認済みのスロット UID を更新します。先に要求されたメニューを探し、その
+スロットを読み取って `pm_uid` と `slot_uid` を取得してください。
+
+```python
+before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+slot = before["slots"][0]
+result = pme.editing.update_slots(
+    pm_uid,
+    {slot_uid: {
+        "mode": "COMMAND",
+        "cmd": "bpy.ops.wm.tool_set_by_id(name='builtin.knife')",
+        "auto_icon": True,
+    }},
+    expected_version=before["version"],
+    expected={slot_uid: slot},
+)
+print(result)
+after = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+```
+
+編集には、保存フィールドへの直接代入ではなく、通常の Slot Editor と同じ入力を使います。
+
+| 編集フィールド | 意味 |
+|---|---|
+| `mode` | `COMMAND`、`PROP`、`MENU`、`CUSTOM` などのスロットモード |
+| `cmd`、`prop`、`custom` | Command 本文、プロパティパス、Custom 本文。保存値の `text` の代わりに使う |
+| `name`、`icon`、`auto_icon` | ラベル、手動アイコン、Auto Icon の設定 |
+| `description`、`description_is_expr` | 説明と、説明を式として扱う設定 |
+| `menu_target_uid` | Menu スロットの参照先メニュー UID |
+| `modal_input` | Modal 固有の入力。フィールド名は `slot_fields()` で確認できる |
+
+ほかの入力と Enum 候補も `slot_fields()` から取得できます。`editable_slots` が偽の
+メニュー種別は専用のエディターを使います。Router の分岐には `update_router()` を使い、
+Property のコールバックを通常スロットとして扱うことはできません。
+
+子メニューへのリンクには、読み取って確認した子メニューの UID を使います。
+Vector Menu は Nest の矢印を描画するため、アイコンには内容のカテゴリに合うものを
+選んでください。次の例は、現在のラベルと表示方法を保ち、参照先とアイコンを変更します。
+
+```python
+before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+old_icon = before["slots"][0]["icon"]
+icon_flags = old_icon[:len(old_icon) - len(old_icon.lstrip("#!^"))]
+result = pme.editing.update_slots(pm_uid, {slot_uid: {
+    "mode": "MENU", "menu_target_uid": child_uid,
+    "icon": icon_flags + "TOOL_SETTINGS", "auto_icon": False,
+}}, expected_version=before["version"], expected={slot_uid: before["slots"][0]})
+```
+
+アイコンだけを変更する場合は、`mode` と `menu_target_uid` を省略します。既存の表示設定は
+保持されるため、アイコン変更のために Submenu を Button へ変更する必要はありません。
+`menu_presentation` は Regular Menu の配置方法を表し、Nest のジェスチャーや Pie Menu の
+確定設定とは別です。目的のメニューで、アイコンの表示、子メニューへの移動、項目の選択、
+終了を確認してください。
+アイコンには `TOOL_SETTINGS` などの Blender の識別子、アイコンなしを表す空文字列／`NONE`、
+または[カスタム PNG アイコン](../editors/custom_icons.md)を表す `@filename` を使います。
+`icon` の先頭には `#`（アイコンのみ）、`!`（非表示）、`^`（対応する場所でチェックボックス表示）の
+表示フラグが含まれます。読み戻しの別フィールドではありません。例では、アイコン名を変更するときに
+既存の接頭辞をそのまま保持しています。未知のアイコン名でも保存でき、表示時には代替アイコンになる場合があります。
+
+未指定の入力は現在の値から始めます。ただし変更対象のスロットには、通常のエディターと
+同じ保存時の正規化が適用されます。結果の `before` と `after` を確認してください。
+VMENU の Command 編集では、ほかのスロットと並び順を保持します。ただし、エディター固有の
+保存処理が Macro のスロットアイコンなどの関連フィールドを更新する場合もあります。
+その変更は各スロットの `before` / `after` または `side_effects` に返します。構造に関わる設定にも
+通常 UI と同じ副作用があります。たとえば空のLayout Panel headerをOFFからONへ切り替えると、
+最初のヘッダースロットを追加します。既にONの空headerを保存しても補充しません。
+構成が変わった場合は、結果の `structure_changes`
+に変更前後の UID 一覧 `before_order` / `after_order` が入るので、対象スロットと併せて
+確認してください。保存フィールドだけの厳密な差し替えや、JSON Import によるメニュー置換とは異なります。
+`EMPTY` スロットを通常のエディターへ読み込むと `COMMAND` から始まるため、`mode` を省略した
+編集でも Command スロットになる場合があります。空の `name` には、エディターが提案した名前が
+入る場合もあります。入力が空のまま残ると仮定せず、正規化後の読み戻しを確認してください。
+
+`expected_version` は、PME の版管理された編集操作による変更を検出します。値は同じ
+セッション内でのみ有効で、すべての変更を検出するものではありません。
+`expected` は指定した保存フィールドの一致も確認します。`read_pm()` が返したスロットを
+丸ごと渡せばその観測値全体、一部を渡せばそのフィールドだけを比較します。
+`stale_version` / `stale_slot` が返ったら、再取得して変更内容を調整してから再試行します。
+
+| 編集操作 | 競合の確認 |
+|---|---|
+| `update_slots` / `clear_slots` | `expected_version` と、保存フィールドの `expected` を併用する |
+| `add_slot` | `expected_version` と、追加のdry-runが返した `expected` の全保存snapshot |
+| `add_panel` とレイアウトの行・設定操作 | `expected_version` と、同じ操作のdry-runが返した `expected` 全体 |
+| 行構造を持たない一覧の `remove_slot` | `expected_version` と、対象の保存fieldの全部または一部を入れた `expected`。削除のdry-runは対象field全体を返す |
+| レイアウトの `remove_slot` / `move_slot` / `swap_slots` | `expected_version` と、同じ操作のdry-runが返した `expected` 全体 |
+| `transfer_slot` | 同じ転送のdry-runが返した、両メニューを含む `expected` 全体 |
+| `update_pm` | `expected` に4個のメタデータフィールドの全部または一部を渡す。`read_pm()` の結果全体は渡さない |
+| `delete_pms` | 削除のdry-runで返された `expected` 全体 |
+| `duplicate_pm` | 複製のdry-runが返した `expected` 全体。collection版と複製元の保存digestを照合する |
+| `update_hotkey` | `expected` に13個すべてを含む `read_pm()["hotkey"]` を渡す |
+| `set_enabled` | `expected` に対象UID全件と保存boolの対応を渡す。dry-runの戻り値を利用できる |
+| `update_tags` | dry-runの`expected`全体。同期前の対象membershipとregistry definitionsを照合する |
+| `update_router` / `update_property_stack` | 対象の定義を直近に読み取ったときの digest を `expected_digest` に渡す |
+
+#### メニューの説明や名前を変更する
+
+`update_pm()` が受け付けるのは、`name`、`description`、`description_is_expr`、
+`poll_cmd` です。メニューの説明は、スロットの説明とは別に保存されます。
+
+```python
+before = pme.editing.read_pm(pm_uid)
+fields = ("name", "description", "description_is_expr", "poll_cmd")
+result = pme.editing.update_pm(pm_uid, {
+    "description_is_expr": False,
+    "description": "Mesh tools. Unmatched contexts keep Blender's shortcut.",
+}, expected={key: before[key] for key in fields})
+print(result)
+```
+
+`expected` は、この4個の保存フィールドのうち、指定したフィールドを編集前に比較します。
+改名には、Menu スロットのリンク、Popup に関係する Panel 項目名、ツリー、ホットキー登録を
+更新する通常処理を使います。Command／Custom／Poll 本文中の名前指定と Router の
+`fallback_name` は、書き換えも `side_effects` への列挙も行いません。改名の影響を受けると
+分かっている名前指定の呼出しは確認してください。結果に返る実際の名前と、影響を受けた
+スロットも確認します。説明の形式は、明示的に指定した説明本文より
+先に適用されます。ほかの通常コールバックによって保存値が変わる場合もあります。
+各フィールドは順に確定するため、再試行前に `fields`、`pending`、`before` / `after`、
+診断、`side_effects` を確認してください。`changed_fields` は、最終の読み戻しで確認した
+コールバック由来の変更も含みます。全体の `status` は `committed`、`partial`、`rejected`、
+各 `fields` 要素の状態は `committed`、`unchanged`、`rejected` です。未変更の項目も完了に含めます。
+有効状態、ホットキー、エディター固有の設定は、この関数の入力対象ではありません。
+Poll や説明のソースも評価しません。Property ID をロックしていない Property Stack は、
+改名によって ID が再生成される場合があります。改名後に
+`property_stack.registered_property_id` を読み直し、旧 ID を埋め込んだ widget の本文を
+更新してください。その本文は自動では書き換わりません。通常 UI と同様、不正な Poll 本文も
+保存され、診断に `poll_compile_error` が入る場合があります。保存の確定は Poll の動作成功を
+意味しません。
+名前の正規化は `name_adjusted` として、要求した名前と実際の名前を報告します。
+`poll_cmd` は `def poll(cls, context):` に続ける本文です。1行なら
+`"return context.mode == 'EDIT_MESH'"` をそのまま使えます。先頭の改行と本文各行の
+字下げが必要なのは、複数行の場合だけです。
+スロットの `cmd` / `prop` / `custom` の構文エラーは、そのスロットの保存前に拒否される点が
+異なります。どちらの構文検査も、実行時の動作を保証するものではありません。
+
+#### メニューを1件または複数削除する
+
+`delete_pms(pm_uids, *, expected=None, dry_run=False)` は、通常エディターの
+Selected Removeと同じ一括削除を使います。メニューUID文字列のiterableを渡します。
+1件でも1要素のリストにします。文字列単体、空のiterable、重複UID、入力型の不正は
+書込み前に拒否します。処理順は現在のメニューコレクション順です。
+
+```python
+preview = pme.editing.delete_pms([pm_uid], dry_run=True)
+print(preview["status"], preview["references"], preview["diagnostics"])
+if preview["status"] == "ready":
+    result = pme.editing.delete_pms([pm_uid], expected=preview["expected"])
+    print(result["status"], result["removed_uids"], result["recovery"])
+```
+
+dry-runは保存値、version、選択、編集中の内容、host登録を変更しません。
+`before` と `after` は同じ保存値で、`committed` はfalseです。現在の対象と削除後の
+選択予定を確認しますが、対象を予約したり、登録解除の成功を保証したりはしません。
+
+返された `expected` は全体をそのまま渡します。`collection_version`、
+`collection_digest`、`target_digests`、`references_digest` が、コレクションのidentityと
+順序、削除対象の保存内容、対象へ向く保存参照を照合します。コレクションversionが
+増えない変更も検出します。古い観測として拒否された場合は再取得し、削除の意図を
+確認してからやり直します。`expected` を省略した場合も、呼出し開始時の状態を基準に
+各対象の削除前に再照合します。
+
+参照元は結果へ表示しますが、削除・書換えはしません。残ったメニューには、削除済みの
+メニューを指す壊れた参照が残ることがあります。無効・未完成のRouterやProperty Stackの
+保存参照も含めます。動的に組み立てる参照を静的解析ですべて検出することはできず、
+走査範囲の警告は削除拒否にはなりません。削除対象自身を編集中なら書込み前に拒否し、
+対象外のメニューの編集中の内容は保持します。選択中のメニューが削除対象外ならそのUIDを
+維持し、削除対象なら通常の一括削除の規則で選択先を決めます。
+
+`selection_before` と `selection_after` はactive UID、選択UID集合、tree行を区別します。
+`active_visible` は現在regionの最後の描画時の観測
+（`visibility_scope="last_rendered_region"`）で、取得できない場合は `None` です。
+画面更新が最終状態を描画し終えた保証ではありません。残ったメニューを表示するために
+filterを解除することはありません。
+
+| `status` | 意味 |
+|---|---|
+| `ready` | dry-runの事前条件を満たした。削除は未実行 |
+| `rejected` | 書込み前の拒否。`diagnostics` を確認する |
+| `committed` | 指定メニューをコレクションから削除した |
+| `restored_failure` | 削除が失敗し、既存の限定された復旧を確認した |
+| `unknown` | 復旧を確認できない。再試行前に最終状態を確認する |
+
+`before`、`after`、`removed_uids`、`remaining_target_uids`、選択と診断を合わせて確認します。
+削除済みの対象は `after[uid] = None` です。保存データの復旧とhost登録の復旧は別で、
+定義が戻っても全Editor資源の復旧を意味しません。削除確定後に画面更新が失敗した場合は
+確定結果を維持します。Preferencesのディスク保存とBlender Undoは行いません。
+
+`remaining_uids` は観測した最終コレクション順です。`recovery.hotkey_observation` が
+ある場合も、既存の削除checkpointとPMEの登録記録の観測に限ります。記録がないことは、
+Blender本体の全keymap itemや、他のEditor資源の解除を証明するものではありません。
+
+#### メニューを複製する
+
+`duplicate_pm(source_pm_uid, *, name=None, expected=None, dry_run=False)` は、
+通常のDuplicateと同じ本体で保存済みメニューを1件複製します。選択中のメニューや
+画面の並び順にかかわらず、collection上の複製元の直後にコピーを置きます。
+
+```python
+preview = pme.editing.duplicate_pm(pm_uid, name="Working copy", dry_run=True)
+print(preview["status"], preview["not_inherited"])
+if preview["status"] == "validated":
+    result = pme.editing.duplicate_pm(
+        pm_uid, name="Working copy", expected=preview["expected"],
+    )
+    print(result["status"], result["created"], result["diagnostics"])
+```
+
+新メニューと各項目には新しいUIDを発行します。項目内容、項目の `enabled`、
+タグ、Editor固有の通常の複製動作は継承します。メニューの `key`、`any`、
+`ctrl`、`shift`、`alt`、`oskey`、`key_mod`、メニューの `enabled` は
+`not_inherited` に列挙し、コピーは有効・ホットキー未割当で始まります。
+Property Stack HUDの外観は既存の複製動作に従い、監視は無効になります。
+コピー内の参照は従来の参照先を保ちます。
+
+`name=None` または `name=""` は複製元の名前を基にします。指定した文字列は
+通常の重複名補正を通して生成時に設定し、前後の空白除去や生成後renameは行いません。
+`created` は生成後の実際の `pm_uid`、`name`、collection上の `index` を返し、
+dry-runでは `None` です。
+
+dry-runはUID生成・版の初期化・選択変更・コピーの登録・HUD保存領域の生成を行いません。
+返す `expected` は `collection_version`、`source_pm_uid`、`source_digest` の
+全体をそのまま渡してください。JSON往復できます。複製元の保存値とcollection版を照合し、
+版更新を伴わない複製元の編集も検出します。名前の予約や全collection順序の固定はしません。
+入力形の不正は `TypeError` または `ValueError`、複製元の未存在・曖昧なUID・
+前提の変更は書込み前の拒否になります。
+
+APIはactiveメニューのUID、選択、開いているdraftを保ち、元のTree行が残る場合は
+同じ出現位置を維持します。通常UIはコピーを選択します。
+`selection_before`／`selection_after` は実際の選択を返します。
+可視性は最後に描画されたregionの観測で、不明な場合もあります。
+非表示になったことを理由に別メニューへ選択を移しません。
+
+`before`／`after` は実際の `pm_uids` と、`source`／`created` の保存snapshotです。
+`before["created"]` は常に `None`。collection版とdiagnosticsも合わせて確認してください。
+
+| `status` | 意味 |
+|---|---|
+| `validated` | dry-run成功。書込みなし |
+| `rejected` | 書込み前に拒否 |
+| `committed` | 既存Duplicate操作が確定した |
+| `restored_failure` | 適用に失敗し、元のUID順序・active UID・複製元保存値の復元を読戻しで確認した |
+| `unknown` | 結果または復旧を確認できない。再試行前に実際の状態を確認する |
+
+確定後の表示更新や補助readbackの失敗でcommitを取り消しません。
+読めなかった値は `None` とdiagnosticsで示します。`recovery` は既存Duplicateの
+復旧と保存値の確認範囲であり、すべてのEditor登録やhost資源の復元を保証しません。
+Preferencesのディスク保存やBlender Undoは行いません。
+
+#### メニューのホットキーを変更する
+
+`update_hotkey()` は通常の Preferences とホットキー処理を共有します。保存フィールドの
+一部を mapping で渡し、省略した値は維持します。読取り後の変更を検出するには、
+`hotkey` 全体を `expected` へ渡します。ホットキーの競合確認にスロットの版は使いません。
+
+```python
+before = pme.editing.read_pm(pm_uid)["hotkey"]
+changes = {"key": "F6", "ctrl": True, "open_mode": "PRESS"}
+preview = pme.editing.update_hotkey(
+    pm_uid, changes, expected=before, dry_run=True,
+)
+if preview["status"] == "ready":
+    result = pme.editing.update_hotkey(pm_uid, changes, expected=before)
+    print(result["after"], result["registration"])
+```
+
+| フィールド | 受け付ける値 |
+|---|---|
+| `key`, `key_mod`, `chord`, `open_mode`, `drag_dir`, `tweak_dir` | 現在の PMItem RNA の enum identifier |
+| `ctrl`, `shift`, `alt`, `oskey`, `any`, `repeat` | bool。整数は不可 |
+| `km_name` | Preferences と同じ区切り方を使うキーマップ名の文字列 |
+
+未知フィールド、型・enum の不正、`expected` の不足・余分なフィールドは、書込み前に
+`TypeError` または `ValueError` になります。`expected=None` は現在の値を基に編集する
+指定です。不一致では `rejected` と `stale_hotkey` を返すので、読み直して意図した変更を
+調整してから再試行してください。
+
+キーマップ名を現在の user keymap に照らして正規化するのは、`km_name` を指定した場合
+だけです。ほかの値の編集では、import した未生成の名前を維持します。明示した
+`open_mode="CHORDS"` は `NONE` の chord を `A` へ、ほかの明示した open mode は
+chord を `NONE` へ補正します。`open_mode` の省略時は保存された chord を維持します。
+`adjustments` と `proposed` で補正を確認してください。危険な組合せは書く前に拒否し、
+観測した衝突は警告に留めて保存を妨げません。
+
+結果は保存値と Blender の登録を分けます。
+
+- `ready` は dry-run 成功です。`committed=False`、`after=before`、
+  `changed_fields` は空で、予測を示すのは `proposed` と `planned_fields` だけです。
+- `unchanged` は保存値が一致している状態です。登録を修復する指示にはなりません。
+- `rejected` は確定しなかった理由を返します。書込み後の値が一致せず、元の保存値へ
+  復旧できたことを確認した場合も含みます。
+- `committed` は候補の全保存値を読み戻して一致した状態です。
+  `before`、`after`、`changed_fields` は実際の保存結果を示します。
+
+`registration` は `status`、`required`、`lanes`、`diagnostics` を持ちます。
+状態は `not_required`、`registered`、`partial`、`unknown` のいずれかで、各 lane は
+keymap/event、期待する登録、観測値、相違理由を返します。無効メニュー、キー未割当、
+Vector Menu の CLICK では登録不要が正常です。残留 handle があれば単純な
+`not_required` にはしません。確認するのは所有する addon KMI と必要なマウス修飾キーの
+observer であり、最終 user keymap の優先順位、入力配送、Poll、実行成功とは別です。
+dry-run の登録結果は現在の binding の観測で、候補を適用した後の予測ではありません。
+
+選択と Slot Editor の draft は維持し、Preferences のディスク保存や Undo は行いません。
+owner や表示更新の例外はそのまま伝播し、保存値がすでに変わっている場合があります。
+再試行前に例外の詳細と現在の binding を読み直してください。マウス修飾キーの既存復旧は
+局所的なもので、ホットキー全フィールドの atomic な復旧を保証しません。
+
+#### メニューを有効・無効にする
+
+`set_enabled(pm_uids, enabled, *, expected=None, dry_run=False)` は、通常エディターの
+有効・無効を切り替える一括操作を共有します。重複しないメニューUID文字列のiterableと、
+全対象に適用するboolを渡します。文字列単体は不可です。対象はコレクション順に処理し、
+空のiterableは `unchanged` を返します。`enabled` と `dry_run` はboolで、整数は不可です。
+
+```python
+preview = pme.editing.set_enabled([pm_uid], False, dry_run=True)
+print(preview["status"], preview["before"], preview["planned_uids"])
+if preview["status"] == "validated":
+    result = pme.editing.set_enabled(
+        [pm_uid], False, expected=preview["expected"],
+    )
+    print(result["status"], result["after"], result["registration"])
+    print(result["diagnostics"])
+```
+
+`expected` には対象UID全件と保存boolの対応を渡し、過不足は認めません。
+入力形式の不正、重複UID、型の不正は `TypeError` または `ValueError` になります。
+対象が見つからない・一意に決まらない場合や `expected` との不一致は、書込み前に
+`rejected` を返します。`expected=None` は呼出し開始時の状態を基準にします。
+後の適用時には対象と条件を再確認します。dry-runは対象の予約やcallback成功の保証ではありません。
+
+`before`、`after`、返却される `expected` はUIDとboolの対応です。返却 `expected` は
+適用成功時も `before` のコピーであり、変更後の値ではありません。`after` は実際の
+読み戻しで、取得できない対象は診断を付けて省略する場合があります。dry-runの `after` は
+現在の保存値のままです。`planned_uids` は変更予定を示し、`attempted_uids` と
+`changed_uids` は適用の記録です。dry-runでは後者2つは空です。
+
+| `status` | 意味 |
+|---|---|
+| `validated` | dry-runの事前条件を満たし、変更予定がある。書込みは未実行 |
+| `unchanged` | 変更が必要な保存boolがない。setterを実行せず、登録も修復しない |
+| `committed` | 指定した保存bool全件の適用と読み戻しを確認した |
+| `rejected` | 書込み前の拒否。`diagnostics` を確認する |
+| `restored_failure` | 適用が失敗し、保存enabled値の復旧を確認した |
+| `unknown` | 復旧を確認できない。再試行前に実際の状態を確認する |
+
+`committed` がtrueになるのはstatusが `committed` の場合だけです。復旧の対象は
+enabled値であり、全保存フィールドや全Editor資源ではありません。失敗時は `before`、
+`after`、`attempted_uids`、`changed_uids`、`reason`、`rollback_reason` と診断を合わせて確認します。
+
+`registration[uid]` は現在観測した**ホットキー**登録を返します。`scope="hotkey"` で、
+状態は `not_required`、`registered`、`partial`、`unknown` のいずれかです。
+確認内容は前節の `update_hotkey()` と同じkeymap/eventとマウスobserverです。
+無効メニュー、キー未割当、Vector MenuのCLICKでは登録不要が正常です。dry-runでも現在の
+登録を返し、有効化後の予測ではありません。Macro、Property、Property Stack、Panelの
+全資源や、Poll、Getter/Setter、アクション実行は確認しません。登録警告や観測不明があっても、
+保存確定済みの結果をトップレベルの `unknown` へ変えることはありません。
+
+選択と編集中の内容は、対象メニュー自身を編集中の場合も保持します。`selection` と
+`visibility` はそれぞれ `before` と `after` を返します。可視性のscopeは
+`last_rendered_region` で、`unknown` の場合もあり、新しい描画の完了を保証しません。
+対象が非表示になってもfilterは維持します。Preferencesのディスク保存とBlender Undoは行いません。
+
+#### タグを追加・解除する
+
+`editing.update_tags(pm_uids, *, add=(), remove=(), expected=None, dry_run=False)`
+は、明示したメニューUIDへ同じタグ変更を一括適用します。通常UIと既存の所属更新処理を共有し、
+tag registryが無効な環境でも名前で編集できます。タグ定義自体を削除する操作ではありません。
+
+```python
+targets = [first_pm_uid, second_pm_uid]
+preview = pme.editing.update_tags(
+    targets, add=["Review"], remove=["Draft"], dry_run=True,
+)
+if preview["status"] == "validated":
+    result = pme.editing.update_tags(
+        targets, add=["Review"], remove=["Draft"], expected=preview["expected"],
+    )
+    print(result["status"], result["after"], result["synchronized"])
+print(pme.editing.read_pm(first_pm_uid)["tags"])
+```
+
+各引数には、文字列を要素とする非文字列iterableを渡します。メニューUIDの重複、追加される名前の重複、
+解除名の完全一致による重複、追加と解除に共通する名前は、同期・書込み前に`ValueError`で拒否します。
+不正な型は`TypeError`または`ValueError`となり、`dry_run`はboolで指定します。
+
+名前は既存の所属操作と同じ意味です。addは入力の前後空白を除き、removeは指定名をそのまま使います。
+大小文字とUnicodeを保持し、add内のcommaは複数名として扱いますが、remove内のcommaは分解しません。
+例えば`add=["A,B"], remove=["B"]`は競合です。単独の空名や`"Untagged"`の追加は既存のno-opで、
+`ignored_names`へ記録しますが、入力重複の検査には含めます。追加の文字数制限はありません。
+既存所属への追加や存在しない名の解除でも、保存rawの順序や重複が整理される場合があるため、
+名前集合だけで未変更と判断せず、実際の結果を確認してください。
+
+`read_pm()["tags"]`は、現在の保存rawが表す一意な名前の昇順listです。読取りで同期しません。
+空rawは`[]`を返し、保存された空名membershipやliteralの`"Untagged"`と区別します。
+`PMHandle.tag`、`PMItem.get_tags()`、`list_tags()`の既存契約は変わりません。
+
+dry-runが確認するのは入力、対象解決、純粋な名前変換です。同期・UID発行・新規定義の予測は行わず、
+後の書込み成功を保証しません。JSON往復できる`expected`の全体、
+`activated`・`targets_digest`・`definitions_digest`を変更せず渡してください。
+対象raw・参照・projection stampとregistry definitionsを通常同期より前に比較し、
+古いexpectedは保存を書き換えず拒否します。変更指定または対象集合が空なら、
+この照合後に`unchanged`を返し、同期・refreshを行いません。
+
+`before`と`after`は対象の実際のraw・名前・参照・projection stampです。
+`changed_uids`は同期後からbatch後への変更を表します。`synchronized`は通常同期による変更を分けて返し、
+対象外メニューやdefinitionsの変化も含みます。要求batchが`unchanged`でも同期差がある場合があります。
+同期とbatchを合わせた全体atomicを保証するものではありません。
+
+| `status` | 意味 |
+|---|---|
+| `validated` | 読取りだけの検査に成功。保存変更なし |
+| `unchanged` | 要求batchによる変更なし。`synchronized`は別途確認する |
+| `rejected` | 保存Tagデータが変わらない形で拒否。診断を確認する |
+| `committed` | 既存batch writerが要求された変更を確定した |
+| `unknown` | 完全な操作receiptを得られず処理が失敗。再試行前に実際の保存値を確認する |
+
+`recovery.carrier_matches`は、示された`baseline`とTag保存データを比較します。
+同期失敗では`before`、batch失敗では`after_synchronize`が基準です。trueは保存値の一致だけを表し、
+`attempted=null`はrollback試行が不明であることを示します。一致から`restored_failure`を推定しません。
+成功後の補助readback・refresh失敗でbatchの成功結果を取り消さず、読めない値やrefresh保留を診断に残します。
+
+activeメニューUID・選択UID集合・開いたdraftを維持します。Treeの同じ出現が残り、refreshが成功した場合は
+その位置を保持します。可視性の既存値は最後に描画した範囲の観測です。
+`active_hidden_by_list_filter`は現在のmode/tag/new/health filterによる別観測で、名前検索や折り畳みを含みません。
+不明な観測は`None`です。この呼出しはPreferencesをディスクへ保存しません。
+
+#### 方向スロットを残して内容を消去する
+
+Slot Editor のモードに `EMPTY` を指定する代わりに、Clear を使います。
+
+```python
+before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+result = pme.editing.clear_slots(pm_uid, [slot_uid],
+    expected_version=before["version"], expected={slot_uid: before["slots"][0]})
+print(result)
+```
+
+Clear はスロットの UID、位置、有効状態を保持し、通常 UI の規則に従って内容、参照、
+アイコン、説明を初期化します。対象エディターが `EMPTY` を扱えなければ `clear_unsupported`、
+レイアウト構造の項目なら `structural_slot` で拒否します。構造の変更には通常のレイアウトエディターを使います。
+Regular Menu の内容項目を Clear すると区切り線になり、一覧から
+項目を削除する操作にはなりません。以下の一括処理の結果と部分保存の扱いも適用されます。
+内容の消去後に表示更新の例外が起こる場合もあるため、再試行前に対象を読み直してください。
+
+#### 項目を1件追加・削除する
+
+Regular Menu の2番目の項目の後ろに、通常の既定項目を追加する例です。
+返された新 UID に対して `update_slots()` を使い、内容を別途設定します。位置の引数を
+両方省略すると末尾へ追加し、`before_uid` では指定項目の前に挿入します。両方は指定できません。
+Pop-up DialogとFloating Panelも同じ位置引数を使い、間のレイアウトマーカーを飛ばしません。
+空のメニューにはanchorなしで追加でき、暗黙の行マーカーは作りません。
+
+```python
+before = pme.editing.read_pm(pm_uid)
+anchor_uid = before["slots"][1]["uid"]
+checked = pme.editing.add_slot(
+    pm_uid, after_uid=anchor_uid, expected_version=before["version"], dry_run=True,
+)
+if checked["status"] != "validated":
+    raise RuntimeError(checked["diagnostics"])
+added = pme.editing.add_slot(
+    pm_uid, after_uid=anchor_uid,
+    expected_version=checked["version"], expected=checked["expected"],
+)
+print(added)
+if not added["committed"]:
+    raise RuntimeError(added["diagnostics"])
+new_uid = added["slots"][0]["uid"]
+```
+
+Regular Menu の種類は `ITEM`（既定）、`LABEL`、`SPACER`、`SEPARATOR`、`COLUMN` です。
+初期値は通常 UI と同じです。Macro、Modal、Stack Key は `kind` を省略し、各エディターの
+通常 Add による初期化を使います。未知または不適合の種類は `slot_kind_unsupported` で拒否します。
+
+Pop-up DialogとFloating Panelは、`kind` を省略するか `kind="BUTTON"` で、本文が空の通常の
+Command項目を追加します。`use_spacer=True` なら通常の自動spacerも作ります。beforeでは
+新項目・spacer・基準項目、afterでは基準項目・spacer・新項目の保存順です。既定値は
+Preferencesから独立した `False` です。行構造を持たない一覧での `use_spacer=True` は
+`unsupported_position` で拒否し、Regular Menuの `kind="SPACER"` は別の項目種類として使います。
+`use_spacer` と `dry_run` はboolのみを受け付け、`0`・`1`・`None` は受け付けません。
+
+固定枠のメニューは追加・削除を行わず、`clear_slots()` で内容を消します（`fixed_slots`）。
+`editable_slots=False` のメニューは専用エディターを使います。Pop-up DialogとFloating Panelを
+含め、最後の可変項目を削除して空の保存列にできます。代わりの行や項目を補充しません。
+レイアウトではSlot Editorで編集中の対象項目を削除する場合は書込み前に拒否し、無関係なdraft・選択・
+clipboardは保持します。
+
+1回の呼出しで1件を操作します。結果には `before_order` / `after_order` の UID 順序、
+`version`、`slots` 内の対象の `before` / `after` が入ります。追加前の `before` と削除後の
+`after` は `None` です。位置の移動を含む周辺変更は `side_effects` に入ります。
+残る内容項目のUIDと相対順序は維持します。レイアウトの整理は操作ごとに異なります。
+Addはマーカーを整理せず、Moveは通常の空行・spacer整理を使い、Removeは近隣のマーカーを
+mergeした後、該当行の列が2未満ならsubrow境界を外します。レイアウトの結果には実際の
+`after_rows` と `structure_changes` も入ります。自動spacerは `created_uids` と構造変更に
+現れ、追加した主項目のUIDは常に `slots[0]["uid"]` です。
+
+行構造を持たない一覧の削除では、`expected` は保存field subsetの既存契約を維持します。
+例えば `{"name": observed_name}` は名前だけを検査し、`{}` は追加条件なしです。
+次の例では、観測した対象fieldをすべて渡します。
+
+```python
+before = pme.editing.read_pm(pm_uid, slot_uids=[new_uid])
+removed = pme.editing.remove_slot(pm_uid, new_uid,
+    expected_version=before["version"], expected=before["slots"][0])
+print(removed)
+```
+
+レイアウト項目の削除では、`read_pm()["slots"]` の1項目の代わりに、削除照会が返す全保存snapshotを使います。
+
+```python
+checked = pme.editing.remove_slot(pm_uid, slot_uid, dry_run=True)
+if checked["status"] == "validated":
+    removed = pme.editing.remove_slot(
+        pm_uid, slot_uid, expected_version=checked["version"],
+        expected=checked["expected"],
+    )
+    print(removed["status"], removed["after_rows"], removed["structure_changes"])
+```
+
+Addは行構造の有無にかかわらず全保存snapshotを受け付けます。レイアウトのRemoveも全snapshotを
+比較し、行構造を持たない一覧のRemoveは指定した対象fieldだけを比較します。照会の `expected` は
+そのまま渡してください。versionだけではすべての直接編集を検出できません。不一致はレイアウトで
+`stale_popup`、通常一覧のAddで `stale_snapshot`、通常一覧のRemoveで `stale_slot` です。
+全snapshotで不足しているfieldを自動補完することはありません。
+
+Add/Removeの照会は `validated` または `rejected`、`committed=False` を返します。
+UID発行、保存値・versionの変更、Editor hook、画面更新は行いません。Add照会は `slots=[]`、
+Remove照会は対象のbefore/afterが同じ保存値です。返された `expected` を同じ操作に戻し、
+`dry_run=True` を外して実行できます。最終label・整理後構造・hook成功を予測するものではありません。
+
+行構造を持たない一覧では、拒否後にもエディターのcallbackによる周辺変更が残り、`side_effects` に報告されることがあります。
+全 callback の巻戻しを保証するものではありません。確定後の表示更新で例外になる場合もあるため、
+tracebackを残し、再試行前に読み直してください。レイアウト操作は前述の `restored_failure` または
+`unknown` で保存状態の復旧を報告します。Preferencesのディスク保存やBlender Undoは行いません。
+
+#### 結果の読み方
+
+各スロットは辞書の順で独立して保存されます。**一括操作全体の atomicity はありません。**
+最初の保存拒否で後続を止め、先に確定した変更は残ります。再試行前に次を確認してください。
+
+| 結果フィールド | 意味 |
+|---|---|
+| `status` | `committed`、`partial`、`rejected` |
+| `committed` | 要求した全スロットが拒否なく完了した。空の変更は未変更のまま |
+| `slots` | 試行した各スロットの `uid`、`status`、`before`、`after`、`reports` と、あれば診断 |
+| `pending` | 明示的な保存を未実行のスロット UID。先行するエディター処理によって値が変わっている場合もある |
+| `version` | 操作後の現在のメニューバージョン |
+| `diagnostics` | 入力が古い場合など、要求全体の問題 |
+| `structure_changes` | スロット構成が変わった場合のみ存在。`before_order` / `after_order` は変更前後のスロット UID 一覧 |
+| `side_effects` | `slots` の結果でまだ示していない変更。pending スロットへの変更も含み、各要素は `uid`、`before`、`after` を持つ |
+
+たとえば Macro の先行スロットを保存した処理が、後続スロットのアイコンも更新する場合が
+あります。後続の明示的な保存より前に一括処理が止まると、その UID は `pending` に残り、
+派生した変更は `side_effects` に示されます。pending は未変更の保証ではありません。
+
+各スロットの状態は `committed`、`rejected`、`unchanged` です。予期しない例外は元の
+traceback と、すでに確定した UID の注記を保持します。操作を繰り返す前に対象を
+読み取ってください。構文診断は、本文の空白や字下げを変更せず、入力欄と位置を示します。
+
+`status` が `committed` でも診断を確認してください。警告には、正規化や、保存済みの定義に
+残る確認事項が示される場合があります。要求の型、フィールド、値が不正な場合は、事前検査で
+`TypeError` / `ValueError` が発生することがあります。一方、保存開始後のエディターや
+コールバックからも同じ型の例外が発生し得ます。例外の型だけで「何も変わっていない」と判断せず、
+traceback と注記を保持し、再試行前に対象を読み直してください。
+
+読み戻しで確認できるのは保存定義です。目的のエディター・モードでの表示と実行は、
+別に確認します。上の例で Knife を選択するとアクティブツールが変わりますが、
+その時点で形状を切断するわけではありません。
+
+#### Context Router の分岐を変更する
+
+Router の `read_pm()` には、`logic`、`digest`、`diagnostics` を持つ `router` も含まれます。
+その digest を `update_router()` へ渡すと、読み取った保存定義から変化していないかを
+確認できます。
+
+`router["logic"]` は、順序付き一覧の `branches` と `otherwise` を持つ辞書です。
+各分岐には `branch_uid`、`name`、`enabled`、`combine_mode`、`conditions`、`target` が
+入ります。各条件には `condition_uid` と、`source`、`op`、`value`、`value_type` などの
+保存済み入力が入ります。
+
+優先順位の変更には `move_router_branch()` の `before_uid` / `after_uid` の片方を、
+分岐の削除には `remove_router_branch()` を使います。指定したRouter内のUIDで対象を決め、
+残る分岐の内容・条件UID・Otherwiseを保ちます。選択中のメニューや編集中の入力は変更しません。
+通常のBranchメニューの **Move Up**・**Move Down**・**Remove Branch** も同じ操作判断を使い、
+UIで従来行っていた保存値の正規化は維持します。
+
+```python
+snapshot = pme.editing.read_pm(router_uid)["router"]
+branches = snapshot["logic"]["branches"]  # Inspect names and UIDs first.
+result = pme.editing.move_router_branch(
+    router_uid, branches[-1]["branch_uid"], before_uid=branches[0]["branch_uid"],
+    expected_digest=snapshot["digest"],
+)
+print(result["status"], result["diagnostics"])
+```
+
+次の編集前には読み直し、新しいdigestを使ってください。自分自身を基準にする場合を含め、
+現在と同じ位置への移動は保存せず `unchanged` を返します。`dry_run=True` は移動不要の場合も
+`validated` と候補の `candidate` を返し、`after` はありません。他の結果は `update_router` と
+同じ `committed`・`rejected`・`unknown` です。`unknown` の再試行前には読み直してください。
+いずれもターゲットの実行、Preferencesのディスク保存、Undoは行いません。
+
+Router の作成には mode ID `ROUTER` を使います。一致する分岐がないときにショートカットを
+Blender の通常処理へ渡すには、Otherwise の **Pass Through** を `{"pass": True}` で設定します。
+
+```python
+created = pme.create_pm(pme.PmCreationSpec("ROUTER", name="Mode Router"))
+if not created.accepted:
+    raise RuntimeError(created.diagnostics)
+router_uid = created.pm_uid
+before = pme.editing.read_pm(router_uid)["router"]
+result = pme.editing.update_router(
+    router_uid, otherwise={"pass": True}, expected_digest=before["digest"],
+)
+print(result["status"], result["diagnostics"])
+```
+
+Pass Through の結果は呼び出し経路にも依存します。不一致時に元のショートカットがどう動くかを
+確認してください。既存 Router を編集する場合は、新規作成せず、確認済みの UID を使います。
+
+`branches` の各要素は、`branch_uid` で指定した既存分岐を更新します。`branch_uid` を
+省略すると新しい分岐を末尾へ追加します。指定しない分岐とフィールドは保持します。
+`conditions` を指定すると、その分岐の条件一覧全体を置き換えます。既存の行の identity を
+保つには `condition_uid` を含めてください。UID を省略した新しい分岐と条件には自動採番します。
+
+次の例は、確認済みの `router_uid` に、3D Viewport の Mesh Edit Mode で
+`target_uid` のメニューを呼ぶ分岐を追加します。
+
+```python
+def enum_condition(*attributes, value):
+    return {
+        "source": {
+            "kind": "rna_path", "root": "context",
+            "segments": [{"kind": "attr", "name": part} for part in attributes],
+            "detected_type": "enum", "readonly": True, "owner_type": None,
+        },
+        "op": "equals", "value": value, "value_type": "enum",
+    }
+
+before = pme.editing.read_pm(router_uid)["router"]
+result = pme.editing.update_router(
+    router_uid,
+    branches=[{
+        "name": "Edit Mesh", "combine_mode": "all",
+        "conditions": [enum_condition("area", "type", value="VIEW_3D"),
+                       enum_condition("mode", value="EDIT_MESH")],
+        "target": {"action": {"type": "menu", "value": target_uid, "opts": {}},
+                   "fallback_name": "Mesh Tools"},
+    }],
+    expected_digest=before["digest"],
+)
+print(result["status"], result["diagnostics"])
+```
+
+この補助関数は属性だけで構成されるパスを表す例であり、任意の Python 式を解析するものでは
+ありません。条件と target は、PME の既存の JSON 互換の logic 値を使います。通常の
+コンテキスト判定は個別Conditionへ置き、それでは表せない計算値には補助Propertyを使います。
+
+使用できる識別子は、既存の [Schema v2 定義](https://github.com/pie-menu-editor/pie-menu-editor-fork-dev/blob/pme2-dev/src/pie_menu_editor/assets/schema/pme2-2.0.json)の
+`PmeLogicValueSource`、`PmeLogicConditionRow`、`ContextRouterConditionRow`、
+`ContextRouterTargetAction` を参照してください。
+
+| フィールド | 使用できる値 |
+|---|---|
+| `source.kind` | `rna_path`、`condition_ref`、`pm_property_ref` |
+| `source.root` | `context`、`paint_settings`、`pme_preferences`。PM 参照には `pm` |
+| `value_type` | `bool`、`int`、`float`、`string`、`enum`、`enum_set`。未設定では `None` |
+| `op` | `is_true`、`is_false`、`equals`、`not_equals`、`lt`、`le`、`ge`、`gt`、`contains`、`starts_with`、`equals_any`、`not_equals_any` |
+| target の `action.type` | `menu`、`command`、`hotkey`、`custom` |
+
+参照元と比較方法に対して有効な組合せで指定してください。RNA の参照には上の例のような
+正規形式の `segments` を使い、PM 参照には UID を持つ `path` を使います。
+呼び出しイベントの修飾キー条件には、専用の Schema 形式があります。
+
+既存条件を変更するには、その分岐と条件の UID を読み取ります。次の例は、上で作成した
+先頭分岐の2番目の条件を `EDIT_MESH` から `OBJECT` に変えます。別の Router では、
+取得した名前・参照元・値を確認して、意図した分岐と条件を先に選んでください。
+
+```python
+from copy import deepcopy
+
+router = pme.editing.read_pm(router_uid)["router"]
+branch = router["logic"]["branches"][0]
+print(branch["branch_uid"], branch["conditions"])
+condition_uid = branch["conditions"][1]["condition_uid"]
+conditions = deepcopy(branch["conditions"])
+next(c for c in conditions if c["condition_uid"] == condition_uid)["value"] = "OBJECT"
+result = pme.editing.update_router(
+    router_uid,
+    branches=[{"branch_uid": branch["branch_uid"], "conditions": conditions}],
+    expected_digest=router["digest"],
+)
+print(result["status"], result["diagnostics"])
+```
+
+一覧をコピーすることで、ほかの条件と既存の `condition_uid` をすべて保持しています。
+更新時はその分岐の条件一覧を置き換えるため、変更する行だけを渡すと、省いた条件が消えます。
+target や位置を含む、指定していない分岐の設定は保持します。
+
+**アクティブな Mesh** と **選択された Mesh** は同じ条件ではありません。
+`active_object.type` だけでは選択限定の要件を満たしません。選択を調べるには、たとえば
+`return C.active_object is not None and C.active_object.select_get()` を持つ既存 Property の
+Getter を `pm_property_ref` 条件から参照できます。この編集 API は Property のコールバックを
+作成・編集しないため、上の Router レシピだけでは選択限定の要件は完了しません。
+
+`otherwise` を省略すると現在の設定を保持し、辞書を指定すると含まれるフィールドだけを
+更新します。新しい分岐の既定は有効、`combine_mode="all"`、条件とtargetなしです。
+条件のない通常分岐は無条件一致にはなりません。分岐の順序には意味があり、最初の一致が選ばれます。
+
+結果は `status`、`candidate`、`before`、`after`、`dry_run`、`diagnostics` を持ちます。
+`dry_run=True` を加えると、保存せずに要求した変更を検証できます。
+`status="validated"` では候補の logic を返し、`after=None` になります。
+条件の評価や target の実行は行いません。通常の保存では `committed`、`rejected`、
+`unknown` を返し、取得できた場合は `before` / `after` に logic と digest が入ります。
+`unknown` や読み戻し失敗では、再試行前にもう一度読み取ってください。
+Router の候補を保存するには、元の `branches` / `otherwise` と同じ digest を渡し、
+`dry_run=False` でもう一度呼びます。候補の UID は仮の値です。候補で新規採番された
+branch UID を、すでに存在する分岐として渡し直さないでください。
+
+参照先のメニューが解決できない場合は、`router_target_menu_unresolved` の警告に
+target の UID と分岐／Otherwise の位置を示します。この警告は保存を妨げません。
+decoder の診断にも分岐や行の位置が含まれる場合があります。検証や保存が成功した場合も
+診断を確認してください。一致する／しないコンテキストで保存済み Router を別途呼び出し、
+分岐動作を確認します。編集の成功だけで分岐の実行を確認したことにはなりません。
+
+#### Property Stack の条件行を1件編集する
+
+行操作は通常エディターと同じ編集・保存処理を使います。追加すると有効な未完成行が
+末尾に入り、結果の `condition_uid` で識別できます。定義を設定するまではSET項目は
+増えません。更新の `fields` 辞書には `source`、`op`、`value`、`value_type`、`label`、
+`enabled` を指定できます。未指定値は保持し、`authoring_state` は既存の編集処理が
+導出します。行UIDは変更できません。
+
+```python
+before = pme.editing.read_pm(stack_uid)["property_stack"]
+added = pme.editing.add_property_stack_row(stack_uid,
+    expected_digest=before["digest"])
+if added["status"] != "committed":
+    raise RuntimeError(added)
+row_uid = added["condition_uid"]
+updated = pme.editing.update_property_stack_row(stack_uid, row_uid, {
+    "source": {"kind": "rna_path", "root": "context", "detected_type": "int",
+               "readonly": False, "segments": [
+                   {"kind": "attr", "name": "scene"},
+                   {"kind": "attr", "name": "frame_current"}]},
+    "op": "equals", "value": 1, "value_type": "int", "label": "First frame",
+}, expected_digest=added["after"]["digest"])
+print(updated["status"], updated["diagnostics"])
+```
+
+定義の更新は、その行から派生するSET項目も作成・更新します。ラベルだけの変更では
+書込み設定を変えず、有効無効の変更は通常UIのSET規則に従います。独立した書込み、
+他の条件行、combine mode、false policy、HUD、Property IDは保持します。
+これらの編集操作自体はGetterもSetterも実行しません。
+
+sourceだけを明示的に設定する場合は `op`、`value`、`value_type` をすべて `None` に
+します。行は未完成となり、対応するderived SET項目を取り除きます。空行のlabel/enabledは
+編集できますが、定義の更新にはNoneではないsourceが必要です。最後の1行も削除できます。
+
+```python
+current = pme.editing.read_pm(stack_uid)["property_stack"]
+removed = pme.editing.remove_property_stack_row(stack_uid, row_uid,
+    expected_digest=current["digest"])
+```
+
+削除時は、その行に対応するderived SET項目も取り除きます。結果は既存の
+`update_property_stack` と同じ `before`、`after`、`candidate`、`diagnostics`、statusに
+`condition_uid` を加えたものです。dry-runは保存せず `validated`、同値更新は書込みなしの
+`unchanged` です。dry-runで得た追加UIDは確定前の候補です。不明・曖昧なUID、古いdigest、
+不正fieldは拒否します。保存データの読取りで意味やidentityの修復が必要だった場合、行操作は
+その修復を暗黙に保存せず拒否します。診断を確認し、修復を意図する場合は全logic置換を使います。
+`unknown` や例外後は再試行前に読み直します。Preferencesのdisk保存とBlender Undoは別操作です。
+
+#### Property Stack を作成して状態を表示する
+
+mode が `CONDITION` の場合、`read_pm()` は `property_stack` も返します。
+この辞書には `logic`、`digest`、`property_id`（保存済み ID）、
+`registered_property_id`（現在登録されている ID）、`diagnostics` と、ロジックとは別の
+`while_true_hud` 設定が入ります。読取りでは Getter の評価や Setter の実行は行いません。
+ウィジェットには登録済み ID を使い、メニュー名から推測したり、登録成功を前提にしたり
+しないでください。
+
+`update_property_stack()` は、既存の PropertyStackLogic 形式である `version`、
+`combine_mode`、`predicate_rows`、`write_plan` の全体を置き換えます。
+Property ID や HUD 設定は変更しません。`logic` 内へ HUD のフィールドを入れると拒否されます。
+保存ロジックを読み解けない場合、`logic` は `None` です。空の定義から作り直さず、
+診断を確認してから編集してください。
+次の小さなローカル helper は、新しい Stack に二つの Boolean 設定を定義します。
+TRUE では Surface を選択し、Connected を ON、Projected を OFF にします。FALSE では何も書き込みません。
+
+```python
+created = pme.create_pm(pme.PmCreationSpec("CONDITION", name="Surface"))
+if not created.accepted:
+    raise RuntimeError(created.diagnostics)
+stack_uid = created.pm_uid
+before = pme.editing.read_pm(stack_uid)["property_stack"]
+
+def fixed_bool(uid, property_name, value):
+    source = {"kind": "rna_path", "root": "context", "detected_type": "bool",
+              "readonly": False, "segments": [{"kind": "attr", "name": part}
+              for part in ("scene", "tool_settings", property_name)]}
+    row = {"condition_uid": uid, "enabled": True, "authoring_state": "complete",
+           "label": property_name, "source": source,
+           "op": "is_true" if value else "is_false", "value": None, "value_type": "bool"}
+    entry = {"entry_uid": "set_" + uid, "kind": "derived", "status": "manual_resolved",
+             "derived_from_condition_uid": uid, "source": source,
+             "value": value, "value_type": "bool", "custom_set_body": "",
+             "enum_set_write_mode": None, "enum_set_write_values": []}
+    return row, entry
+
+pairs = [fixed_bool("connected", "use_proportional_connected", True),
+         fixed_bool("projected", "use_proportional_projected", False)]
+logic = {"version": 1, "combine_mode": "all",
+         "predicate_rows": [row for row, entry in pairs],
+         "write_plan": {"false_policy": "no_op", "entries": [entry for row, entry in pairs]}}
+check = pme.editing.update_property_stack(stack_uid, logic=logic,
+    expected_digest=before["digest"], dry_run=True)
+if check["status"] != "validated":
+    raise ValueError(check["diagnostics"])
+result = pme.editing.update_property_stack(stack_uid, logic=check["candidate"],
+    expected_digest=before["digest"])
+if result["status"] != "committed":
+    raise RuntimeError(result["diagnostics"])
+stack = pme.editing.read_pm(stack_uid)["property_stack"]
+property_id = stack["registered_property_id"]
+if not property_id:
+    raise RuntimeError(f"Property Stack is not registered: {stack['diagnostics']}")
+
+# Known destination menu and slot UIDs, obtained by read_pm above.
+slot_before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+result = pme.editing.update_slots(pm_uid, {slot_uid: {"mode": "CUSTOM",
+    "custom": f"L.prop(props(), {property_id!r}, text='Surface', toggle=True)"}},
+    expected_version=slot_before["version"], expected={slot_uid: slot_before["slots"][0]})
+```
+
+この helper は新しい Stack 用です。既存 Stack の read `logic` は、保存 JSON そのものではなく、
+保存データの decoder が正規化した値です。先に `scope="current_storage"` の診断を確認してください。
+`property_stack_storage_normalized` は、変更した `path`、元の `input`、返す `normalized` 値を
+示します。この読取り値では、未対応・古い項目の省略や書込みの無効化が起こり得ます。その変更を
+確認したうえでコピーし、対象の条件行や書込み項目を編集して、読取り時の digest とともに
+全体を渡してください。フィールドの追加・削除は `input_present` / `normalized_present` で
+区別できます。それ以外の値、`condition_uid`、`entry_uid`、各
+`derived_from_condition_uid` の参照関係を保持します。省略した行や項目は削除されます。
+Router の追加処理とは異なり、このロジック全体の入力には、ローカルで一意な UID の明示が
+必要です。API は欠けた ID を割り当てたり、重複を黙って修正したりしません。
+
+FALSE の動作は、設定ごとに選びます。次の例では `false_policy="no_op"` を使いますが、
+Boolean の `auto_resolved` 項目は、この設定でも FALSE 時に反転した値を書き込みます。
+
+| 目的の操作 | TRUE | FALSE／書込み項目の選択 |
+|---|---|---|
+| Surface または Volume プリセット | 二つの Boolean を指定値にする | 書込みなし。固定値の Boolean 項目には `manual_resolved` を使う |
+| 3D Step Snap | 全体の Snap を ON、対象の変形を ON、INCREMENT に設定 | 対象の変形だけを OFF。その Boolean 項目を `auto_resolved` とし、ほかの固定値は manual のままにする |
+| UV Step Snap | UV Snap を ON、対象の変形を ON、INCREMENT に設定 | UV Snap を OFF。その Boolean 項目を `auto_resolved` とし、ほかの固定値は manual のままにする |
+
+Enum の集合では、`manual_resolved` 項目に `enum_set_write_mode="replace"` と
+`enum_set_write_values=["INCREMENT"]` を指定すると、TRUE 時に集合を置き換え、FALSE 時は
+書き込みません。Getter は目的の集合だけでなく、余分な要素が含まれる場合も検証してください。
+FALSE は以前の状態を復元する操作ではありません。評価だけを行う行や各書込み方式については、
+[Property Stack ガイド](../editors/property_stack_editor.md)を参照してください。
+
+結果には `status`、`candidate`、`before`、`after`、`diagnostics` が含まれます。
+`validated` は、dry-run の候補が入力検査に合格し、保存はしていない状態です。
+`committed` はメモリ内に保存済み、`rejected` は受け付けなかったことを表します。
+`unknown` の場合は、再試行前に読み直してください。正規化の内容は、候補と診断で確認します。
+`scope="input"` の診断は、今回渡したロジックについてのものです。意味を保つ正規化は報告し、
+UID の修復、項目の破棄、書込み状態の変更が必要な入力は拒否します。既存の保存データに対する
+診断は `scope="current_storage"` の警告として更新結果へ引き継ぎ、それだけでは拒否しません。
+入力の検証は、保存データの読取り時にすでに行われた正規化を取り消すものではありません。
+dry-run は、参照元の評価、実行時の書込み可否の確認、Setter の実行、ウィジェットの検証を
+行いません。このレシピの通常入力経路は、ここでは **foreground未検証** です。
+実際の値、チェック状態、方向の選択と release、無関係な設定への影響をそれぞれ確認してください。
+Preferences のディスク保存も別の操作です。
+
+### コード実行
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - 関数
+  - 説明
+* - `execute(code, *, extra_globals=None)`
+  - コードを実行し `ExecuteResult` を返す
+* - `evaluate(expr, *, extra_globals=None)`
+  - 式を評価して結果を返す。失敗時は例外
+* - `check_syntax(code, *, mode="exec")`
+  - 構文チェックのみ。`SyntaxResult` を返す
+```
+
+### 検証
+
+```{list-table}
+:header-rows: 1
+:widths: 30 70
+
+* - 関数
+  - 説明
+* - `validate_json(json_string, *, strict=False, check_references=True)`
+  - 同梱の JSON Schema v2 と PME の UID 規則に対して文書を検証。`ValidationResult` を返す
+* - `validate_uid(uid)`
+  - uid 文字列のフォーマットを検証
+```
+
+検証は入力文書を書き換えず、含まれる Python コードも実行しません。同梱の Schema
+を使い、文書の `$schema` URL は取得しません。`valid=True` は要求された文書検査に
+合格したことを表します。現在の Blender 環境での Import 成功や、保存されたコマンドの
+実行成功を保証するものではありません。
+
+構造検証では、一度に一つの Schema 違反を返し、基本的な型や必須項目の誤りを、
+それらに依存する条件の違反より優先します。修正して再検証すると、残っている問題を確認できます。
+Schema に適合した後で PME の UID（メニューの UID 接頭辞と mode の一致を含む）と、
+要求された文書内参照を検査します。これらの検査では複数の問題を返す場合があります。
+
+Extension には fastjsonschema 2.22.2 を同梱していますが、同じ Python プロセスで Blender
+自身の 2.21 系が先に読み込まれている場合があります。同梱版と実際に使用する版は必ずしも
+一致しません。検証は両者に共通の API を使い、Blender が読み込んだライブラリを置換しません。
+
+既定の `check_references=True` では、UID による MENU の参照先と、Property Stack /
+Context Router データから依存先として認識できる PM について、同じ文書に含まれるかも調べます。
+参照先を別途用意する部分的な Export などでは、`False` にして参照検査の段階を省略できます。
+その場合も構造と UID の検査は行います。旧形式の名前参照や Blender のメニュー型名を、実行中の
+Blender に照会して解決することはありません。
+
+参照検査のために logic データを読み取れない場合は `E603`、読取り時に正規化が必要な場合は
+警告 `W202` を返します。入力データは変更しません。これらは任意の参照検査に属する診断です。
+
+認識できる旧形式の PME JSON には警告 `W301` を返します。その項目内容や名前参照を
+Schema v2 で検証したという意味ではありません。`strict=True` では、警告を
+`result.warnings` に残したまま、警告が一件でもあれば `valid` が偽になります。
+
+解析済みの JSON には `pme.validation.validate(data, ...)`、UTF-8 の JSON ファイルには
+`pme.validation.validate_file(filepath, ...)` を使えます。どちらも `validate_json` と
+同じオプションと検証結果を使います。問題のコードとパスは `errors` / `warnings` から、
+表示用レポートは `result.format_report()` から確認できます。
+
+(resource-discovery)=
+
+### リソースの照会
+
+```{versionadded} 2.2.0
+登録フォルダー、スクリプト・アイコンの一覧、スクリプト参照の解決結果を取得する読み取り専用 API です。
+API の安定性は **Experimental** です。
+```
+
+`pme.resources` は、PME が現在使用している[リソース設定](file_locations.md)を参照します。
+外部スクリプトからは、[短縮エイリアスまたはパッケージ名による読み込み](#public-api-import)を使えます。
+
+| 関数 | 取得する情報 | 戻り値 |
+|------|--------------|--------|
+| `list_folders()` | 登録名・保存パス・解決後のパス・フォルダーの状態 | 登録順の `ResourceFolderInfo` の tuple |
+| `list_icon_folders()` | 登録したアイコン用フォルダーの保存パス・解決後のパス・状態 | 登録順の `ResourceFolderInfo` の tuple。`name` は空 |
+| `list_files(kind=None)` | 登録先に存在するファイルと、走査できなかった場所 | `ResourceFileListing` |
+| `resolve_script(reference)` | 指定したスクリプト参照の解決状態と候補 | `ScriptResolution` |
+
+`list_files()` の `kind` は、`None`（両方）・`"script"`・`"icon"` を受け付けます。
+
+#### 登録場所と素材を取得する
+
+未使用のファイルも一覧に含まれます。AI や外部ツールへ渡す JSON は、標準の `dataclasses.asdict()` で作成できます。
+**`files` と `issues` を合わせて確認してください。** 読み取れなかった場所がある場合、`files` は部分的な一覧です。
+
+```python
+from dataclasses import asdict
+import json
+import pme
+
+folders = pme.resources.list_folders()
+listing = pme.resources.list_files()
+
+payload = {
+    "folders": [asdict(folder) for folder in folders],
+    "files": [asdict(item) for item in listing.files],
+    "issues": [asdict(issue) for issue in listing.issues],
+}
+print(json.dumps(payload, ensure_ascii=False, indent=2))
+```
+
+| 結果の型 | フィールド |
+|----------|------------|
+| `ResourceFolderInfo` | `index`、`name`、`raw_path`、`resolved_path`、`status` |
+| `ResourceFileInfo` | `folder`、`kind`、`relative_path`、`absolute_path` |
+| `ResourcePathIssue` | `folder`、`path`、`code` |
+| `ResourceFileListing` | `files`、`issues`（いずれも tuple） |
+
+結果は変更不可のデータです。`folder` は所属先の `ResourceFolderInfo` を保持します。
+`relative_path` は `scripts/modeling/align.py` のように、登録フォルダーからのパスです。
+`raw_path` は保存した表記を保持し、フォルダーの `resolved_path` は実行中の Blender を基準に解決した絶対パスです。
+名前と `index` は表示・登録順の情報で、永続的な識別子や名前空間ではありません。
+
+| フォルダーの `status` | 意味 |
+|----------------------|------|
+| `available` | ディレクトリを開いて一覧を取得できる。配下の全ファイルの読取成功までは保証しない |
+| `missing` | 登録先が存在しない |
+| `not_directory` | 指定先がディレクトリではない |
+| `unreadable` | 指定先を確認・走査できない |
+| `invalid` | 保存されたパスを解決できない。`resolved_path` は空文字列 |
+
+走査の問題は `ResourcePathIssue.path` と `code` で返します。
+`code` は `missing`・`not_directory`・`unreadable`・`invalid` です。
+登録したリソースフォルダーやアイコン用フォルダー自体の不在は、問題として返します。
+
+#### スクリプト参照を確認する
+
+**登録フォルダー内のファイルをスロットから使う場合は、`scripts/...` のような登録フォルダーからの相対パスを保存します。** 解決結果の絶対パスは、現在どのファイルに対応するかを確認するための情報です。
+次の例はコマンド文字列を作るだけで、スクリプトを実行したりスロットを書き換えたりはしません。
+
+```python
+import pme
+
+reference = "scripts/modeling/align.py"
+result = pme.resources.resolve_script(reference)
+
+if result.status == "resolved":
+    command = f"execute_script({reference!r})"
+    print(command)  # execute_script('scripts/modeling/align.py')
+else:
+    print(result.status, result.candidates)
+```
+
+`ScriptResolution` は `reference`・`status`・`resolved_path`・`candidates` を持ちます。
+`resolved_path` は成功時だけ絶対パスを持ち、それ以外は `None` です。
+`candidates` は確認できた該当ファイルのパスの tuple です。
+
+| `status` | 意味 |
+|----------|------|
+| `resolved` | 参照先を一意に特定できた。ファイルの読取権限・Python構文の正しさは未検証 |
+| `missing` | 該当ファイルが見つからない |
+| `ambiguous` | 異なる実ファイルが複数該当する |
+| `unavailable` | 必要な場所を解決・確認できず、参照先を確定できない |
+
+相対参照は、スクリプト実行と同じ処理で全登録先を確認します。
+異なるユーザーファイルは内容が同一でも別候補です。同じ実ファイルへの別パスは一候補として扱います。
+ユーザー候補がなく、ユーザー側の場所を確認できた場合だけ、アドオン本体の中へ進みます。
+絶対パス参照も受け付けます。
+
+#### 走査範囲と更新
+
+- **スクリプト:** 登録フォルダー全体の小文字拡張子 `.py` を再帰走査します。隠しフォルダーと `__pycache__` は走査しません。ディレクトリのシンボリックリンクもたどり、同じ実ディレクトリは登録フォルダーごとに一度だけ走査します。
+- **アイコン:** 登録した各アイコン用フォルダーの直下にある、小文字拡張子 `.png` を列挙します。予約接頭辞 `_intr_` は除外します。`relative_path` はファイル名です。アイコン用フォルダー自体は `pme.resources.list_icon_folders()` で取得でき、表示名はありません。衝突するファイルや、Custom の選択一覧では非表示になる `_` 始まりの名前も返します。**この一覧はアイコンの選択・描画可否の判定結果ではありません。**
+- **設定とファイル:** 実行中の有効なリソース設定を使い、ファイル状態は呼出しごとに確認します。外部エディターによる設定ファイルの変更は、次の起動・再有効化で読み込みます。
+
+これらの関数は、スクリプト実行・画像のデコード・ディレクトリ作成・設定移行を行いません。
+一覧取得や解決後にファイルが変わる可能性があるため、スクリプト実行時には参照を再解決します。
+スロットでの利用箇所解析、移動・改名への自動追従は対象外です。
+
+登録フォルダーが未設定の場合、`list_folders()`・`list_icon_folders()`・`list_files()` は既定フォルダーを作らず空の結果を返します。
+設定を読み取れず過去の有効な設定もない場合は、この2関数が `RuntimeError` を送出します。
+`list_files()` の未対応 `kind` は `ValueError` です。
+
+### ユーザープロパティ
+
+Property Editor で作成したユーザープロパティには、Command 内の `props()` と
+`import pme` の `pme.props()` のどちらからも同じ方法でアクセスできます。
+
+```python
+import pme
+
+# PropertyGroup を取得して属性として読み書きする
+pme.props().MyCounter = 10
+value = pme.props().MyCounter
+
+# 登録済みstorage IDを指定して読み書きする
+value = pme.props("MyCounter")
+written = pme.props("MyCounter", 10)
+```
+
+`pme.props(name, None)` は従来どおり読み取りです。`None` を値として書き込む
+操作にはなりません。名前によるアクセスはPMEが登録したproperty専用です。
+未登録名は読み取り時に `None`、書き込み時に `False` を返し、scratch storageを
+作成しません。以前の Experimental API で使えた
+`pme.props.MyCounter` は `pme.props().MyCounter` に変更してください。
+
+### Runtime add-on identity
+
+Blender APIへ実行中のadd-on module IDを渡す必要がある場合は
+`pme.ADDON_ID`を使います。Blender Extensionでは
+`bl_ext.<repository>.<package>`を含む現在のpackage identityを返します。
+
+```python
+import bpy
+import pme
+
+addon_preferences = bpy.context.preferences.addons[pme.ADDON_ID].preferences
+```
+
+PMEのPreferences objectだけが必要な場合は`pme.preferences`を使ってください。
+新しいscriptで`"pie_menu_editor"`を固定値として書かないでください。
+
+### 後方互換
+
+PME1 の `pme.context` と Command global の `props()` は引き続き利用可能です。
+既存の Command タブ内の `props()` スクリプトはそのまま動作します。
+
+```python
+# これらは PME2 でもそのまま使える
+pme.context.open_menu("My Menu")
+pme.context.event.mouse_x
+pme.context.add_global("my_var", value)
+props("MyCounter", 10)
+```
+
+新規コードでは `pme.execute()` / `pme.invoke_pm()` の利用を推奨します。
+
+```{note}
+Public API は現在 **Experimental** です。基本的なインターフェースは安定していますが、細部は今後のバージョンで変更される可能性があります。
+```
+
+```{seealso}
+短縮エイリアス `import pme` は [Boot Options](boot_options.md) で設定できます。
+[パッケージ名による読み込み](#public-api-import)でも同じ API を使えます。
+```

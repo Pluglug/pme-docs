@@ -1,0 +1,151 @@
+(interactive-panels)=
+
+# Interactive Panels and Extend Panel
+
+**Interactive Panels** is a temporary mode that exposes Blender panels, menus, and headers to PME. Use it to capture them into PME menus or insert your menus before or after existing UI.
+
+**Extend Panel / Extend Menu / Extend Header** inserts PME menus into existing Blender UI. Pop-up Dialog and Regular Menu support these extensions.
+
+```{versionadded} 2.0.0
+Redesigned extension settings with dedicated Target, Side, and Order properties. Several menus can share a Target, use Poll for conditional display, and use Order to control their sequence. This removes the 1.x restrictions that tied the target to the menu display name and allowed only one extension per target.
+```
+
+---
+
+## Overview
+
+| Item | Value |
+|---|---|
+| Mode | Temporary mode; one toggle shared across PME |
+| Interactive Panels entry points | Settings toolbar and the Side Panel / Pop-up Dialog / Regular Menu / Hidden Panel Group editors |
+| Editors supporting Extend | Pop-up Dialog (Panel / Header) and Regular Menu (Menu) |
+| Extend properties | Extend Target / Side / Order / R (TOPBAR_HT_ only) |
+
+---
+
+## Enable the mode
+
+The Settings toolbar contains the **Interactive Panels** toggle. Enable it to insert red-highlighted **PME Tools** buttons into Blender's **headers**, **menus**, and **panels**.
+
+This toggle is shared across PME. The same control appears in Side Panel Editor, Pop-up Dialog, Regular Menu, and Hidden Panel Group.
+
+---
+
+## PME Tools menu
+
+PME Tools adapts its items to the header, menu, or panel under the mouse. **Copy Menu ID** / **Copy Panel ID** at the end copies its class ID to the clipboard.
+
+### Panels (`*_PT_*`)
+
+| Item | Description |
+|---|---|
+| **Hide Panel** | Adds this panel to a Hidden Panel Group to hide it |
+| **Add as Button to '〈current menu〉'** | Creates a **Command slot** using `bpy.ops.pme.popup_panel(...)` in the current menu |
+| **Add as Popover to '〈current menu〉'** | Creates a **Custom slot** using `L.popover(panel='...', ...)` in the current menu |
+| **Add as Panel to '〈current menu〉'** | Adds the panel in the form appropriate to Side Panel Editor / Pop-up Dialog / Pie Menu |
+| **Extend Panel ▲ / ▼** | Creates a Pop-up Dialog inserted before or after the existing panel |
+| **Copy Panel ID** | Copies the class name, such as `VIEW3D_PT_view3d_cursor` |
+
+### Menus (`*_MT_*`)
+
+| Item | Description |
+|---|---|
+| **Add as Menu to '〈current menu〉'** | Creates a **Custom slot** using `L.menu(menu='...', ...)` in the current menu |
+| **Extend Menu ▲ / ▼** | Creates a Regular Menu inserted before or after the existing menu |
+| **Copy Menu ID** | Copies the menu class name |
+
+### Headers (`*_HT_*`)
+
+| Item | Description |
+|---|---|
+| **Extend Header ◀ / ▶** | Creates a Pop-up Dialog inserted on the left or right of the header |
+| **Copy Menu ID** | Copies the header class name |
+
+### Add as versus Extend
+
+- **Add as ...** captures an existing panel or menu as one slot in the menu currently being edited.
+- **Extend ...** inserts your menu into an existing panel or menu. The original UI remains, with the PME menu drawn before or after it.
+
+---
+
+## Extend Target / Side / Order
+
+Choosing Extend Panel / Extend Menu / Extend Header creates a menu with Target and Side already configured. Its Extend row appears directly below the editor's top bar.
+
+| Field | Role |
+|---|---|
+| **Extend Target** (searchable text) | Destination class ID, with `prop_search` suggestions. Accepts the string from **Copy Panel ID** / **Copy Menu ID** |
+| **Side (▲▼ or ◀▶)** | `prepend` (before/left) or `append` (after/right). Headers show ◀▶ |
+| **Order** (number) | Order among menus sharing a Target. Lower values draw first |
+| **R** (TOPBAR_HT_ only) | Toggles insertion in the TOPBAR header's right region (Pop-up Dialog) |
+
+---
+
+## Capture workflow (Add as ...)
+
+1. Select and edit the destination menu in PME Editor.
+2. Enable Interactive Panels from the toolbar.
+3. Display the Blender menu, panel, or button you want to capture.
+4. Click its PME Tools button.
+5. Choose **Add as Button**, **Add as Popover**, **Add as Menu**, or **Add as Panel**.
+6. For a Pie Menu, choose one of its ten slot positions.
+7. Disable Interactive Panels.
+
+---
+
+## Extension workflow (Extend ...)
+
+1. Enable Interactive Panels in PME Editor.
+2. Display the menu, panel, or header to extend.
+3. Click PME Tools and choose **Extend Panel ▲ / ▼**, **Extend Menu ▲ / ▼**, or **Extend Header ◀ / ▶**.
+4. A new Pop-up Dialog (for a panel/header) or Regular Menu (for a menu) is created with Extend Target configured.
+5. Add slots to build its contents.
+6. Disable Interactive Panels.
+
+You can change Target, Side, and Order at any time from the Extend Target row in the Pop-up Dialog / Regular Menu editor.
+
+---
+
+## Supported editors
+
+| Editor | Extend support | Role |
+|---|---|---|
+| **Pop-up Dialog** | Yes (Panel / Header / TOPBAR_HT_) | Inserts your widgets into a panel or header |
+| **Regular Menu** | Yes (Menu) | Inserts items into an existing dropdown or context menu |
+| **Pie Menu** | No | A destination for Interactive Panels' Add as ... actions |
+| **Side Panel Editor** | No | Places content in a new N-Panel tab or group |
+
+---
+
+## Constraints
+
+- Interactive Panels highlights UI across Blender in red. Disable it after editing.
+- Not every Blender panel supports Extend. Even a panel captured with Add as Panel can fail to draw if its code requires an internal context.
+- Blender updates may rename target classes. If `prop_search` no longer suggests a class, its ID may have changed.
+- Extension settings are stored in Pop-up Dialog (`pd_`) or Regular Menu (`rm_`) menu data and included in exported JSON.
+
+---
+
+```{admonition} Related pages
+:class: seealso
+
+- [Popup Dialog Editor](./popup_dialog_editor.md)
+- [Regular Menu Editor](./regular_menu_editor.md)
+- [Side Panel Editor](./side_panel_editor.md)
+- [Hiding Unused Panels](./hiding_unused_panels.md)
+- [Changelog 2.0.0](../support_community/changelog.md)
+```
+
+## Reference videos (original author's channel)
+
+From [roaoao's videos](../reference/original_author_videos.md). These show an older interface and workflow.
+
+:::{dropdown} Extending Panels in Blender
+:open:
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/iO9PzLX6EDQ" title="Extending Panels in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Extending Panels in Blender — Open on YouTube](https://www.youtube.com/watch?v=iO9PzLX6EDQ)
+:::

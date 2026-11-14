@@ -1,0 +1,23 @@
+Sets Python code evaluated when the UI is drawn.
+`L` is the layout object; use Blender's layout API to build the UI.
+This code also runs on redraw. Place buttons for actions such as adding or removing objects,
+rather than performing those actions directly while drawing.
+
+```python
+# Display a label inside a box
+L.box().label(text="Add Mesh")
+```
+
+```python
+# Arrange several buttons vertically
+col = L.column(); col.operator("mesh.primitive_cube_add", text="Cube"); col.operator("mesh.primitive_uv_sphere_add", text="Sphere")
+```
+
+These are two independent examples. To place several UI elements in one Pie Menu slot,
+wrap them in a single column or box as in the second example.
+Adding multiple elements directly to the pie layout can shift subsequent slots to different directions.
+
+PME imposes no fixed length limit on Custom code.
+Command slots and Context Router Command targets in GPU menus (Floating Panel / Vector Menu) retain a **4,096-character limit per transported string** (command body or string argument); text exceeding that limit is not executed and produces an `operator_property_string_too_long` diagnostic.
+See [Code Input and Execution](/reference/command_text.md) for
+input behavior, multiline code, and external scripts.

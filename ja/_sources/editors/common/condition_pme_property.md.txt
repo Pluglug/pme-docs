@@ -1,0 +1,10 @@
+:::{admonition} プロパティパスだけでは表せない値や判定
+:class: tip
+
+複数のデータを集計する、値を計算するなど、パスの参照だけでは表せない処理には、通常の {ref}`PME Property <property-editor>` を使います。{ref}`Getter <property-callbacks>` に Python で処理を書き、Boolean・数値・Enum などの一つの値として返せます。
+
+- **一つの値の表示・操作で足りる場合**：PME Property をそのまま使います。別メニューの Menu タブから参照してウィジェットを配置できます。独自の書き込み処理が必要なら、PME Property の Setter を設定します。
+- **分岐や他の条件と組み合わせる場合**：条件スロットの **Menu タブ**で PME Property を参照し、返された値を比較します。Context Router では行き先の選択に、Property Stack では Getter の状態判定に使えます。
+
+条件からリンク参照する PME Property は、保存先を **Addon Preferences** にします。Getter のみの読み取り専用プロパティも条件に使えます。戻り値の型と、対象がない場合に返す値を決めてください。設定方法は {ref}`Property Editor の Getter / Setter <property-callbacks>` を参照してください。
+:::

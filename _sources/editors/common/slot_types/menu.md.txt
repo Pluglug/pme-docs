@@ -1,0 +1,5 @@
+When clicked, calls another menu item created in PME.
+Examples:
+- Display a **Popup Dialog** with `Expand Popup Dialog`
+- Display a **Regular Menu** with `Open on Mouse Over`
+- Run a **Macro Operator**
