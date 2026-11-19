@@ -1,0 +1,525 @@
+:vocab: developer-facing
+
+.. _authoring-settings:
+
+============================================================
+メニューの種類ごとの設定
+============================================================
+
+.. py:currentmodule:: pme.editing
+
+メニューの種類ごとに固有の設定があります。Pop-up Dialog の Mode と幅、
+Pie Menu の半径などです。設定は名前で読み書きします。スロット、ホットキー、
+メニュー名は別の操作で扱います。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 関数
+     - 用途
+   * - :py:func:`read_pm`
+     - 現在の値を ``settings`` に入れて返します。
+   * - :py:func:`setting_fields`
+     - メニューが受け付ける設定の説明を返します。
+   * - :py:func:`update_settings`
+     - 設定を変更します。
+
+設定を読む
+============================================================
+
+``read_pm(pm_uid)["settings"]`` は、設定名と現在の値のマッピングです。
+名前は :ref:`authoring-settings-by-type` に挙げた保存名です。値は編集画面が表示する値です。Enum は保存された数値ではなく、識別子の文字列です。
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(pm_uid)["settings"]
+   {'pd_panel': 'PANEL', 'pd_width': 300, 'pd_title': True, 'pd_box': True,
+    'pd_use_property_split': False, 'pd_use_property_decorate': False,
+    'pd_extend_target': '', 'pd_extend_side': 'append', 'pd_extend_order': 0,
+    'pd_extend_is_right': False}
+
+設定を持たないメニューの種類では ``{}`` を返します。保存データを解析できない場合、``settings`` は ``{}`` になり、``read_pm()`` はコード
+``settings_data_unreadable`` を含む ``settings_diagnostics`` も返します。
+
+関数
+============================================================
+
+.. py:function:: setting_fields(pm_uid)
+
+   メニューの種類が受け付ける設定の説明を返します。
+
+   :param str pm_uid: メニューの UID。
+   :returns: 設定名と、その説明の対応。
+   :rtype: dict[str, dict]
+   :raises ValueError: UID が見つからない、不正、または曖昧な場合。
+   :raises RuntimeError: Blender のメインスレッド以外から、または PME の読み込みが終わる前に呼び出された場合。
+
+   各説明は次のキーを持ちます。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 20 20 60
+
+      * - キー
+        - 対象
+        - 値
+      * - ``type``
+        - すべて
+        - ``"BOOLEAN"``、``"INT"``、``"STRING"``、``"ENUM"`` のいずれか
+      * - ``description``
+        - すべて
+        - 編集画面のツールチップ文字列。Stack Key の設定では空。
+      * - ``min``, ``max``
+        - ``INT``
+        - :py:func:`update_settings` が受け付ける範囲（両端を含む）
+      * - ``values``
+        - ``ENUM``
+        - 受け付ける識別子
+      * - ``flags``
+        - ``vm_start_inputs``
+        - フラグ名と、そのビット値の対応
+
+   .. code-block:: python
+
+      >>> pme.editing.setting_fields(pm_uid)["pd_width"]
+      {'type': 'INT', 'description': 'Width of the popup', 'min': 100, 'max': 2000}
+
+.. py:function:: update_settings(pm_uid, changes, *, expected=None, dry_run=False)
+
+   メニューの種類の設定を変更します。
+
+   最初の書き込みの前に、すべての変更を確認します。一つでも拒否されると、
+   何も書き込みません。
+
+   :param str pm_uid: メニューの UID。
+   :param dict changes: 設定名と新しい値の対応。部分指定です。指定しない設定は値を維持します。
+   :param expected: 設定名と、その設定が現在持つべき値の対応。設定の任意の一部を指定します。値が異なると ``stale_settings`` で拒否します。
+   :type expected: dict or None
+   :param bool dry_run: 変更を確認し、書き込まずに返ります。
+   :returns: 下記の結果。
+   :rtype: dict
+   :raises TypeError: ``changes`` または ``expected`` が文字列キーのマッピングでない場合、または ``dry_run`` が bool でない場合。
+   :raises ValueError: UID が見つからない、不正、または曖昧な場合。
+   :raises RuntimeError: Blender のメインスレッド以外から、または PME の読み込みが終わる前に呼び出された場合。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - キー
+        - 型
+        - 値
+      * - ``status``
+        - str
+        - 下記の *ステータス* を参照。
+      * - ``committed``
+        - bool
+        - ``status`` が ``"committed"`` のときだけ ``True``。
+      * - ``dry_run``
+        - bool
+        - 引数 ``dry_run`` の値。
+      * - ``pm_uid``
+        - str
+        - 引数 ``pm_uid`` の値。
+      * - ``before``
+        - dict
+        - 呼び出し前に読んだ設定。
+      * - ``after``
+        - dict
+        - 呼び出し後に読んだ設定。何も書き込まなかった場合は ``before`` と同じです。
+      * - ``changed_fields``
+        - list[str]
+        - ``before`` と ``after`` で値が異なる設定名。
+      * - ``recovery``
+        - dict or None
+        - 書き込みに失敗した後に設定されます。``scope`` （``"settings"``）、
+          ``saved_settings_match``、``saved_data_matches`` を持ちます。
+      * - ``diagnostics``
+        - list[dict]
+        - 問題ごとに一つのエントリ。``code``、``field`` （または ``fields``）、
+          ``message`` と、*診断* に挙げた詳細を持ちます。
+
+   .. rubric:: ステータス
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - 意味
+      * - ``committed``
+        - 要求した値をすべて保存しました。
+      * - ``validated``
+        - ``dry_run=True`` で、変更は受理可能です。何も書き込んでいません。
+      * - ``unchanged``
+        - 要求した値はすべて保存値と同じです。
+      * - ``rejected``
+        - 何も書き込んでいません。``diagnostics`` が原因を示します。
+      * - ``restored_failure``
+        - 書き込みに失敗し、設定を ``before`` に戻しました。
+      * - ``unknown``
+        - 書き込みに失敗し、復元を確認できませんでした。再試行の前に
+          :py:func:`read_pm` を呼び出してください。
+
+   .. rubric:: 診断
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``setting_not_applicable``
+        - 名前がこのメニューの種類の設定ではありません。``available`` に、
+          この種類の設定名を列挙します。
+      * - ``setting_type_mismatch``
+        - 値の Python の型が違います。``INT`` の設定は float と bool を受け付けません。
+      * - ``setting_out_of_range``
+        - 整数が ``min`` .. ``max`` の範囲外です。値を範囲内に丸めません。
+      * - ``setting_not_a_choice``
+        - Enum の値が ``values`` にありません。
+      * - ``setting_not_representable``
+        - 文字列が ``&`` または ``=`` を含みます。保存形式はこれらの文字を保持できません。
+      * - ``extend_target_unknown``
+        - 追加先が、登録済みの Panel、Header、Menu の型ではありません。
+      * - ``extend_target_not_extendable``
+        - 追加先が、PME 自身のパネルなど、PME が拡張しない型です。
+      * - ``setting_requires_extend_target``
+        - 追加先なしで、追加位置、順序、右側リージョンのフラグを指定しました。
+      * - ``stale_settings``
+        - ``expected`` の値が保存値と異なります。``fields`` に該当する設定名を列挙します。
+      * - ``settings_data_unreadable``
+        - 保存データを解析できません。``exception_type`` がエラーの名前を示します。
+      * - ``setting_value_not_retained``
+        - setter が要求した値を保持しませんでした。``requested`` と
+          ``actual`` に両方の値が入ります。
+      * - ``setting_write_failed``
+        - setter が例外を送出しました。``exception_type`` がエラーの名前を示します。
+
+   .. rubric:: 例
+
+   Popup Mode で幅 420 ピクセルの Pop-up Dialog を作成します。
+
+   .. code-block:: python
+
+      created = pme.create_pm(pme.PmCreationSpec("DIALOG", name="Bone Collections"))
+      result = pme.editing.update_settings(
+          created.pm_uid,
+          {"pd_panel": "POPUP", "pd_width": 420},
+          expected={"pd_panel": "PANEL"},
+      )
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: 補足
+
+   * 追加先に関する設定は、追加先、位置、右側リージョン、順序の順に書き込みます。追加先を設定すると、位置も ``"append"`` になります。
+   * 追加先と Panel Group の配置は、編集画面と同じく、呼び出しの中で Blender
+     に登録します。
+   * この呼び出しは、Preferences のディスク保存、Undo ステップの追加、
+     メニューの呼び出しを行いません。
+
+.. _authoring-settings-by-type:
+
+メニューの種類別の設定
+============================================================
+
+*メニューの種類* の値は、``PmCreationSpec`` に渡す ``mode_id`` で、
+``read_pm()["mode"]`` としても返ります。ここに挙げていない種類には設定がありません。Property は ``update_property()`` で、Property Stack は専用の操作で編集します。
+
+Pie Menu (``PMENU``)
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - 名前
+     - 型
+     - 値の範囲
+     - 既定値
+     - 説明
+   * - ``pm_radius``
+     - INT
+     - -1 .. 1000
+     - -1
+     - Pie Menu の半径。-1 は既定値を使います。
+   * - ``pm_threshold``
+     - INT
+     - -1 .. 1000
+     - -1
+     - 項目を選択できるようになる、中心からの最小距離。-1 は既定値を使います。
+   * - ``pm_confirm``
+     - INT
+     - -1 .. 1000
+     - -1
+     - 自動確定までの、しきい値を超えた追加の距離。0 で自動確定を無効にし、
+       -1 は既定値を使います。
+   * - ``pm_flick``
+     - BOOLEAN
+     -
+     - True
+     - ホットキーを離したときに選択を確定します。
+
+Vector Menu (``VMENU``)
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - 名前
+     - 型
+     - 値の範囲
+     - 既定値
+     - 説明
+   * - ``vm_wait_for_input``
+     - BOOLEAN
+     -
+     - False
+     - 開始前にマウスボタンまたはペン先の入力を待ちます。その入力を離すと確定します。
+   * - ``vm_start_inputs``
+     - INT
+     - 0 .. 15
+     - 15
+     - メニューを開始する入力。ビットフラグで、1 は左マウスボタン、2 は中マウスボタン、4 は右マウスボタン、8 はペン先です。
+
+Regular Menu (``RMENU``)
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - 名前
+     - 型
+     - 値の範囲
+     - 既定値
+     - 説明
+   * - ``rm_title``
+     - BOOLEAN
+     -
+     - True
+     - タイトルを表示します。
+   * - ``rm_extend_target``
+     - STRING
+     - Menu の型名
+     - ``""``
+     - このメニューの内容を追加する Blender の Menu。例:
+       ``VIEW3D_MT_object``。空にすると追加を解除します。
+   * - ``rm_extend_side``
+     - ENUM
+     - ``prepend``, ``append``
+     - ``append``
+     - 元の内容に対する位置。
+   * - ``rm_extend_order``
+     - INT
+     - 0 以上
+     - 0
+     - 複数のメニューが同じ追加先に追加するときの表示順。
+
+Pop-up Dialog (``DIALOG``)
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - 名前
+     - 型
+     - 値の範囲
+     - 既定値
+     - 説明
+   * - ``pd_panel``
+     - ENUM
+     - ``PIE``, ``PANEL``, ``POPUP``
+     - ``PANEL``
+     - Mode。Pie Mode、Dialog Mode、Popup Mode のいずれか。
+   * - ``pd_width``
+     - INT
+     - 100 .. 2000
+     - 300
+     - ポップアップの幅。
+   * - ``pd_title``
+     - BOOLEAN
+     -
+     - True
+     - タイトルを表示します。
+   * - ``pd_box``
+     - BOOLEAN
+     -
+     - True
+     - 枠を使います。
+   * - ``pd_use_property_split``
+     - BOOLEAN
+     -
+     - False
+     - Blender のプロパティパネルと同じく、プロパティのラベルを別の列に描画します。
+   * - ``pd_use_property_decorate``
+     - BOOLEAN
+     -
+     - False
+     - アニメーションのデコレーター列を表示します。Property Split と併用したときだけ有効です。
+   * - ``pd_extend_target``
+     - STRING
+     - Panel または Header の型名
+     - ``""``
+     - このメニューの内容を追加する Blender の Panel または Header。例:
+       ``VIEW3D_HT_header``。空にすると追加を解除します。
+   * - ``pd_extend_side``
+     - ENUM
+     - ``prepend``, ``append``
+     - ``append``
+     - 元の内容に対する位置。
+   * - ``pd_extend_order``
+     - INT
+     - 0 以上
+     - 0
+     - 複数のメニューが同じ追加先に追加するときの表示順。
+   * - ``pd_extend_is_right``
+     - BOOLEAN
+     -
+     - False
+     - トップバーの右側リージョンに描画します。
+
+Floating Panel (``FPANEL``)
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - 名前
+     - 型
+     - 値の範囲
+     - 既定値
+     - 説明
+   * - ``fp_use_property_split``
+     - BOOLEAN
+     -
+     - False
+     - プロパティのラベルを別の列に描画します。
+   * - ``fp_use_property_decorate``
+     - BOOLEAN
+     -
+     - False
+     - アニメーションのデコレーター列を表示します。Property Split と併用したときだけ有効です。
+
+Panel Group (``PANEL``)
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - 名前
+     - 型
+     - 値の範囲
+     - 既定値
+     - 説明
+   * - ``pg_space``
+     - ENUM
+     - Space の種類。:py:func:`setting_fields` を参照
+     - ``VIEW_3D``
+     - パネルを表示するエディター。
+   * - ``pg_region``
+     - ENUM
+     - ``TOOLS``, ``UI``, ``WINDOW``, ``HEADER``
+     - ``UI``
+     - パネルを表示するリージョン。
+   * - ``pg_context``
+     - ENUM
+     - コンテキスト。:py:func:`setting_fields` を参照
+     - ``ANY``
+     - パネルのコンテキスト。``.mesh_edit`` や ``object`` など。
+   * - ``pg_category``
+     - STRING
+     - ``&`` と ``=`` を含まない文字列
+     - ``My Category``
+     - Sidebar のタブ。
+   * - ``pg_wicons``
+     - BOOLEAN
+     -
+     - False
+     - 幅の広いアイコンボタンを使います。
+
+Modal Operator (``MODAL``)
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - 名前
+     - 型
+     - 値の範囲
+     - 既定値
+     - 説明
+   * - ``md_confirm``
+     - BOOLEAN
+     -
+     - False
+     - オペレーターを開始したキーまたはマウスボタンを離したときに確定します。
+   * - ``md_block_ui``
+     - BOOLEAN
+     -
+     - True
+     - ほかのホットキーをブロックします。
+   * - ``md_lock``
+     - BOOLEAN
+     -
+     - True
+     - マウスカーソルを現在のエリア内に留めます。
+
+Sticky Key (``STICKY``)
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - 名前
+     - 型
+     - 値の範囲
+     - 既定値
+     - 説明
+   * - ``sk_block_ui``
+     - BOOLEAN
+     -
+     - False
+     - Sticky Key が有効な間、ほかのツールをブロックします。
+
+Stack Key (``SCRIPT``)
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - 名前
+     - 型
+     - 値の範囲
+     - 既定値
+     - 説明
+   * - ``s_undo``
+     - BOOLEAN
+     -
+     - False
+     - 直前のコマンドを取り消します。
+   * - ``s_state``
+     - BOOLEAN
+     -
+     - False
+     - 最後に実行したスロットを記憶します。
+   * - ``s_cycle_trigger``
+     - ENUM
+     - ``EVERY_PRESS``, ``TIMED_REPEAT``
+     - ``EVERY_PRESS``
+     - 記憶したスロットを進める条件。押すたびに進めるか、タイムアウト内にもう一度押したときだけ進めます。
+   * - ``s_repeat_timeout_ms``
+     - INT
+     - 1 以上
+     - 600
+     - 繰り返しとみなす時間の幅（ミリ秒）。

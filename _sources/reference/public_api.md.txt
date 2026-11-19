@@ -1,0 +1,28 @@
+---
+vocab: developer-facing
+orphan: true
+---
+
+(public_api)=
+
+# Public API
+
+This reference is now the [Authoring API](authoring/index.rst), split into one page per
+area. The content that was on this page has moved without change of meaning.
+
+(local-menu-editing)=
+
+## Local menu editing
+
+The `pme.editing` operations are described on these pages:
+
+- [Concepts](authoring/concepts.rst)
+- [Results and guards](authoring/results.rst)
+- [Menus](authoring/menus.rst)
+- [Slots](authoring/slots.rst)
+- [Layout rows and panels](authoring/layout.rst)
+- [Menu type settings](authoring/settings.rst)
+- [Hotkeys](authoring/hotkeys.rst)
+- [Property](authoring/property.rst)
+- [Property Stack](authoring/property_stack.rst)
+- [Context Router](authoring/router.rst)

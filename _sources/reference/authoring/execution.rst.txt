@@ -1,0 +1,442 @@
+:vocab: developer-facing
+
+.. _authoring-execution:
+
+=======================================
+Execution, user properties and identity
+=======================================
+
+.. py:currentmodule:: pme
+
+Names on the top-level ``pme`` package that run Python code in PME's standard
+namespace, read and write user properties, and identify the running add-on.
+Names available inside slot code (Command, Custom, Poll) are listed in
+:ref:`pme-scripting`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Name
+     - Purpose
+   * - :py:func:`execute`
+     - Runs code and returns :py:class:`~pme.types.ExecuteResult`.
+   * - :py:func:`evaluate`
+     - Evaluates one expression and returns its value.
+   * - :py:func:`check_syntax`
+     - Checks syntax without running the code. Returns
+       :py:class:`~pme.types.SyntaxResult`.
+   * - :py:func:`props`
+     - Reads or writes user properties stored in Addon Preferences.
+   * - :py:data:`ADDON_ID`
+     - Module name of the running PME add-on.
+   * - :py:data:`preferences`
+     - PME's add-on preferences.
+   * - :py:func:`validate_uid`
+     - Checks the format of a menu UID.
+   * - ``context``
+     - PME1 execution context, kept for backward compatibility.
+
+.. _authoring-execution-namespace:
+
+Standard namespace
+==================
+
+:py:func:`execute` and :py:func:`evaluate` run code in a dictionary built from
+PME's execution context on each call.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Names
+     - Value
+   * - ``C``, ``D``, ``O``, ``T``, ``P``, ``bpy``, ``U``, ``pme``, ``props``
+       and the other global names
+     - Every name in ``pme.context.globals``: the globals that slot code
+       receives, the helper functions listed in :ref:`pme-scripting`, and names
+       added with ``pme.context.add_global()``, including those of autorun
+       scripts.
+   * - ``PREFS``
+     - PME's add-on preferences, the same object as :py:data:`preferences`.
+   * - ``PME``
+     - ``bpy.context.window_manager.pme``, PME's session data, or ``None``.
+   * - ``text``, ``icon``, ``icon_value``
+     - The current values of ``pme.context.text``, ``pme.context.icon`` and
+       ``pme.context.icon_value``.
+   * - ``E``
+     - The event PME is handling. Absent when PME is not handling an event.
+   * - Names in ``extra_globals``
+     - Added last. A name in ``extra_globals`` replaces a standard name.
+
+* Each call builds a new dictionary. Names that the code assigns at top level
+  are not kept for the next call. Objects reached through the namespace keep
+  their changes, for example attributes set on ``U``.
+* Neither function sets an event, a layout or a slot. Names that describe a
+  menu invocation, such as ``L``, ``delta``, ``drag_x`` and ``drag_y``, hold the
+  values left in PME's execution context, or are absent.
+* While PME runs the startup scripts in ``scripts/autorun`` and
+  ``scripts/register`` during add-on loading, neither function runs code. PME
+  records the call as a failure of the running startup script and does not run
+  the remaining startup scripts.
+
+Code execution
+==============
+
+.. py:function:: execute(code, *, extra_globals=None)
+
+   Run Python code in the standard namespace and report whether it completed.
+
+   An exception raised by the code is caught and returned as text. It is not
+   printed, and no traceback is kept.
+
+   :param str code: Python statements. Several lines are accepted.
+   :param extra_globals: Names added to the namespace after the standard names.
+      A name that already exists is replaced.
+   :type extra_globals: dict or None
+   :returns: The outcome of the run.
+   :rtype: ExecuteResult
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      result = pme.execute("bpy.ops.mesh.primitive_cube_add()")
+      if not result.success:
+          print(result.error_message)
+
+   .. rubric:: Notes
+
+   * ``error_message`` is ``str()`` of the exception and does not name its type:
+     ``raise KeyError('a')`` gives ``"'a'"``, ``1/0`` gives
+     ``"division by zero"``.
+   * A syntax error in ``code`` is returned the same way: ``"x = "`` gives
+     ``"invalid syntax (<string>, line 1)"``.
+   * Only subclasses of ``Exception`` are caught. ``SystemExit`` and
+     ``KeyboardInterrupt`` propagate.
+   * During the startup scripts, ``success`` is ``False`` and ``error_message``
+     is ``"Host operations are unavailable during boot script data phase"``.
+     The code is not run. See :ref:`authoring-execution-namespace`.
+
+.. py:function:: evaluate(expr, *, extra_globals=None)
+
+   Evaluate one Python expression in the standard namespace and return its
+   value.
+
+   Exceptions are not caught.
+
+   :param str expr: One expression. A statement such as ``x = 1`` raises
+      ``SyntaxError``.
+   :param extra_globals: Names added to the namespace after the standard names.
+      A name that already exists is replaced.
+   :type extra_globals: dict or None
+   :returns: The value of the expression.
+   :rtype: object
+   :raises SyntaxError: ``expr`` is not a single expression.
+   :raises NameError: ``expr`` uses a name that is not in the namespace.
+   :raises RuntimeError: Called during the startup scripts. The message is
+      ``"Host operations are unavailable during boot script data phase"``.
+   :raises Exception: Any other exception raised while evaluating ``expr``.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      count = pme.evaluate("len(C.selected_objects)")
+
+.. py:function:: check_syntax(code, *, mode="exec")
+
+   Check that ``code`` parses as Python, without running it.
+
+   :param str code: Python source. Empty or whitespace-only code is valid.
+   :param str mode: ``"exec"`` for statements, ``"eval"`` for one expression.
+      The value is passed to :py:func:`ast.parse`, which also accepts
+      ``"single"`` and ``"func_type"``.
+   :returns: The parse result.
+   :rtype: SyntaxResult
+   :raises ValueError: ``mode`` is not a mode that :py:func:`ast.parse`
+      accepts.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      >>> pme.check_syntax("x = ")
+      SyntaxResult(valid=False, error='invalid syntax', line=1, column=5)
+      >>> pme.check_syntax("2 + 2", mode="eval").valid
+      True
+
+   .. rubric:: Notes
+
+   * Only syntax is checked. Undefined names and errors that occur when the code
+     runs are not detected.
+
+Result types
+------------
+
+.. py:currentmodule:: pme.types
+
+Both classes are dataclasses in ``pme.types``.
+
+.. py:class:: ExecuteResult
+
+   Outcome of :py:func:`pme.execute`.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - Attribute
+        - Type
+        - Value
+      * - ``success``
+        - bool
+        - ``True`` when the code ran to the end without raising.
+      * - ``error_message``
+        - str or None
+        - ``str()`` of the exception when ``success`` is ``False``; ``None``
+          otherwise.
+
+.. py:class:: SyntaxResult
+
+   Outcome of :py:func:`pme.check_syntax`.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - Attribute
+        - Type
+        - Value
+      * - ``valid``
+        - bool
+        - ``True`` when the code parses.
+      * - ``error``
+        - str or None
+        - The parser's message, such as ``"invalid syntax"`` or
+          ``"'(' was never closed"``. ``None`` when valid.
+      * - ``line``
+        - int or None
+        - Line of the error, counted from 1. ``None`` when valid.
+      * - ``column``
+        - int or None
+        - Column of the error, counted from 1. ``None`` when valid.
+
+.. py:currentmodule:: pme
+
+User properties
+===============
+
+.. py:function:: props(name=None, value=None)
+
+   Read or write the user properties stored in Addon Preferences.
+
+   Only Properties whose storage is Addon Preferences, and Property Stacks, are
+   reached. A Property stored on an ID type such as ``Object`` keeps one value
+   per data-block, as an attribute of that data-block; ``props()`` does not
+   hold it. See :ref:`authoring-property`.
+
+   :param name: Property ID or menu name to resolve, converted with ``str()``.
+      ``None`` returns the PropertyGroup.
+   :type name: str or None
+   :param value: Value to write. ``None`` reads instead of writing.
+   :returns: See *Call forms*.
+   :raises RuntimeError: PME has not finished loading the Property Editor. The
+      message is ``"PME user properties are unavailable until the add-on
+      finishes loading"``.
+   :raises TypeError: A write gives a value the property does not accept.
+      Raised by Blender, for example ``expected True/False or 0/1, not str``.
+
+   .. rubric:: Call forms
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 30 14 56
+
+      * - Call
+        - Operation
+        - Returns
+      * - ``props()``
+        - none
+        - The PropertyGroup that holds the values. Its attributes are the
+          registered Property IDs; reading and assigning them reads and writes
+          the values.
+      * - ``props(name)``, ``props(name, None)``
+        - read
+        - The value, or ``None`` when ``name`` does not resolve.
+      * - ``props(name, value)``
+        - write
+        - ``True`` when the value was written. ``False`` when ``name`` does not
+          resolve to a writable name.
+
+   .. rubric:: Name resolution
+
+   ``name`` is compared with the rows in this order. The first match decides.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 50 25 25
+
+      * - ``name``
+        - Read
+        - Write
+      * - The registered Property ID of a Property or Property Stack:
+          ``registered_property_id`` in ``read_pm()["property"]`` or
+          ``read_pm()["property_stack"]``.
+        - The value
+        - Writes, returns ``True``
+      * - The menu name of exactly one enabled Property stored in Addon
+          Preferences or enabled Property Stack whose Property ID is
+          registered.
+        - The value under that ID
+        - ``False``
+      * - The menu name of several such menus.
+        - ``None``
+        - ``False``
+      * - Anything else.
+        - ``None``
+        - ``False``
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      import pme
+
+      # Get the PropertyGroup and access a property as an attribute
+      pme.props().MyCounter = 10
+      value = pme.props().MyCounter
+
+      # Read or write by registered Property ID
+      value = pme.props("MyCounter")
+      written = pme.props("MyCounter", 10)
+
+   .. rubric:: Notes
+
+   * Inside slot code, the same function is the global ``props``. User
+     properties created with the Property Editor use the same call forms in
+     both places.
+   * ``props(name, None)`` reads. It does not write ``None``.
+   * A name that does not resolve is not created as scratch storage.
+   * Attribute names of the PropertyGroup itself, such as ``bl_rna``,
+     ``keys`` or ``__class__``, are not Property IDs: ``props("bl_rna")``
+     returns ``None`` and ``props("bl_rna", 1)`` returns ``False``. Read them
+     from the PropertyGroup, ``pme.props().bl_rna``.
+   * A write by menu name returns ``False`` even when a read by the same name
+     returns a value.
+   * Earlier Experimental builds exposed the PropertyGroup as
+     ``pme.props.MyCounter``. The current form is ``pme.props().MyCounter``.
+
+Add-on identity
+===============
+
+.. py:data:: ADDON_ID
+   :type: str
+
+   Module name of the running PME add-on: ``"pie_menu_editor"`` for an add-on
+   installed in ``scripts/addons``, ``"bl_ext.<repository>.<package>"`` for a
+   Blender Extension. It is the key of PME's entry in
+   ``bpy.context.preferences.addons``.
+
+   Reading it before PME's ``addon`` module is loaded raises ``RuntimeError``
+   with the message ``"PME add-on identity is unavailable until the add-on
+   finishes loading"``. A hard-coded ``"pie_menu_editor"`` does not match a
+   Blender Extension installation.
+
+   .. code-block:: python
+
+      import bpy
+      import pme
+
+      addon_preferences = bpy.context.preferences.addons[pme.ADDON_ID].preferences
+
+.. py:data:: preferences
+
+   PME's add-on preferences (``PMEPreferences``): the same object as
+   ``bpy.context.preferences.addons[pme.ADDON_ID].preferences``. Looked up on
+   each access.
+
+   Reading it raises ``KeyError`` when :py:data:`ADDON_ID` is not in
+   ``bpy.context.preferences.addons``. It is ``None`` while that entry exists
+   but PME's preferences class is not registered, for example while the
+   add-on is being enabled, or after ``addon_utils.disable()`` without
+   ``default_set=True``.
+
+.. py:function:: validate_uid(uid)
+
+   Return whether ``uid`` has the format of a menu UID.
+
+   The check covers the format only. It does not look for a saved menu.
+
+   :param str uid: The string to check.
+   :returns: ``True`` for ``<prefix>_<id>``, where ``<prefix>`` is a menu
+      type's prefix below and ``<id>`` is 8 characters from ``a``-``z`` and
+      ``2``-``7``. ``False`` otherwise, including for non-strings, upper case
+      and slot UIDs (``pmi_<id>``).
+   :rtype: bool
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 15 40 45
+
+      * - Prefix
+        - Menu type
+        - ``mode``
+      * - ``pm``
+        - Pie Menu
+        - ``PMENU``
+      * - ``vm``
+        - Vector Menu
+        - ``VMENU``
+      * - ``rm``
+        - Regular Menu
+        - ``RMENU``
+      * - ``pd``
+        - Pop-up Dialog
+        - ``DIALOG``
+      * - ``fp``
+        - Floating Panel
+        - ``FPANEL``
+      * - ``s``
+        - Stack Key
+        - ``SCRIPT``
+      * - ``pg``
+        - Panel Group
+        - ``PANEL``
+      * - ``hpg``
+        - Hidden Panel Group
+        - ``HPANEL``
+      * - ``sk``
+        - Sticky Key
+        - ``STICKY``
+      * - ``mc``
+        - Macro Operator
+        - ``MACRO``
+      * - ``md``
+        - Modal Operator
+        - ``MODAL``
+      * - ``pr``
+        - Property
+        - ``PROPERTY``
+      * - ``cn``
+        - Property Stack
+        - ``CONDITION``
+      * - ``rt``
+        - Context Router
+        - ``ROUTER``
+
+   .. code-block:: python
+
+      >>> pme.validate_uid("pm_a2b3c4d5")
+      True
+      >>> pme.validate_uid("pmi_a2b3c4d5")
+      False
+
+.. py:data:: context
+   :no-index:
+
+   PME's execution context (``PMEContext``), kept for PME1 scripts.
+   ``pme.context.globals`` is the dictionary behind the
+   :ref:`standard namespace <authoring-execution-namespace>`, and
+   ``pme.context.add_global(name, value)`` adds a name to it. Described in
+   :ref:`pme-scripting`.

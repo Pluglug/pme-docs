@@ -1,0 +1,479 @@
+:vocab: developer-facing
+
+.. _authoring-hotkeys:
+
+=======
+Hotkeys
+=======
+
+.. py:currentmodule:: pme.editing
+
+A menu's hotkey binding is 13 saved fields. They are read with
+:py:func:`read_pm` and changed with :py:func:`update_hotkey`, which reports
+Blender's keymap registration separately from the saved values. Hotkey Modes
+are described under :ref:`hotkey-modes`, the editor under
+:ref:`hotkey-editor`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Function
+     - Purpose
+   * - :py:func:`read_pm`
+     - Returns the saved binding under ``hotkey``.
+   * - :py:func:`update_hotkey`
+     - Changes the binding and reports registration.
+
+Reading the hotkey
+==================
+
+``read_pm(pm_uid)["hotkey"]`` maps each field name to its saved value. Every
+menu type returns it. Reading does not normalize values or touch Blender's
+keymaps.
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(pm_uid)["hotkey"]
+   {'key': 'F6', 'key_mod': 'NONE', 'ctrl': True, 'shift': False, 'alt': False,
+    'oskey': False, 'any': False, 'open_mode': 'PRESS', 'km_name': 'Window',
+    'chord': 'NONE', 'drag_dir': 'ANY', 'tweak_dir': 'ANY', 'repeat': False}
+
+.. _authoring-hotkeys-fields:
+
+Hotkey fields
+-------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 14 9 25 11 41
+
+   * - Field
+     - Type
+     - Accepted values
+     - Default
+     - Meaning
+   * - ``key``
+     - str
+     - Identifier of ``bpy.types.Event.type``, or ``NONE``
+     - ``NONE``
+     - Key or button that invokes the menu. ``NONE``: no hotkey.
+   * - ``key_mod``
+     - str
+     - Identifier of ``bpy.types.Event.type``, or ``NONE``
+     - ``NONE``
+     - Key held as a modifier (**Key Modifier**). A mouse button
+       (``LEFTMOUSE``, ``MIDDLEMOUSE``, ``RIGHTMOUSE``, ``BUTTON4MOUSE`` to
+       ``BUTTON7MOUSE``) is tracked by a separate PME observer keymap item.
+   * - ``ctrl``
+     - bool
+     - ``True``, ``False``
+     - ``False``
+     - Ctrl held.
+   * - ``shift``
+     - bool
+     - ``True``, ``False``
+     - ``False``
+     - Shift held.
+   * - ``alt``
+     - bool
+     - ``True``, ``False``
+     - ``False``
+     - Alt held.
+   * - ``oskey``
+     - bool
+     - ``True``, ``False``
+     - ``False``
+     - OS key held.
+   * - ``any``
+     - bool
+     - ``True``, ``False``
+     - ``False``
+     - Match regardless of modifier keys (**Any Modifier**). The keymap item
+       then ignores the four modifier fields.
+   * - ``open_mode``
+     - str
+     - ``PRESS``, ``HOLD``, ``DOUBLE_CLICK``, ``TWEAK``, ``CHORDS``,
+       ``CLICK``, ``CLICK_DRAG``
+     - ``PRESS``
+     - Hotkey Mode.
+   * - ``km_name``
+     - str
+     - Keymap names separated by ``;``
+     - ``Window``
+     - Keymaps in which the hotkey is active, such as ``"Window; 3D View"``.
+   * - ``chord``
+     - str
+     - Identifier of ``bpy.types.Event.type``, or ``NONE``
+     - ``NONE``
+     - Second key of a Key Chords sequence (``open_mode`` ``CHORDS``).
+   * - ``drag_dir``
+     - str
+     - ``ANY``, ``NORTH``, ``NORTH_EAST``, ``EAST``, ``SOUTH_EAST``,
+       ``SOUTH``, ``SOUTH_WEST``, ``WEST``, ``NORTH_WEST``
+     - ``ANY``
+     - Drag direction for ``CLICK_DRAG``.
+   * - ``tweak_dir``
+     - str
+     - Same as ``drag_dir``
+     - ``ANY``
+     - Drag direction for ``TWEAK``. Separate from ``drag_dir``; both are
+       kept when ``open_mode`` changes.
+   * - ``repeat``
+     - bool
+     - ``True``, ``False``
+     - ``False``
+     - Accept repeated key presses while a key is held.
+
+*Default* is the RNA default. Enum values are the identifiers of the running
+Blender, so the set of ``key`` identifiers can differ between Blender versions.
+
+Property, Property Stack, Panel Group and Hidden Panel Group menus store these
+fields but have no hotkey. Their registration is never required.
+
+Functions
+=========
+
+.. py:function:: update_hotkey(pm_uid, changes, *, expected=None, dry_run=False)
+
+   Change a menu's hotkey binding.
+
+   All inputs are checked before the first write. Saved values are confirmed by
+   reading them back; Blender's keymap state is reported separately in
+   ``registration``.
+
+   :param str pm_uid: UID of the menu.
+   :param changes: Field name mapped to its new value. Partial: fields that
+      are not named keep their values.
+   :type changes: Mapping
+   :param expected: The complete ``read_pm()["hotkey"]`` mapping as read
+      before. The update is rejected with ``stale_hotkey`` when a saved value
+      differs. ``None`` skips the check.
+   :type expected: Mapping or None
+   :param bool dry_run: Check the change and return without writing.
+   :returns: The result described below.
+   :rtype: dict
+   :raises TypeError: ``changes`` or ``expected`` is not a mapping; a Boolean
+      field has a value that is not a bool (``1`` is rejected); another field
+      has a value that is not a string; ``dry_run`` is not a bool.
+   :raises ValueError: The UID is missing, invalid or ambiguous; a field name
+      is unknown; an Enum value is not an accepted identifier; ``expected``
+      does not have exactly the 13 fields.
+   :raises RuntimeError: Called outside Blender's main thread, before PME has
+      finished loading, or while PME preferences are unavailable. Also raised
+      after writing has started; see *Notes*.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - Key
+        - Type
+        - Value
+      * - ``status``
+        - str
+        - See *Status* below.
+      * - ``committed``
+        - bool
+        - ``True`` only when ``status`` is ``"committed"``.
+      * - ``dry_run``
+        - bool
+        - The ``dry_run`` argument.
+      * - ``pm_uid``
+        - str
+        - UID of the menu.
+      * - ``before``
+        - dict
+        - The 13 fields read before the call.
+      * - ``after``
+        - dict
+        - The 13 fields read at the end. Equal to ``before`` unless
+          ``status`` is ``"committed"``.
+      * - ``proposed``
+        - dict
+        - The complete binding the call writes, or would write, after
+          normalization.
+      * - ``changed_fields``
+        - list[str]
+        - Fields whose value differs between ``before`` and ``after``.
+      * - ``planned_fields``
+        - list[str]
+        - Fields whose value differs between ``before`` and ``proposed``.
+      * - ``adjustments``
+        - list[dict]
+        - One entry per normalized field: ``field``, ``requested`` and
+          ``proposed``. See *Normalization*.
+      * - ``diagnostics``
+        - list[dict]
+        - One entry per problem or warning: ``code``, plus the details listed
+          under *Diagnostics*.
+      * - ``registration``
+        - dict
+        - Blender's keymap state at the end of the call. See
+          :ref:`authoring-hotkeys-registration`.
+
+   .. rubric:: Status
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - Meaning
+      * - ``committed``
+        - Every field of ``proposed`` was read back. The keymap was updated;
+          check ``registration`` for its state.
+      * - ``ready``
+        - ``dry_run=True`` and the change is acceptable. Nothing was written.
+          ``proposed`` and ``planned_fields`` describe the change. This
+          function returns ``ready``, not ``validated``.
+      * - ``unchanged``
+        - ``proposed`` equals the saved binding. Nothing was written.
+          Registration is not repaired.
+      * - ``rejected``
+        - Nothing was saved. ``diagnostics`` names the cause.
+
+   The shared meaning of these values is defined on :ref:`authoring-results`.
+   A failure after writing has started raises instead of returning a status.
+
+   .. rubric:: Diagnostics
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``stale_hotkey``
+        - A value in ``expected`` differs from the saved value. ``fields``
+          lists the names. ``status`` is ``rejected``, also with
+          ``dry_run=True``.
+      * - ``keymap_names_unavailable``
+        - ``km_name`` was given and Blender's user keymaps cannot be read.
+          ``message`` holds the error. ``status`` is ``rejected``.
+      * - ``menu_hotkey_screen_editing_leftmouse``
+        - The binding puts a Left Mouse event into the Screen Editing keymap,
+          which would block normal clicks. ``keymap_name`` names the keymap.
+          ``status`` is ``rejected``.
+      * - ``hotkey_write_mismatch``
+        - A written field did not read back as written. The saved values
+          were restored and the restoration was confirmed. ``status`` is
+          ``rejected``.
+      * - ``current_hotkey_collision``
+        - Warning. The menu's current registration collides with another
+          keymap item. ``severity`` is ``"warning"``; ``collision`` holds
+          ``target`` and ``opponent``. It does not block saving.
+      * - ``current_hotkey_collision_unavailable``
+        - The collision check raised. ``message`` holds the error.
+
+   .. rubric:: Normalization
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 30 70
+
+      * - Input
+        - Effect on ``proposed``
+      * - ``km_name`` given
+        - Split at ``;`` and trimmed. Names that are not keymaps of Blender's
+          user keyconfig are dropped. The rest is joined with ``"; "``. An
+          empty result becomes ``"Window"``.
+      * - ``km_name`` not given
+        - The saved names are kept, including names of keymaps that do not
+          exist yet, such as imported ones.
+      * - ``open_mode`` given as ``CHORDS``
+        - A ``chord`` of ``NONE`` becomes ``A``.
+      * - ``open_mode`` given as another mode
+        - ``chord`` becomes ``NONE``.
+      * - ``open_mode`` not given
+        - ``chord`` is kept as given or saved.
+
+   The Screen Editing check runs on the requested and on the normalized
+   keymap names, so a name dropped by normalization still rejects. It applies
+   to menu types that have a hotkey.
+
+   .. rubric:: Example
+
+   Preview, then apply F6 with Ctrl:
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid)["hotkey"]
+      changes = {"key": "F6", "ctrl": True, "open_mode": "PRESS"}
+      preview = pme.editing.update_hotkey(
+          pm_uid, changes, expected=before, dry_run=True,
+      )
+      if preview["status"] == "ready":
+          result = pme.editing.update_hotkey(pm_uid, changes, expected=before)
+          print(result["after"], result["registration"])
+
+   .. rubric:: Notes
+
+   * Fields are written in the order ``open_mode``, ``chord``, then the
+     others in table order; only fields that differ are set. The keymap is
+     updated once, after every field has been read back.
+   * Freshness is checked with ``expected`` only. A hotkey change does not
+     change ``read_pm()["version"]``.
+   * In a ``ready``, ``unchanged`` or ``rejected`` result, ``registration``
+     and collision warnings describe the saved binding, not ``proposed``.
+     ``update_hotkey(pm_uid, {}, dry_run=True)`` returns the current
+     registration without writing.
+   * If a write raises or reads back differently, the saved values are
+     restored before the keymap is touched. A confirmed restoration after a
+     readback difference returns ``rejected`` with ``hotkey_write_mismatch``;
+     after a raising write, the exception propagates. If the restoration is
+     not confirmed, the restoring step raises with the note *Hotkey
+     saved-value restoration is unconfirmed; host application has not
+     started* (``RuntimeError("hotkey_saved_value_restore_mismatch")`` when
+     the values differ).
+   * If updating the keymap or refreshing raises, or the final readback
+     differs from ``proposed`` (``RuntimeError("hotkey_final_saved_value_mismatch")``),
+     the exception propagates with notes giving the saved readback, the
+     changed fields and the registration. Saved values may already have
+     changed. Read the hotkey before retrying.
+   * If the mouse-button observer for a new ``key_mod`` cannot be registered,
+     ``key_mod`` is restored and the other written fields keep their new
+     values. This recovery covers ``key_mod`` only; registration can then be
+     ``partial``.
+   * The call does not change the selected menu or the Slot Editor draft,
+     save Preferences to disk, add an Undo step, or invoke the hotkey.
+
+.. _authoring-hotkeys-registration:
+
+Registration
+============
+
+``registration`` describes the keymap items PME has in Blender's add-on
+keyconfig for this menu. It does not prove the final priority among user
+keymaps, input delivery, Poll, or execution.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``status``
+     - str
+     - See below.
+   * - ``required``
+     - bool
+     - ``True`` when the menu type has a hotkey, the menu is enabled,
+       ``key`` is not ``NONE``, and, for a Vector Menu, ``open_mode`` is not
+       ``CLICK``.
+   * - ``lanes``
+     - list[dict]
+     - One entry per expected keymap item (each keymap in ``km_name`` times
+       each event), plus one per leftover item.
+   * - ``diagnostics``
+     - list[dict]
+     - Observation problems: ``code``, and ``keymap_name`` or ``message``
+       where available.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - ``status``
+     - Meaning
+   * - ``not_required``
+     - No registration is required and no leftover item remains.
+   * - ``registered``
+     - Every expected keymap item exists and matches.
+   * - ``partial``
+     - At least one lane has a ``reason``: a missing, different or leftover
+       item, or an unconfirmed mouse-button observer.
+   * - ``unknown``
+     - Registration could not be fully observed. ``diagnostics`` names the
+       cause.
+
+Lane
+----
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 18 62
+
+   * - Key
+     - Type
+     - Value
+   * - ``keymap_name``
+     - str
+     - Keymap of the item.
+   * - ``event_type``
+     - str
+     - Event type of the item. ``"UNKNOWN"`` for a leftover item that could
+       not be read.
+   * - ``expected``
+     - dict or None
+     - The item PME registers: ``type``, ``value``, ``any``, ``shift``,
+       ``ctrl``, ``alt``, ``oskey``, ``hyper`` (``0`` or ``1``),
+       ``key_modifier``, ``direction``, ``active``, ``repeat``, ``idname``
+       (``"wm.pme_user_pie_menu_call"``), ``pie_menu_name``, ``invoke_mode``
+       (``"HOTKEY"``), ``keymap``, ``source_pm_mode``. ``None`` for a
+       leftover item.
+   * - ``observed``
+     - dict or None
+     - The same keys read from the actual item. ``None`` when the item is
+       missing.
+   * - ``reason``
+     - str or None
+     - ``None`` when ``observed`` equals ``expected``. Otherwise one of the
+       reasons below.
+   * - ``mouse_observer``
+     - dict
+     - Present when ``key_mod`` is a mouse button: ``key``, ``recorded``
+       (PME holds a claim on the observer) and ``present`` (an active
+       observer item exists in the keymap).
+
+A mouse button in ``key_mod`` is handled by the observer, so ``expected``
+then has ``key_modifier`` ``"NONE"``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - ``reason``
+     - Meaning
+   * - ``hotkey_kmi_missing``
+     - The expected item is not registered.
+   * - ``hotkey_handle_missing_from_addon``
+     - PME's record points to an item that is not in the add-on keyconfig.
+   * - ``hotkey_projection_mismatch``
+     - The item differs from ``expected``.
+   * - ``mouse_modifier_observer_unconfirmed``
+     - The mouse-button observer for ``key_mod`` is not claimed or not
+       present.
+   * - ``hotkey_projection_unreadable``
+     - The item could not be read. ``status`` is ``unknown``.
+   * - ``unexpected_hotkey_projection``
+     - PME's record holds more items for the keymap than expected.
+   * - ``untracked_hotkey_projection``
+     - The add-on keyconfig has an item for this menu that PME's record does
+       not track.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Registration ``diagnostics`` code
+     - Cause
+   * - ``hotkey_owner_unavailable``
+     - Registration is required and PME has no record for the menu.
+       ``status`` is ``unknown``.
+   * - ``hotkey_registration_unavailable``
+     - Blender's add-on keyconfig could not be read. ``message`` holds the
+       error. ``status`` is ``unknown`` and ``lanes`` lists only the expected
+       items.
+   * - ``hotkey_projection_unreadable``
+     - An item could not be read. ``message`` holds the error.
+   * - ``mouse_modifier_owner_remaining``
+     - Registration is not required and a mouse-button observer claim
+       remains. ``status`` is ``unknown``.
+
+A disabled menu, a ``key`` of ``NONE``, and a Vector Menu with ``CLICK``
+require no registration. Their status is ``not_required`` only when no item
+or observer claim remains.

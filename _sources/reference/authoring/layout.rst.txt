@@ -1,0 +1,1508 @@
+:vocab: developer-facing
+
+.. _authoring-layout:
+
+======================
+Layout rows and panels
+======================
+
+.. py:currentmodule:: pme.editing
+
+Pop-up Dialogs (``DIALOG``) and Floating Panels (``FPANEL``) store rows, spacers
+and Layout Panels as slots in the menu's saved list. The functions on this page
+read that list as rows and change rows, spacers, item alignment and Layout
+Panels. Adding, removing, moving and editing single items is on
+:ref:`authoring-slots`; Mode, width and the other menu settings are on
+:ref:`authoring-settings`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Function
+     - Purpose
+   * - :py:func:`read_pm`
+     - Returns the rows under ``rows``.
+   * - :py:func:`add_row`
+     - Adds a row with a default button.
+   * - :py:func:`add_panel`
+     - Adds a row with a Layout Panel.
+   * - :py:func:`remove_row`
+     - Removes a row and everything in it.
+   * - :py:func:`move_row`
+     - Moves a row before or after another row.
+   * - :py:func:`split_row`
+     - Splits a row before one of its slots.
+   * - :py:func:`join_rows`
+     - Joins two adjacent rows.
+   * - :py:func:`update_row`
+     - Changes row settings.
+   * - :py:func:`update_spacer`
+     - Changes one spacer setting, creating the spacer when needed.
+   * - :py:func:`align_slot`
+     - Places an item in the left, center or right section of its row.
+
+Saved layout
+============
+
+The saved list is read in order, left to right and top to bottom. Three kinds of
+slot carry the layout:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 34 44
+
+   * - Slot
+     - Saved as
+     - Meaning
+   * - Row marker
+     - ``mode`` ``"EMPTY"``, ``text`` starting with ``row``, for example
+       ``"row?size=LARGE"``
+     - Starts a row. The text holds the row settings.
+   * - Spacer
+     - ``mode`` ``"EMPTY"``, ``text`` starting with ``spacer``, for example
+       ``"spacer?hsep=COLUMN"``
+     - A gap, column boundary, alignment boundary or subrow boundary inside a
+       row. The text holds the spacer settings.
+   * - Layout Panel anchor
+     - ``mode`` ``"MENU"`` with ``layout_panel`` options
+     - Starts a Layout Panel. The slots after it in the same row are the Panel
+       header.
+
+A row runs from its marker to the next marker. Slots before the first marker
+form a markerless first row, which has default settings. A new Pop-up Dialog or
+Floating Panel has one marker and one button.
+
+.. _authoring-layout-rows:
+
+Rows
+====
+
+``read_pm(pm_uid)["rows"]`` lists the rows of a Pop-up Dialog or Floating Panel
+in saved order. Other menu types have no ``rows`` key. An empty menu has
+``rows == []``. The ``slot_uids`` argument of :py:func:`read_pm` filters only
+``slots``; ``rows`` always describes the whole menu. Reading does not add
+markers, repair UIDs, initialize the version or change the layout.
+
+Each row is a dictionary:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 16 62
+
+   * - Key
+     - Type
+     - Value
+   * - ``row_ref``
+     - dict
+     - Reference to the row. See :ref:`authoring-layout-row-refs`.
+   * - ``slot_uids``
+     - list[str]
+     - UIDs of every slot in the row in saved order, the marker included.
+   * - ``has_marker``
+     - bool
+     - ``False`` for a markerless first row.
+   * - ``raw_text``
+     - str or None
+     - The marker's saved text. ``None`` without a marker. Unknown keys in the
+       saved text appear only here.
+   * - ``settings``
+     - dict
+     - Row settings by name, see :ref:`authoring-layout-row-settings`. A name
+       missing from the saved text has its default. A row without a marker has
+       all defaults; the text of its first item is not read as row settings.
+   * - ``defaulted_fields``
+     - list[str]
+     - Setting names that are not in the saved text. All names for a row
+       without a marker.
+   * - ``diagnostics``
+     - list[dict]
+     - ``layout_parse_failed`` with ``exception_type`` and ``message`` when the
+       saved text cannot be parsed. ``settings`` then holds the defaults and
+       ``raw_text`` keeps the saved text.
+   * - ``spacers``
+     - list[dict]
+     - One entry per spacer in the row, in saved order. See below.
+   * - ``panel``
+     - dict or None
+     - The row's Layout Panel, or ``None``. See below.
+
+A spacer entry:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 16 62
+
+   * - Key
+     - Type
+     - Value
+   * - ``slot_uid``
+     - str
+     - UID of the spacer.
+   * - ``raw_text``
+     - str
+     - The spacer's saved text.
+   * - ``settings``
+     - dict
+     - ``hsep`` and ``subrow``, see :ref:`authoring-layout-spacer-settings`.
+   * - ``defaulted_fields``
+     - list[str]
+     - Setting names that are not in the saved text.
+   * - ``diagnostics``
+     - list[dict]
+     - As for the row.
+
+A ``panel`` entry:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 16 62
+
+   * - Key
+     - Type
+     - Value
+   * - ``anchor_uid``
+     - str
+     - UID of the anchor: the first Layout Panel anchor in the row.
+   * - ``options``
+     - dict
+     - The anchor's options read as ``idname`` (str), ``default_closed``
+       (bool) and ``use_header_layout`` (bool).
+   * - ``layout_panel``
+     - any
+     - The saved ``layout_panel`` value before that reading, as JSON values.
+   * - ``layout_panel_present``
+     - bool
+     - Whether the anchor has a saved ``layout_panel`` value.
+   * - ``header_uids``
+     - list[str]
+     - Every slot after the anchor in the row, in saved order. Disabled items
+       and items hidden while Header Layout is off are included.
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(pm_uid)["rows"][0]
+   {'row_ref': {'kind': 'marker', 'slot_uid': 'pmi_gxyya7hr'},
+    'slot_uids': ['pmi_gxyya7hr', 'pmi_glcfd66v'], 'has_marker': True,
+    'raw_text': 'row',
+    'settings': {'align': 'CENTER', 'size': 'NORMAL', 'vspacer': 'NORMAL',
+                 'fixed_col': False, 'fixed_but': False},
+    'defaulted_fields': ['align', 'size', 'vspacer', 'fixed_col', 'fixed_but'],
+    'diagnostics': [], 'spacers': [], 'panel': None}
+   >>> panel_row["panel"]
+   {'anchor_uid': 'pmi_nptwzacb',
+    'options': {'idname': 'layout_panel_tbcduupz', 'default_closed': False,
+                'use_header_layout': False},
+    'layout_panel_present': True,
+    'layout_panel': {'idname': 'layout_panel_tbcduupz', 'default_closed': False,
+                     'use_header_layout': False},
+    'header_uids': []}
+
+.. _authoring-layout-row-refs:
+
+Row references
+--------------
+
+A ``row_ref`` is ``{"kind": kind, "slot_uid": uid}``: the slot that starts the
+row. ``kind`` is ``"marker"`` when that slot is the row marker and
+``"first_item"`` for the first slot of a markerless first row. A ``row_ref`` is
+not a permanent row ID.
+
+A ``row_ref`` is accepted while a row still starts with the same slot and the
+same kind. It stops matching when that slot moves or is removed, when another
+slot is placed before it, or when a marker is added to a markerless first row
+(the reference changes from ``"first_item"`` to ``"marker"``). An old reference
+is not redirected to another row: operations reject it with ``row_not_found``.
+Take current references from the ``after_rows`` of the last result, or read
+again.
+
+Row operations accept a ``row_ref`` with exactly the keys ``kind`` and
+``slot_uid``. Other keys or a missing key raise ``TypeError``; another ``kind``
+raises ``ValueError``.
+
+.. _authoring-layout-row-settings:
+
+Row settings
+============
+
+Row settings are stored in the row marker's text. :py:func:`update_row` accepts
+these names and values.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 16 10 24 12 38
+
+   * - Name
+     - Type
+     - Values
+     - Default
+     - Description
+   * - ``align``
+     - str
+     - ``CENTER``, ``LEFT``, ``RIGHT``
+     - ``CENTER``
+     - Alignment of the row and its subrows when the row has no ``ALIGNER``
+       spacer. Separate from :py:func:`align_slot`. The editor's Row Alignment
+       menu marks it deprecated and points to button alignment.
+   * - ``size``
+     - str
+     - ``NORMAL``, ``LARGE``, ``LARGER``
+     - ``NORMAL``
+     - Button height: 1, 1.25 or 1.5 times normal.
+   * - ``vspacer``
+     - str
+     - ``NONE``, ``NORMAL``, ``LARGE``, ``LARGER``
+     - ``NORMAL``
+     - Space above the row: 0, 1, 3 or 5 separators. No space is drawn above
+       the first row.
+   * - ``fixed_col``
+     - bool
+     -
+     - ``False``
+     - Give the row's columns equal widths.
+   * - ``fixed_but``
+     - bool
+     -
+     - ``False``
+     - Use equal button widths in the row or its subrows.
+
+.. _authoring-layout-spacer-settings:
+
+Spacer settings
+===============
+
+Spacer settings are stored in the spacer's text. :py:func:`update_spacer`
+changes one of them per call.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 16 10 24 12 38
+
+   * - Name
+     - Type
+     - Values
+     - Default
+     - Description
+   * - ``hsep``
+     - str
+     - ``NONE``, ``SPACER``, ``COLUMN``, ``ALIGNER``
+     - ``NONE``
+     - ``SPACER`` draws a gap. ``COLUMN`` starts a new column. ``ALIGNER`` is a
+       boundary between the left, center and right sections used by
+       :py:func:`align_slot`.
+   * - ``subrow``
+     - str
+     - ``NONE``, ``BEGIN``, ``END``
+     - ``NONE``
+     - ``BEGIN`` starts a subrow inside the current column; ``END`` ends it.
+
+.. _authoring-layout-results:
+
+Common result keys
+==================
+
+Every function on this page returns the dictionary described here. So do
+:py:func:`add_slot`, :py:func:`remove_slot`, :py:func:`move_slot` and
+:py:func:`swap_slots` on a Pop-up Dialog or Floating Panel, without the three
+``*_row_refs`` keys. :py:func:`transfer_slot` has its own result; its Popup side
+carries ``before_rows``, ``after_rows`` and ``insertion_position``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 16 62
+
+   * - Key
+     - Type
+     - Value
+   * - ``status``
+     - str
+     - See :ref:`authoring-layout-status`.
+   * - ``committed``
+     - bool
+     - ``True`` only when ``status`` is ``"committed"``.
+   * - ``pm_uid``
+     - str
+     - UID of the menu.
+   * - ``version``
+     - int
+     - The menu's session-local version after the call. Equal to
+       ``version_after``.
+   * - ``version_before``
+     - int
+     - The version read before the call.
+   * - ``version_after``
+     - int
+     - The version read after the call.
+   * - ``before_order``
+     - list[str]
+     - Slot UIDs in saved order before the call.
+   * - ``after_order``
+     - list[str] or None
+     - Slot UIDs in saved order after the call. ``None`` when the readback
+       failed.
+   * - ``before_rows``
+     - list[dict]
+     - Rows before the call, as in :ref:`authoring-layout-rows`.
+   * - ``after_rows``
+     - list[dict] or None
+     - Rows after the call. ``None`` when the readback failed.
+   * - ``insertion_position``
+     - dict or None
+     - The gap an item addition or move resolved to. See
+       :ref:`authoring-layout-insertion-position`. ``None`` for the functions
+       on this page.
+   * - ``slots``
+     - list[dict]
+     - The call's target slots. Each entry has ``uid``, ``status`` (the call's
+       status), ``before``, ``after`` and ``reports`` (always ``[]``).
+       ``before`` and ``after`` are the slot's saved values plus ``index`` and
+       ``layout_panel``, or ``None`` where the slot does not exist. Each
+       function entry says which slots are targets.
+   * - ``side_effects``
+     - list[dict]
+     - Other slots whose saved values or index changed: ``uid``, ``before``,
+       ``after``.
+   * - ``created_uids``
+     - list[str]
+     - Slots present after the call and not before, in saved order.
+   * - ``deleted_uids``
+     - list[str]
+     - Slots present before the call and not after.
+   * - ``moved_uids``
+     - list[str]
+     - Slots whose index changed, including shifts caused by inserted or
+       removed slots.
+   * - ``structure_changes``
+     - list[dict]
+     - The actual row and spacer changes, including cleanup outside the
+       target row. See below.
+   * - ``expected``
+     - dict
+     - The saved slot collection read before the call: ``pm_uid`` and
+       ``items``. See :ref:`authoring-layout-checks`.
+   * - ``recovery``
+     - str
+     - ``"not_needed"``, ``"restored"`` or ``"unknown"``.
+   * - ``pending``
+     - list
+     - Always ``[]``.
+   * - ``diagnostics``
+     - list[dict]
+     - One entry per problem: ``code`` plus the details listed under
+       :ref:`authoring-layout-diagnostics` and in each function entry.
+   * - ``created_row_refs``
+     - list[dict]
+     - Functions on this page only. Row references present after the call and
+       not before.
+   * - ``deleted_row_refs``
+     - list[dict]
+     - Functions on this page only. Row references present before the call and
+       not after.
+   * - ``moved_row_refs``
+     - list[dict]
+     - Functions on this page only. Row references whose start index changed,
+       including shifts caused by another row's change.
+
+``structure_changes`` entries:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 22 60
+
+   * - ``kind``
+     - Other keys
+     - Meaning
+   * - ``"rows"``
+     - ``before``, ``after``
+     - The complete ``before_rows`` and ``after_rows``. Present when they
+       differ.
+   * - ``"layout_slot"``
+     - ``uid``, ``before``, ``after``
+     - A row marker or spacer was added, removed, changed or shifted.
+       ``before`` and ``after`` as in ``slots``.
+   * - ``"row_ref"``
+     - ``before``, ``after``
+     - The call added a marker to a markerless first row. ``before`` is the
+       old ``"first_item"`` reference, ``after`` the new ``"marker"``
+       reference. Row operations only.
+
+.. _authoring-layout-status:
+
+Status
+------
+
+The values are those of :ref:`authoring-results`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - ``status``
+     - Meaning
+   * - ``validated``
+     - ``dry_run=True`` and the call is acceptable. Nothing was written.
+   * - ``unchanged``
+     - No saved change: the saved slots already satisfy the call, or the write
+       left them equal to ``expected``. The version does not change.
+   * - ``committed``
+     - The saved slots changed and were read back. The version increased by
+       one.
+   * - ``rejected``
+     - Nothing was written. ``diagnostics`` names the cause.
+   * - ``restored_failure``
+     - A write raised and the saved slots were restored to the ``expected``
+       snapshot. ``recovery`` is ``"restored"``.
+   * - ``unknown``
+     - A write raised and the restore failed. ``recovery`` is ``"unknown"``.
+       Call :py:func:`read_pm` before retrying.
+
+.. _authoring-layout-diagnostics:
+
+Common diagnostics
+------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - ``code``
+     - Cause, and extra keys
+   * - ``row_operation_unsupported``
+     - The menu is not a Pop-up Dialog or Floating Panel. Reported by every
+       function on this page: :py:func:`add_row`, :py:func:`add_panel`,
+       :py:func:`remove_row`, :py:func:`move_row`, :py:func:`split_row`,
+       :py:func:`join_rows`, :py:func:`update_row`, :py:func:`update_spacer`
+       and :py:func:`align_slot`.
+   * - ``stale_version``
+     - ``expected_version`` differs from the current version. ``expected``
+       (the supplied version) and ``actual`` (the current version), as for
+       slot operations.
+   * - ``stale_popup``
+     - ``expected`` differs from the current saved slot collection.
+   * - ``row_not_found``
+     - A ``row_ref`` does not match exactly one current row.
+   * - ``slot_not_found``
+     - A UID does not identify one slot of the menu.
+   * - ``slot_edit_conflict``
+     - The Slot Editor has an open draft on a slot that the call would delete
+       or rewrite.
+   * - ``panel_row``
+     - The call is not available for a Layout Panel row or anchor. Each
+       function entry gives the case.
+   * - ``aligner_without_root``
+     - The change would place the row's first ``ALIGNER`` after its first
+       ``COLUMN``, which loses the alignment root. Reported only when the row
+       was not already in that state. ``column_slot_uid``,
+       ``aligner_slot_uid``, ``message``.
+   * - ``popup_<operation>_failed``
+     - A write raised. ``<operation>`` is ``row_add``, ``panel_add``,
+       ``row_remove``, ``row_move``, ``row_split``, ``row_join``,
+       ``row_update``, ``spacer_update`` or ``slot_alignment``; ``add``,
+       ``remove`` or ``move`` for item operations. ``exception_type``,
+       ``message``.
+   * - ``popup_restore_failed``
+     - Restoring the ``expected`` snapshot raised. ``status`` is
+       ``"unknown"``. ``exception_type``, ``message``.
+   * - ``refresh_failed``
+     - The editor refresh raised after the write. ``status`` is kept.
+       ``exception_type``, ``message``.
+   * - ``popup_readback_failed``
+     - Reading the saved state after the call raised. ``status`` and
+       ``recovery`` are kept. ``exception_type``, ``message``.
+
+.. _authoring-layout-checks:
+
+Checks before writing
+---------------------
+
+Every function on this page takes ``expected_version``, ``expected`` and
+``dry_run``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 78
+
+   * - Argument
+     - Rule
+   * - ``expected_version``
+     - ``None`` or a non-negative ``int``. The call is rejected with
+       ``stale_version`` when it differs from the menu's session-local version
+       (``read_pm()["version"]`` or a result's ``version``). Any other value,
+       ``bool`` included, raises ``TypeError``.
+   * - ``expected``
+     - ``None`` or the ``expected`` of an earlier Popup result, usually the dry
+       run of the same call. Pass it unchanged. It holds the complete saved
+       slot collection, so it also detects saved changes that did not increase
+       the version. The call is rejected with ``stale_popup`` when it differs.
+       A filtered :py:func:`read_pm` result, a ``slots`` entry or an edited
+       copy is not a substitute. It survives a JSON round trip. A value that is not a mapping
+       raises ``TypeError``.
+   * - ``dry_run``
+     - A ``bool``; any other value raises ``TypeError``. ``True`` runs the same
+       checks and returns ``validated``, ``unchanged`` or ``rejected``.
+
+A dry run writes nothing: no UIDs, no markers, no version change and no refresh.
+Its ``before_*`` and ``after_*`` values both describe the current saved state,
+and its created, deleted and moved lists are empty. It does not predict cleanup,
+new UIDs or drawing success. The later call resolves its arguments and checks
+the current saved state again.
+
+.. code-block:: python
+
+   before = pme.editing.read_pm(pm_uid)
+   checked = pme.editing.add_row(
+       pm_uid, expected_version=before["version"], dry_run=True,
+   )
+   if checked["status"] == "validated":
+       added = pme.editing.add_row(
+           pm_uid, expected_version=checked["version"], expected=checked["expected"],
+       )
+       print(added["status"], added["after_rows"], added["created_row_refs"])
+
+Notes
+-----
+
+* Only ``committed`` increases the version, once per call.
+* ``committed=False`` with ``status="unknown"`` does not mean that nothing
+  changed.
+* The editor refresh runs after every write, including one that ends
+  ``unchanged`` or ``restored_failure``. A call that stops before writing (a dry
+  run, a rejection, or a no-op found before writing) does not refresh.
+* When the final readback raises, ``after_order`` and ``after_rows`` are
+  ``None``; ``after_order`` is kept when only the row readback failed. The
+  created, deleted and moved lists are then empty, which does not mean that
+  nothing changed. Read again before retrying.
+* Selection, unrelated Slot Editor drafts and the row clipboard stay in place.
+* The calls do not save Preferences to disk or add an Undo step.
+
+Row operations
+==============
+
+The editor's **Add Row**, **Remove Row**, **Move Row**, **Split** and **Join
+Rows** commands call the same operations. Pass current row references from
+``read_pm()["rows"]`` or from the last result's ``after_rows``.
+
+.. py:function:: add_row(pm_uid, *, before_row_ref=None, after_row_ref=None, expected_version=None, expected=None, dry_run=False)
+
+   Add a row marker and a default button, as **Add Row** does.
+
+   Give at most one position. Without one, the row is appended after the last
+   row, also in an empty menu.
+
+   :param str pm_uid: UID of a Pop-up Dialog or Floating Panel.
+   :param before_row_ref: Insert the new row before this row.
+   :type before_row_ref: dict or None
+   :param after_row_ref: Insert the new row after this row.
+   :type after_row_ref: dict or None
+   :param expected_version: See :ref:`authoring-layout-checks`.
+   :type expected_version: int or None
+   :param expected: See :ref:`authoring-layout-checks`.
+   :type expected: dict or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described in :ref:`authoring-layout-results`.
+   :rtype: dict
+   :raises TypeError: A ``row_ref`` is not a mapping with exactly ``kind`` and
+      a non-empty ``slot_uid`` string, or ``expected_version``, ``expected`` or
+      ``dry_run`` has the wrong type.
+   :raises ValueError: Both positions are given, a ``row_ref`` kind is not
+      ``"marker"`` or ``"first_item"``, or the menu UID is missing, invalid or
+      ambiguous.
+
+   .. rubric:: Result
+
+   ``slots`` holds the new marker and the new button, in that order.
+   ``created_uids`` lists the same two UIDs. ``created_row_refs`` holds the new
+   row.
+
+   .. rubric:: Diagnostics
+
+   ``row_operation_unsupported``, ``row_not_found``, ``stale_version``,
+   ``stale_popup`` and the write failures under
+   :ref:`authoring-layout-diagnostics`.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      added = pme.editing.add_row(pm_uid)
+      marker_uid, button_uid = added["created_uids"]
+
+   .. rubric:: Notes
+
+   * The new button is a Command slot named ``Button <n>`` with no command.
+     An empty menu receives a marker with the text ``row`` and one button.
+   * The new row's settings follow **Add Row**:
+
+     * Appended, also after the last row: ``size`` from the last row, and
+       ``vspacer`` from it unless that row has a ``COLUMN`` spacer.
+     * Before a row: ``size`` from that row. The new row gets
+       ``vspacer="NONE"`` if that row had ``NONE`` and the row above it has
+       no ``COLUMN`` spacer, otherwise ``"NORMAL"``. That row's ``vspacer``
+       becomes ``"NONE"`` unless it has a ``COLUMN`` spacer.
+     * After a row that is not the last: ``size`` from that row, and
+       ``vspacer="NONE"`` unless that row has a ``COLUMN`` spacer, in which
+       case ``"NORMAL"``.
+     * A row with a ``COLUMN`` spacer, and the row directly below it, never
+       receive ``vspacer="NONE"`` from this call; the editor's row
+       **Spacer** menu does not offer ``NONE`` there either. A ``NONE``
+       already saved on such a row is kept.
+   * ``before_row_ref`` naming a markerless first row adds a marker to that
+     row first, keeping its slots and their text. ``structure_changes`` then
+     has a ``"row_ref"`` entry. ``after_row_ref`` adds no marker to it.
+
+.. py:function:: remove_row(pm_uid, row_ref, *, expected_version=None, expected=None, dry_run=False)
+
+   Remove a row: its marker and every slot in it.
+
+   The next row keeps its marker and settings. Removing the last row leaves an
+   empty menu.
+
+   :param str pm_uid: UID of a Pop-up Dialog or Floating Panel.
+   :param dict row_ref: The row to remove.
+   :param expected_version: See :ref:`authoring-layout-checks`.
+   :type expected_version: int or None
+   :param expected: See :ref:`authoring-layout-checks`.
+   :type expected: dict or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described in :ref:`authoring-layout-results`.
+   :rtype: dict
+   :raises TypeError: ``row_ref`` is not a mapping with exactly ``kind`` and a
+      non-empty ``slot_uid`` string, or ``expected_version``, ``expected`` or
+      ``dry_run`` has the wrong type.
+   :raises ValueError: The ``row_ref`` kind is not ``"marker"`` or
+      ``"first_item"``, or the menu UID is missing, invalid or ambiguous.
+
+   .. rubric:: Result
+
+   ``slots`` holds every slot of the removed row; their ``after`` is ``None``.
+   ``deleted_row_refs`` holds the removed row.
+
+   .. rubric:: Diagnostics
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``slot_edit_conflict``
+        - The Slot Editor has an open draft on a slot of the row.
+
+   Also ``row_operation_unsupported``, ``row_not_found``, ``stale_version``,
+   ``stale_popup`` and the write failures under
+   :ref:`authoring-layout-diagnostics`.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      rows = pme.editing.read_pm(pm_uid)["rows"]
+      result = pme.editing.remove_row(pm_uid, rows[-1]["row_ref"])
+
+   .. rubric:: Notes
+
+   * A Layout Panel row is removed with its anchor and every header item,
+     including disabled items and items hidden while Header Layout is off.
+   * No empty-row or spacer cleanup runs on the neighboring rows.
+   * Unrelated drafts, the selection and the row clipboard stay in place.
+
+.. py:function:: move_row(pm_uid, row_ref, *, before_row_ref=None, after_row_ref=None, expected_version=None, expected=None, dry_run=False)
+
+   Move a whole row before or after another row.
+
+   Give exactly one of ``before_row_ref`` and ``after_row_ref``.
+
+   :param str pm_uid: UID of a Pop-up Dialog or Floating Panel.
+   :param dict row_ref: The row to move.
+   :param before_row_ref: Move the row before this row.
+   :type before_row_ref: dict or None
+   :param after_row_ref: Move the row after this row.
+   :type after_row_ref: dict or None
+   :param expected_version: See :ref:`authoring-layout-checks`.
+   :type expected_version: int or None
+   :param expected: See :ref:`authoring-layout-checks`.
+   :type expected: dict or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described in :ref:`authoring-layout-results`.
+   :rtype: dict
+   :raises TypeError: A ``row_ref`` is not a mapping with exactly ``kind`` and
+      a non-empty ``slot_uid`` string, or ``expected_version``, ``expected`` or
+      ``dry_run`` has the wrong type.
+   :raises ValueError: Neither or both positions are given, a ``row_ref`` kind
+      is not ``"marker"`` or ``"first_item"``, or the menu UID is missing,
+      invalid or ambiguous.
+
+   .. rubric:: Result
+
+   ``slots`` holds the slots of the moved row. ``moved_row_refs`` lists every
+   row whose start index changed.
+
+   .. rubric:: Status
+
+   ``unchanged`` when ``row_ref`` names the target row itself or the row is
+   already at that position. This is also the dry-run status in that case. No
+   marker is added, the version does not change and the editor is not
+   refreshed.
+
+   .. rubric:: Diagnostics
+
+   ``row_operation_unsupported``, ``row_not_found``, ``stale_version``,
+   ``stale_popup`` and the write failures under
+   :ref:`authoring-layout-diagnostics`.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      rows = pme.editing.read_pm(pm_uid)["rows"]
+      result = pme.editing.move_row(
+          pm_uid, rows[-1]["row_ref"], before_row_ref=rows[0]["row_ref"],
+      )
+
+   .. rubric:: Notes
+
+   * The row's slots, settings and UIDs move together, including the header
+     items of a Layout Panel row.
+   * No item-move cleanup runs.
+   * A markerless first row receives a marker when it is moved, or when it is
+     the ``before_row_ref`` target. ``structure_changes`` then has a
+     ``"row_ref"`` entry.
+
+.. py:function:: split_row(pm_uid, row_ref, *, before_uid, expected_version=None, expected=None, dry_run=False)
+
+   Split an ordinary row so that one of its slots starts a new row.
+
+   The slot named by ``before_uid`` and the slots after it in the row move to a
+   new row with default settings. No button is added.
+
+   :param str pm_uid: UID of a Pop-up Dialog or Floating Panel.
+   :param dict row_ref: The row to split.
+   :param str before_uid: A slot of the row other than its marker: an item or a
+      spacer.
+   :param expected_version: See :ref:`authoring-layout-checks`.
+   :type expected_version: int or None
+   :param expected: See :ref:`authoring-layout-checks`.
+   :type expected: dict or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described in :ref:`authoring-layout-results`.
+   :rtype: dict
+   :raises TypeError: ``before_uid`` is not a non-empty string, ``row_ref`` is
+      not a mapping with exactly ``kind`` and a non-empty ``slot_uid`` string,
+      or ``expected_version``, ``expected`` or ``dry_run`` has the wrong type.
+   :raises ValueError: The ``row_ref`` kind is not ``"marker"`` or
+      ``"first_item"``, or the menu UID is missing, invalid or ambiguous.
+
+   .. rubric:: Result
+
+   ``slots`` holds the row's slots and the new marker. ``created_row_refs``
+   holds the new row.
+
+   .. rubric:: Diagnostics
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``panel_row``
+        - The row is a Layout Panel row.
+      * - ``split_position_not_found``
+        - ``before_uid`` is not in the row, or is its marker.
+      * - ``aligner_without_root``
+        - The new row would start its first ``ALIGNER`` after its first
+          ``COLUMN``. ``column_slot_uid``, ``aligner_slot_uid``, ``message``.
+
+   Also ``row_operation_unsupported``, ``row_not_found``, ``stale_version``,
+   ``stale_popup`` and the write failures under
+   :ref:`authoring-layout-diagnostics`.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      row = pme.editing.read_pm(pm_uid)["rows"][0]
+      result = pme.editing.split_row(
+          pm_uid, row["row_ref"], before_uid=row["slot_uids"][-1],
+      )
+
+   .. rubric:: Notes
+
+   * The original row keeps its marker and settings. The new marker has
+     default settings.
+   * One spacer immediately before ``before_uid`` is removed, as **Split**
+     does. Other slots and all UIDs stay.
+   * ``before_uid`` naming the first item leaves the original row empty. A
+     markerless first row receives a marker first; ``structure_changes`` then
+     has a ``"row_ref"`` entry.
+   * A spacer named by ``before_uid`` stays at the start of the new row.
+     Naming the ``ALIGNER`` spacer itself keeps the alignment root.
+   * Rows with ``COLUMN`` or ``ALIGNER`` spacers are accepted unless
+     ``aligner_without_root`` applies. A row already in that state is not
+     repaired.
+   * The editor does not offer **Split** on the first item. The function
+     accepts it.
+
+.. py:function:: join_rows(pm_uid, first_row_ref, second_row_ref, *, expected_version=None, expected=None, dry_run=False)
+
+   Join two adjacent ordinary rows.
+
+   ``second_row_ref`` must start where the first row ends.
+
+   :param str pm_uid: UID of a Pop-up Dialog or Floating Panel.
+   :param dict first_row_ref: The upper row. It keeps its marker and settings.
+   :param dict second_row_ref: The row directly below it.
+   :param expected_version: See :ref:`authoring-layout-checks`.
+   :type expected_version: int or None
+   :param expected: See :ref:`authoring-layout-checks`.
+   :type expected: dict or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described in :ref:`authoring-layout-results`.
+   :rtype: dict
+   :raises TypeError: A ``row_ref`` is not a mapping with exactly ``kind`` and
+      a non-empty ``slot_uid`` string, or ``expected_version``, ``expected`` or
+      ``dry_run`` has the wrong type.
+   :raises ValueError: A ``row_ref`` kind is not ``"marker"`` or
+      ``"first_item"``, or the menu UID is missing, invalid or ambiguous.
+
+   .. rubric:: Result
+
+   ``slots`` holds the slots of both rows. ``deleted_row_refs`` holds the
+   second row.
+
+   .. rubric:: Diagnostics
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``panel_row``
+        - Either row is a Layout Panel row.
+      * - ``rows_not_adjacent``
+        - Another row lies between them, they are in the reverse order, or
+          both references name the same row.
+
+   Also ``row_operation_unsupported``, ``row_not_found``, ``stale_version``,
+   ``stale_popup`` and the write failures under
+   :ref:`authoring-layout-diagnostics`.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      rows = pme.editing.read_pm(pm_uid)["rows"]
+      result = pme.editing.join_rows(pm_uid, rows[0]["row_ref"], rows[1]["row_ref"])
+
+   .. rubric:: Notes
+
+   * The second row's marker is removed, and so is every spacer in the second
+     row whose ``hsep`` is ``COLUMN`` or ``ALIGNER``. Other spacers and items
+     stay.
+
+Row settings, spacers and alignment
+===================================
+
+The editor's row settings, spacer and alignment commands call the same
+operations. The caller does not build row or spacer text.
+
+.. py:function:: update_row(pm_uid, row_ref, changes, *, scope="row", expected_version=None, expected=None, dry_run=False)
+
+   Change the settings of one row or a group of rows.
+
+   Settings that already have the requested value are not written. When
+   nothing differs, the result is ``unchanged``.
+
+   :param str pm_uid: UID of a Pop-up Dialog or Floating Panel.
+   :param row_ref: The row. ``None`` only with ``scope="all_rows"``.
+   :type row_ref: dict or None
+   :param dict changes: Row setting name mapped to its new value. Partial:
+      settings that are not named keep their values. Names and values are
+      under :ref:`authoring-layout-row-settings`.
+   :param str scope: ``"row"``, ``"aligned_rows"`` or ``"all_rows"``. See
+      *Scope* below.
+   :param expected_version: See :ref:`authoring-layout-checks`.
+   :type expected_version: int or None
+   :param expected: See :ref:`authoring-layout-checks`.
+   :type expected: dict or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described in :ref:`authoring-layout-results`.
+   :rtype: dict
+   :raises TypeError: ``changes`` is not a mapping; a value has the wrong
+      Python type (``bool`` for ``fixed_col`` and ``fixed_but``, ``str`` for
+      the others); ``row_ref`` is ``None`` with another scope or is not a
+      mapping with exactly ``kind`` and a non-empty ``slot_uid`` string; or
+      ``expected_version``, ``expected`` or ``dry_run`` has the wrong type.
+   :raises ValueError: A name is not a row setting, a value is not one of its
+      values, ``scope`` is not one of the three values, the ``row_ref`` kind is
+      not ``"marker"`` or ``"first_item"``, or the menu UID is missing, invalid
+      or ambiguous.
+
+   .. rubric:: Scope
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``scope``
+        - Rows changed
+      * - ``row``
+        - The row named by ``row_ref``.
+      * - ``aligned_rows``
+        - The row's group of rows joined by ``vspacer="NONE"``: upward while a
+          row has ``vspacer="NONE"``, so the group's top row is included, and
+          downward while the next row has ``vspacer="NONE"``.
+      * - ``all_rows``
+        - Every row, a markerless first row included. ``row_ref`` may be
+          ``None``. An empty menu stays empty and returns ``unchanged``.
+
+   .. rubric:: Result
+
+   ``slots`` holds the slots of every row in the scope.
+
+   .. rubric:: Diagnostics
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``panel_row``
+        - ``scope="row"`` on a Layout Panel row with a setting other than
+          ``vspacer``. ``fields`` lists those names.
+      * - ``row_fields_skipped``
+        - Not a rejection. A wider scope left settings other than ``vspacer``
+          unchanged on a Layout Panel row. ``row_ref``, ``fields``.
+      * - ``slot_edit_conflict``
+        - The Slot Editor has an open draft on a marker that would be
+          rewritten.
+
+   Also ``row_operation_unsupported``, ``row_not_found``, ``stale_version``,
+   ``stale_popup`` and the write failures under
+   :ref:`authoring-layout-diagnostics`.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid)
+      row_ref = before["rows"][0]["row_ref"]
+      checked = pme.editing.update_row(
+          pm_uid, row_ref, {"size": "LARGE", "fixed_but": True},
+          expected_version=before["version"], dry_run=True,
+      )
+      if checked["status"] == "validated":
+          changed = pme.editing.update_row(
+              pm_uid, row_ref, {"size": "LARGE", "fixed_but": True},
+              expected_version=checked["version"], expected=checked["expected"],
+          )
+          print(changed["status"], changed["after_rows"], changed["structure_changes"])
+
+   .. rubric:: Notes
+
+   * A Layout Panel row accepts only ``vspacer``.
+   * With ``scope="all_rows"``, ``vspacer="NONE"`` is written as ``"NORMAL"``
+     on a row when that row or the row above it has a ``COLUMN`` spacer.
+   * Values are compared after that adjustment. A call with nothing to change
+     leaves the saved text, UIDs and version as they are and does not refresh.
+   * A markerless first row receives a marker only when one of its settings
+     changes. Its first item keeps its command text. ``structure_changes``
+     then has a ``"row_ref"`` entry.
+   * A changed marker is written with the editor's encoding, which can
+     normalize or drop unknown query keys on that marker. Other saved values
+     stay.
+   * ``align`` is the row setting, not the item placement done by
+     :py:func:`align_slot`.
+
+.. py:function:: update_spacer(pm_uid, *, slot_uid=None, before_uid=None, after_uid=None, prop, value, expected_version=None, expected=None, dry_run=False)
+
+   Change one spacer setting, creating the spacer when needed.
+
+   Name exactly one target: ``slot_uid`` for an existing spacer, or
+   ``before_uid`` / ``after_uid`` for the spacer beside a content slot. One call
+   changes one setting, because the cleanup depends on the order of changes.
+
+   :param str pm_uid: UID of a Pop-up Dialog or Floating Panel.
+   :param slot_uid: An existing spacer: leading, trailing or between items.
+   :type slot_uid: str or None
+   :param before_uid: A content slot. The spacer immediately before it in the
+      same row is changed; when there is none, a spacer is created there.
+   :type before_uid: str or None
+   :param after_uid: A content slot. The spacer immediately after it in the
+      same row is changed or created.
+   :type after_uid: str or None
+   :param str prop: ``"hsep"`` or ``"subrow"``.
+   :param str value: A value of ``prop``, see
+      :ref:`authoring-layout-spacer-settings`.
+   :param expected_version: See :ref:`authoring-layout-checks`.
+   :type expected_version: int or None
+   :param expected: See :ref:`authoring-layout-checks`.
+   :type expected: dict or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described in :ref:`authoring-layout-results`.
+   :rtype: dict
+   :raises TypeError: ``value`` is not a string, the target UID is not a
+      non-empty string, or ``expected_version``, ``expected`` or ``dry_run`` has
+      the wrong type.
+   :raises ValueError: ``prop`` is not a spacer setting, ``value`` is not one
+      of its values, not exactly one target is given, or the menu UID is
+      missing, invalid or ambiguous.
+
+   .. rubric:: Result
+
+   ``slots`` holds the spacers whose settings change, the targeted spacer and a
+   created spacer.
+
+   .. rubric:: Diagnostics
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``spacer_required``
+        - ``slot_uid`` names a row marker or a content slot.
+      * - ``content_slot_required``
+        - ``before_uid`` or ``after_uid`` names a spacer or a row marker.
+      * - ``panel_row``
+        - In a Layout Panel row: the target is the anchor, ``prop`` is
+          ``subrow``, or the value is ``hsep="COLUMN"``.
+      * - ``aligner_without_root``
+        - See :ref:`authoring-layout-diagnostics`.
+      * - ``slot_edit_conflict``
+        - The Slot Editor has an open draft on a spacer or marker that would
+          be rewritten or removed.
+
+   Also ``row_operation_unsupported``, ``slot_not_found``, ``stale_version``,
+   ``stale_popup`` and the write failures under
+   :ref:`authoring-layout-diagnostics`.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      result = pme.editing.update_spacer(
+          pm_uid, after_uid=slot_uid, prop="hsep", value="SPACER",
+      )
+
+   .. rubric:: Notes
+
+   * An adjacent spacer is updated in place. :py:func:`add_slot` with
+     ``use_spacer=True`` inserts a spacer instead.
+   * The neighbor must be in the same row. Leading and trailing positions are
+     accepted. Creating a spacer before the first item of a markerless first
+     row adds no row marker.
+   * A spacer whose settings all become ``NONE`` is removed. ``NONE`` with no
+     adjacent spacer returns ``unchanged``.
+   * ``hsep="COLUMN"`` on a spacer with ``subrow="END"`` clears the ``END``.
+   * ``hsep="COLUMN"`` also sets ``vspacer="NORMAL"`` on this row and the next
+     row where they have ``vspacer="NONE"``. The first row is not changed.
+   * Changing the row's only ``COLUMN`` spacer to another ``hsep`` clears
+     ``subrow`` on every spacer in the row.
+   * Changing ``subrow`` from ``BEGIN`` to ``NONE`` also clears the next
+     ``END`` in the row, unless a ``BEGIN`` or ``COLUMN`` comes first.
+   * A subrow does not require a ``COLUMN`` spacer.
+   * Spacers in a Layout Panel header can be changed while Header Layout is
+     off. The change does not turn Header Layout on.
+
+.. py:function:: align_slot(pm_uid, slot_uid, alignment, *, expected_version=None, expected=None, dry_run=False)
+
+   Place an item in the left, center or right section of its row.
+
+   The call moves or creates ``ALIGNER`` spacers as the editor's alignment
+   buttons do. It does not write the row's ``align`` setting.
+
+   :param str pm_uid: UID of a Pop-up Dialog or Floating Panel.
+   :param str slot_uid: A content slot.
+   :param alignment: ``"LEFT"``, ``"CENTER"``, ``"RIGHT"``, or ``None`` to
+      remove the row's outer alignment boundaries.
+   :type alignment: str or None
+   :param expected_version: See :ref:`authoring-layout-checks`.
+   :type expected_version: int or None
+   :param expected: See :ref:`authoring-layout-checks`.
+   :type expected: dict or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described in :ref:`authoring-layout-results`.
+   :rtype: dict
+   :raises TypeError: ``slot_uid`` is not a non-empty string, or
+      ``expected_version``, ``expected`` or ``dry_run`` has the wrong type.
+   :raises ValueError: ``alignment`` is not one of the four values, or the menu
+      UID is missing, invalid or ambiguous.
+
+   .. rubric:: Result
+
+   ``slots`` holds the item. Spacers that are created, moved, changed or
+   removed appear in ``created_uids``, ``deleted_uids``, ``side_effects`` and
+   ``structure_changes``.
+
+   .. rubric:: Diagnostics
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``content_slot_required``
+        - ``slot_uid`` names a row marker or a spacer.
+      * - ``panel_row``
+        - ``slot_uid`` names a Layout Panel anchor.
+      * - ``item_in_column_region``
+        - The row has a ``COLUMN`` spacer and the item comes after the first
+          one. ``column_slot_uid``, ``message``.
+      * - ``aligners_after_column``
+        - The row has an ``ALIGNER`` after its first ``COLUMN``. ``message``.
+      * - ``popup_slot_alignment_failed``
+        - The changes could not be calculated from the saved data. Nothing was
+          written and ``recovery`` is ``"not_needed"``. The traceback is
+          printed to the console. ``exception_type``, ``message``.
+      * - ``aligner_without_root``
+        - See :ref:`authoring-layout-diagnostics`.
+      * - ``slot_edit_conflict``
+        - The Slot Editor has an open draft on a slot that would be moved,
+          rewritten or removed.
+
+   Also ``row_operation_unsupported``, ``slot_not_found``, ``stale_version``,
+   ``stale_popup`` and the write failures under
+   :ref:`authoring-layout-diagnostics`.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      result = pme.editing.align_slot(pm_uid, slot_uid, "RIGHT")
+
+   .. rubric:: Notes
+
+   * In a row with ``COLUMN`` spacers the item must come before the first
+     ``COLUMN``, and no ``ALIGNER`` may follow it. Elsewhere, edit the
+     boundaries with :py:func:`update_spacer`. This limit belongs to
+     ``align_slot``, not to the saved layout.
+   * ``None`` removes the row's first and last ``ALIGNER`` (up to two), also
+     when the item is after a ``COLUMN``. Further ``ALIGNER`` spacers in
+     imported data stay.
+   * Adjacent spacers are merged afterwards by the editor's rules.
+   * Alignment in a Layout Panel header can be changed while Header Layout is
+     off. The change does not turn Header Layout on.
+
+Layout Panels
+=============
+
+A Layout Panel is a collapsible section of a Pop-up Dialog or Floating Panel. It
+occupies one row. Its anchor is a Menu slot whose target menu supplies the Panel
+body; the slots after the anchor in the same row form the Panel header. A
+Panel's anchor and header move or are removed together with the row
+(:py:func:`move_row`, :py:func:`remove_row`). The anchor cannot be removed,
+moved or exchanged as a single item (``panel_row``). Layout Panel rows cannot be
+split or joined.
+
+.. py:function:: add_panel(pm_uid, *, before_row_ref=None, after_row_ref=None, expected_version=None, expected=None, dry_run=False)
+
+   Add a row with a default Layout Panel anchor, as **Add Panel** does.
+
+   Give at most one position. Without one, the row is appended after the last
+   row, also in an empty menu.
+
+   :param str pm_uid: UID of a Pop-up Dialog or Floating Panel.
+   :param before_row_ref: Insert the new row before this row.
+   :type before_row_ref: dict or None
+   :param after_row_ref: Insert the new row after this row.
+   :type after_row_ref: dict or None
+   :param expected_version: See :ref:`authoring-layout-checks`.
+   :type expected_version: int or None
+   :param expected: See :ref:`authoring-layout-checks`.
+   :type expected: dict or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described in :ref:`authoring-layout-results`.
+   :rtype: dict
+   :raises TypeError: A ``row_ref`` is not a mapping with exactly ``kind`` and
+      a non-empty ``slot_uid`` string, or ``expected_version``, ``expected`` or
+      ``dry_run`` has the wrong type.
+   :raises ValueError: Both positions are given, a ``row_ref`` kind is not
+      ``"marker"`` or ``"first_item"``, or the menu UID is missing, invalid or
+      ambiguous.
+
+   .. rubric:: Result
+
+   ``slots`` holds the anchor. ``created_uids`` lists the new marker and the
+   anchor. ``created_row_refs`` holds the new row.
+
+   .. rubric:: Diagnostics
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``layout_panel_unavailable``
+        - Blender is older than 4.2 or has no ``UILayout.panel``. Checked
+          before a dry run returns.
+
+   Also ``row_operation_unsupported``, ``row_not_found``, ``stale_version``,
+   ``stale_popup`` and the write failures under
+   :ref:`authoring-layout-diagnostics`.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      added = pme.editing.add_panel(pm_uid)
+      anchor_uid = added["slots"][0]["uid"]
+
+   .. rubric:: Notes
+
+   * The anchor is a Menu slot named ``Panel`` with no target, no icon and no
+     button background color. Its ``layout_panel`` is a fresh ``idname``
+     (``layout_panel_<id>``) with ``default_closed`` and
+     ``use_header_layout`` set to ``False``. The header is empty.
+   * The new row's ``size`` and ``vspacer`` follow **Add Row**, as in
+     :py:func:`add_row`. Then the new row and the row after it get
+     ``vspacer="NORMAL"`` where they have ``vspacer="NONE"``.
+   * ``before_row_ref`` naming a markerless first row adds a marker to that
+     row, keeping its slots and their text.
+   * Set the anchor's name and ``menu_target_uid`` with
+     :py:func:`update_slots`, using the anchor's UID. Give
+     ``menu_target_uid`` in the same edit as the name or before it: an edit
+     on an anchor without a body menu is rejected (see *Panel settings*
+     below). A ``layout_panel`` dictionary or row marker is not built by
+     hand.
+
+Panel settings
+--------------
+
+The Panel settings are the :py:func:`update_slots` fields
+``layout_panel_default_closed`` and ``layout_panel_use_header_layout`` on the
+anchor. Both accept only ``bool``.
+
+* :py:func:`update_slots` saves the anchor as the Slot Editor does, and the
+  Slot Editor saves a Menu slot only with a body menu. On an anchor without
+  one, such as a new :py:func:`add_panel` anchor, every edit is rejected:
+  the slot entry has ``editor_validation`` with the editor's message
+  ``"Select the item"``, whichever fields are given. Give ``menu_target_uid``
+  in the same edit or an earlier one. The editor's anchor menu changes
+  **Default Closed** and **Header Layout** without a body menu; no
+  ``pme.editing`` function does.
+* Turning ``layout_panel_use_header_layout`` on while the header is empty adds
+  one button to the header.
+* A header that becomes empty later stays empty: another save, a rename or an
+  unchanged ``True`` does not add a button.
+* Turning it off keeps every saved header item.
+* A changed save applies the editor's anchor normalization, including
+  ``enabled=True``. ``enabled`` is not an :py:func:`update_slots` field.
+* :py:func:`update_slots` saves edits one after another; a failure does not undo
+  earlier edits.
+
+.. _authoring-layout-header:
+
+Header positions
+----------------
+
+:py:func:`add_slot`, :py:func:`move_slot` and :py:func:`transfer_slot` place an
+item in a Panel header with ``header_anchor_uid``, the ``panel["anchor_uid"]``
+of the row, combined with exactly one position:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - Position
+     - Meaning
+   * - ``before_uid`` / ``after_uid``
+     - Before or after a saved slot of that header. Spacers count as
+       positions.
+   * - ``edge="START"``
+     - Directly after the anchor.
+   * - ``edge="END"``
+     - At the end of the header. Use an edge when the header is empty.
+
+* Giving none or several positions with ``header_anchor_uid``, an ``edge``
+  other than ``"START"`` or ``"END"``, or ``header_anchor_uid`` together with
+  ``row_ref`` or ``new_row`` raises ``ValueError``.
+* A ``row_ref`` of a Layout Panel row does not mean its header; it is rejected
+  with ``panel_row``.
+* :py:func:`move_slot` into a header from an ordinary row or another header
+  needs ``header_anchor_uid``; otherwise the result is
+  ``header_role_required``. Moving with ``before_uid`` / ``after_uid`` inside
+  the same header works without it. :py:func:`transfer_slot` into a header
+  always needs it.
+* :py:func:`add_slot` with ``before_uid`` / ``after_uid`` inside a header works
+  without ``header_anchor_uid`` while Header Layout is on, and needs it while
+  Header Layout is off.
+* :py:func:`swap_slots` takes only the two UIDs. It exchanges an ordinary item
+  with a header item, or items in different headers, without cleanup.
+* An anchor cannot be moved into another header. A second anchor already saved
+  inside a header can be removed with :py:func:`remove_slot`; nothing inserts
+  one.
+* Header items can be added, moved and removed while Header Layout is off; the
+  call does not turn it on. The result then has ``header_layout_disabled``
+  with the ``anchor_uid`` in ``diagnostics``. Preferences shows these items for
+  editing; the menu at run time hides them.
+* In the editor, the anchor's menu has **Add** for an empty header, **Move**
+  offers the header start and end, Ctrl+Alt+click removes one header item, and
+  **Delete Inactive Header** removes all items of a header whose Header Layout
+  is off.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - ``code``
+     - Cause, and extra keys
+   * - ``header_layout_disabled``
+     - Not a rejection. The header's Header Layout is off. ``anchor_uid``.
+   * - ``panel_anchor_not_found``
+     - ``header_anchor_uid`` does not name a Layout Panel anchor.
+   * - ``header_target_mismatch``
+     - ``before_uid`` / ``after_uid`` is not a slot of that header.
+   * - ``header_role_required``
+     - A move or transfer into a header without ``header_anchor_uid``.
+   * - ``panel_row``
+     - The destination is in a Layout Panel row outside the header positions,
+       or :py:func:`add_slot` without ``header_anchor_uid`` targets a header
+       whose Header Layout is off, or the moved item is an anchor.
+
+.. code-block:: python
+
+   before = pme.editing.read_pm(pm_uid)
+   panel = next(row["panel"] for row in before["rows"] if row["panel"])
+   anchor_uid = panel["anchor_uid"]
+   checked = pme.editing.move_slot(
+       pm_uid, slot_uid, header_anchor_uid=anchor_uid, edge="END",
+       expected_version=before["version"], dry_run=True,
+   )
+   if checked["status"] == "validated":
+       moved = pme.editing.move_slot(
+           pm_uid, slot_uid, header_anchor_uid=anchor_uid, edge="END",
+           expected_version=checked["version"], expected=checked["expected"],
+       )
+       print(moved["status"], moved["diagnostics"], moved["after_rows"])
+
+.. _authoring-layout-positions:
+
+Item positions in rows
+======================
+
+In a Pop-up Dialog or Floating Panel, :py:func:`add_slot`, :py:func:`move_slot`
+and :py:func:`transfer_slot` take one of these destination forms.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 20 50
+
+   * - Arguments
+     - Functions
+     - Destination
+   * - ``before_uid`` / ``after_uid``
+     - all three
+     - Directly before or after that saved slot.
+   * - ``row_ref`` with ``edge="START"`` / ``"END"``
+     - ``move_slot``, ``transfer_slot``
+     - The left end (after the marker) or the right end of that row. The row
+       may be empty. A Layout Panel row is rejected with ``panel_row``.
+   * - ``new_row="END"``
+     - ``move_slot``, ``transfer_slot``
+     - A new last row.
+   * - ``header_anchor_uid`` with a position
+     - all three
+     - A Panel header. See :ref:`authoring-layout-header`.
+
+* Exactly one form is accepted. Mixing forms raises ``ValueError``. ``new_row``
+  is the string ``"END"``, not a bool.
+* ``use_spacer`` is a ``bool`` and defaults to ``False``. The Preferences
+  setting does not apply.
+* ``before_uid`` / ``after_uid`` use the anchor's saved index. Markers and
+  spacers are not skipped: ``after_uid=A`` and ``before_uid=B`` are different
+  positions when spacers lie between A and B.
+* :py:func:`move_slot` runs the editor's empty-row and spacer cleanup for all
+  forms. The moved item keeps its UID and saved values; the selection and an
+  open Slot Editor draft stay attached to their items.
+* A move with ``before_uid`` / ``after_uid`` that is already satisfied,
+  including a self anchor, returns ``unchanged`` without spacers, cleanup,
+  version change or refresh. A row-edge move that is already satisfied can
+  still refresh the editor. Moving the only item of a row to a new row can end
+  ``unchanged`` after cleanup.
+* :py:func:`swap_slots` exchanges two items with their UIDs and saved values,
+  without cleanup of empty rows or spacers.
+* The editor's **Move** chooser offers the same before and after positions,
+  the exchange, the row ends and **Add Row**.
+
+.. code-block:: python
+
+   before = pme.editing.read_pm(pm_uid)
+   row_ref = before["rows"][-1]["row_ref"]
+   checked = pme.editing.move_slot(
+       pm_uid, slot_uid, row_ref=row_ref, edge="END",
+       expected_version=before["version"], dry_run=True,
+   )
+   if checked["status"] == "validated":
+       result = pme.editing.move_slot(
+           pm_uid, slot_uid, row_ref=row_ref, edge="END",
+           expected_version=checked["version"], expected=checked["expected"],
+       )
+       print(result["status"], result["after_rows"], result["structure_changes"])
+
+.. _authoring-layout-insertion-position:
+
+Read a resolved Popup insertion position
+========================================
+
+Popup results of :py:func:`add_slot` and :py:func:`move_slot` include
+``insertion_position``. For :py:func:`transfer_slot` it is
+``result["to"]["insertion_position"]``. The value is the position the call
+resolved, recorded the same way for a dry run and for the write. It describes
+a gap in the saved order **before** the call.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 16 62
+
+   * - Key
+     - Type
+     - Value
+   * - ``basis``
+     - str
+     - Always ``"before"``.
+   * - ``index``
+     - int
+     - Gap index from 0 through the number of saved slots, markers and
+       spacers included.
+   * - ``previous_slot_uid``
+     - str or None
+     - The slot directly before the gap. ``None`` at the start.
+   * - ``next_slot_uid``
+     - str or None
+     - The slot directly after the gap. ``None`` at the end.
+   * - ``row_ref``
+     - dict or None
+     - The before-state row that contains ``previous_slot_uid``. At index 0,
+       the markerless first row if there is one. Otherwise ``None``.
+   * - ``new_row``
+     - str or None
+     - ``"END"`` for a new last row, otherwise ``None``.
+
+For the saved order ``[row, A, COLUMN, B]``, a position after A is index 2,
+between A and the ``COLUMN`` spacer; a position before B is index 3, between
+the ``COLUMN`` spacer and B. The UIDs of the neighboring markers and spacers
+tell the two sides of a boundary apart.
+
+* A new-row destination reports the end index of the before state with
+  ``row_ref=None``. No future row reference or UID is allocated.
+* Removing the source, inserting a spacer and cleanup can change the final
+  index. The value keeps its before basis after success or failure; the
+  ``after_*`` values and orders give the saved result.
+* An ``unchanged`` move can report the requested gap with the source UID as a
+  neighbor.
+* A rejection before the position is resolved has ``None``. A rejection after
+  it can carry a position; ``status`` and ``diagnostics`` decide whether the
+  call is allowed. A new check never reuses the position of an earlier one.
+* :py:func:`swap_slots`, :py:func:`remove_slot`, the functions on this page and
+  transfers to other menu types report ``None``.
+* The value records saved insertion boundaries only. Column and subrow nesting
+  is not reported as a tree. A dry run keeps the current saved rows in
+  ``before_rows`` and ``after_rows`` and does not predict cleanup.
+
+See also: :ref:`authoring-recipe-build-panel-rows`.

@@ -1,0 +1,506 @@
+:vocab: developer-facing
+
+.. _authoring-results:
+
+==================
+Results and guards
+==================
+
+.. py:currentmodule:: pme.editing
+
+Every editing function of ``pme.editing`` returns a ``dict``. This page defines
+what those results share: ``status`` values, the guards that reject stale input,
+``dry_run``, diagnostic entries and exceptions. Keys that belong to one function
+are described with that function.
+
+The success, preview and stale-input values are named per operation.
+:ref:`authoring-results-by-operation` lists them; a caller tests those values
+rather than one assumed spelling.
+
+Common result keys
+==================
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``status``
+     - str
+     - One of the values under :ref:`authoring-results-status`. Present in every
+       result.
+   * - ``committed``
+     - bool
+     - ``True`` only when ``status`` is ``"committed"``.
+   * - ``dry_run``
+     - bool
+     - The ``dry_run`` argument. Slot, layout and transfer results do not have
+       this key.
+   * - ``pm_uid``
+     - str
+     - The menu UID, in results of most operations on one menu.
+   * - ``before``, ``after``
+     - dict or None
+     - Saved values read before and after the call. Shape and presence are
+       described with each function.
+   * - ``expected``
+     - dict
+     - The value to pass as ``expected`` to a later call, in operations whose
+       guard is a snapshot (:ref:`authoring-results-guards`).
+   * - ``pending``
+     - list
+     - Parts whose save was not attempted: slot UIDs, metadata field names or
+       Property groups. An earlier step, such as an editor callback, can still
+       have changed them. Pending does not mean unchanged.
+   * - ``recovery``
+     - dict, str or None
+     - Restore details after a failed write. Shape described with each
+       function.
+   * - ``diagnostics``
+     - list[dict]
+     - Entries described under :ref:`authoring-results-diagnostics`. Present in
+       every result.
+
+:py:func:`pme.create_pm` returns a ``PmCreationResult`` object, not a dict:
+``accepted`` (bool), ``pm_uid`` (str, empty when rejected) and ``diagnostics``
+(tuple of code strings). ``refresh_failed`` with ``accepted`` ``True`` means
+the menu was created and only the display refresh failed.
+
+:py:func:`update_slots` and :py:func:`clear_slots` also return per-slot
+``slots``, ``side_effects`` and ``structure_changes``, described with
+:py:func:`update_slots`.
+
+.. _authoring-results-status:
+
+Status values
+=============
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 78
+
+   * - ``status``
+     - Meaning
+   * - ``committed``
+     - The requested change is saved in memory, as read back after the editor's
+       normal normalization. For :py:func:`update_slots`,
+       :py:func:`clear_slots` and :py:func:`update_pm`: at least one requested
+       part was saved and none was rejected; single parts can be
+       ``unchanged``. When every part already has the requested value, the
+       result is ``unchanged``.
+   * - ``partial``
+     - Part of the request was saved, then a later part was rejected or
+       failed. The parts that were not attempted are in ``pending``. Returned
+       only by :py:func:`update_slots`, :py:func:`clear_slots`,
+       :py:func:`update_pm` and :py:func:`update_property`.
+   * - ``validated``
+     - ``dry_run=True`` and the request passes every check. Nothing was
+       written.
+   * - ``ready``
+     - The same as ``validated``, returned by :py:func:`update_hotkey` and
+       :py:func:`delete_pms`.
+   * - ``unchanged``
+     - The request already matches the saved values. Nothing was written.
+       Router and Property Stack dry runs return ``validated`` instead.
+   * - ``rejected``
+     - The requested change is not saved. ``diagnostics`` names the cause. A
+       slot operation that ran an editor callback can still leave the
+       callback's changes, shown in ``after`` and ``side_effects``.
+   * - ``restored_failure``
+     - A write failed. The saved values were written back, and the readback
+       matches the values from before the call. Blender registration is
+       observed separately.
+   * - ``unknown``
+     - A write failed and the saved state could not be confirmed. The target
+       is read again before any retry.
+
+Entries inside a result have their own ``status``:
+
+* ``slots`` entries (slot operations) and ``fields`` entries
+  (:py:func:`update_pm`): ``committed``, ``unchanged`` or ``rejected``.
+* ``groups`` entries (:py:func:`update_property`): ``committed``,
+  ``rejected``, ``restored_failure`` or ``unknown``.
+* ``registration`` (:py:func:`update_hotkey`, :py:func:`set_enabled`):
+  ``registered``, ``not_required``, ``partial`` or ``unknown``.
+* ``visibility`` (:py:func:`set_enabled`): ``observed`` or ``unknown``.
+
+Registration and visibility are observations of Blender's current state, not
+the outcome of the operation.
+
+What a committed status covers
+------------------------------
+
+* The saved definition in memory. Preferences are not saved to disk
+  (:ref:`authoring-concepts`).
+* Not display or action. Readback verifies the saved definition; display and
+  actions are observed separately in the editor and mode the menu targets. For
+  example, a committed Command slot that activates the Knife tool changes the
+  active tool when run; it does not cut geometry by itself.
+* Not the absence of problems. Diagnostics can accompany ``committed``:
+  normalization notes, warnings, or a saved definition that still needs
+  attention.
+* A refresh after the save can fail without undoing the commit. The failure
+  is reported in ``diagnostics`` or in an exception note.
+
+.. _authoring-results-guards:
+
+Guards
+======
+
+A guard compares the caller's copy of the saved state with the current state
+before anything is written. A mismatch returns ``status`` ``"rejected"`` with
+the operation's stale diagnostic, listed under
+:ref:`authoring-results-by-operation`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 40 40
+
+   * - Input
+     - Compares
+     - Value comes from
+   * - ``expected_version``
+     - The menu's session-local version (int). Stale code ``stale_version``,
+       with ``expected`` and ``actual``.
+     - ``read_pm()["version"]``, or ``version`` in an earlier slot or layout
+       result.
+   * - ``expected``
+     - Saved values, in one of the three forms below.
+     - ``read_pm()``, or ``expected`` in an earlier result.
+   * - ``expected_digest``
+     - A hash (str) of the saved storage of a Router, Property Stack or
+       Property.
+     - ``read_pm()["router"]["digest"]``,
+       ``read_pm()["property_stack"]["digest"]`` or
+       ``read_pm()["property"]["digest"]``.
+
+``expected_version`` and ``expected`` are independent. ``version`` does not
+detect every raw Python write; ``expected`` compares the saved values and
+detects them.
+
+``expected_version`` is accepted by :py:func:`update_slots`,
+:py:func:`clear_slots`, :py:func:`add_slot`, :py:func:`remove_slot`,
+:py:func:`move_slot`, :py:func:`swap_slots` and the row, spacer and panel
+operations. :py:func:`transfer_slot` does not accept it.
+
+Forms of ``expected``
+---------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 38 40
+
+   * - Form
+     - Operations
+     - Rule
+   * - Subset of saved values
+     - :py:func:`update_pm` (metadata), :py:func:`update_settings` (settings),
+       :py:func:`update_slots` and :py:func:`clear_slots` (slot UID to slot
+       fields), :py:func:`remove_slot` on menus other than Pop-up Dialog and
+       Floating Panel (the slot's fields)
+     - Any subset of the keys ``read_pm()`` returns for that part. A key whose
+       value differs rejects the call. A key the saved values do not have is
+       stale too, except in :py:func:`update_pm`, which raises ``ValueError``
+       for an unknown field. :py:func:`update_slots` and
+       :py:func:`clear_slots` raise ``ValueError`` for a slot UID that is not
+       being edited.
+   * - Complete saved values
+     - :py:func:`update_hotkey` (exactly the 13 fields of
+       ``read_pm()["hotkey"]``), :py:func:`set_enabled` (every requested UID
+       mapped to its saved bool)
+     - Missing or extra keys raise ``ValueError``.
+   * - Snapshot from an earlier call
+     - :py:func:`add_slot`; :py:func:`remove_slot`, :py:func:`move_slot`,
+       :py:func:`swap_slots` and the row, spacer and panel operations on a
+       Pop-up Dialog or Floating Panel; :py:func:`transfer_slot`,
+       :py:func:`update_tags`, :py:func:`duplicate_pm`, :py:func:`delete_pms`
+     - ``result["expected"]`` from an earlier call, usually the dry run, passed
+       back unchanged. Any difference rejects the call.
+
+:py:func:`move_slot` and :py:func:`swap_slots` raise ``TypeError`` for
+``expected`` on menus other than Pop-up Dialog and Floating Panel.
+
+.. _authoring-results-dry-run:
+
+``dry_run``
+===========
+
+* ``dry_run=True`` runs the checks of the real call against the current saved
+  values and writes nothing. Saved values, versions and UIDs stay as they were;
+  editor hooks and refresh do not run.
+* An accepted dry run returns ``validated`` (``ready`` for
+  :py:func:`update_hotkey` and :py:func:`delete_pms`), or ``unchanged`` where
+  :ref:`authoring-results-by-operation` lists it.
+* ``before`` and ``after``, where present, report saved values, not a
+  prediction. A predicted
+  value, where returned, is ``proposed`` (:py:func:`update_hotkey`) or
+  ``candidate`` (:py:func:`update_property`, Router and Property Stack
+  operations).
+* The ``expected`` of a dry run can be passed to the applying call.
+* The applying call resolves the UIDs and repeats every check. ``validated``
+  does not reserve success and does not test editor hooks, refresh or Blender
+  registration.
+* :py:func:`update_slots`, :py:func:`clear_slots` and :py:func:`update_pm` have
+  no ``dry_run``.
+
+.. _authoring-results-by-operation:
+
+Results by operation
+====================
+
+*Other statuses* lists the values besides the committed and dry-run values.
+*Guard inputs* gives the guard parameters and the stale diagnostic code.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 11 14 21 32
+
+   * - Operation
+     - Committed
+     - Accepted dry run
+     - Other statuses
+     - Guard inputs
+   * - :py:func:`pme.create_pm`
+     - ``accepted`` is ``True`` (object, not a dict)
+     - none
+     - ``accepted`` ``False`` with ``diagnostics``
+     - none
+   * - :py:func:`update_slots`, :py:func:`clear_slots`
+     - ``committed``
+     - no ``dry_run``
+     - ``unchanged``, ``partial``, ``rejected``
+     - ``expected_version``; ``expected`` (slot UID to subset of slot fields).
+       ``stale_version``, ``stale_slot``
+   * - :py:func:`update_pm`
+     - ``committed``
+     - no ``dry_run``
+     - ``unchanged``, ``partial``, ``rejected``
+     - ``expected`` (subset of the metadata). ``stale_metadata``
+   * - :py:func:`update_settings`
+     - ``committed``
+     - ``validated``, ``unchanged``
+     - ``unchanged``, ``rejected``, ``restored_failure``, ``unknown``
+     - ``expected`` (subset of the settings). ``stale_settings``
+   * - :py:func:`update_hotkey`
+     - ``committed``
+     - ``ready``, ``unchanged``
+     - ``unchanged``, ``rejected``
+     - ``expected`` (all 13 hotkey fields). ``stale_hotkey``
+   * - :py:func:`set_enabled`
+     - ``committed``
+     - ``validated``, ``unchanged``
+     - ``unchanged``, ``rejected``, ``restored_failure``, ``unknown``
+     - ``expected`` (UID to saved bool, every target).
+       ``pm_availability_expected_mismatch``
+   * - :py:func:`update_tags`
+     - ``committed``
+     - ``validated``; ``unchanged`` for an empty request
+     - ``unchanged``, ``rejected``, ``unknown``
+     - ``expected`` (snapshot). ``tag_expected_stale``
+   * - :py:func:`duplicate_pm`
+     - ``committed``
+     - ``validated``
+     - ``rejected``, ``restored_failure``, ``unknown``
+     - ``expected`` (snapshot). ``pm_duplicate_stale_expected``
+   * - :py:func:`delete_pms`
+     - ``committed``
+     - ``ready``
+     - ``rejected``, ``restored_failure``, ``unknown``
+     - ``expected`` (snapshot). ``pm_remove_saved_state_stale``
+   * - :py:func:`read_pm`, :py:func:`read_slot_inputs`,
+       :py:func:`slot_fields`, :py:func:`resolve_auto_icons`,
+       :py:func:`setting_fields`, :py:func:`find_references`
+     - Read-only: no ``status``, nothing is written
+     - none
+     - none
+     - none
+   * - :py:func:`add_slot`
+     - ``committed``
+     - ``validated``
+     - ``rejected``; on a Pop-up Dialog or Floating Panel also
+       ``restored_failure``, ``unknown``
+     - ``expected_version``; ``expected`` (snapshot). ``stale_version``,
+       ``stale_snapshot``, ``stale_popup`` (Pop-up)
+   * - :py:func:`remove_slot`
+     - ``committed``
+     - ``validated``
+     - ``rejected``; on a Pop-up Dialog or Floating Panel also
+       ``restored_failure``, ``unknown``
+     - ``expected_version``; ``expected`` (the slot's fields, or a snapshot on
+       a Pop-up). ``stale_version``, ``stale_slot``, ``stale_popup``
+   * - :py:func:`move_slot`, :py:func:`swap_slots`
+     - ``committed``
+     - ``validated``, ``unchanged``
+     - ``unchanged``, ``rejected``; on a Pop-up Dialog or Floating Panel also
+       ``restored_failure``, ``unknown``
+     - ``expected_version``; ``expected`` (snapshot, Pop-up only).
+       ``stale_version``, ``stale_popup``
+   * - :py:func:`transfer_slot`
+     - ``committed``
+     - ``validated``
+     - ``rejected``, ``restored_failure``, ``unknown``
+     - ``expected`` (snapshot); no ``expected_version``. ``stale_transfer``
+   * - :py:func:`add_row`, :py:func:`add_panel`, :py:func:`remove_row`,
+       :py:func:`split_row`, :py:func:`join_rows`
+     - ``committed``
+     - ``validated``
+     - ``rejected``, ``restored_failure``, ``unknown``
+     - ``expected_version``; ``expected`` (snapshot). ``stale_version``,
+       ``stale_popup``
+   * - :py:func:`move_row`, :py:func:`update_row`, :py:func:`update_spacer`,
+       :py:func:`align_slot`
+     - ``committed``
+     - ``validated``, ``unchanged``
+     - ``unchanged``, ``rejected``, ``restored_failure``, ``unknown``
+     - ``expected_version``; ``expected`` (snapshot). ``stale_version``,
+       ``stale_popup``
+   * - :py:func:`update_property`
+     - ``committed``
+     - ``validated``, ``unchanged``
+     - ``unchanged``, ``partial``, ``rejected``, ``restored_failure``,
+       ``unknown``
+     - ``expected_digest``. ``stale_property``
+   * - :py:func:`remove_router_branch`
+     - ``committed``
+     - ``validated``
+     - ``rejected``, ``unknown``
+     - ``expected_digest``. ``stale_router_digest``
+   * - :py:func:`update_router`, :py:func:`move_router_branch`,
+       :py:func:`reorder_router_branches`
+     - ``committed``
+     - ``validated``
+     - ``unchanged``, ``rejected``, ``unknown``
+     - ``expected_digest``. ``stale_router_digest``
+   * - :py:func:`update_property_stack`
+     - ``committed``
+     - ``validated``
+     - ``unchanged``, ``rejected``, ``unknown``
+     - ``expected_digest``. ``stale_property_stack_digest``
+   * - :py:func:`add_property_stack_row`,
+       :py:func:`update_property_stack_row`,
+       :py:func:`remove_property_stack_row`
+     - ``committed``
+     - ``validated``
+     - ``unchanged``, ``rejected``, ``unknown``
+     - ``expected_digest``. ``stale_property_stack_digest``
+   * - :py:func:`update_property_stack_hud`
+     - ``committed``
+     - ``validated``, ``unchanged``
+     - ``unchanged``, ``rejected``, ``restored_failure``, ``unknown``
+     - ``expected`` (subset of ``while_true_hud``). ``stale_property_stack_hud``
+
+.. _authoring-results-diagnostics:
+
+Diagnostics
+===========
+
+``diagnostics`` is a list of dicts. Every entry has ``code``; the other keys
+depend on the entry.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 30 48
+
+   * - Key
+     - Present in
+     - Value
+   * - ``code``
+     - every entry
+     - Machine-readable identifier, such as ``stale_settings``.
+   * - ``message``
+     - most entries
+     - Human-readable description.
+   * - ``field`` / ``fields``
+     - entries about named inputs
+     - The input name, or a list of names. Stale guards list the differing
+       names in ``fields``.
+   * - ``pmi_uid``
+     - slot operations
+     - The slot the entry concerns.
+   * - ``path``
+     - Router and Property Stack operations
+     - Location in the input or logic, such as
+       ``logic.branches[0].target``.
+   * - ``severity``
+     - some entries
+     - ``"error"`` or ``"warning"``. Property Stack entries always have it.
+       Elsewhere it marks warnings, such as hotkey collisions, references
+       left after a deletion and unresolved Router menu targets.
+   * - ``exception_type``
+     - entries for a caught exception
+     - Class name of the exception. The traceback is printed to Blender's
+       console.
+   * - ``phase``
+     - :py:func:`update_tags`, :py:func:`delete_pms`, :py:func:`set_enabled`
+     - The step that produced the entry, such as ``preflight`` or
+       ``readback``.
+   * - ``expected``, ``actual``
+     - ``stale_version``
+     - The supplied and the current version.
+   * - ``line``, ``column``
+     - ``invalid_syntax`` (slot operations)
+     - Location of the syntax error in the submitted text. The text is not
+       stripped or reindented before the check.
+
+* A diagnostic does not mean failure by itself. ``status`` decides; a
+  ``committed`` result can carry diagnostics.
+* Codes specific to a function are listed with that function.
+
+.. _authoring-results-exceptions:
+
+Exceptions
+==========
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 46 32
+
+   * - Exception
+     - Raised when
+     - Saved state
+   * - ``RuntimeError``
+     - Called off Blender's main thread, before PME finished loading, or
+       without PME preferences (:ref:`authoring-concepts`).
+     - Not touched.
+   * - ``TypeError``
+     - An argument has the wrong type, such as ``changes`` that is not a
+       mapping or a ``dry_run`` that is not a bool.
+     - Not written: raised before the first write.
+   * - ``ValueError``
+     - An unknown field, an invalid value, conflicting arguments, or a menu UID
+       that is missing, invalid or ambiguous.
+     - Not written: raised before the first write.
+   * - Any exception after writing started
+     - A write, editor callback, setter or refresh raised.
+     - Can be partly changed. The traceback is kept and a note is added.
+
+* An editor or callback can also raise ``TypeError`` or ``ValueError`` after
+  writing started. The exception class does not prove that nothing changed.
+  The traceback and notes are kept, and the target is read again before any
+  retry.
+* The note is in the exception's ``__notes__`` and is printed with the
+  traceback. It names what was committed or what to read:
+
+  * :py:func:`update_slots`, :py:func:`clear_slots`: the committed slot UIDs
+    and the slot being saved.
+  * :py:func:`update_pm`: the committed fields and the step that raised.
+  * :py:func:`update_hotkey`: the saved readback, the changed fields and the
+    registration readback.
+  * :py:func:`add_slot`, :py:func:`remove_slot`, :py:func:`move_slot`,
+    :py:func:`swap_slots` on menus other than Pop-up Dialog and Floating
+    Panel: the slot order before the call.
+  * :py:func:`update_property`: whether the saved definition was restored.
+  * Router and Property Stack operations: an instruction to read the menu
+    before retrying; Property Stack notes also give the last reported status.
+
+* Router and Property Stack operations do not raise for malformed input. They
+  return ``rejected`` with a diagnostic such as ``dry_run_must_be_a_boolean``,
+  ``expected_digest_must_be_a_string`` or ``branches_must_be_a_sequence``.
+* :py:func:`update_settings`, :py:func:`set_enabled`, :py:func:`update_tags`,
+  :py:func:`duplicate_pm`, :py:func:`delete_pms`, :py:func:`transfer_slot` and
+  the slot and layout operations on a Pop-up Dialog or Floating Panel catch a
+  failed write instead of raising. They print the traceback, return
+  ``restored_failure`` or ``unknown`` (:py:func:`update_tags`: ``rejected`` or
+  ``unknown``), and describe the failure in ``diagnostics``.

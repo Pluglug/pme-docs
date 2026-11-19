@@ -1,0 +1,265 @@
+(regular-menu-editor)=
+
+# Regular Menu Editor
+
+**Regular Menu** は、項目を縦に並べたドロップダウン型のメニューを作成するエディターです。Blender のドロップダウンメニューやコンテキストメニューと同じ形式で動作します。
+
+
+:::{dropdown} 構成ガイド — 機能・組み合わせ・活用例（AI 向け）
+
+**呼び名：Regular Menu／種別 ID：`RMENU`。** 項目を縦に並べ、必要に応じて列や区切りで整理するメニューです。スロット数は可変。Command / Property / Menu / Hotkey / Custom を使えます。
+
+- **割り当て**：Command は実行する Python、Property は RNA パスによるウィジェット、Custom は Blender の `UILayout` を使う描画コードです。Hotkey は実行時のキー割り当てからオペレーターを呼びます。
+- **Menu の組み合わせ**：別のメニューを開く、Property / Property Stack をスイッチとして配置する、Regular Menu を展開するなど、参照先とオプションで意味が変わります。
+- **配置**：ホットキーから呼ぶ／既存 Blender メニューへ差し込む／Pie Menu や Popup Dialog の中へ展開する。差し込み先のクラスと、実行時のエディター・モードを確認します。
+- **用途**：名前を見て選ぶ操作一覧、種類ごとに列を分けたツールメニュー。方向操作が必要なら Pie Menu / Vector Menu を検討します。
+
+展開は {ref}`他メニューとの組み合わせ <regular-composition>`、差し込みは {ref}`Extend Target <regular-extend>`、項目は {ref}`メニュースロット <regular-slots>`へ。
+:::
+
+## 画面と編集の流れ
+
+```{raw} html
+:file: common/_regular_menu_editor_overview_map.html
+```
+
+1. {ref}`名前と基本操作 <regular-basic>`
+2. {ref}`Extend Target <regular-extend>`
+3. {ref}`Advanced settings <regular-advanced>`
+4. {ref}`Keymap / Hotkey <regular-hotkey>`
+5. {ref}`メニュースロット <regular-slots>`
+
+名前と利用条件、呼び出し方を設定し、スロットでメニューの内容を組み立てます。
+
+(regular-basic)=
+
+## 名前と基本操作
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-5.16962843%">
+<img src="../_static/images/editors/overview/regular-menu-blender-5-2.png" width="663" height="619" alt="My Help Menu の 名前と基本操作。メニュー名と有効状態を確認し、プレビューや詳細設定を開きます。">
+</div>
+<figcaption>名前と基本操作。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+有効状態、プレビュー、選択メニュー、名前、タグ、ドキュメント、詳細設定の操作です。各ボタンは {ref}`選択メニューの設定 <overview-selected>`を参照してください。
+
+(regular-hotkey)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 67;--crop-offset:-28.27140549%">
+<img src="../_static/images/editors/overview/regular-menu-blender-5-2.png" width="663" height="619" alt="My Help Menu の Keymap / Hotkey。独立して呼び出す場合の場所とキーを指定します。この例はキー未割り当てです。">
+</div>
+<figcaption>Keymap / Hotkey。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+使う場所を Keymap、起動キーと修飾キーを Hotkey で設定します。Open Mode は開くタイミングです。入力欄は {ref}`共通の Hotkey 設定 <hotkey-editor>`を参照してください。
+
+(regular-extend)=
+
+## Extend Target
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 25;--crop-offset:-10.33925687%">
+<img src="../_static/images/editors/overview/regular-menu-blender-5-2.png" width="663" height="619" alt="My Help Menu の Extend Target。既存メニューへの差し込み先と位置、順序を設定します。この例は Help メニューの末尾です。">
+</div>
+<figcaption>Extend Target。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+
+トップバー直下にあり、Blender の既存メニューへこの Regular Menu を差し込むための行です。
+
+```{versionadded} 2.0.0
+Extend Target に対して複数の Pop-up Dialog / Regular Menu を重ねられるようになりました。
+```
+
+:Extend Target:
+  差し込み先の Blender メニュークラス ID。`VIEW3D_MT_object` のような文字列を入れます。未指定の場合は差し込みは行われません。
+
+:Side:
+  差し込み位置。**▲** は対象メニューの先頭、**▼** は末尾を指します。
+
+:Order:
+  同じ Target に複数のメニューが差し込まれている場合の表示順。値が小さいほど先に並びます。
+
+差し込み先 ID は [Interactive Panels](./interactive_panels.md) モードからも取得できます。
+
+(regular-slots)=
+
+## メニュースロット
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__image" style="grid-template-columns:repeat(2, 1fr)">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 370;--crop-offset:-39.74151858%">
+<img src="../_static/images/editors/overview/regular-menu-blender-5-2.png" width="663" height="619" alt="My Help Menu の メニュースロット。項目を縦に並べ、見出しや区切りで整理します。">
+</div>
+<a class="pme-overview__spot" style="--x:1.96%;--y:91.62%;--w:87.93%;--h:6.22%" href="#regular-add-slot" aria-label="A 下にスロットを追加の説明へ">
+<span class="pme-overview__number">A</span><span class="pme-overview__tip"><strong>Add Slot</strong>この列の末尾にスロットを追加します。項目を縦に増やす操作です。</span></a>
+<a class="pme-overview__spot pme-overview__spot--right" style="--x:94.72%;--y:0.54%;--w:3.62%;--h:97.30%" href="#regular-add-column" aria-label="B 右に列を追加の説明へ">
+<span class="pme-overview__number">B</span><span class="pme-overview__tip"><strong>Add Column</strong>右側に新しい列を追加します。複数列に分けて整理する操作です。</span></a>
+</div>
+<figcaption>A：下にスロットを追加。B：右に列を追加。</figcaption>
+</figure>
+```
+
+スロットは各列の上から順にメニュー項目として並びます。増やす方向に応じて、次の2つを使い分けます。
+
+- <span id="regular-add-slot"></span>**A. 下の Add Slot — スロットを追加**：その列の末尾に新しい項目を追加します。同じ列の操作を縦に増やすときに使います。
+- <span id="regular-add-column"></span>**B. 右端の ＋ — 列を追加（Add Column）**：現在の最後の列の右に、新しい列を追加します。例えば左に選択ツール、右に変形ツールを置くように、項目を横に分けて整理できます。追加した列も、下の Add Slot で項目を増やします。
+
+- 並び順がそのままメニューの表示順になります。
+- スロットの追加・削除・並び替えが可能です。
+- 個別スロットの有効化/無効化は、無効化されたスロットがメニューから取り除かれた状態で表示されます。
+- スロットタイプを未設定（空スロット）にすると、メニュー上で区切り線として描画されます。
+- サブメニューは、Menu スロットで別のメニューを参照することで構成します。
+
+(regular-advanced)=
+
+## Advanced settings
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 73;--crop-offset:-15.83198708%">
+<img src="../_static/images/editors/overview/regular-menu-blender-5-2.png" width="663" height="619" alt="My Help Menu の Advanced settings。説明、利用条件、タイトルの表示を設定します。">
+</div>
+<figcaption>Advanced settings。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+Description と Poll は、説明文と利用条件の設定です。Python による動的な説明も使えます。共通の {ref}`詳細設定 <editor-extra-settings>`を参照してください。
+
+:タイトル表示:
+  メニュー上部にメニュー名を見出しとして描画するかを切り替えます。
+
+---
+
+(regular-composition)=
+
+## 他メニューとの組み合わせ
+
+```{versionadded} 2.1
+Regular Menu を Pie Menu / Popup Dialog / Regular Menu の中へ展開できます。
+```
+
+呼び出す側の Menu タブで Regular Menu を指定し、**Expand Regular Menu** を ON にすると中身が展開されます。OFF の場合は、選択して開くメニューとして使います。
+**Open on Mouse Over** と表示される他の配置先とは区別してください。
+
+Blender の既存メニューを配置する場合も、プルダウンにするか、中身を展開するかを選べます。PME で作った Regular Menu の参照と、Blender のメニュークラスの指定を混同しないでください。
+
+## スロットエディタ
+
+::::{tab-set}
+
+:::{tab-item} Command
+:sync: command
+
+```{include} common/slot_types/command.md
+```
+:::
+
+:::{tab-item} Property
+:sync: property
+
+```{include} common/slot_types/property.md
+```
+:::
+
+:::{tab-item} Menu
+:sync: menu
+
+```{include} common/slot_types/menu.md
+```
+:::
+
+:::{tab-item} Hotkey
+:sync: hotkey
+
+```{include} common/slot_types/hotkey.md
+```
+:::
+
+:::{tab-item} Custom
+:sync: custom
+
+```{include} common/slot_types/custom.md
+```
+:::
+
+::::
+
+---
+
+## 応用的な使い方
+
+### Pie Menu の中へ展開する
+
+Pie Menu のスロットから Regular Menu を開くと、放射状 + リストのハイブリッド UI を構成できます。Pie Menu のスロットエディタで **Menu タブ**を選び、リンク先に Regular Menu を指定します。同じスロットの **Expand Regular Menu** を ON にすると中身を Pie 内に配置し、OFF にすると選択して開くサブメニューになります。
+
+### 動的なドロップダウン / 列挙
+
+Custom スロットの 1 行で、Blender の `prop_menu_enum` などをそのまま流し込めます。列挙型プロパティを Regular Menu の形で出す典型形です。
+
+```python
+L.prop_menu_enum(C.object, "display_type")
+```
+
+### `draw_menu()` で別レイアウトに描く
+
+`open_menu()` が「Regular Menu を新しいポップアップとして開く」のに対し、`draw_menu()` は **現在の layout にその Regular Menu の中身を描画する** ヘルパーです。Pop-up Dialog や Panel Group の中で Regular Menu を再利用するときに使います。
+
+```python
+draw_menu("Regular Menu Name")
+```
+
+### Stack Key / Macro Operator の呼び出し口
+
+Regular Menu に Stack Key や Macro Operator をリストとして並べると、コマンド一覧として使えます。並べ方は 2 通りあり、動作経路が異なります。
+
+- **Menu スロットで直接参照** — Stack Key / Macro を Menu スロットの参照先に指定。Macro の場合、Blender の **Adjust Last Operation**（F9）パネルから引数を再調整できる経路を維持します。
+- **Command スロットから `open_menu()` で呼び出し** — `open_menu("名前")` を Command スロットで実行。条件分岐をはさんで呼ぶメニューを切り替えるなど、コード側で制御したい場合に使います。
+
+```python
+open_menu("My Macro Operator")
+```
+
+### Extend Menu の重ね合わせ
+
+```{versionadded} 2.0.0
+同じ Extend Target に対して、Poll で出し分けながら複数の Regular Menu を重ねられるようになりました。
+```
+
+Extend Target / Side / Order の詳細と Interactive Panels からの追加手順は [Interactive Panels と Extend Panel](interactive_panels.md) を参照してください。
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Interactive Panels と Extend Panel](interactive_panels.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+- [キーマップの選び方](../reference/keymap_guide.md)
+```
+
+## 参考動画（原作者のチャンネル）
+
+[roaoao の動画一覧](../reference/original_author_videos.md)より。旧版の UI・手順を扱う参考動画です。
+
+:::{dropdown} Menu Editor
+:open:
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/bvDADkqMLEw" title="Menu Editor" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Menu Editor — YouTube で開く](https://www.youtube.com/watch?v=bvDADkqMLEw)
+:::

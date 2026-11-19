@@ -1,0 +1,417 @@
+:vocab: developer-facing
+
+.. _authoring-execution:
+
+============================================================
+コード実行・ユーザープロパティ・identity
+============================================================
+
+.. py:currentmodule:: pme
+
+トップレベルの ``pme`` パッケージにある名前のうち、PME の標準名前空間で
+Python コードを実行するもの、ユーザープロパティを読み書きするもの、実行中のアドオンを特定するものを扱います。スロットのコード（Command、Custom、Poll）
+の中で使える名前は :ref:`pme-scripting` に挙げています。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 名前
+     - 用途
+   * - :py:func:`execute`
+     - コードを実行し、:py:class:`~pme.types.ExecuteResult` を返します。
+   * - :py:func:`evaluate`
+     - 一つの式を評価し、その値を返します。
+   * - :py:func:`check_syntax`
+     - コードを実行せずに構文を確認します。
+       :py:class:`~pme.types.SyntaxResult` を返します。
+   * - :py:func:`props`
+     - Addon Preferences に保存されたユーザープロパティを読み書きします。
+   * - :py:data:`ADDON_ID`
+     - 実行中の PME アドオンのモジュール名。
+   * - :py:data:`preferences`
+     - PME のアドオン Preferences。
+   * - :py:func:`validate_uid`
+     - メニュー UID の形式を確認します。
+   * - ``context``
+     - 後方互換のために残している PME1 の実行コンテキスト。
+
+.. _authoring-execution-namespace:
+
+標準名前空間
+============================================================
+
+:py:func:`execute` と :py:func:`evaluate` は、呼び出しのたびに PME の実行コンテキストから作る辞書の中でコードを実行します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - 名前
+     - 値
+   * - ``C``、``D``、``O``、``T``、``P``、``bpy``、``U``、``pme``、``props``
+       と、その他のグローバル名
+     - ``pme.context.globals`` のすべての名前。スロットのコードが受け取るグローバル、:ref:`pme-scripting` に挙げたヘルパー関数、
+       ``pme.context.add_global()`` で追加した名前（autorun スクリプトが追加したものを含む）。
+   * - ``PREFS``
+     - PME のアドオン Preferences。:py:data:`preferences` と同じオブジェクト。
+   * - ``PME``
+     - PME のセッションデータである ``bpy.context.window_manager.pme``、
+       または ``None``。
+   * - ``text``、``icon``、``icon_value``
+     - ``pme.context.text``、``pme.context.icon``、``pme.context.icon_value``
+       の現在の値。
+   * - ``E``
+     - PME が処理中のイベント。PME がイベントを処理していないときは存在しません。
+   * - ``extra_globals`` の名前
+     - 最後に追加します。``extra_globals`` の名前は標準の名前を置き換えます。
+
+* 呼び出しごとに新しい辞書を作ります。コードがトップレベルで代入した名前は、
+  次の呼び出しに残りません。名前空間を通じて到達したオブジェクトへの変更は残ります。例: ``U`` に設定した属性。
+* どちらの関数も、イベント、レイアウト、スロットを設定しません。``L``、
+  ``delta``、``drag_x``、``drag_y`` など、メニューの呼び出しを表す名前は、
+  PME の実行コンテキストに残っている値を持つか、存在しません。
+* アドオンの読み込み中に PME が ``scripts/autorun`` と ``scripts/register``
+  の起動スクリプトを実行している間は、どちらの関数もコードを実行しません。
+  PME はその呼び出しを実行中の起動スクリプトの失敗として記録し、残りの起動スクリプトを実行しません。
+
+コード実行
+============================================================
+
+.. py:function:: execute(code, *, extra_globals=None)
+
+   標準名前空間で Python コードを実行し、完了したかどうかを報告します。
+
+   コードが送出した例外は捕捉し、テキストとして返します。例外は表示せず、
+   traceback も残しません。
+
+   :param str code: Python の文。複数行を受け付けます。
+   :param extra_globals: 標準の名前の後に名前空間へ追加する名前。既存の名前は置き換えます。
+   :type extra_globals: dict or None
+   :returns: 実行の結果。
+   :rtype: ExecuteResult
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      result = pme.execute("bpy.ops.mesh.primitive_cube_add()")
+      if not result.success:
+          print(result.error_message)
+
+   .. rubric:: 補足
+
+   * ``error_message`` は例外の ``str()`` で、例外の型名を含みません。
+     ``raise KeyError('a')`` では ``"'a'"``、``1/0`` では
+     ``"division by zero"`` になります。
+   * ``code`` の構文エラーも同じように返します。``"x = "`` では
+     ``"invalid syntax (<string>, line 1)"`` になります。
+   * 捕捉するのは ``Exception`` のサブクラスだけです。``SystemExit`` と
+     ``KeyboardInterrupt`` は伝播します。
+   * 起動スクリプトの実行中は、``success`` が ``False``、``error_message``
+     が ``"Host operations are unavailable during boot script data phase"``
+     になります。コードは実行しません。:ref:`authoring-execution-namespace`
+     を参照。
+
+.. py:function:: evaluate(expr, *, extra_globals=None)
+
+   標準名前空間で一つの Python の式を評価し、その値を返します。
+
+   例外は捕捉しません。
+
+   :param str expr: 一つの式。``x = 1`` のような文は ``SyntaxError`` を送出します。
+   :param extra_globals: 標準の名前の後に名前空間へ追加する名前。既存の名前は置き換えます。
+   :type extra_globals: dict or None
+   :returns: 式の値。
+   :rtype: object
+   :raises SyntaxError: ``expr`` が単一の式でない場合。
+   :raises NameError: ``expr`` が名前空間にない名前を使っている場合。
+   :raises RuntimeError: 起動スクリプトの実行中に呼び出された場合。
+      メッセージは
+      ``"Host operations are unavailable during boot script data phase"``。
+   :raises Exception: ``expr`` の評価中に送出されたその他の例外。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      count = pme.evaluate("len(C.selected_objects)")
+
+.. py:function:: check_syntax(code, *, mode="exec")
+
+   ``code`` を実行せずに、Python として構文解析できるかを確認します。
+
+   :param str code: Python のソース。空のコードや空白だけのコードは有効です。
+   :param str mode: 文には ``"exec"``、一つの式には ``"eval"``。値は
+      :py:func:`ast.parse` に渡し、``"single"`` と ``"func_type"`` も受け付けます。
+   :returns: 構文解析の結果。
+   :rtype: SyntaxResult
+   :raises ValueError: ``mode`` が :py:func:`ast.parse` の受け付けるモードでない場合。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      >>> pme.check_syntax("x = ")
+      SyntaxResult(valid=False, error='invalid syntax', line=1, column=5)
+      >>> pme.check_syntax("2 + 2", mode="eval").valid
+      True
+
+   .. rubric:: 補足
+
+   * 確認するのは構文だけです。未定義の名前や、コードの実行時に起きるエラーは検出しません。
+
+結果の型
+------------------------------------------------------------
+
+.. py:currentmodule:: pme.types
+
+どちらのクラスも ``pme.types`` の dataclass です。
+
+.. py:class:: ExecuteResult
+
+   :py:func:`pme.execute` の結果。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - 属性
+        - 型
+        - 値
+      * - ``success``
+        - bool
+        - コードが例外を送出せずに最後まで実行されたとき ``True``。
+      * - ``error_message``
+        - str or None
+        - ``success`` が ``False`` のときは例外の ``str()``。それ以外は
+          ``None``。
+
+.. py:class:: SyntaxResult
+
+   :py:func:`pme.check_syntax` の結果。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - 属性
+        - 型
+        - 値
+      * - ``valid``
+        - bool
+        - コードを構文解析できたとき ``True``。
+      * - ``error``
+        - str or None
+        - パーサーのメッセージ。例: ``"invalid syntax"``、
+          ``"'(' was never closed"``。有効な場合は ``None``。
+      * - ``line``
+        - int or None
+        - エラーの行（1 から数えます）。有効な場合は ``None``。
+      * - ``column``
+        - int or None
+        - エラーの列（1 から数えます）。有効な場合は ``None``。
+
+.. py:currentmodule:: pme
+
+ユーザープロパティ
+============================================================
+
+.. py:function:: props(name=None, value=None)
+
+   Addon Preferences に保存されたユーザープロパティを読み書きします。
+
+   対象は、保存先が Addon Preferences の Property と、Property Stack だけです。``Object`` などの ID 型に保存する Property は、データブロックごとに一つの値を、そのデータブロックの属性として持ちます。``props()`` はその値を保持しません。:ref:`authoring-property` を参照。
+
+   :param name: 解決する Property ID またはメニュー名。``str()`` で変換します。``None`` では PropertyGroup を返します。
+   :type name: str or None
+   :param value: 書き込む値。``None`` では書き込まずに読み取ります。
+   :returns: *呼び出し形式* を参照。
+   :raises RuntimeError: PME が Property Editor の読み込みを終えていない場合。メッセージは ``"PME user properties are unavailable until the add-on
+      finishes loading"``。
+   :raises TypeError: 書き込みで、プロパティが受け付けない値を渡した場合。
+      Blender が送出します。例: ``expected True/False or 0/1, not str``。
+
+   .. rubric:: 呼び出し形式
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 30 14 56
+
+      * - 呼び出し
+        - 操作
+        - 戻り値
+      * - ``props()``
+        - なし
+        - 値を保持する PropertyGroup。その属性は登録された Property ID
+          で、属性の読み取りと代入で値を読み書きします。
+      * - ``props(name)``, ``props(name, None)``
+        - 読み取り
+        - 値。``name`` を解決できない場合は ``None``。
+      * - ``props(name, value)``
+        - 書き込み
+        - 値を書き込んだとき ``True``。``name`` が書き込み可能な名前に解決できない場合は ``False``。
+
+   .. rubric:: 名前の解決
+
+   ``name`` を次の行の順に照合します。最初に一致した行で決まります。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 50 25 25
+
+      * - ``name``
+        - 読み取り
+        - 書き込み
+      * - Property または Property Stack の登録済み Property ID。
+          ``read_pm()["property"]`` または ``read_pm()["property_stack"]``
+          の ``registered_property_id``。
+        - 値
+        - 書き込み、``True`` を返す
+      * - Property ID が登録されている有効なメニュー（Addon Preferences に保存する Property、または Property Stack）のうち、ちょうど一つが持つメニュー名。
+        - その ID の値
+        - ``False``
+      * - そのようなメニューの複数が持つメニュー名。
+        - ``None``
+        - ``False``
+      * - それ以外。
+        - ``None``
+        - ``False``
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      import pme
+
+      # Get the PropertyGroup and access a property as an attribute
+      pme.props().MyCounter = 10
+      value = pme.props().MyCounter
+
+      # Read or write by registered Property ID
+      value = pme.props("MyCounter")
+      written = pme.props("MyCounter", 10)
+
+   .. rubric:: 補足
+
+   * スロットのコードでは、同じ関数がグローバルの ``props`` です。Property
+     Editor で作成したユーザープロパティは、どちらでも同じ呼び出し形式を使います。
+   * ``props(name, None)`` は読み取りです。``None`` を書き込みません。
+   * 解決できない名前を、一時的な保存領域として作成することはありません。
+   * ``bl_rna``、``keys``、``__class__`` など、PropertyGroup 自体の属性名は
+     Property ID ではありません。``props("bl_rna")`` は ``None``、
+     ``props("bl_rna", 1)`` は ``False`` を返します。これらは PropertyGroup
+     から ``pme.props().bl_rna`` のように読みます。
+   * メニュー名による書き込みは、同じ名前による読み取りが値を返す場合でも
+     ``False`` を返します。
+   * 以前の Experimental ビルドでは、PropertyGroup を
+     ``pme.props.MyCounter`` として公開していました。現在の形式は
+     ``pme.props().MyCounter`` です。
+
+アドオンの identity
+============================================================
+
+.. py:data:: ADDON_ID
+   :type: str
+
+   実行中の PME アドオンのモジュール名。``scripts/addons`` にインストールしたアドオンでは ``"pie_menu_editor"``、Blender Extension では
+   ``"bl_ext.<repository>.<package>"`` です。
+   ``bpy.context.preferences.addons`` での PME のエントリのキーです。
+
+   PME の ``addon`` モジュールの読み込み前に読むと、メッセージ
+   ``"PME add-on identity is unavailable until the add-on
+   finishes loading"`` とともに ``RuntimeError`` を送出します。固定値の
+   ``"pie_menu_editor"`` は、Blender Extension としてのインストールと一致しません。
+
+   .. code-block:: python
+
+      import bpy
+      import pme
+
+      addon_preferences = bpy.context.preferences.addons[pme.ADDON_ID].preferences
+
+.. py:data:: preferences
+
+   PME のアドオン Preferences（``PMEPreferences``）。
+   ``bpy.context.preferences.addons[pme.ADDON_ID].preferences`` と同じオブジェクトです。アクセスのたびに参照し直します。
+
+   :py:data:`ADDON_ID` が ``bpy.context.preferences.addons`` にない場合、
+   読み取ると ``KeyError`` を送出します。そのエントリが存在しても PME の
+   Preferences クラスが登録されていない間は ``None`` です。例: アドオンを有効にしている途中、または ``default_set=True`` なしで
+   ``addon_utils.disable()`` を呼んだ後。
+
+.. py:function:: validate_uid(uid)
+
+   ``uid`` がメニュー UID の形式かどうかを返します。
+
+   確認するのは形式だけです。保存済みのメニューは探しません。
+
+   :param str uid: 確認する文字列。
+   :returns: ``<prefix>_<id>`` の形式なら ``True``。``<prefix>`` は下表のメニューの種類の接頭辞、``<id>`` は ``a``-``z`` と ``2``-``7`` からなる 8 文字です。それ以外は ``False`` です。文字列でない値、大文字、
+      スロット UID（``pmi_<id>``）もこれに含まれます。
+   :rtype: bool
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 15 40 45
+
+      * - 接頭辞
+        - メニューの種類
+        - ``mode``
+      * - ``pm``
+        - Pie Menu
+        - ``PMENU``
+      * - ``vm``
+        - Vector Menu
+        - ``VMENU``
+      * - ``rm``
+        - Regular Menu
+        - ``RMENU``
+      * - ``pd``
+        - Pop-up Dialog
+        - ``DIALOG``
+      * - ``fp``
+        - Floating Panel
+        - ``FPANEL``
+      * - ``s``
+        - Stack Key
+        - ``SCRIPT``
+      * - ``pg``
+        - Panel Group
+        - ``PANEL``
+      * - ``hpg``
+        - Hidden Panel Group
+        - ``HPANEL``
+      * - ``sk``
+        - Sticky Key
+        - ``STICKY``
+      * - ``mc``
+        - Macro Operator
+        - ``MACRO``
+      * - ``md``
+        - Modal Operator
+        - ``MODAL``
+      * - ``pr``
+        - Property
+        - ``PROPERTY``
+      * - ``cn``
+        - Property Stack
+        - ``CONDITION``
+      * - ``rt``
+        - Context Router
+        - ``ROUTER``
+
+   .. code-block:: python
+
+      >>> pme.validate_uid("pm_a2b3c4d5")
+      True
+      >>> pme.validate_uid("pmi_a2b3c4d5")
+      False
+
+.. py:data:: context
+   :no-index:
+
+   PME の実行コンテキスト（``PMEContext``）。PME1 のスクリプトのために残しています。``pme.context.globals`` は
+   :ref:`標準名前空間 <authoring-execution-namespace>` の元になる辞書で、
+   ``pme.context.add_global(name, value)`` はそこに名前を追加します。
+   :ref:`pme-scripting` で説明しています。

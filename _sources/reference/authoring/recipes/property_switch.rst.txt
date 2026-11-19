@@ -1,0 +1,51 @@
+:vocab: developer-facing
+
+.. _authoring-recipe-property-switch:
+
+=====================================
+Turn a setting into a Property switch
+=====================================
+
+Turn Blender's Rest Position setting into a PME Property switch and link it
+from a menu slot.
+
+A new Property is a stored Boolean. A Getter and a Setter make it read and
+write another setting instead.
+
+.. code-block:: python
+
+   created = pme.create_pm(pme.PmCreationSpec("PROPERTY", name="Rest Position"))
+   if not created.accepted:
+       raise RuntimeError(created.diagnostics)
+   before = pme.editing.read_pm(created.pm_uid)["property"]
+   changes = {
+       "get": "a = C.pose_object; return bool(a) and a.data.pose_position == 'REST'",
+       "set": "a = C.pose_object; a and setattr(a.data, 'pose_position', 'REST' if value else 'POSE')",
+   }
+   # Check first: nothing is written.
+   check = pme.editing.update_property(created.pm_uid, changes, dry_run=True)
+   if check["status"] != "validated":
+       raise ValueError(check["diagnostics"])
+   result = pme.editing.update_property(
+       created.pm_uid, changes, expected_digest=before["digest"],
+   )
+   if result["status"] != "committed":
+       raise RuntimeError(result["diagnostics"])
+
+   # Known destination menu and slot UIDs, obtained by read_pm above.
+   pme.editing.update_slots(pm_uid, {slot_uid: {
+       "mode": "MENU", "name": "Rest Position", "menu_target_uid": created.pm_uid,
+   }})
+
+Check
+=====
+
+* ``result["registration"]["status"]`` is ``"committed"`` and
+  ``read_pm(created.pm_uid)["property"]["registered_property_id"]`` is not
+  empty.
+* These calls do not display the switch. Check it in the menu that uses it.
+* Preferences are not saved to disk by these calls.
+
+Functions used: :py:func:`pme.create_pm`, :py:func:`pme.editing.read_pm`,
+:py:func:`pme.editing.update_property`, :py:func:`pme.editing.update_slots`.
+Field reference: :ref:`authoring-property`.

@@ -1,0 +1,12 @@
+オブジェクトのプロパティへのパスを指定し、ウィジェットとして表示します。
+例：`bpy.context.object.location`でオブジェクトの位置を表示・編集できます。
+
+`tool_props()` で参照するツール設定は、対象のエディター・モード・ツールで利用できる間だけ表示します。
+それ以外のときは非表示になります。表示条件や代替表示を指定する場合はCustomタブを使います。
+関数の引数は[APIリファレンス](/reference/scripting.rst#pme-tool-props)を参照してください。
+
+:::{admonition} 高度なプロパティ操作
+:class: tip
+
+インデックス指定やより複雑なプロパティ操作が必要な場合は、[Property Editor](/editors/property_editor.md)を利用してください。
+:::

@@ -1,0 +1,186 @@
+.. _script-management:
+
+================
+Managing Scripts
+================
+
+PME's **Scripts** list manages Python files called with ``execute_script()``.
+Find and edit a file, copy the call to paste into a menu, or return to a menu
+that uses the file.
+
+For example, enter this in a slot's Command field to run a saved file:
+
+.. code-block:: python
+
+   execute_script("scripts/my_tool.py")
+
+This page explains how to create, edit, and save the files you call this way.
+For ``execute_script()`` arguments and return values, see :doc:`scripting`.
+
+Open the list in either place:
+
+- **To organize your setup:** PME Preferences > Settings > Resources > **Scripts**.
+- **To edit code:** Blender's Text Editor sidebar (N), **PME** tab > **Scripts**.
+
+To choose a storage folder first, see Script Directories in :doc:`file_locations`.
+
+Find a file
+------------------------------------------------------------
+
+Click the triangle beside a folder to see its files. Use the search field to
+narrow a long list and check the file locations. If a file added outside Blender
+does not appear, click **Refresh**.
+
+In the Text Editor, click a file name to open it there. In Preferences, choose
+**Edit** from the file's row menu. This opens your configured external editor,
+or Blender's Text Editor if you have not configured one.
+
+.. tip::
+
+   Set an external editor in Blender Preferences > File Paths > Text Editor.
+   You can still choose **Edit in Blender** to edit inside Blender.
+   From the Text Editor's list, use **Edit Externally** to switch to that editor.
+
+Create a script or use one in a menu
+------------------------------------------------------------------------
+
+**To create a script while adding it to a menu,** choose **New Script** in the
+helper menu of the slot's Command field. PME creates the file and fills in the
+``execute_script()`` call.
+
+**To create a file first,** click **New** (+) in the Scripts list. The new file
+opens in the editor; replace the template's operation with your code and save.
+It is saved in the first Script Directory's ``scripts/`` folder, or directly in
+the registered directory if that subfolder does not exist. Existing files are
+not overwritten.
+
+**To use an existing file,** choose **Copy Reference** in its row menu and paste
+the ``execute_script()`` call into a slot's Command field. You can also select a file with
+**Call External Script** in the Slot Editor.
+
+Edit and save
+------------------------------------------------------------
+
+After editing in Blender's Text Editor, a save icon appears to the right of the
+file name. Click it, or use the Text Editor's **Save**. The next
+``execute_script()`` call uses the saved contents.
+
+For text that has not been saved as a file, or is stored outside your registered
+folders, **Save into Script Directory** appears below the list. Click it to
+choose where to save. The saved file becomes available in the Scripts list and
+can be used with **Copy Reference**.
+
+.. note::
+
+   If the file also changed outside Blender, **Resolve Conflict** opens before
+   overwriting it. Choose **Reload** to read the external contents, **Save** to
+   save Blender's contents, or **Make Internal** to keep the text inside Blender.
+
+.. dropdown:: Saved changes are not showing up
+
+   - Click **Refresh** to list files added outside Blender.
+   - Python modules imported by your script are not reloaded just because their
+     files were saved. Restart Blender, or reload them in code with ``importlib.reload``.
+   - Scripts in ``scripts/autorun/`` run at startup. Re-enable PME after changing them.
+
+Return to a menu that uses the file
+----------------------------------------------------------------------
+
+Click **Used by** (the link icon) beside a file to go to a menu that calls it with ``execute_script()``.
+If several slots use it, choose the destination from the list.
+
+.. dropdown:: What Used by can find
+
+   It finds saved Command and Custom slots that write the file name directly,
+   such as ``execute_script("scripts/tool.py")``. Calls that build a path in
+   code, or call a function registered by autorun, are not included. Code with
+   syntax errors, Poll code, and Context Router code are also excluded.
+   An empty list does not prove that a file is unused.
+
+   The destination is PME's Editor tab; the Slot Editor does not open automatically.
+   From the Text Editor, Preferences opens if it was closed.
+
+Resolve a warning
+------------------------------------------------------------
+
+Click the warning mark to the left of a file name to see the reason and candidate
+locations. The Slot Editor also marks problems with a script that a slot calls.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Status
+     - What to check
+   * - File not found (Missing)
+     - Check whether the file moved or was renamed, and check the path in the call.
+       **Show in Scripts** in the execution message takes you to the affected entry.
+   * - More than one file at the same relative path
+     - Two Script Directories contain the same relative path. Neither runs because
+       the reference is ambiguous. Check the locations shown in the warning.
+   * - File cannot be read
+     - Read the displayed reason, then check the file location and access permissions.
+
+.. dropdown:: Other list groups and status messages
+
+   In Preferences, **Outside Script Directories** lists calls using absolute paths
+   outside your registered folders or bundled examples. **Missing** lists references
+   whose files could not be found. These two groups do not appear in the Text Editor.
+
+   Below the Text Editor list, the current text's saved state is shown:
+
+   - **Not listed yet:** the file was saved since the last list update. Click Refresh.
+   - **Not in a Script Directory:** the file is outside the registered folders.
+   - **Internal text, not saved as a file:** the text exists only inside Blender.
+
+   Use **Open Folder** to open the file's location. In the Text Editor's Open and
+   Save As file browsers, the **Pie Menu Editor** panel on the left provides
+   shortcuts to your registered locations.
+
+Templates and the folder guide
+------------------------------------------------------------
+
+New scripts include a template that can run from both a PME slot and the Text
+Editor. When run from the Text Editor, the context is the Text Editor itself.
+If your operation needs a 3D View or another editor, also check it through the
+menu where you intend to use it.
+
+**New** and **New Script** write the following. In the ``execute_script()``
+example at the top, ``scripts/<name>.py`` is replaced with the new file's reference.
+
+.. code-block:: python
+
+    """<One line: what this script does.>
+
+    Called from a PME slot:
+        execute_script("scripts/<name>.py", example="value")
+    Runs from the Text Editor (Alt+P) as well: kwargs is then empty, and C is the
+    Text Editor's own context, not the area that called the slot.
+    """
+    import bpy
+
+    C = globals().get("C", bpy.context)        # PME provides C / D; the Text Editor does not
+    D = globals().get("D", bpy.data)
+    kwargs = globals().get("kwargs", {})       # the slot's keyword arguments, {} from the Text Editor
+
+
+    def main(example="value"):
+        ...
+        return True
+
+
+    if __name__ == "__main__":
+        return_value = main(**kwargs)
+
+``scripts/README_PME.md`` explains calls from menus, available variables, and
+where to find examples. Use it when starting a script or asking an AI tool to
+edit one. PME provides it when setting up a location with a ``scripts/`` folder
+or creating files there; an existing README is not overwritten.
+
+.. seealso::
+
+   :doc:`file_locations` — add and organize storage locations
+
+   :doc:`scripting` — look up functions, arguments, and return values
+
+   :doc:`bundled_utilities` — use the bundled helpers

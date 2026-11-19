@@ -1,0 +1,82 @@
+:vocab: developer-facing
+
+.. _authoring-recipe-property-stack-new:
+
+==========================================
+Author a Property Stack and show its state
+==========================================
+
+Create a Property Stack that selects proportional editing Surface and show it
+as a toggle in a menu slot.
+
+TRUE selects Surface: Connected on, Projected off. FALSE writes nothing. The
+local helper ``fixed_bool`` describes one Boolean setting as a condition row
+and its write entry.
+
+.. code-block:: python
+
+   created = pme.create_pm(pme.PmCreationSpec("CONDITION", name="Surface"))
+   if not created.accepted:
+       raise RuntimeError(created.diagnostics)
+   stack_uid = created.pm_uid
+   before = pme.editing.read_pm(stack_uid)["property_stack"]
+
+   def fixed_bool(uid, property_name, value):
+       source = {"kind": "rna_path", "root": "context", "detected_type": "bool",
+                 "readonly": False, "segments": [{"kind": "attr", "name": part}
+                 for part in ("scene", "tool_settings", property_name)]}
+       row = {"condition_uid": uid, "enabled": True, "authoring_state": "complete",
+              "label": property_name, "source": source,
+              "op": "is_true" if value else "is_false", "value": None, "value_type": "bool"}
+       # manual_resolved: writes the fixed value on TRUE, nothing on FALSE.
+       entry = {"entry_uid": "set_" + uid, "kind": "derived", "status": "manual_resolved",
+                "derived_from_condition_uid": uid, "source": source,
+                "value": value, "value_type": "bool", "custom_set_body": "",
+                "enum_set_write_mode": None, "enum_set_write_values": []}
+       return row, entry
+
+   pairs = [fixed_bool("connected", "use_proportional_connected", True),
+            fixed_bool("projected", "use_proportional_projected", False)]
+   logic = {"version": 1, "combine_mode": "all",
+            "predicate_rows": [row for row, entry in pairs],
+            "write_plan": {"false_policy": "no_op", "entries": [entry for row, entry in pairs]}}
+   # Check first, then save the checked candidate.
+   check = pme.editing.update_property_stack(stack_uid, logic=logic,
+       expected_digest=before["digest"], dry_run=True)
+   if check["status"] != "validated":
+       raise ValueError(check["diagnostics"])
+   result = pme.editing.update_property_stack(stack_uid, logic=check["candidate"],
+       expected_digest=before["digest"])
+   if result["status"] != "committed":
+       raise RuntimeError(result["diagnostics"])
+   # Use the registered ID for the widget, not the menu name.
+   stack = pme.editing.read_pm(stack_uid)["property_stack"]
+   property_id = stack["registered_property_id"]
+   if not property_id:
+       raise RuntimeError(f"Property Stack is not registered: {stack['diagnostics']}")
+
+   # Known destination menu and slot UIDs, obtained by read_pm above.
+   slot_before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+   result = pme.editing.update_slots(pm_uid, {slot_uid: {"mode": "CUSTOM",
+       "custom": f"L.prop(props(), {property_id!r}, text='Surface', toggle=True)"}},
+       expected_version=slot_before["version"], expected={slot_uid: slot_before["slots"][0]})
+
+The helper builds a new stack. An existing stack is edited from its read
+``logic``; see the Notes of :py:func:`pme.editing.update_property_stack`.
+
+Check
+=====
+
+* ``registered_property_id`` is not empty, and ``result["status"]`` of the
+  slot update is ``"committed"``.
+* The dry run does not evaluate sources, check runtime writability, execute a
+  Setter, or test the widget. Check separately, in the menu: the actual
+  values, the checked state, direction selection and release, and that
+  unrelated settings stay unchanged.
+* Preferences are not saved to disk by these calls.
+
+Functions used: :py:func:`pme.create_pm`, :py:func:`pme.editing.read_pm`,
+:py:func:`pme.editing.update_property_stack`,
+:py:func:`pme.editing.update_slots`. Logic reference:
+:ref:`authoring-property-stack-logic`; FALSE behaviour:
+:ref:`authoring-property-stack-true-false`.

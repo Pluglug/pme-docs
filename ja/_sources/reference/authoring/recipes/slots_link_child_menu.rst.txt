@@ -1,0 +1,57 @@
+:vocab: developer-facing
+
+.. _authoring-recipe-link-child-menu:
+
+============================================================
+子メニューへリンクし、アイコンのフラグを保つ
+============================================================
+
+.. py:currentmodule:: pme.editing
+
+既存のスロットを、新しいアイコン付きの子メニューへのリンクに変えます。
+スロットのラベル、表示方法、アイコンのフラグは保ちます。
+
+1. 子メニューの UID を :py:func:`read_pm` またはメニューの一覧から読み取ります。
+   UID を組み立てないでください。
+2. スロットを読み取り、アイコンのフラグ (``#``、``!``、``^``) をアイコン名から分けます。
+3. リンクと、元のフラグを付けた新しいアイコン名を保存します。
+
+.. code-block:: python
+
+   before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+   slot = before["slots"][0]
+   # Keep the leading flags and replace only the icon name.
+   old_icon = slot["icon"]
+   icon_flags = old_icon[:len(old_icon) - len(old_icon.lstrip("#!^"))]
+   result = pme.editing.update_slots(
+       pm_uid,
+       {slot_uid: {
+           "mode": "MENU",
+           "menu_target_uid": child_uid,
+           "icon": icon_flags + "TOOL_SETTINGS",
+           "auto_icon": False,
+       }},
+       expected_version=before["version"],
+       expected={slot_uid: slot},
+   )
+   assert result["status"] == "committed", result
+
+* 子メニューの内容の分類に合うアイコンを選んでください。
+  Vector Menu は Nest の矢印を自身で描画します。
+* アイコンだけを変更する場合は ``mode`` と ``menu_target_uid`` を省きます。
+  表示設定は保存値のまま保たれます。
+  アイコンを変えるために Submenu を Button へ変更する必要はありません。
+* ``menu_presentation`` は、リンク先 Regular Menu の配置方法です。
+  Nest のジェスチャーや Pie Menu の確定の設定とは別の設定です。
+
+確認
+============================================================
+
+* ``result["slots"][0]["after"]`` の ``mode`` が ``"MENU"``、``target_pm_uid`` が
+  ``child_uid`` と等しく、``icon`` が元のフラグで始まっていること。
+* 目的のメニューで、アイコンの表示、子メニューへの移動、子メニュー内での選択、
+  子メニューからの離脱が意図どおりに動くこと。
+
+使用する関数: :py:func:`read_pm`、:py:func:`update_slots`。
+アイコンの値は :ref:`authoring-slot-icon`、Menu スロットの text は
+:ref:`authoring-slot-menu-text` で説明しています。

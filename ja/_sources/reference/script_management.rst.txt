@@ -1,0 +1,181 @@
+.. _script-management:
+
+====================
+スクリプトの管理
+====================
+
+PMEの **Scripts** 一覧では、``execute_script()`` で呼び出すPythonファイルを管理できます。
+ファイルを探して編集したり、メニューに貼り付ける呼び出しコードをコピーしたり、
+そのファイルを使っているメニューへ戻ったりできます。
+
+たとえば、スロットのCommand欄に次のように書くと、保存したファイルを実行できます。
+
+.. code-block:: python
+
+   execute_script("scripts/my_tool.py")
+
+このページでは、その呼び出し先のファイルを作成・編集・保存する手順を説明します。
+``execute_script()`` の引数や戻り値は :doc:`scripting` を参照してください。
+
+一覧は次の2か所から開けます。
+
+- **設定を整理する場合：** PMEの Preferences > Settings > Resources > **Scripts**。
+- **コードを編集する場合：** BlenderのText Editorでサイドバー（Nキー）を開き、**PME** タブ > **Scripts**。
+
+最初に保存先を設定する場合は、:doc:`file_locations` のScript Directoriesを参照してください。
+
+ファイルを探す
+------------------------------------------------------------
+
+フォルダーの左の三角を押すと、中のファイルが表示されます。
+数が多い場合は検索欄に文字を入れて絞り込めます。ファイルの場所も確認できます。
+Blenderの外で追加したファイルが見つからない場合は **Refresh** を押してください。
+
+Text Editor側では、ファイル名をクリックするとその場で開きます。
+Preferences側では、ファイルの行メニューから **Edit** を選びます。
+外部エディターを設定している場合はそちらで、未設定ならBlenderのText Editorで開きます。
+
+.. tip::
+
+   外部エディターは、Blenderの Preferences > File Paths > Text Editor で設定できます。
+   設定後も **Edit in Blender** でBlender内の編集を選べます。
+   Text Editor側から外部エディターへ移る場合は **Edit Externally** を使います。
+
+新しく作る・メニューで使う
+------------------------------------------------------------
+
+**メニューに追加しながら作る場合**は、スロットのCommand欄の補助メニューで **New Script** を選びます。
+ファイルが作成され、``execute_script()`` の呼び出しコードもスロットに入ります。
+
+**先にファイルだけ作る場合**は、Scripts一覧の **New** （＋）を押します。
+作成したファイルがエディターで開くので、ひな型の処理部分を書き換えて保存してください。
+保存先は、先頭のScript Directoryの ``scripts/`` フォルダーです。
+そのフォルダーがない場合は、登録したディレクトリーの直下に作成されます。既存ファイルは上書きしません。
+
+**既存ファイルをメニューで使う場合**は、その行の **Copy Reference** で ``execute_script()`` の呼び出しコードをコピーし、
+スロットのCommand欄へ貼り付けます。Slot Editorの **Call External Script** から選ぶこともできます。
+
+編集して保存する
+------------------------------------------------------------
+
+Text Editorで変更すると、一覧のファイル名の右側に保存アイコンが出ます。
+これを押すか、Text Editorの **Save** で保存してください。
+保存後、次に ``execute_script()`` で呼び出すと、新しい内容で動きます。
+
+まだファイルとして保存していないテキストや、登録先の外にあるテキストには、一覧の下に
+**Save into Script Directory** が表示されます。押すと保存先を選べます。
+保存後はScripts一覧から探せるようになり、**Copy Reference** も使えます。
+
+.. note::
+
+   Blenderの外でも同じファイルが変更されている場合は、上書き前に **Resolve Conflict** が開きます。
+   外部の内容を読み直す **Reload**、Blender側の内容を保存する **Save**、
+   Blender内のテキストとして保持する **Make Internal** から選んでください。
+
+.. dropdown:: 保存したのに変更が反映されない場合
+
+   - Blenderの外で追加したファイルを一覧に出すには **Refresh** を押します。
+   - スクリプトがimportする別のPythonモジュールは、ファイルを保存しただけでは読み直されません。
+     Blenderを再起動するか、コード側で ``importlib.reload`` を使って再読み込みします。
+   - ``scripts/autorun/`` 内のスクリプトは起動時に実行されます。変更後はPMEを再有効化してください。
+
+使っているメニューへ戻る
+------------------------------------------------------------
+
+ファイルの横にある **Used by** （リンクのアイコン）を押すと、``execute_script()`` でそのファイルを呼び出しているメニューに移動します。
+複数のスロットで使っている場合は、移動先を一覧から選べます。
+
+.. dropdown:: Used byに表示される範囲
+
+   保存済みのCommand・Customスロットに、``execute_script("scripts/tool.py")`` のように
+   ファイル名を直接書いた呼び出しを探します。
+   コード内でファイル名を組み立てている場合や、autorunで登録した関数を名前で呼ぶ場合は一覧に含まれません。
+   構文エラーのあるコード、Poll、Context Routerのコードも対象外です。
+   ここに表示されないことだけでは「使われていない」とは判断できません。
+
+   移動先はPMEのEditorタブです。Slot Editorは自動では開きません。
+   Text Editor側から操作した場合、Preferencesが閉じていれば開きます。
+
+警告が出たら
+------------------------------------------------------------
+
+ファイル名の左にある警告の印を押すと、理由や候補の場所を確認できます。
+Slot Editorにも、呼び出し先の問題を知らせる印が表示されます。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - 状態
+     - 確認すること
+   * - ファイルが見つからない（Missing）
+     - ファイルの移動・改名や、呼び出しコードのパスを確認してください。
+       実行時のメッセージにある **Show in Scripts** から、該当する項目へ移動できます。
+   * - 同じパスが複数ある
+     - 複数のScript Directoryに同じ相対パスのファイルがあります。
+       どちらを使うか決められないため実行されません。警告に出る場所を確認してください。
+   * - ファイルを読めない
+     - 表示された理由を確認し、ファイルの場所やアクセス権を見直してください。
+
+.. dropdown:: 一覧の分類と、その他の表示
+
+   Preferences側の **Outside Script Directories** は、登録先の外の絶対パスや同梱のサンプルを
+   呼び出している項目です。**Missing** は呼び出し先が見つからない項目です。
+   この2分類はText Editor側の一覧には表示されません。
+
+   Text Editorの一覧の下には、現在開いているテキストの保存状態も表示されます。
+
+   - **Not listed yet：** 一覧の更新後に保存されたファイルです。Refreshで更新してください。
+   - **Not in a Script Directory：** 登録先の外に保存されています。
+   - **Internal text, not saved as a file：** Blender内にだけ存在し、外部ファイルには保存されていません。
+
+   ファイルの場所を開くには **Open Folder** を使います。
+   Text EditorのOpen・Save Asでは、ファイルブラウザー左側の **Pie Menu Editor** から
+   登録先へすばやく移動できます。
+
+ひな型とフォルダー内の案内
+------------------------------------------------------------
+
+新しいスクリプトには、PMEのスロットとText Editorの両方から実行できるひな型が入っています。
+ただし、Text Editorから実行する場合のコンテキストはText Editor自身です。
+3D Viewなどを必要とする処理は、実際に使うメニューからも確認してください。
+
+**New** と **New Script** は次の内容を書き込みます。
+先頭の ``execute_script()`` の例の ``scripts/<name>.py`` は、作成したファイルの参照に置き換わります。
+
+.. code-block:: python
+
+    """<One line: what this script does.>
+
+    Called from a PME slot:
+        execute_script("scripts/<name>.py", example="value")
+    Runs from the Text Editor (Alt+P) as well: kwargs is then empty, and C is the
+    Text Editor's own context, not the area that called the slot.
+    """
+    import bpy
+
+    C = globals().get("C", bpy.context)        # PME provides C / D; the Text Editor does not
+    D = globals().get("D", bpy.data)
+    kwargs = globals().get("kwargs", {})       # the slot's keyword arguments, {} from the Text Editor
+
+
+    def main(example="value"):
+        ...
+        return True
+
+
+    if __name__ == "__main__":
+        return_value = main(**kwargs)
+
+``scripts/README_PME.md`` には、メニューからの呼び出し方や使える変数、サンプルの場所が書かれています。
+スクリプトを書き始めるときや、AIに編集を依頼するときの案内として使えます。
+PMEが ``scripts/`` のある保存先を設定したり、そこに新しいファイルを作ったりするときに用意され、
+既存のREADMEは上書きされません。
+
+.. seealso::
+
+   :doc:`file_locations` — 保存先を追加する・整理する
+
+   :doc:`scripting` — 関数・引数・戻り値を調べる
+
+   :doc:`bundled_utilities` — 同梱の補助関数を使う

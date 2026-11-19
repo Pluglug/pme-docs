@@ -1,0 +1,387 @@
+:vocab: developer-facing
+
+.. _authoring-resources:
+.. _resource-discovery:
+
+=========
+Resources
+=========
+
+.. py:module:: pme.resources
+
+``pme.resources`` reads the registered resource folders and icon folders, the
+script and icon files in them, and the resolution of a script reference. It
+reads the :ref:`resource configuration <user_resources>` PME currently uses and
+changes nothing. From an external script, ``pme`` is the
+:ref:`short alias or the explicit package import <public-api-import>`.
+
+.. versionadded:: 2.2.0
+   Read-only queries for registered folders, script and icon files, and script
+   reference resolution. The API is **Experimental**.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Function
+     - Purpose
+   * - :py:func:`list_folders`
+     - Returns the registered resource folders with their current status.
+   * - :py:func:`list_icon_folders`
+     - Returns the registered icon folders with their current status.
+   * - :py:func:`list_files`
+     - Lists the script and icon files in those folders.
+   * - :py:func:`resolve_script`
+     - Resolves a script reference as script execution does.
+
+Results are immutable dataclasses. ``dataclasses.asdict()`` converts one to a
+dictionary, including the nested folder.
+
+Folders
+=======
+
+.. py:function:: list_folders()
+
+   Return the registered resource folders in their saved order, with their
+   current status.
+
+   :returns: One entry per registered folder. Missing locations are included.
+   :rtype: tuple[ResourceFolderInfo, ...]
+   :raises RuntimeError: The resource settings could not be read and no
+      previous valid configuration is available. The message is
+      ``"Resource settings are unavailable"``.
+
+   .. rubric:: Notes
+
+   * When no resource folder is registered, the result is empty. No default
+     folder is created.
+
+.. py:function:: list_icon_folders()
+
+   Return the registered icon folders in their saved order, with their current
+   status.
+
+   Icon folders are registered separately from resource folders.
+
+   :returns: One entry per registered icon folder. ``name`` is ``""``.
+   :rtype: tuple[ResourceFolderInfo, ...]
+   :raises RuntimeError: The resource settings could not be read and no
+      previous valid configuration is available. The message is
+      ``"Resource settings are unavailable"``.
+
+   .. rubric:: Notes
+
+   * An empty result means that only the bundled icons are used. No default
+     folder is created.
+
+.. py:class:: ResourceFolderInfo
+
+   A registered folder as observed at the time of the call. Used for resource
+   folders and icon folders.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 10 68
+
+      * - Attribute
+        - Type
+        - Value
+      * - ``index``
+        - int
+        - Position in registration order, from 0. Not a stable identity.
+      * - ``name``
+        - str
+        - Display name of a resource folder. ``""`` for an icon folder. Not a
+          namespace or a stable identity.
+      * - ``raw_path``
+        - str
+        - The path as saved.
+      * - ``resolved_path``
+        - str
+        - Absolute path. A relative ``raw_path`` is resolved from the directory
+          that contains the running Blender executable; ``~`` and environment
+          variables are expanded. ``""`` when ``status`` is ``invalid``.
+      * - ``status``
+        - str
+        - See *Folder status*.
+
+   .. rubric:: Folder status
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 78
+
+      * - ``status``
+        - Meaning
+      * - ``available``
+        - The directory can be opened for listing. Its children are not
+          checked; some can still be unreadable.
+      * - ``missing``
+        - The registered location does not exist.
+      * - ``not_directory``
+        - The location is not a directory.
+      * - ``unreadable``
+        - The location cannot be inspected or scanned.
+      * - ``invalid``
+        - The saved path cannot be resolved. ``resolved_path`` is ``""``.
+
+Files
+=====
+
+.. py:function:: list_files(kind=None)
+
+   List the existing script and icon files in the registered folders, including
+   files that no slot uses.
+
+   Each call reads the active resource configuration and the file system again.
+
+   :param kind: ``None`` for both kinds, ``"script"`` or ``"icon"``.
+   :type kind: str or None
+   :returns: The files found and the locations that could not be read.
+   :rtype: ResourceFileListing
+   :raises ValueError: ``kind`` is another value. The message is
+      ``"kind must be None, 'script', or 'icon'"``.
+   :raises RuntimeError: The resource settings could not be read and no
+      previous valid configuration is available. The message is
+      ``"Resource settings are unavailable"``.
+
+   .. rubric:: Scan scope
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 14 86
+
+      * - Kind
+        - Files listed
+      * - Scripts
+        - Files ending in lowercase ``.py`` anywhere in each resource folder,
+          also outside ``scripts/``, because relative script references are
+          resolved from the folder itself. Folders whose name starts with
+          ``.`` and ``__pycache__`` are skipped. Directory symbolic links are
+          followed; each real directory is visited once per registered folder.
+      * - Icons
+        - Files ending in lowercase ``.png`` directly in each icon folder,
+          except names with the reserved ``_intr_`` prefix. Files with
+          conflicting names and names starting with ``_`` (hidden in the Custom
+          picker) are included. This is not a list of icons confirmed to be
+          selectable or drawable.
+
+   .. rubric:: Example
+
+   Collect the registered folders and files as JSON for another tool:
+
+   .. code-block:: python
+
+      from dataclasses import asdict
+      import json
+      import pme
+
+      folders = pme.resources.list_folders()
+      listing = pme.resources.list_files()
+
+      payload = {
+          "folders": [asdict(folder) for folder in folders],
+          "files": [asdict(item) for item in listing.files],
+          "issues": [asdict(issue) for issue in listing.issues],
+      }
+      print(json.dumps(payload, ensure_ascii=False, indent=2))
+
+   .. rubric:: Notes
+
+   * ``files`` is a complete inventory only when ``issues`` is empty. A folder
+     that is not ``available`` contributes an issue and no files. A path that
+     fails during the scan contributes an issue; the rest of its folder is still
+     listed.
+   * A registered resource folder or icon folder that is missing is an issue.
+   * With ``kind=None``, scripts come first, then icons. Folders follow
+     registration order; names are sorted within each directory.
+   * Files with the same name in different folders are separate entries.
+   * Contents are not executed or decoded.
+   * Changes that an external editor makes to the resource settings file are
+     loaded on the next startup or when the add-on is enabled again.
+
+.. py:class:: ResourceFileListing
+
+   Result of :py:func:`list_files`.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 30 48
+
+      * - Attribute
+        - Type
+        - Value
+      * - ``files``
+        - tuple[ResourceFileInfo, ...]
+        - The files found.
+      * - ``issues``
+        - tuple[ResourcePathIssue, ...]
+        - Folders and paths that could not be read.
+
+.. py:class:: ResourceFileInfo
+
+   An existing script or icon file.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 20 58
+
+      * - Attribute
+        - Type
+        - Value
+      * - ``folder``
+        - ResourceFolderInfo
+        - The registered folder that contains the file, with its status at the
+          time of the scan.
+      * - ``kind``
+        - str
+        - ``"script"`` or ``"icon"``.
+      * - ``relative_path``
+        - str
+        - Path relative to ``folder``, with ``/`` separators: such as
+          ``scripts/modeling/align.py`` for a script, the file name such as
+          ``name.png`` for an icon. For a script it is a lookup reference: other
+          registered folders can hold a file under the same reference, which
+          :py:func:`resolve_script` reports.
+      * - ``absolute_path``
+        - str
+        - Absolute path of the file.
+
+.. py:class:: ResourcePathIssue
+
+   A folder or path that could not be read.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 20 58
+
+      * - Attribute
+        - Type
+        - Value
+      * - ``folder``
+        - ResourceFolderInfo
+        - The registered folder concerned.
+      * - ``path``
+        - str
+        - The folder's ``resolved_path`` (``raw_path`` when it is empty) for a
+          folder that is not available, or the path that failed during the
+          scan. Exception text is not included.
+      * - ``code``
+        - str
+        - ``missing``, ``not_directory``, ``unreadable`` or ``invalid``, with
+          the meanings of *Folder status*.
+
+Script references
+=================
+
+.. py:function:: resolve_script(reference)
+
+   Resolve a script reference with the resolver that script execution uses,
+   without running the script.
+
+   A slot stores the path of a file inside a registered folder relative to that
+   folder, such as ``scripts/modeling/align.py``. The resolved absolute path
+   identifies the file found now.
+
+   :param str reference: An absolute path or a relative reference.
+   :returns: The resolution status and the matching files.
+   :rtype: ScriptResolution
+
+   .. rubric:: Search order
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 30 70
+
+      * - ``reference``
+        - Locations checked
+      * - Absolute path
+        - That path only.
+      * - ``assets/examples/scripts/...``
+        - The bundled examples in the add-on package only.
+      * - Any other relative reference
+        - Every registered resource folder, with ``\`` read as ``/``. The
+          add-on package is checked only when no registered folder has a
+          candidate and every registered location could be inspected. In the
+          package, a ``scripts/...`` reference also finds the bundled examples
+          at their earlier locations.
+
+   .. rubric:: Status
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 78
+
+      * - ``status``
+        - Meaning
+      * - ``resolved``
+        - One file was found. Read permission and Python syntax are not
+          checked.
+      * - ``missing``
+        - No matching file was found.
+      * - ``ambiguous``
+        - Two or more distinct files match.
+      * - ``unavailable``
+        - A location could not be resolved or inspected, so resolution could
+          not be completed.
+
+   .. rubric:: Example
+
+   Build a command string for a slot. This neither runs the script nor edits a
+   slot:
+
+   .. code-block:: python
+
+      import pme
+
+      reference = "scripts/modeling/align.py"
+      result = pme.resources.resolve_script(reference)
+
+      if result.status == "resolved":
+          command = f"execute_script({reference!r})"
+          print(command)  # execute_script('scripts/modeling/align.py')
+      else:
+          print(result.status, result.candidates)
+
+   .. rubric:: Notes
+
+   * Distinct files are separate candidates even when their contents are the
+     same. Paths that lead to the same real file count as one candidate.
+   * ``ambiguous`` takes precedence over ``unavailable``.
+   * Files can change after the call. Script execution resolves the reference
+     again.
+
+.. py:class:: ScriptResolution
+
+   Result of :py:func:`resolve_script`.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 20 58
+
+      * - Attribute
+        - Type
+        - Value
+      * - ``reference``
+        - str
+        - The ``reference`` argument.
+      * - ``status``
+        - str
+        - ``resolved``, ``missing``, ``ambiguous`` or ``unavailable``.
+      * - ``resolved_path``
+        - str or None
+        - Absolute path of the file when ``status`` is ``resolved``; ``None``
+          otherwise.
+      * - ``candidates``
+        - tuple[str, ...]
+        - Paths of the matching files found: one for ``resolved``, two or more
+          for ``ambiguous``, none for ``missing``, those that could be
+          inspected for ``unavailable``.
+
+Scope
+=====
+
+* The functions do not execute scripts, decode images, create directories or
+  migrate settings.
+* Which slots use a file is not reported. Slot references are not updated when
+  a file is moved or renamed.

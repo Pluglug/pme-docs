@@ -1,0 +1,209 @@
+:vocab: developer-facing
+
+.. _authoring-concepts:
+
+============================================================
+基本事項
+============================================================
+
+.. py:currentmodule:: pme.editing
+
+``pme.editing`` のすべての関数が従う規則です。
+実行できる場所、対象、行わないこと、安定している範囲を定めます。
+結果のステータス、ガード、例外は :ref:`authoring-results` で説明します。
+
+実行できる場所
+============================================================
+
+関数は、PME の読み込みが完了した後に、Blender のメイン Python スレッドで実行します。
+Python Console、Text Editor、ほかのアドオン、またはそこで Python を実行する外部ツールから呼び出します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - 要件
+     - 満たさない場合
+   * - Blender のメインスレッド
+     - ``RuntimeError("Menu editing requires Blender's main thread")``。
+       Router と Property Stack の操作は
+       ``RuntimeError("PME editing must run on Blender's main thread")`` を送出します。
+   * - PME の読み込みが完了している
+     - ``RuntimeError("Menu editing requires PME to finish loading")``。
+       アドオンの boot script の段階が実行中の間に送出します。
+   * - PME の Preferences が存在する
+     - ``RuntimeError("PME preferences are unavailable")``。
+       Router と Property Stack の操作は、代わりに ``status`` ``"rejected"`` と診断 ``preferences_unavailable`` を返します。
+       PME がまったく有効でない場合、Blender にアドオンのエントリーがなく、
+       参照時に ``KeyError("Addon '<id>' not found")`` を送出します。
+   * - GUI セッション
+     - ``--background`` では、メニューの作成と編集が使う一時的な Preferences とエディターの状態を持たないまま、PME が登録されます。
+       静的な JSON 検証(:py:func:`pme.validate_json`)は、この要件とは別です。
+
+* PME の初期化状態を報告する公開関数や、初期化を待つ公開関数はありません。
+* 起動時の固定の待機や、任意の ``RuntimeError`` の後の再試行は、
+  準備完了の証明になりません。
+* PME の Preferences エディターが使える状態になった時点で、
+  PME はオーサリングのコードを実行できる状態です。
+
+関数が扱う対象
+============================================================
+
+* **保存定義。** 関数は、メモリ上にある PME の Preferences データ内のメニュー定義を、
+  エディターと同じ処理を通じて読み書きします。
+* **UID で指定。** すべての編集関数は UID を受け取ります。
+  名前はメニューを見つけるために使い(:py:func:`pme.find_pm`)、その後は UID で指定します。
+  メニューを改名しても UID は変わりません。
+* **通常の値。** 読み取り結果は通常の Python の dict、list、文字列、数値で、
+  Blender のライブデータ(RNA)ではありません。メニューが変わっても、読み取り結果は変わりません。
+* **セッションのバージョン。** ``read_pm()["version"]`` は、現在のセッションの間だけ保持するカウンターです。
+  保存されず、Python からの直接の書き込みをすべて検出するものでもありません。
+  ``expected`` のガードは、代わりに保存値を比較します。
+* **一意な対象。** 存在しない、形式が不正、または複数の保存済みメニューが共有しているメニュー UID は、
+  ``ValueError("Menu UID is missing, invalid or ambiguous: ...")`` を送出します。
+  関数は、同じ UID を持つ複数のメニューから 1 つを選びません。
+  Router と Property Stack の操作は、代わりに診断付きで ``status`` ``"rejected"`` を返します。
+
+メニュー UID
+------------------------------------------------------------
+
+メニュー UID は ``<prefix>_<id>`` です。``<id>`` は ``a``-``z`` と ``2``-``7`` から成る 8 文字です。
+接頭辞はメニューの種類によって決まります。:py:func:`pme.validate_uid` がこの形式を確認します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 34 32
+
+   * - メニューの種類
+     - ``mode_id``
+     - UID の接頭辞
+   * - Pie Menu
+     - ``PMENU``
+     - ``pm_``
+   * - Vector Menu
+     - ``VMENU``
+     - ``vm_``
+   * - Regular Menu
+     - ``RMENU``
+     - ``rm_``
+   * - Pop-up Dialog
+     - ``DIALOG``
+     - ``pd_``
+   * - Floating Panel
+     - ``FPANEL``
+     - ``fp_``
+   * - Stack Key
+     - ``SCRIPT``
+     - ``s_``
+   * - Panel Group
+     - ``PANEL``
+     - ``pg_``
+   * - Hidden Panel Group
+     - ``HPANEL``
+     - ``hpg_``
+   * - Sticky Key
+     - ``STICKY``
+     - ``sk_``
+   * - Macro Operator
+     - ``MACRO``
+     - ``mc_``
+   * - Modal Operator
+     - ``MODAL``
+     - ``md_``
+   * - Property
+     - ``PROPERTY``
+     - ``pr_``
+   * - Property Stack
+     - ``CONDITION``
+     - ``cn_``
+   * - Context Router
+     - ``ROUTER``
+     - ``rt_``
+
+その他の識別子
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 28 30 42
+
+   * - 識別子
+     - 形式
+     - 範囲
+   * - スロット UID
+     - ``pmi_<id>``。``<id>`` の規則はメニュー UID と同じ
+     - 所属するメニュー。スロットは、メニューの UID とスロット自身の UID で指定します。
+   * - Context Router の分岐 UID
+     - ``branch_`` と番号で割り当て
+     - 所属する Router。
+   * - Context Router の条件 UID
+     - ``cond_`` と番号で割り当て
+     - 所属する Router の分岐。
+   * - Property Stack の条件 UID
+     - 接頭辞 ``cond_`` を付けて割り当て
+     - 所属する Property Stack。
+   * - レイアウトの ``row_ref``
+     - ``read_pm()["rows"]`` から得る ``{"kind": ..., "slot_uid": ...}``
+     - Pop-up Dialog または Floating Panel の行の、現在の先頭。
+       永続的な ID ではありません。構造を変更した後は読み直します。
+
+関数が行わないこと
+============================================================
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 保証
+     - 提供するか
+   * - Preferences のディスクへの保存
+     - いいえ。変更は、Blender が Preferences を保存するまでメモリ内に留まります
+       (**Save Preferences** または自動保存)。保存された内容は再起動で確認します。
+   * - Blender の Undo ステップの追加
+     - いいえ。
+   * - 作成した内容の実行
+     - いいえ。Command、Custom スクリプト、Poll、Router の条件と対象は実行せず、
+       メニューも呼び出しません。
+       Property を読み取っても、その Getter の評価や Setter の実行は行いません。
+   * - 作成したメニューが動作することの証明
+     - いいえ。確定した結果が示すのは保存定義です。
+       表示と動作は、メニューが対象とするエディターとモードで別に観測します。
+   * - 選択中のメニューの変更
+     - いいえ。メニューはエディターの選択ではなく UID で指定します。
+       :py:func:`delete_pms` は無関係なアクティブメニューを保ちます。
+       アクティブなメニューや選択中のメニューを削除すると選択が変わり、
+       ``selection_before`` と ``selection_after`` として報告します。
+       :py:func:`pme.create_pm` は、エディターの New Menu 操作と同じく、新しいメニューを選択します。
+   * - 一括操作のアトミックな適用
+     - いいえ。:py:func:`update_slots`、:py:func:`clear_slots`、
+       :py:func:`update_pm`、:py:func:`update_property` は段階ごとに確定します。
+       後の段階が失敗しても、先に確定した段階は確定したまま残ります(``partial``)。
+       別々の呼び出しは互いに独立です。
+   * - 並行した変更の検出
+     - ガードとして ``expected_version``、``expected``、``expected_digest`` のいずれかを渡した場合だけ(:ref:`authoring-results`)。
+   * - Blender の登録の更新
+     - はい。ホットキー、Extend Target、Panel Group の配置、Property の登録は、
+       エディターと同じく呼び出しの中で更新します。
+
+.. _authoring-concepts-stability:
+
+安定性
+============================================================
+
+* API 全体が **Experimental** です。基本的なインターフェースは安定を保つ方針です。
+  細部は今後のバージョンで変わる場合があります。
+* 互換性の境界は、UID で対象を指定する操作の、文書化された入力、競合確認、観測できる結果です。
+* 内部実装は、保存形式とエディターの通常の正規化を保ったまま変わる場合があります。
+* 失敗後に残る状態や stale 検出の変更は、関数のシグネチャが同じでも、
+  観測可能な挙動の変更です。
+
+バッチでの作業
+============================================================
+
+* 結果とその診断は、確定、拒否、一部だけ保存、状態不明を区別します(:ref:`authoring-results`)。
+* 予期しない例外や ``unknown`` ステータスの後は、再試行の前に対象を読み直します。
+* 多数のメニューを編集する外部ツールは、小さなバッチに分けて送り、
+  呼び出しの間で各結果と進捗を保持します。
+* ツールのタイムアウトは Blender 側の処理を取り消さず、何も変わっていないことの証明にもなりません。
+  まず実行中の呼び出しが終わります。その後、対象のメニューを読み、
+  再試行する変更があるかどうか、どれを再試行するかを判断します。

@@ -1,0 +1,19 @@
+:vocab: developer-facing
+
+.. _authoring-recipes:
+
+=======
+Recipes
+=======
+
+Each recipe combines several functions of the Authoring API to reach one
+goal. The functions themselves are described on the reference pages.
+
+.. toctree::
+   :maxdepth: 1
+
+   layout_build_panel_rows
+   property_stack_new
+   property_switch
+   router_add_branch
+   slots_link_child_menu

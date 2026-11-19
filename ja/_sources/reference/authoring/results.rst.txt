@@ -1,0 +1,490 @@
+:vocab: developer-facing
+
+.. _authoring-results:
+
+============================================================
+結果とガード
+============================================================
+
+.. py:currentmodule:: pme.editing
+
+``pme.editing`` のすべての編集関数は ``dict`` を返します。
+このページは、それらの結果に共通する要素を定義します。
+``status`` の値、古い入力を拒否するガード、``dry_run``、診断の項目、例外です。
+1 つの関数だけが持つキーは、その関数の説明に記載します。
+
+成功、事前確認、古い入力を表す値の名前は、操作ごとに決まっています。
+:ref:`authoring-results-by-operation` に一覧があります。
+呼び出し側は、1 つの綴りを仮定せず、そこに挙げた値で判定します。
+
+共通の結果キー
+============================================================
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``status``
+     - str
+     - :ref:`authoring-results-status` のいずれかの値。
+       すべての結果にあります。
+   * - ``committed``
+     - bool
+     - ``status`` が ``"committed"`` のときだけ ``True``。
+   * - ``dry_run``
+     - bool
+     - ``dry_run`` 引数の値。
+       スロット、レイアウト、移送の結果にはこのキーがありません。
+   * - ``pm_uid``
+     - str
+     - メニュー UID。1 つのメニューに対する大半の操作の結果にあります。
+   * - ``before``, ``after``
+     - dict または None
+     - 呼び出しの前と後に読んだ保存値。
+       形と有無は各関数の説明に記載します。
+   * - ``expected``
+     - dict
+     - 後の呼び出しに ``expected`` として渡す値。
+       ガードがスナップショットである操作にあります(:ref:`authoring-results-guards`)。
+   * - ``pending``
+     - list
+     - 保存を試みていない部分(スロット UID、メタデータのフィールド名、Property のグループ)。
+       エディターのコールバックなど、先の段階がそれらを変更している場合があります。
+       pending は未変更を意味しません。
+   * - ``recovery``
+     - dict、str または None
+     - 書き込み失敗後の復元の詳細。
+       形は各関数の説明に記載します。
+   * - ``diagnostics``
+     - list[dict]
+     - :ref:`authoring-results-diagnostics` で説明する項目。
+       すべての結果にあります。
+
+:py:func:`pme.create_pm` は dict ではなく ``PmCreationResult`` オブジェクトを返します。
+属性は ``accepted`` (bool)、``pm_uid`` (str。拒否時は空)、
+``diagnostics`` (コード文字列の tuple)です。
+``accepted`` が ``True`` で ``refresh_failed`` がある場合、
+メニューは作成済みで、表示の更新だけが失敗しています。
+
+:py:func:`update_slots` と :py:func:`clear_slots` は、スロットごとの ``slots``、
+``side_effects``、``structure_changes`` も返します。説明は :py:func:`update_slots` にあります。
+
+.. _authoring-results-status:
+
+ステータスの値
+============================================================
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 78
+
+   * - ``status``
+     - 意味
+   * - ``committed``
+     - 確定(メモリ内に保存済み)。
+       要求した変更は、エディターの通常の正規化を経て読み戻したとおり、メモリ内に保存されています。
+       :py:func:`update_slots`、:py:func:`clear_slots`、:py:func:`update_pm` では、
+       要求した部分のうち少なくとも 1 つが保存され、拒否された部分がない状態です。
+       個々の部分は ``unchanged`` の場合があります。
+       すべての部分がすでに要求どおりの値なら、結果は ``unchanged`` です。
+   * - ``partial``
+     - 一部だけ保存。要求の一部を保存した後、後続の部分が拒否されたか失敗しました。
+       試みていない部分は ``pending`` にあります。
+       :py:func:`update_slots`、:py:func:`clear_slots`、
+       :py:func:`update_pm`、:py:func:`update_property` だけが返します。
+   * - ``validated``
+     - dry run の受理。``dry_run=True`` で、要求がすべての検査を通過しました。
+       何も書き込んでいません。
+   * - ``ready``
+     - 実行可能と確認済み。``validated`` と同じ意味で、
+       :py:func:`update_hotkey` と :py:func:`delete_pms` が返します。
+   * - ``unchanged``
+     - 変更なし(書き込まない)。要求は保存値とすでに一致しています。何も書き込んでいません。
+       Router と Property Stack の dry run は、代わりに ``validated`` を返します。
+   * - ``rejected``
+     - 拒否。要求した変更は保存されていません。``diagnostics`` が原因を示します。
+       エディターのコールバックを実行したスロット操作では、コールバックによる変更が残る場合があり、
+       ``after`` と ``side_effects`` に示されます。
+   * - ``restored_failure``
+     - 失敗後に復元済み。書き込みが失敗しました。保存値を書き戻し、
+       読み戻しが呼び出し前の値と一致しています。Blender の登録は別に観測します。
+   * - ``unknown``
+     - 状態不明(読み直す)。書き込みが失敗し、保存状態を確認できませんでした。
+       再試行の前に対象を読み直します。
+
+結果の中の項目は、それぞれ独自の ``status`` を持ちます：
+
+* ``slots`` の項目(スロット操作)と ``fields`` の項目(:py:func:`update_pm`)：
+  ``committed``、``unchanged``、``rejected``。
+* ``groups`` の項目(:py:func:`update_property`)：``committed``、
+  ``rejected``、``restored_failure``、``unknown``。
+* ``registration`` (:py:func:`update_hotkey`、:py:func:`set_enabled`)：
+  ``registered``、``not_required``、``partial``、``unknown``。
+* ``visibility`` (:py:func:`set_enabled`)：``observed`` または ``unknown``。
+
+登録と可視性は Blender の現在の状態の観測であり、操作の結果ではありません。
+
+確定ステータスが示す範囲
+------------------------------------------------------------
+
+* メモリ内の保存定義。Preferences はディスクに保存されません(:ref:`authoring-concepts`)。
+* 表示や動作は含みません。読み戻しで確認できるのは保存定義です。
+  表示と動作は、メニューが対象とするエディターとモードで別に観測します。
+  たとえば、Knife ツールを有効にする Command スロットが確定した場合、
+  そのスロットを実行するとアクティブツールが変わります。それだけで形状を切断するわけではありません。
+* 問題がないことは示しません。``committed`` に診断が付く場合があります。
+  正規化の注記、警告、確認が必要な保存定義などです。
+* 保存後の refresh が失敗しても、確定は取り消されません。
+  失敗は ``diagnostics`` または例外の注記で報告します。
+
+.. _authoring-results-guards:
+
+ガード
+============================================================
+
+ガードは、何かを書き込む前に、呼び出し側が持つ保存状態の写しと現在の状態を比較します。
+一致しない場合は、``status`` ``"rejected"`` と、その操作の stale 診断を返します。
+stale 診断は :ref:`authoring-results-by-operation` に一覧があります。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 40 40
+
+   * - 入力
+     - 比較するもの
+     - 値の取得元
+   * - ``expected_version``
+     - メニューのセッション内のバージョン(int)。
+       stale のコードは ``stale_version`` で、``expected`` と ``actual`` を持ちます。
+     - ``read_pm()["version"]``、または以前のスロット操作やレイアウト操作の結果の
+       ``version``。
+   * - ``expected``
+     - 保存値。下の 3 つの形式のいずれか。
+     - ``read_pm()``、または以前の結果の ``expected``。
+   * - ``expected_digest``
+     - Router、Property Stack、Property の保存データのハッシュ(str)。
+     - ``read_pm()["router"]["digest"]``、
+       ``read_pm()["property_stack"]["digest"]``、
+       または ``read_pm()["property"]["digest"]``。
+
+``expected_version`` と ``expected`` は互いに独立しています。
+``version`` は、Python からの直接の書き込みをすべて検出するものではありません。
+``expected`` は保存値を比較するため、それらも検出します。
+
+``expected_version`` を受け付けるのは、:py:func:`update_slots`、
+:py:func:`clear_slots`、:py:func:`add_slot`、:py:func:`remove_slot`、
+:py:func:`move_slot`、:py:func:`swap_slots` と、行・spacer・panel の操作です。
+:py:func:`transfer_slot` は受け付けません。
+
+``expected`` の形式
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 38 40
+
+   * - 形式
+     - 操作
+     - 規則
+   * - 保存値の一部
+     - :py:func:`update_pm` (メタデータ)、:py:func:`update_settings` (設定)、
+       :py:func:`update_slots` と :py:func:`clear_slots` (スロット UID からスロットのフィールドへの対応)、
+       Pop-up Dialog と Floating Panel 以外のメニューでの :py:func:`remove_slot`
+       (そのスロットのフィールド)
+     - その部分について ``read_pm()`` が返すキーの任意の部分集合。
+       値が異なるキーがあると、呼び出しを拒否します。
+       保存値にないキーも stale として扱います。
+       ただし :py:func:`update_pm` は、未知のフィールドに対して ``ValueError`` を送出します。
+       :py:func:`update_slots` と :py:func:`clear_slots` は、
+       編集対象でないスロット UID に対して ``ValueError`` を送出します。
+   * - 保存値の全体
+     - :py:func:`update_hotkey` (``read_pm()["hotkey"]`` の 13 フィールドちょうど)、
+       :py:func:`set_enabled` (要求したすべての UID から保存済みの bool への対応)
+     - キーの不足や余分は ``ValueError`` を送出します。
+   * - 以前の呼び出しのスナップショット
+     - :py:func:`add_slot`。
+       Pop-up Dialog または Floating Panel での :py:func:`remove_slot`、:py:func:`move_slot`、
+       :py:func:`swap_slots` と、行・spacer・panel の操作。
+       :py:func:`transfer_slot`、:py:func:`update_tags`、:py:func:`duplicate_pm`、
+       :py:func:`delete_pms`
+     - 以前の呼び出し(通常は dry run)が返した ``result["expected"]`` を、変更せずに渡します。
+       違いがあれば呼び出しを拒否します。
+
+:py:func:`move_slot` と :py:func:`swap_slots` は、Pop-up Dialog と Floating Panel 以外のメニューで
+``expected`` を渡すと ``TypeError`` を送出します。
+
+.. _authoring-results-dry-run:
+
+``dry_run``
+============================================================
+
+* ``dry_run=True`` は、実際の呼び出しと同じ検査を現在の保存値に対して実行し、何も書き込みません。
+  保存値、バージョン、UID は元のままです。エディターの hook と refresh は実行しません。
+* 受理された dry run は ``validated`` (:py:func:`update_hotkey` と :py:func:`delete_pms` では ``ready``)を返します。
+  :ref:`authoring-results-by-operation` に記載がある操作では、``unchanged`` を返す場合もあります。
+* ``before`` と ``after`` がある場合、それらは予測ではなく保存値を示します。
+  予測値を返す場合、それは ``proposed`` (:py:func:`update_hotkey`)、
+  または ``candidate`` (:py:func:`update_property`、Router と Property Stack の操作)です。
+* dry run の ``expected`` は、適用する呼び出しに渡せます。
+* 適用する呼び出しは UID を解決し直し、すべての検査を繰り返します。
+  ``validated`` は成功を予約せず、エディターの hook、refresh、Blender の登録も検査しません。
+* :py:func:`update_slots`、:py:func:`clear_slots`、:py:func:`update_pm` には
+  ``dry_run`` がありません。
+
+.. _authoring-results-by-operation:
+
+操作ごとの結果とガードの語彙
+============================================================
+
+*その他のステータス* は、確定と dry run の値以外の値を挙げます。
+*ガードの入力* は、ガードの引数と stale 診断のコードを示します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 11 14 21 32
+
+   * - 操作
+     - 確定
+     - dry run の受理
+     - その他のステータス
+     - ガードの入力
+   * - :py:func:`pme.create_pm`
+     - ``accepted`` が ``True`` (dict ではなくオブジェクト)
+     - なし
+     - ``accepted`` が ``False`` で ``diagnostics`` あり
+     - なし
+   * - :py:func:`update_slots`、:py:func:`clear_slots`
+     - ``committed``
+     - ``dry_run`` なし
+     - ``unchanged``、``partial``、``rejected``
+     - ``expected_version``、``expected`` (スロット UID からスロットのフィールドの一部への対応)。
+       ``stale_version``、``stale_slot``
+   * - :py:func:`update_pm`
+     - ``committed``
+     - ``dry_run`` なし
+     - ``unchanged``、``partial``、``rejected``
+     - ``expected`` (メタデータの一部)。``stale_metadata``
+   * - :py:func:`update_settings`
+     - ``committed``
+     - ``validated``、``unchanged``
+     - ``unchanged``、``rejected``、``restored_failure``、``unknown``
+     - ``expected`` (設定の一部)。``stale_settings``
+   * - :py:func:`update_hotkey`
+     - ``committed``
+     - ``ready``、``unchanged``
+     - ``unchanged``、``rejected``
+     - ``expected`` (ホットキーの 13 フィールドすべて)。``stale_hotkey``
+   * - :py:func:`set_enabled`
+     - ``committed``
+     - ``validated``、``unchanged``
+     - ``unchanged``、``rejected``、``restored_failure``、``unknown``
+     - ``expected`` (UID から保存済みの bool への対応、全対象)。
+       ``pm_availability_expected_mismatch``
+   * - :py:func:`update_tags`
+     - ``committed``
+     - ``validated``。空の要求では ``unchanged``
+     - ``unchanged``、``rejected``、``unknown``
+     - ``expected`` (スナップショット)。``tag_expected_stale``
+   * - :py:func:`duplicate_pm`
+     - ``committed``
+     - ``validated``
+     - ``rejected``、``restored_failure``、``unknown``
+     - ``expected`` (スナップショット)。``pm_duplicate_stale_expected``
+   * - :py:func:`delete_pms`
+     - ``committed``
+     - ``ready``
+     - ``rejected``、``restored_failure``、``unknown``
+     - ``expected`` (スナップショット)。``pm_remove_saved_state_stale``
+   * - :py:func:`read_pm`、:py:func:`read_slot_inputs`、
+       :py:func:`slot_fields`、:py:func:`resolve_auto_icons`、
+       :py:func:`setting_fields`、:py:func:`find_references`
+     - 読み取り専用。``status`` はなく、何も書き込みません
+     - なし
+     - なし
+     - なし
+   * - :py:func:`add_slot`
+     - ``committed``
+     - ``validated``
+     - ``rejected``。Pop-up Dialog または Floating Panel では
+       ``restored_failure``、``unknown`` も
+     - ``expected_version``、``expected`` (スナップショット)。``stale_version``、
+       ``stale_snapshot``、``stale_popup`` (Pop-up)
+   * - :py:func:`remove_slot`
+     - ``committed``
+     - ``validated``
+     - ``rejected``。Pop-up Dialog または Floating Panel では
+       ``restored_failure``、``unknown`` も
+     - ``expected_version``、``expected`` (そのスロットのフィールド。Pop-up ではスナップショット)。
+       ``stale_version``、``stale_slot``、``stale_popup``
+   * - :py:func:`move_slot`、:py:func:`swap_slots`
+     - ``committed``
+     - ``validated``、``unchanged``
+     - ``unchanged``、``rejected``。Pop-up Dialog または Floating Panel では
+       ``restored_failure``、``unknown`` も
+     - ``expected_version``、``expected`` (スナップショット。Pop-up のみ)。
+       ``stale_version``、``stale_popup``
+   * - :py:func:`transfer_slot`
+     - ``committed``
+     - ``validated``
+     - ``rejected``、``restored_failure``、``unknown``
+     - ``expected`` (スナップショット)。``expected_version`` なし。``stale_transfer``
+   * - :py:func:`add_row`、:py:func:`add_panel`、:py:func:`remove_row`、
+       :py:func:`split_row`、:py:func:`join_rows`
+     - ``committed``
+     - ``validated``
+     - ``rejected``、``restored_failure``、``unknown``
+     - ``expected_version``、``expected`` (スナップショット)。``stale_version``、
+       ``stale_popup``
+   * - :py:func:`move_row`、:py:func:`update_row`、:py:func:`update_spacer`、
+       :py:func:`align_slot`
+     - ``committed``
+     - ``validated``、``unchanged``
+     - ``unchanged``、``rejected``、``restored_failure``、``unknown``
+     - ``expected_version``、``expected`` (スナップショット)。``stale_version``、
+       ``stale_popup``
+   * - :py:func:`update_property`
+     - ``committed``
+     - ``validated``、``unchanged``
+     - ``unchanged``、``partial``、``rejected``、``restored_failure``、
+       ``unknown``
+     - ``expected_digest``。``stale_property``
+   * - :py:func:`remove_router_branch`
+     - ``committed``
+     - ``validated``
+     - ``rejected``、``unknown``
+     - ``expected_digest``。``stale_router_digest``
+   * - :py:func:`update_router`、:py:func:`move_router_branch`、
+       :py:func:`reorder_router_branches`
+     - ``committed``
+     - ``validated``
+     - ``unchanged``、``rejected``、``unknown``
+     - ``expected_digest``。``stale_router_digest``
+   * - :py:func:`update_property_stack`
+     - ``committed``
+     - ``validated``
+     - ``unchanged``、``rejected``、``unknown``
+     - ``expected_digest``。``stale_property_stack_digest``
+   * - :py:func:`add_property_stack_row`、
+       :py:func:`update_property_stack_row`、
+       :py:func:`remove_property_stack_row`
+     - ``committed``
+     - ``validated``
+     - ``unchanged``、``rejected``、``unknown``
+     - ``expected_digest``。``stale_property_stack_digest``
+   * - :py:func:`update_property_stack_hud`
+     - ``committed``
+     - ``validated``、``unchanged``
+     - ``unchanged``、``rejected``、``restored_failure``、``unknown``
+     - ``expected`` ( ``while_true_hud`` の一部)。``stale_property_stack_hud``
+
+.. _authoring-results-diagnostics:
+
+診断
+============================================================
+
+``diagnostics`` は dict の list です。すべての項目が ``code`` を持ちます。
+その他のキーは項目によって異なります。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 30 48
+
+   * - キー
+     - 含まれる項目
+     - 値
+   * - ``code``
+     - すべての項目
+     - ``stale_settings`` などの機械可読な識別子。
+   * - ``message``
+     - 大半の項目
+     - 人が読むための説明。
+   * - ``field`` / ``fields``
+     - 名前のある入力に関する項目
+     - 入力名、または名前の list。
+       stale のガードは、異なる名前を ``fields`` に挙げます。
+   * - ``pmi_uid``
+     - スロット操作
+     - その項目が関係するスロット。
+   * - ``path``
+     - Router と Property Stack の操作
+     - ``logic.branches[0].target`` など、入力またはロジック内の位置。
+   * - ``severity``
+     - 一部の項目
+     - ``"error"`` または ``"warning"``。Property Stack の項目は常に持ちます。
+       それ以外では、ホットキーの衝突、削除後に残った参照、
+       解決できない Router のメニュー対象などの警告を示します。
+   * - ``exception_type``
+     - 捕捉した例外の項目
+     - 例外のクラス名。traceback は Blender のコンソールに出力します。
+   * - ``phase``
+     - :py:func:`update_tags`、:py:func:`delete_pms`、:py:func:`set_enabled`
+     - ``preflight`` や ``readback`` など、その項目を生成した段階。
+   * - ``expected``, ``actual``
+     - ``stale_version``
+     - 渡したバージョンと現在のバージョン。
+   * - ``line``, ``column``
+     - ``invalid_syntax`` (スロット操作)
+     - 渡したテキスト内の構文エラーの位置。
+       検査の前に、テキストの空白除去や字下げの変更は行いません。
+
+* 診断があること自体は失敗を意味しません。判定は ``status`` で行います。
+  ``committed`` の結果にも診断が付く場合があります。
+* 関数固有のコードは、その関数の説明に記載します。
+
+.. _authoring-results-exceptions:
+
+例外
+============================================================
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 46 32
+
+   * - 例外
+     - 送出する条件
+     - 保存状態
+   * - ``RuntimeError``
+     - Blender のメインスレッド以外からの呼び出し、PME の読み込み完了前の呼び出し、
+       または PME の Preferences がない状態での呼び出し(:ref:`authoring-concepts`)。
+     - 触れません。
+   * - ``TypeError``
+     - 引数の型が誤っている。マッピングでない ``changes`` や、
+       bool でない ``dry_run`` など。
+     - 書き込みません。最初の書き込みの前に送出します。
+   * - ``ValueError``
+     - 未知のフィールド、不正な値、矛盾する引数、
+       または存在しない・不正・曖昧なメニュー UID。
+     - 書き込みません。最初の書き込みの前に送出します。
+   * - 書き込み開始後の任意の例外
+     - 書き込み、エディターのコールバック、setter、refresh のいずれかが例外を送出した。
+     - 一部が変更されている場合があります。traceback を保持し、注記を追加します。
+
+* 書き込み開始後に、エディターやコールバックが ``TypeError`` や ``ValueError`` を送出する場合もあります。
+  例外のクラスは、何も変わっていないことの証明になりません。
+  traceback と注記を保持し、再試行の前に対象を読み直します。
+* 注記は例外の ``__notes__`` にあり、traceback とともに出力します。
+  注記は、確定した内容または読むべき対象を示します：
+
+  * :py:func:`update_slots`、:py:func:`clear_slots`：
+    確定したスロット UID と、保存中だったスロット。
+  * :py:func:`update_pm`：確定したフィールドと、例外を送出した段階。
+  * :py:func:`update_hotkey`：保存値の読み戻し、変更したフィールド、登録の読み戻し。
+  * Pop-up Dialog と Floating Panel 以外のメニューでの :py:func:`add_slot`、:py:func:`remove_slot`、
+    :py:func:`move_slot`、:py:func:`swap_slots`：呼び出し前のスロットの順序。
+  * :py:func:`update_property`：保存定義を復元したかどうか。
+  * Router と Property Stack の操作：再試行の前にメニューを読むよう求める指示。
+    Property Stack の注記は、最後に報告したステータスも示します。
+
+* Router と Property Stack の操作は、不正な形式の入力に対して例外を送出しません。
+  ``dry_run_must_be_a_boolean``、``expected_digest_must_be_a_string``、
+  ``branches_must_be_a_sequence`` などの診断とともに ``rejected`` を返します。
+* :py:func:`update_settings`、:py:func:`set_enabled`、:py:func:`update_tags`、
+  :py:func:`duplicate_pm`、:py:func:`delete_pms`、:py:func:`transfer_slot` と、
+  Pop-up Dialog または Floating Panel でのスロット操作・レイアウト操作は、
+  書き込みの失敗を例外として送出せずに捕捉します。
+  traceback を出力し、``restored_failure`` または ``unknown`` を返し
+  (:py:func:`update_tags` は ``rejected`` または ``unknown``)、
+  失敗を ``diagnostics`` で説明します。

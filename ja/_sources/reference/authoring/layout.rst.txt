@@ -1,0 +1,1400 @@
+:vocab: developer-facing
+
+.. _authoring-layout:
+
+============================================================
+レイアウトの行とパネル
+============================================================
+
+.. py:currentmodule:: pme.editing
+
+Pop-up Dialog（``DIALOG``）とFloating Panel（``FPANEL``）は、行、spacer、Layout Panelをメニューの保存リストにスロットとして保存します。
+このページの関数は、そのリストを行として読み取り、行、spacer、項目の揃え、Layout Panelを変更します。
+単独の項目の追加・削除・移動・編集は :ref:`authoring-slots`、Modeや幅などのメニュー設定は
+:ref:`authoring-settings` にあります。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 関数
+     - 用途
+   * - :py:func:`read_pm`
+     - 行を ``rows`` で返します。
+   * - :py:func:`add_row`
+     - 既定のボタンを持つ行を追加します。
+   * - :py:func:`add_panel`
+     - Layout Panelを持つ行を追加します。
+   * - :py:func:`remove_row`
+     - 行とその中身をすべて削除します。
+   * - :py:func:`move_row`
+     - 行を別の行の前後へ移動します。
+   * - :py:func:`split_row`
+     - 行を、その行のスロットの一つの直前で分割します。
+   * - :py:func:`join_rows`
+     - 隣接する2行を結合します。
+   * - :py:func:`update_row`
+     - 行設定を変更します。
+   * - :py:func:`update_spacer`
+     - spacerの設定を一つ変更します。必要ならspacerを作成します。
+   * - :py:func:`align_slot`
+     - 項目を行の左・中央・右の区分に配置します。
+
+保存されるレイアウト
+============================================================
+
+保存リストは、左から右、上から下の順に読みます。レイアウトを担うスロットは3種類です。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 34 44
+
+   * - スロット
+     - 保存形式
+     - 意味
+   * - 行マーカー
+     - ``mode`` は ``"EMPTY"``、``text`` は ``row`` で始まる。例:
+       ``"row?size=LARGE"``
+     - 行を開始します。この文字列に行設定が入ります。
+   * - spacer
+     - ``mode`` は ``"EMPTY"``、``text`` は ``spacer`` で始まる。例:
+       ``"spacer?hsep=COLUMN"``
+     - 行内の間隔、列境界、揃え境界、subrow境界。
+       この文字列にspacerの設定が入ります。
+   * - Layout Panel アンカー
+     - ``mode`` は ``"MENU"`` で、``layout_panel`` オプションを持つ
+     - Layout Panelを開始します。同じ行でアンカーより後のスロットがPanel ヘッダーです。
+
+行はマーカーから次のマーカーまでです。最初のマーカーより前のスロットは、マーカーのない先頭行になり、
+既定の設定を持ちます。新しいPop-up DialogまたはFloating Panelは、マーカーとボタンを一つずつ持ちます。
+
+.. _authoring-layout-rows:
+
+行構造を読む
+============================================================
+
+``read_pm(pm_uid)["rows"]`` は、Pop-up DialogまたはFloating Panelの行を保存順に並べます。
+他の種類のメニューには ``rows`` キーがありません。空のメニューは ``rows == []`` です。
+:py:func:`read_pm` の ``slot_uids`` 引数が絞り込むのは ``slots`` だけで、``rows`` は常にメニュー全体を表します。
+読み取りでは、マーカーの追加、UIDの修復、バージョンの初期化、レイアウトの変更を行いません。
+
+各行は次の辞書です。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 16 62
+
+   * - キー
+     - 型
+     - 値
+   * - ``row_ref``
+     - dict
+     - 行への参照。:ref:`authoring-layout-row-refs` を参照。
+   * - ``slot_uids``
+     - list[str]
+     - 行内の全スロットのUID。保存順で、マーカーを含みます。
+   * - ``has_marker``
+     - bool
+     - マーカーのない先頭行では ``False``。
+   * - ``raw_text``
+     - str or None
+     - マーカーの保存文字列。マーカーがなければ ``None``。
+       保存文字列内の未知のキーはここにだけ現れます。
+   * - ``settings``
+     - dict
+     - 名前ごとの行設定。:ref:`authoring-layout-row-settings` を参照。
+       保存文字列にない名前は既定値です。マーカーのない行はすべて既定値で、
+       先頭項目の文字列を行設定として読みません。
+   * - ``defaulted_fields``
+     - list[str]
+     - 保存文字列にない設定名。マーカーのない行ではすべての名前。
+   * - ``diagnostics``
+     - list[dict]
+     - 保存文字列を解析できないときは、``exception_type`` と ``message`` を持つ ``layout_parse_failed``。
+       このとき ``settings`` は既定値を持ち、``raw_text`` は保存文字列を保持します。
+   * - ``spacers``
+     - list[dict]
+     - 行内のspacerごとに1件、保存順。下記を参照。
+   * - ``panel``
+     - dict or None
+     - 行のLayout Panel、または ``None``。下記を参照。
+
+spacerの要素は次のとおりです。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 16 62
+
+   * - キー
+     - 型
+     - 値
+   * - ``slot_uid``
+     - str
+     - spacerのUID。
+   * - ``raw_text``
+     - str
+     - spacerの保存文字列。
+   * - ``settings``
+     - dict
+     - ``hsep`` と ``subrow``。:ref:`authoring-layout-spacer-settings` を参照。
+   * - ``defaulted_fields``
+     - list[str]
+     - 保存文字列にない設定名。
+   * - ``diagnostics``
+     - list[dict]
+     - 行と同じ。
+
+``panel`` の値は次のとおりです。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 16 62
+
+   * - キー
+     - 型
+     - 値
+   * - ``anchor_uid``
+     - str
+     - アンカーのUID。行内で最初のLayout Panel アンカーです。
+   * - ``options``
+     - dict
+     - アンカーのオプションを ``idname`` (str)、``default_closed`` (bool)、
+       ``use_header_layout`` (bool) として読んだ値。
+   * - ``layout_panel``
+     - any
+     - その読み取りを行う前の、保存済みの ``layout_panel`` の値。JSONの値として返します。
+   * - ``layout_panel_present``
+     - bool
+     - アンカーに保存済みの ``layout_panel`` の値があるかどうか。
+   * - ``header_uids``
+     - list[str]
+     - 行内でアンカーより後の全スロット。保存順です。
+       無効な項目と、Header LayoutがOFFの間は非表示の項目も含みます。
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(pm_uid)["rows"][0]
+   {'row_ref': {'kind': 'marker', 'slot_uid': 'pmi_gxyya7hr'},
+    'slot_uids': ['pmi_gxyya7hr', 'pmi_glcfd66v'], 'has_marker': True,
+    'raw_text': 'row',
+    'settings': {'align': 'CENTER', 'size': 'NORMAL', 'vspacer': 'NORMAL',
+                 'fixed_col': False, 'fixed_but': False},
+    'defaulted_fields': ['align', 'size', 'vspacer', 'fixed_col', 'fixed_but'],
+    'diagnostics': [], 'spacers': [], 'panel': None}
+   >>> panel_row["panel"]
+   {'anchor_uid': 'pmi_nptwzacb',
+    'options': {'idname': 'layout_panel_tbcduupz', 'default_closed': False,
+                'use_header_layout': False},
+    'layout_panel_present': True,
+    'layout_panel': {'idname': 'layout_panel_tbcduupz', 'default_closed': False,
+                     'use_header_layout': False},
+    'header_uids': []}
+
+.. _authoring-layout-row-refs:
+
+行参照
+------------------------------------------------------------
+
+``row_ref`` は ``{"kind": kind, "slot_uid": uid}`` で、行を開始するスロットを指します。
+``kind`` は、そのスロットが行マーカーなら ``"marker"``、マーカーのない先頭行の先頭スロットなら
+``"first_item"`` です。``row_ref`` は永続的な行IDではありません。
+
+``row_ref`` は、行が同じスロット・同じkindで始まっている間だけ受け付けられます。
+そのスロットが移動・削除されたとき、別のスロットがその前に置かれたとき、マーカーのない先頭行にマーカーが追加されたとき（参照が ``"first_item"`` から ``"marker"`` に変わる）には一致しなくなります。
+古い参照は別の行へ付け替えられず、操作は ``row_not_found`` で拒否します。
+現在の参照は、直前の結果の ``after_rows`` から取るか、読み直して取得してください。
+
+行の操作は、キーがちょうど ``kind`` と ``slot_uid`` の ``row_ref`` を受け付けます。
+他のキーがある、またはキーが欠けている場合は ``TypeError``、それ以外の ``kind`` は ``ValueError`` を送出します。
+
+.. _authoring-layout-row-settings:
+
+行設定
+============================================================
+
+行設定は行マーカーの文字列に保存されます。:py:func:`update_row` は次の名前と値を受け付けます。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 16 10 24 12 38
+
+   * - 名前
+     - 型
+     - 値の範囲
+     - 既定値
+     - 説明
+   * - ``align``
+     - str
+     - ``CENTER``, ``LEFT``, ``RIGHT``
+     - ``CENTER``
+     - 行に ``ALIGNER`` spacerがないときの、行とそのsubrowの寄せ。
+       :py:func:`align_slot` とは別の設定です。エディターのRow Alignmentメニューは、
+       この設定を非推奨と表示し、ボタンの揃えを案内します。
+   * - ``size``
+     - str
+     - ``NORMAL``, ``LARGE``, ``LARGER``
+     - ``NORMAL``
+     - ボタンの高さ。通常の1倍、1.25倍、1.5倍。
+   * - ``vspacer``
+     - str
+     - ``NONE``, ``NORMAL``, ``LARGE``, ``LARGER``
+     - ``NORMAL``
+     - 行の上の間隔。separator 0、1、3、5個分。先頭行の上には間隔を描画しません。
+   * - ``fixed_col``
+     - bool
+     -
+     - ``False``
+     - 行の列を等幅にします。
+   * - ``fixed_but``
+     - bool
+     -
+     - ``False``
+     - 行またはそのsubrow内のボタンを等幅にします。
+
+.. _authoring-layout-spacer-settings:
+
+spacerの設定
+============================================================
+
+spacerの設定はspacerの文字列に保存されます。:py:func:`update_spacer` は1回の呼び出しでそのうち一つを変更します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 16 10 24 12 38
+
+   * - 名前
+     - 型
+     - 値の範囲
+     - 既定値
+     - 説明
+   * - ``hsep``
+     - str
+     - ``NONE``, ``SPACER``, ``COLUMN``, ``ALIGNER``
+     - ``NONE``
+     - ``SPACER`` は間隔を描画します。``COLUMN`` は新しい列を開始します。
+       ``ALIGNER`` は、:py:func:`align_slot` が使う左・中央・右の区分の境界です。
+   * - ``subrow``
+     - str
+     - ``NONE``, ``BEGIN``, ``END``
+     - ``NONE``
+     - ``BEGIN`` は現在の列の中でsubrowを開始し、``END`` はそれを終了します。
+
+.. _authoring-layout-results:
+
+共通の結果キー
+============================================================
+
+このページのすべての関数は、ここで説明する辞書を返します。
+Pop-up DialogまたはFloating Panelに対する :py:func:`add_slot`、:py:func:`remove_slot`、:py:func:`move_slot`、
+:py:func:`swap_slots` も同じ辞書を返しますが、3つの ``*_row_refs`` キーはありません。
+:py:func:`transfer_slot` は独自の結果を返し、そのPopup側が ``before_rows``、``after_rows``、
+``insertion_position`` を持ちます。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 16 62
+
+   * - キー
+     - 型
+     - 値
+   * - ``status``
+     - str
+     - :ref:`authoring-layout-status` を参照。
+   * - ``committed``
+     - bool
+     - ``status`` が ``"committed"`` のときだけ ``True``。
+   * - ``pm_uid``
+     - str
+     - メニューのUID。
+   * - ``version``
+     - int
+     - 呼び出し後のメニューのセッション内バージョン。
+       ``version_after`` と同じです。
+   * - ``version_before``
+     - int
+     - 呼び出し前に読んだバージョン。
+   * - ``version_after``
+     - int
+     - 呼び出し後に読んだバージョン。
+   * - ``before_order``
+     - list[str]
+     - 呼び出し前の、保存順のスロットUID。
+   * - ``after_order``
+     - list[str] or None
+     - 呼び出し後の、保存順のスロットUID。読み戻しに失敗したときは
+       ``None``。
+   * - ``before_rows``
+     - list[dict]
+     - 呼び出し前の行。形式は :ref:`authoring-layout-rows` と同じです。
+   * - ``after_rows``
+     - list[dict] or None
+     - 呼び出し後の行。読み戻しに失敗したときは ``None``。
+   * - ``insertion_position``
+     - dict or None
+     - 項目の追加または移動が解決した隙間。
+       :ref:`authoring-layout-insertion-position` を参照。このページの関数では
+       ``None``。
+   * - ``slots``
+     - list[dict]
+     - 呼び出しの対象スロット。各要素は ``uid``、``status`` (呼び出しのstatus)、
+       ``before``、``after``、``reports`` (常に ``[]``) を持ちます。
+       ``before`` と ``after`` はスロットの保存値に ``index`` と
+       ``layout_panel`` を加えたもので、スロットが存在しない側は ``None`` です。
+       どのスロットが対象かは各関数の説明にあります。
+   * - ``side_effects``
+     - list[dict]
+     - 保存値またはindexが変わった他のスロット。``uid``、``before``、
+       ``after``。
+   * - ``created_uids``
+     - list[str]
+     - 呼び出し前になく、呼び出し後にあるスロット。保存順。
+   * - ``deleted_uids``
+     - list[str]
+     - 呼び出し前にあり、呼び出し後にないスロット。
+   * - ``moved_uids``
+     - list[str]
+     - indexが変わったスロット。スロットの挿入・削除によるずれも含みます。
+   * - ``structure_changes``
+     - list[dict]
+     - 実際の行とspacerの変更。対象行の外の整理も含みます。
+       下記を参照。
+   * - ``expected``
+     - dict
+     - 呼び出し前に読んだ保存スロット一式。``pm_uid`` と
+       ``items``。:ref:`authoring-layout-checks` を参照。
+   * - ``recovery``
+     - str
+     - ``"not_needed"``、``"restored"``、``"unknown"`` のいずれか。
+   * - ``pending``
+     - list
+     - 常に ``[]``。
+   * - ``diagnostics``
+     - list[dict]
+     - 問題ごとに1件。``code`` と、:ref:`authoring-layout-diagnostics` および各関数の説明に挙げる詳細を持ちます。
+   * - ``created_row_refs``
+     - list[dict]
+     - このページの関数のみ。呼び出し前になく、呼び出し後にある行参照。
+   * - ``deleted_row_refs``
+     - list[dict]
+     - このページの関数のみ。呼び出し前にあり、呼び出し後にない行参照。
+   * - ``moved_row_refs``
+     - list[dict]
+     - このページの関数のみ。開始indexが変わった行参照。
+       別の行の変更によるずれも含みます。
+
+``structure_changes`` の要素は次のとおりです。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 22 60
+
+   * - ``kind``
+     - その他のキー
+     - 意味
+   * - ``"rows"``
+     - ``before``, ``after``
+     - 完全な ``before_rows`` と ``after_rows``。両者が異なるときに入ります。
+   * - ``"layout_slot"``
+     - ``uid``, ``before``, ``after``
+     - 行マーカーまたはspacerの追加・削除・変更・位置のずれ。
+       ``before`` と ``after`` は ``slots`` と同じ形式です。
+   * - ``"row_ref"``
+     - ``before``, ``after``
+     - 呼び出しが、マーカーのない先頭行にマーカーを追加しました。``before`` は古い ``"first_item"`` 参照、``after`` は新しい ``"marker"``
+       参照です。行の操作のみ。
+
+.. _authoring-layout-status:
+
+ステータス
+------------------------------------------------------------
+
+値は :ref:`authoring-results` と同じです。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - ``status``
+     - 意味
+   * - ``validated``
+     - ``dry_run=True`` で、呼び出しは受理可能です。何も書き込んでいません。
+   * - ``unchanged``
+     - 保存変更なし。保存済みのスロットがすでに呼び出しを満たしているか、
+       書き込み後も ``expected`` と同じでした。バージョンは変わりません。
+   * - ``committed``
+     - 保存済みのスロットが変わり、読み戻されました。バージョンが1増えました。
+   * - ``rejected``
+     - 何も書き込んでいません。``diagnostics`` が原因を示します。
+   * - ``restored_failure``
+     - 書き込みが例外を送出し、保存済みのスロットを ``expected`` のスナップショットへ復元しました。``recovery`` は ``"restored"`` です。
+   * - ``unknown``
+     - 書き込みが例外を送出し、復元にも失敗しました。``recovery`` は ``"unknown"`` です。
+       再試行の前に :py:func:`read_pm` を呼び出してください。
+
+.. _authoring-layout-diagnostics:
+
+共通の診断
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - ``code``
+     - 原因と追加のキー
+   * - ``row_operation_unsupported``
+     - メニューがPop-up DialogでもFloating Panelでもありません。このページのすべての関数
+       （:py:func:`add_row`、:py:func:`add_panel`、:py:func:`remove_row`、:py:func:`move_row`、
+       :py:func:`split_row`、:py:func:`join_rows`、:py:func:`update_row`、:py:func:`update_spacer`、
+       :py:func:`align_slot`）が報告します。
+   * - ``stale_version``
+     - ``expected_version`` が現在のバージョンと異なります。スロットの操作と同じく、
+       ``expected`` (指定したバージョン) と ``actual`` (現在のバージョン)。
+   * - ``stale_popup``
+     - ``expected`` が現在の保存スロット一式と異なります。
+   * - ``row_not_found``
+     - ``row_ref`` が現在の行のちょうど一つに一致しません。
+   * - ``slot_not_found``
+     - UIDがメニューのスロットを一つに特定しません。
+   * - ``slot_edit_conflict``
+     - 呼び出しが削除または書き換えるスロットを、Slot Editorで編集中です。
+   * - ``panel_row``
+     - この呼び出しはLayout Panelの行またはアンカーには使えません。
+       該当する場合は各関数の説明にあります。
+   * - ``aligner_without_root``
+     - 変更によって行の最初の ``ALIGNER`` が最初の ``COLUMN`` より後になり、
+       揃えの起点が失われます。行が元からその状態でなかった場合だけ報告します。
+       ``column_slot_uid``、``aligner_slot_uid``、``message``。
+   * - ``popup_<operation>_failed``
+     - 書き込みが例外を送出しました。``<operation>`` は ``row_add``、``panel_add``、
+       ``row_remove``、``row_move``、``row_split``、``row_join``、
+       ``row_update``、``spacer_update``、``slot_alignment`` のいずれか、
+       項目の操作では ``add``、``remove``、``move`` のいずれかです。
+       ``exception_type``、``message``。
+   * - ``popup_restore_failed``
+     - ``expected`` のスナップショットの復元が例外を送出しました。``status`` は
+       ``"unknown"``。``exception_type``、``message``。
+   * - ``refresh_failed``
+     - 書き込み後のエディターの画面更新が例外を送出しました。``status`` は維持されます。
+       ``exception_type``、``message``。
+   * - ``popup_readback_failed``
+     - 呼び出し後の保存状態の読み取りが例外を送出しました。``status`` と
+       ``recovery`` は維持されます。``exception_type``、``message``。
+
+.. _authoring-layout-checks:
+
+書き込み前の検査
+------------------------------------------------------------
+
+このページのすべての関数は ``expected_version``、``expected``、``dry_run`` を受け取ります。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 78
+
+   * - 引数
+     - 規則
+   * - ``expected_version``
+     - ``None`` または負でない ``int``。メニューのセッション内バージョン
+       （``read_pm()["version"]`` または結果の ``version``）と異なると、
+       ``stale_version`` で拒否します。``bool`` を含むそれ以外の値は
+       ``TypeError`` を送出します。
+   * - ``expected``
+     - ``None``、または以前のPopupの結果の ``expected``。通常は同じ呼び出しのdry runが返したものです。
+       変更せずに渡してください。保存スロット一式を保持するため、バージョンが増えない保存変更も検出します。
+       異なると ``stale_popup`` で拒否します。
+       絞り込んだ :py:func:`read_pm` の結果、``slots`` の要素、編集したコピーでは代用できません。
+       JSONの往復後も使えます。マッピングでない値は
+       ``TypeError`` を送出します。
+   * - ``dry_run``
+     - ``bool``。それ以外の値は ``TypeError`` を送出します。``True`` は同じ検査を実行し、``validated``、``unchanged``、``rejected`` のいずれかを返します。
+
+dry runは何も書き込みません。UIDもマーカーも作成せず、バージョンも変えず、画面更新もしません。
+``before_*`` と ``after_*`` の値はどちらも現在の保存状態を表し、作成・削除・移動の一覧は空です。
+整理の結果、新しいUID、描画の成功は予測しません。
+後の呼び出しは引数を改めて解決し、現在の保存状態を再度検査します。
+
+.. code-block:: python
+
+   before = pme.editing.read_pm(pm_uid)
+   checked = pme.editing.add_row(
+       pm_uid, expected_version=before["version"], dry_run=True,
+   )
+   if checked["status"] == "validated":
+       added = pme.editing.add_row(
+           pm_uid, expected_version=checked["version"], expected=checked["expected"],
+       )
+       print(added["status"], added["after_rows"], added["created_row_refs"])
+
+補足
+------------------------------------------------------------
+
+* バージョンを増やすのは ``committed`` だけで、1回の呼び出しにつき1回です。
+* ``status="unknown"`` で ``committed=False`` でも、何も変わっていないとは限りません。
+* エディターの画面更新は、``unchanged`` または ``restored_failure`` で終わるものを含め、
+  すべての書き込みの後に実行されます。書き込み前に止まる呼び出し（dry run、拒否、
+  書き込み前に変更なしと判明した呼び出し）は画面更新しません。
+* 最終の読み戻しが例外を送出すると、``after_order`` と ``after_rows`` は
+  ``None`` になります。行の読み戻しだけが失敗した場合は ``after_order`` が残ります。
+  このとき作成・削除・移動の一覧は空ですが、何も変わっていないことを意味しません。
+  再試行の前に読み直してください。
+* 選択、無関係なSlot Editorの編集中の内容、行のクリップボードはそのまま残ります。
+* この呼び出しはPreferencesをディスクへ保存せず、Undoステップも追加しません。
+
+レイアウト行の追加・削除・移動・分割・結合
+============================================================
+
+エディターの **Add Row**、**Remove Row**、**Move Row**、**Split**、**Join Rows** コマンドは、
+同じ操作を呼び出します。``read_pm()["rows"]`` または直前の結果の ``after_rows`` から、
+現在の行参照を渡してください。
+
+.. py:function:: add_row(pm_uid, *, before_row_ref=None, after_row_ref=None, expected_version=None, expected=None, dry_run=False)
+
+   **Add Row** と同じく、行マーカーと既定のボタンを追加します。
+
+   位置は最大一つ指定します。指定しない場合は最後の行の後に追加します。
+   空のメニューでも同じです。
+
+   :param str pm_uid: Pop-up DialogまたはFloating PanelのUID。
+   :param before_row_ref: この行の前に新しい行を挿入します。
+   :type before_row_ref: dict or None
+   :param after_row_ref: この行の後に新しい行を挿入します。
+   :type after_row_ref: dict or None
+   :param expected_version: :ref:`authoring-layout-checks` を参照。
+   :type expected_version: int or None
+   :param expected: :ref:`authoring-layout-checks` を参照。
+   :type expected: dict or None
+   :param bool dry_run: 書き込まずに検査して返します。
+   :returns: :ref:`authoring-layout-results` で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``row_ref`` が、キーをちょうど ``kind`` と空でない文字列の
+      ``slot_uid`` だけ持つマッピングでない場合、または ``expected_version``、``expected``、
+      ``dry_run`` の型が誤っている場合。
+   :raises ValueError: 両方の位置を指定した場合、``row_ref`` のkindが
+      ``"marker"`` でも ``"first_item"`` でもない場合、またはメニューUIDが存在しない・無効・
+      曖昧な場合。
+
+   .. rubric:: 結果
+
+   ``slots`` は新しいマーカーと新しいボタンを、この順で持ちます。
+   ``created_uids`` は同じ2つのUIDを並べます。``created_row_refs`` は新しい行を持ちます。
+
+   .. rubric:: 診断
+
+   ``row_operation_unsupported``、``row_not_found``、``stale_version``、
+   ``stale_popup`` と、:ref:`authoring-layout-diagnostics` の書き込み失敗。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      added = pme.editing.add_row(pm_uid)
+      marker_uid, button_uid = added["created_uids"]
+
+   .. rubric:: 補足
+
+   * 新しいボタンは、名前が ``Button <n>`` でコマンドのないCommandスロットです。
+     空のメニューには、文字列が ``row`` のマーカーとボタン一つが入ります。
+   * 新しい行の設定は **Add Row** に従います。
+
+     * 末尾への追加（最後の行の後への追加を含む）: ``size`` は最後の行から取ります。
+       ``vspacer`` も、その行に ``COLUMN`` spacerがなければ最後の行から取ります。
+     * 行の前: ``size`` はその行から取ります。その行が ``NONE`` で、その上の行に
+       ``COLUMN`` spacerがなければ、新しい行は ``vspacer="NONE"``、それ以外は
+       ``"NORMAL"`` です。その行の ``vspacer`` は、その行に ``COLUMN`` spacerがない限り
+       ``"NONE"`` になります。
+     * 最後でない行の後: ``size`` はその行から取ります。新しい行は
+       ``vspacer="NONE"`` です。ただし、その行に ``COLUMN`` spacerがある場合は
+       ``"NORMAL"`` です。
+     * ``COLUMN`` spacerを持つ行と、そのすぐ下の行は、この呼び出しで
+       ``vspacer="NONE"`` を受け取りません。エディターの行の
+       **Spacer** メニューも、そこでは ``NONE`` を提示しません。そのような行にすでに保存されている ``NONE`` は維持されます。
+   * ``before_row_ref`` がマーカーのない先頭行を指す場合は、まずその行にマーカーを追加し、スロットとその文字列を保ちます。このとき ``structure_changes`` に
+     ``"row_ref"`` 要素が入ります。``after_row_ref`` ではマーカーを追加しません。
+
+.. py:function:: remove_row(pm_uid, row_ref, *, expected_version=None, expected=None, dry_run=False)
+
+   行を、そのマーカーと行内の全スロットとともに削除します。
+
+   次の行はマーカーと設定を保ちます。最後の行を削除すると、空のメニューになります。
+
+   :param str pm_uid: Pop-up DialogまたはFloating PanelのUID。
+   :param dict row_ref: 削除する行。
+   :param expected_version: :ref:`authoring-layout-checks` を参照。
+   :type expected_version: int or None
+   :param expected: :ref:`authoring-layout-checks` を参照。
+   :type expected: dict or None
+   :param bool dry_run: 書き込まずに検査して返します。
+   :returns: :ref:`authoring-layout-results` で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``row_ref`` が、キーをちょうど ``kind`` と空でない文字列の
+      ``slot_uid`` だけ持つマッピングでない場合、または ``expected_version``、``expected``、
+      ``dry_run`` の型が誤っている場合。
+   :raises ValueError: ``row_ref`` のkindが ``"marker"`` でも
+      ``"first_item"`` でもない場合、またはメニューUIDが存在しない・無効・曖昧な場合。
+
+   .. rubric:: 結果
+
+   ``slots`` は削除した行の全スロットを持ち、その ``after`` は ``None`` です。
+   ``deleted_row_refs`` は削除した行を持ちます。
+
+   .. rubric:: 診断
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``slot_edit_conflict``
+        - 行のスロットをSlot Editorで編集中です。
+
+   ほかに ``row_operation_unsupported``、``row_not_found``、``stale_version``、
+   ``stale_popup`` と、:ref:`authoring-layout-diagnostics` の書き込み失敗。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      rows = pme.editing.read_pm(pm_uid)["rows"]
+      result = pme.editing.remove_row(pm_uid, rows[-1]["row_ref"])
+
+   .. rubric:: 補足
+
+   * Layout Panel行は、アンカーとすべてのヘッダー項目とともに削除されます。
+     無効な項目と、Header LayoutがOFFの間は非表示の項目も含みます。
+   * 隣の行に対する空行やspacerの整理は実行しません。
+   * 無関係な編集中の内容、選択、行のクリップボードはそのまま残ります。
+
+.. py:function:: move_row(pm_uid, row_ref, *, before_row_ref=None, after_row_ref=None, expected_version=None, expected=None, dry_run=False)
+
+   行全体を別の行の前後へ移動します。
+
+   ``before_row_ref`` と ``after_row_ref`` のどちらか一方だけを指定します。
+
+   :param str pm_uid: Pop-up DialogまたはFloating PanelのUID。
+   :param dict row_ref: 移動する行。
+   :param before_row_ref: この行の前へ移動します。
+   :type before_row_ref: dict or None
+   :param after_row_ref: この行の後へ移動します。
+   :type after_row_ref: dict or None
+   :param expected_version: :ref:`authoring-layout-checks` を参照。
+   :type expected_version: int or None
+   :param expected: :ref:`authoring-layout-checks` を参照。
+   :type expected: dict or None
+   :param bool dry_run: 書き込まずに検査して返します。
+   :returns: :ref:`authoring-layout-results` で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``row_ref`` が、キーをちょうど ``kind`` と空でない文字列の
+      ``slot_uid`` だけ持つマッピングでない場合、または ``expected_version``、``expected``、
+      ``dry_run`` の型が誤っている場合。
+   :raises ValueError: 位置を指定しないか両方を指定した場合、``row_ref`` のkindが
+      ``"marker"`` でも ``"first_item"`` でもない場合、またはメニューUIDが存在しない・
+      無効・曖昧な場合。
+
+   .. rubric:: 結果
+
+   ``slots`` は移動した行のスロットを持ちます。``moved_row_refs`` は開始indexが変わったすべての行を並べます。
+
+   .. rubric:: ステータス
+
+   ``row_ref`` が移動先の行自身を指す場合、または行がすでにその位置にある場合は
+   ``unchanged`` です。この場合はdry runのステータスも同じです。マーカーを追加せず、
+   バージョンも変わらず、エディターの画面更新もしません。
+
+   .. rubric:: 診断
+
+   ``row_operation_unsupported``、``row_not_found``、``stale_version``、
+   ``stale_popup`` と、:ref:`authoring-layout-diagnostics` の書き込み失敗。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      rows = pme.editing.read_pm(pm_uid)["rows"]
+      result = pme.editing.move_row(
+          pm_uid, rows[-1]["row_ref"], before_row_ref=rows[0]["row_ref"],
+      )
+
+   .. rubric:: 補足
+
+   * 行のスロット、設定、UIDは、Layout Panel行のヘッダー項目を含めて一緒に移動します。
+   * 項目の移動で行う整理は実行しません。
+   * マーカーのない先頭行は、移動するとき、または ``before_row_ref`` の対象になったときにマーカーを受け取ります。このとき ``structure_changes`` に
+     ``"row_ref"`` 要素が入ります。
+
+.. py:function:: split_row(pm_uid, row_ref, *, before_uid, expected_version=None, expected=None, dry_run=False)
+
+   通常の行を分割し、その行のスロットの一つから新しい行を始めます。
+
+   ``before_uid`` で指定したスロットと、行内でそれより後のスロットは、既定の設定を持つ新しい行へ移ります。ボタンは追加しません。
+
+   :param str pm_uid: Pop-up DialogまたはFloating PanelのUID。
+   :param dict row_ref: 分割する行。
+   :param str before_uid: 行のマーカー以外のスロット。項目または
+      spacer。
+   :param expected_version: :ref:`authoring-layout-checks` を参照。
+   :type expected_version: int or None
+   :param expected: :ref:`authoring-layout-checks` を参照。
+   :type expected: dict or None
+   :param bool dry_run: 書き込まずに検査して返します。
+   :returns: :ref:`authoring-layout-results` で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``before_uid`` が空でない文字列でない場合、``row_ref`` がキーをちょうど ``kind`` と空でない文字列の ``slot_uid`` だけ持つマッピングでない場合、
+      または ``expected_version``、``expected``、``dry_run`` の型が誤っている場合。
+   :raises ValueError: ``row_ref`` のkindが ``"marker"`` でも
+      ``"first_item"`` でもない場合、またはメニューUIDが存在しない・無効・曖昧な場合。
+
+   .. rubric:: 結果
+
+   ``slots`` は行のスロットと新しいマーカーを持ちます。``created_row_refs``
+   は新しい行を持ちます。
+
+   .. rubric:: 診断
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``panel_row``
+        - 行がLayout Panel行です。
+      * - ``split_position_not_found``
+        - ``before_uid`` が行内にないか、行のマーカーです。
+      * - ``aligner_without_root``
+        - 新しい行で、最初の ``ALIGNER`` が最初の
+          ``COLUMN`` より後になります。``column_slot_uid``、``aligner_slot_uid``、``message``。
+
+   ほかに ``row_operation_unsupported``、``row_not_found``、``stale_version``、
+   ``stale_popup`` と、:ref:`authoring-layout-diagnostics` の書き込み失敗。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      row = pme.editing.read_pm(pm_uid)["rows"][0]
+      result = pme.editing.split_row(
+          pm_uid, row["row_ref"], before_uid=row["slot_uids"][-1],
+      )
+
+   .. rubric:: 補足
+
+   * 元の行はマーカーと設定を保ちます。新しいマーカーは既定の設定です。
+   * **Split** と同じく、``before_uid`` の直前のspacerを一つ削除します。
+     それ以外のスロットとすべてのUIDは残ります。
+   * ``before_uid`` に先頭項目を指定すると、元の行は空になります。
+     マーカーのない先頭行は先にマーカーを受け取り、このとき ``structure_changes`` に
+     ``"row_ref"`` 要素が入ります。
+   * ``before_uid`` で指定したspacerは、新しい行の先頭に残ります。
+     ``ALIGNER`` spacer自体を指定すると、揃えの起点が保たれます。
+   * ``COLUMN`` または ``ALIGNER`` spacerを持つ行も、
+     ``aligner_without_root`` に該当しない限り受け付けます。すでにその状態の行は修復しません。
+   * エディターは先頭項目に **Split** を表示しません。この関数は受け付けます。
+
+.. py:function:: join_rows(pm_uid, first_row_ref, second_row_ref, *, expected_version=None, expected=None, dry_run=False)
+
+   隣接する2つの通常の行を結合します。
+
+   ``second_row_ref`` は、最初の行が終わる位置から始まっている必要があります。
+
+   :param str pm_uid: Pop-up DialogまたはFloating PanelのUID。
+   :param dict first_row_ref: 上の行。マーカーと設定を保ちます。
+   :param dict second_row_ref: そのすぐ下の行。
+   :param expected_version: :ref:`authoring-layout-checks` を参照。
+   :type expected_version: int or None
+   :param expected: :ref:`authoring-layout-checks` を参照。
+   :type expected: dict or None
+   :param bool dry_run: 書き込まずに検査して返します。
+   :returns: :ref:`authoring-layout-results` で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``row_ref`` が、キーをちょうど ``kind`` と空でない文字列の
+      ``slot_uid`` だけ持つマッピングでない場合、または ``expected_version``、``expected``、
+      ``dry_run`` の型が誤っている場合。
+   :raises ValueError: ``row_ref`` のkindが ``"marker"`` でも
+      ``"first_item"`` でもない場合、またはメニューUIDが存在しない・無効・曖昧な場合。
+
+   .. rubric:: 結果
+
+   ``slots`` は両方の行のスロットを持ちます。``deleted_row_refs`` は
+   2番目の行を持ちます。
+
+   .. rubric:: 診断
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``panel_row``
+        - どちらかの行がLayout Panel行です。
+      * - ``rows_not_adjacent``
+        - 間に別の行がある、順序が逆である、または両方の参照が同じ行を指しています。
+
+   ほかに ``row_operation_unsupported``、``row_not_found``、``stale_version``、
+   ``stale_popup`` と、:ref:`authoring-layout-diagnostics` の書き込み失敗。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      rows = pme.editing.read_pm(pm_uid)["rows"]
+      result = pme.editing.join_rows(pm_uid, rows[0]["row_ref"], rows[1]["row_ref"])
+
+   .. rubric:: 補足
+
+   * 2番目の行のマーカーと、2番目の行で ``hsep`` が ``COLUMN`` または
+     ``ALIGNER`` のspacerをすべて削除します。それ以外のspacerと項目は残ります。
+
+行設定・間隔・揃えを変更する
+============================================================
+
+エディターの行設定、spacer、揃えのコマンドは、同じ操作を呼び出します。
+呼び出し側は行やspacerの文字列を組み立てません。
+
+.. py:function:: update_row(pm_uid, row_ref, changes, *, scope="row", expected_version=None, expected=None, dry_run=False)
+
+   1つの行、または行のグループの設定を変更します。
+
+   すでに要求した値になっている設定は書き込みません。何も異ならない場合、
+   結果は ``unchanged`` です。
+
+   :param str pm_uid: Pop-up DialogまたはFloating PanelのUID。
+   :param row_ref: 行。``None`` は ``scope="all_rows"`` のときだけ。
+   :type row_ref: dict or None
+   :param dict changes: 行設定の名前と新しい値のマッピング。部分指定で、
+      指定しない設定は値を保ちます。名前と値は
+      :ref:`authoring-layout-row-settings` にあります。
+   :param str scope: ``"row"``、``"aligned_rows"``、``"all_rows"`` のいずれか。
+      下の「対象範囲」を参照。
+   :param expected_version: :ref:`authoring-layout-checks` を参照。
+   :type expected_version: int or None
+   :param expected: :ref:`authoring-layout-checks` を参照。
+   :type expected: dict or None
+   :param bool dry_run: 書き込まずに検査して返します。
+   :returns: :ref:`authoring-layout-results` で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``changes`` がマッピングでない場合、値のPythonの型が誤っている場合
+      （``fixed_col`` と ``fixed_but`` は ``bool``、それ以外は
+      ``str``）、``row_ref`` が他のscopeで ``None`` であるか、キーをちょうど
+      ``kind`` と空でない文字列の ``slot_uid`` だけ持つマッピングでない場合、または
+      ``expected_version``、``expected``、``dry_run`` の型が誤っている場合。
+   :raises ValueError: 名前が行設定でない場合、値がその設定の値の範囲にない場合、
+      ``scope`` が3つの値のいずれでもない場合、``row_ref`` のkindが
+      ``"marker"`` でも ``"first_item"`` でもない場合、またはメニューUIDが存在しない・無効・
+      曖昧な場合。
+
+   .. rubric:: 対象範囲
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``scope``
+        - 変更する行
+      * - ``row``
+        - ``row_ref`` で指定した行。
+      * - ``aligned_rows``
+        - ``vspacer="NONE"`` でつながる、その行を含む行のグループ。上方向へは、
+          行が ``vspacer="NONE"`` を持つ間たどるため、グループの最上行を含みます。
+          下方向へは、次の行が ``vspacer="NONE"`` を持つ間たどります。
+      * - ``all_rows``
+        - マーカーのない先頭行を含むすべての行。``row_ref`` は
+          ``None`` でもかまいません。空のメニューは空のままで、``unchanged`` を返します。
+
+   .. rubric:: 結果
+
+   ``slots`` は対象範囲のすべての行のスロットを持ちます。
+
+   .. rubric:: 診断
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``panel_row``
+        - Layout Panel行に対する ``scope="row"`` で、``vspacer`` 以外の設定を指定しました。``fields`` にその名前が入ります。
+      * - ``row_fields_skipped``
+        - 拒否ではありません。広い対象範囲で、Layout Panel行の ``vspacer`` 以外の設定を変更しませんでした。``row_ref``、``fields``。
+      * - ``slot_edit_conflict``
+        - 書き換えるマーカーをSlot Editorで編集中です。
+
+   ほかに ``row_operation_unsupported``、``row_not_found``、``stale_version``、
+   ``stale_popup`` と、:ref:`authoring-layout-diagnostics` の書き込み失敗。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid)
+      row_ref = before["rows"][0]["row_ref"]
+      checked = pme.editing.update_row(
+          pm_uid, row_ref, {"size": "LARGE", "fixed_but": True},
+          expected_version=before["version"], dry_run=True,
+      )
+      if checked["status"] == "validated":
+          changed = pme.editing.update_row(
+              pm_uid, row_ref, {"size": "LARGE", "fixed_but": True},
+              expected_version=checked["version"], expected=checked["expected"],
+          )
+          print(changed["status"], changed["after_rows"], changed["structure_changes"])
+
+   .. rubric:: 補足
+
+   * Layout Panel行は ``vspacer`` だけを受け付けます。
+   * ``scope="all_rows"`` では、行自身またはその上の行に ``COLUMN`` spacerがある場合、
+     ``vspacer="NONE"`` をその行に ``"NORMAL"`` として書き込みます。
+   * 値はこの補正の後で比較します。変更のない呼び出しは保存文字列、UID、
+     バージョンをそのまま保ち、画面更新もしません。
+   * マーカーのない先頭行は、その設定のいずれかが変わるときだけマーカーを受け取ります。
+     先頭項目はコマンドの文字列を保ちます。このとき ``structure_changes`` に
+     ``"row_ref"`` 要素が入ります。
+   * 変更したマーカーはエディターのencodeで書き込まれるため、そのマーカーの未知の
+     queryキーが正規化または削除される場合があります。他の保存値は変わりません。
+   * ``align`` は行設定です。:py:func:`align_slot` による項目の配置ではありません。
+
+.. py:function:: update_spacer(pm_uid, *, slot_uid=None, before_uid=None, after_uid=None, prop, value, expected_version=None, expected=None, dry_run=False)
+
+   spacerの設定を一つ変更します。必要ならspacerを作成します。
+
+   対象をちょうど一つ指定します。既存のspacerなら ``slot_uid``、内容スロットの隣のspacerなら
+   ``before_uid`` / ``after_uid`` です。整理の結果が変更の順序に依存するため、
+   1回の呼び出しで変更する設定は一つです。
+
+   :param str pm_uid: Pop-up DialogまたはFloating PanelのUID。
+   :param slot_uid: 既存のspacer。先頭、末尾、項目の間のいずれでもかまいません。
+   :type slot_uid: str or None
+   :param before_uid: 内容スロット。同じ行でその直前にあるspacerを変更します。
+      ない場合は、そこにspacerを作成します。
+   :type before_uid: str or None
+   :param after_uid: 内容スロット。同じ行でその直後にあるspacerを変更または作成します。
+   :type after_uid: str or None
+   :param str prop: ``"hsep"`` または ``"subrow"``。
+   :param str value: ``prop`` の値。
+      :ref:`authoring-layout-spacer-settings` を参照。
+   :param expected_version: :ref:`authoring-layout-checks` を参照。
+   :type expected_version: int or None
+   :param expected: :ref:`authoring-layout-checks` を参照。
+   :type expected: dict or None
+   :param bool dry_run: 書き込まずに検査して返します。
+   :returns: :ref:`authoring-layout-results` で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``value`` が文字列でない場合、対象のUIDが空でない文字列でない場合、
+      または ``expected_version``、``expected``、``dry_run`` の型が誤っている場合。
+   :raises ValueError: ``prop`` がspacerの設定でない場合、``value`` がその値の範囲にない場合、対象がちょうど一つでない場合、またはメニューUIDが存在しない・無効・曖昧な場合。
+
+   .. rubric:: 結果
+
+   ``slots`` は、設定が変わるspacer、対象のspacer、作成したspacerを持ちます。
+
+   .. rubric:: 診断
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``spacer_required``
+        - ``slot_uid`` が行マーカーまたは内容スロットを指しています。
+      * - ``content_slot_required``
+        - ``before_uid`` または ``after_uid`` がspacerまたは行マーカーを指しています。
+      * - ``panel_row``
+        - Layout Panel行で、対象がアンカーである、``prop`` が
+          ``subrow`` である、または値が ``hsep="COLUMN"`` です。
+      * - ``aligner_without_root``
+        - :ref:`authoring-layout-diagnostics` を参照。
+      * - ``slot_edit_conflict``
+        - 書き換えまたは削除するspacerかマーカーをSlot Editorで編集中です。
+
+   ほかに ``row_operation_unsupported``、``slot_not_found``、``stale_version``、
+   ``stale_popup`` と、:ref:`authoring-layout-diagnostics` の書き込み失敗。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      result = pme.editing.update_spacer(
+          pm_uid, after_uid=slot_uid, prop="hsep", value="SPACER",
+      )
+
+   .. rubric:: 補足
+
+   * 隣接するspacerはその場で更新します。``use_spacer=True`` の :py:func:`add_slot` は、
+     代わりにspacerを挿入します。
+   * 隣のスロットは同じ行にある必要があります。先頭と末尾の位置も受け付けます。
+     マーカーのない先頭行の先頭項目の前にspacerを作成しても、行マーカーは追加しません。
+   * すべての設定が ``NONE`` になったspacerは削除します。隣接するspacerがないときの
+     ``NONE`` は ``unchanged`` を返します。
+   * ``subrow="END"`` を持つspacerに ``hsep="COLUMN"`` を設定すると、その ``END`` を解除します。
+   * ``hsep="COLUMN"`` は、この行と次の行が ``vspacer="NONE"`` を持つ場合、それぞれに
+     ``vspacer="NORMAL"`` も設定します。先頭行は変更しません。
+   * 行で唯一の ``COLUMN`` spacerを別の ``hsep`` に変えると、行内の全spacerの
+     ``subrow`` を解除します。
+   * ``subrow`` を ``BEGIN`` から ``NONE`` に変えると、行内の次の
+     ``END`` も解除します。ただし、その前に ``BEGIN`` または ``COLUMN`` がある場合は解除しません。
+   * subrowに ``COLUMN`` spacerは必須ではありません。
+   * Layout Panelのヘッダーにあるspacerは、Header LayoutがOFFでも変更できます。
+     この変更でHeader LayoutはONになりません。
+
+.. py:function:: align_slot(pm_uid, slot_uid, alignment, *, expected_version=None, expected=None, dry_run=False)
+
+   項目を行の左・中央・右の区分に配置します。
+
+   エディターの揃えボタンと同じく、``ALIGNER`` spacerを移動または作成します。
+   行の ``align`` 設定は書き込みません。
+
+   :param str pm_uid: Pop-up DialogまたはFloating PanelのUID。
+   :param str slot_uid: 内容スロット。
+   :param alignment: ``"LEFT"``、``"CENTER"``、``"RIGHT"``、または行の外側の揃え境界を解除する ``None``。
+   :type alignment: str or None
+   :param expected_version: :ref:`authoring-layout-checks` を参照。
+   :type expected_version: int or None
+   :param expected: :ref:`authoring-layout-checks` を参照。
+   :type expected: dict or None
+   :param bool dry_run: 書き込まずに検査して返します。
+   :returns: :ref:`authoring-layout-results` で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``slot_uid`` が空でない文字列でない場合、または
+      ``expected_version``、``expected``、``dry_run`` の型が誤っている場合。
+   :raises ValueError: ``alignment`` が4つの値のいずれでもない場合、またはメニュー
+      UIDが存在しない・無効・曖昧な場合。
+
+   .. rubric:: 結果
+
+   ``slots`` は項目を持ちます。作成・移動・変更・削除したspacerは
+   ``created_uids``、``deleted_uids``、``side_effects``、
+   ``structure_changes`` に現れます。
+
+   .. rubric:: 診断
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``content_slot_required``
+        - ``slot_uid`` が行マーカーまたはspacerを指しています。
+      * - ``panel_row``
+        - ``slot_uid`` がLayout Panel アンカーを指しています。
+      * - ``item_in_column_region``
+        - 行に ``COLUMN`` spacerがあり、項目が最初の ``COLUMN`` より後にあります。``column_slot_uid``、``message``。
+      * - ``aligners_after_column``
+        - 行の最初の ``COLUMN`` より後に ``ALIGNER`` があります。``message``。
+      * - ``popup_slot_alignment_failed``
+        - 保存データから変更を計算できませんでした。何も書き込まず、``recovery`` は ``"not_needed"`` です。tracebackはコンソールに出力されます。``exception_type``、``message``。
+      * - ``aligner_without_root``
+        - :ref:`authoring-layout-diagnostics` を参照。
+      * - ``slot_edit_conflict``
+        - 移動・書き換え・削除するスロットをSlot Editorで編集中です。
+
+   ほかに ``row_operation_unsupported``、``slot_not_found``、``stale_version``、
+   ``stale_popup`` と、:ref:`authoring-layout-diagnostics` の書き込み失敗。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      result = pme.editing.align_slot(pm_uid, slot_uid, "RIGHT")
+
+   .. rubric:: 補足
+
+   * ``COLUMN`` spacerのある行では、項目は最初の ``COLUMN`` より前にある必要があり、
+     その後に ``ALIGNER`` があってはなりません。それ以外の場合は、
+     :py:func:`update_spacer` で境界を編集します。この制限は
+     ``align_slot`` のもので、保存レイアウトの制限ではありません。
+   * ``None`` は、項目が ``COLUMN`` より後にある場合も、行の最初と最後の
+     ``ALIGNER`` (最大2つ) を削除します。インポートしたデータにある、それ以外の
+     ``ALIGNER`` spacerは残ります。
+   * 隣接するspacerは、その後エディターの規則で統合されます。
+   * Layout Panelのヘッダーの揃えは、Header LayoutがOFFでも変更できます。
+     この変更でHeader LayoutはONになりません。
+
+Layout Panelを作成し、ヘッダーを編集する
+============================================================
+
+Layout Panelは、Pop-up DialogまたはFloating Panelの折りたたみ可能な区画です。1行を占めます。
+アンカーはMenuスロットで、その参照先メニューがPanelの本文を提供します。同じ行でアンカーより後のスロットがPanel ヘッダーになります。Panelのアンカーとヘッダーは、行とともに移動・削除されます
+（:py:func:`move_row`、:py:func:`remove_row`）。アンカーを単独の項目として削除・移動・
+交換することはできません（``panel_row``）。Layout Panel行は分割も結合もできません。
+
+.. py:function:: add_panel(pm_uid, *, before_row_ref=None, after_row_ref=None, expected_version=None, expected=None, dry_run=False)
+
+   **Add Panel** と同じく、既定のLayout Panel アンカーを持つ行を追加します。
+
+   位置は最大一つ指定します。指定しない場合は最後の行の後に追加します。
+   空のメニューでも同じです。
+
+   :param str pm_uid: Pop-up DialogまたはFloating PanelのUID。
+   :param before_row_ref: この行の前に新しい行を挿入します。
+   :type before_row_ref: dict or None
+   :param after_row_ref: この行の後に新しい行を挿入します。
+   :type after_row_ref: dict or None
+   :param expected_version: :ref:`authoring-layout-checks` を参照。
+   :type expected_version: int or None
+   :param expected: :ref:`authoring-layout-checks` を参照。
+   :type expected: dict or None
+   :param bool dry_run: 書き込まずに検査して返します。
+   :returns: :ref:`authoring-layout-results` で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``row_ref`` が、キーをちょうど ``kind`` と空でない文字列の
+      ``slot_uid`` だけ持つマッピングでない場合、または ``expected_version``、``expected``、
+      ``dry_run`` の型が誤っている場合。
+   :raises ValueError: 両方の位置を指定した場合、``row_ref`` のkindが
+      ``"marker"`` でも ``"first_item"`` でもない場合、またはメニューUIDが存在しない・無効・
+      曖昧な場合。
+
+   .. rubric:: 結果
+
+   ``slots`` はアンカーを持ちます。``created_uids`` は新しいマーカーとアンカーを並べます。``created_row_refs`` は新しい行を持ちます。
+
+   .. rubric:: 診断
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``layout_panel_unavailable``
+        - Blenderが4.2より古いか、``UILayout.panel`` がありません。
+          dry runが結果を返す前に検査します。
+
+   ほかに ``row_operation_unsupported``、``row_not_found``、``stale_version``、
+   ``stale_popup`` と、:ref:`authoring-layout-diagnostics` の書き込み失敗。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      added = pme.editing.add_panel(pm_uid)
+      anchor_uid = added["slots"][0]["uid"]
+
+   .. rubric:: 補足
+
+   * アンカーは、名前が ``Panel`` で、参照先・アイコン・ボタンの背景色を持たない
+     Menuスロットです。``layout_panel`` は新しい ``idname``
+     (``layout_panel_<id>``) を持ち、``default_closed`` と
+     ``use_header_layout`` は ``False`` です。ヘッダーは空です。
+   * 新しい行の ``size`` と ``vspacer`` は、:py:func:`add_row` と同じく **Add Row** に従います。そのうえで、新しい行とその次の行が ``vspacer="NONE"`` を持つ場合は
+     ``vspacer="NORMAL"`` にします。
+   * ``before_row_ref`` がマーカーのない先頭行を指す場合は、その行にマーカーを追加し、スロットとその文字列を保ちます。
+   * アンカーの名前と ``menu_target_uid`` は、アンカーのUIDを使って
+     :py:func:`update_slots` で設定します。``menu_target_uid`` は、名前と同じ編集か、
+     それより前に指定してください。本文のメニューがないアンカーへの編集は拒否されます（後述の「Panel設定」を参照）。``layout_panel`` 辞書や行マーカーは手で組み立てません。
+
+Panel設定
+------------------------------------------------------------
+
+Panel設定は、アンカーに対する :py:func:`update_slots` の項目
+``layout_panel_default_closed`` と ``layout_panel_use_header_layout`` です。
+どちらも ``bool`` だけを受け付けます。
+
+* :py:func:`update_slots` はSlot Editorと同じ方法でアンカーを保存し、Slot Editorは
+  Menuスロットを本文のメニューがある場合だけ保存します。新しい :py:func:`add_panel` のアンカーのように本文のメニューがないアンカーでは、どの項目を指定しても、すべての編集が拒否されます。
+  スロットの要素は、エディターのメッセージ ``"Select the item"`` を伴う ``editor_validation`` を持ちます。``menu_target_uid`` を同じ編集か、それより前の編集で指定してください。
+  エディターのアンカーメニューは、本文のメニューがなくても **Default Closed** と
+  **Header Layout** を変更します。``pme.editing`` の関数はどれも変更しません。
+* ヘッダーが空の状態で ``layout_panel_use_header_layout`` をONにすると、ヘッダーにボタンを一つ追加します。
+* 後で空になったヘッダーは空のままです。再度の保存、名前の変更、変わらない
+  ``True`` では、ボタンを追加しません。
+* OFFにしても、保存済みのヘッダー項目はすべて残ります。
+* 変更のある保存では、``enabled=True`` を含むエディターのアンカー正規化を適用します。
+  ``enabled`` は :py:func:`update_slots` の項目ではありません。
+* :py:func:`update_slots` は編集を1件ずつ順に保存します。失敗しても、先に保存した編集は元に戻りません。
+
+.. _authoring-layout-header:
+
+ヘッダーの位置
+------------------------------------------------------------
+
+:py:func:`add_slot`、:py:func:`move_slot`、:py:func:`transfer_slot` は、行の
+``panel["anchor_uid"]`` である ``header_anchor_uid`` と、次の位置のちょうど一つを組み合わせて、
+項目をPanel ヘッダーに配置します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - 位置
+     - 意味
+   * - ``before_uid`` / ``after_uid``
+     - そのヘッダーの保存済みスロットの前または後。spacerも位置として数えます。
+   * - ``edge="START"``
+     - アンカーの直後。
+   * - ``edge="END"``
+     - ヘッダーの末尾。ヘッダーが空のときはedgeを使います。
+
+* ``header_anchor_uid`` に対して位置を指定しない、または複数指定した場合、``edge`` が
+  ``"START"`` でも ``"END"`` でもない場合、``header_anchor_uid`` を
+  ``row_ref`` または ``new_row`` と併用した場合は ``ValueError`` を送出します。
+* Layout Panel行の ``row_ref`` は、そのヘッダーを意味しません。``panel_row`` で拒否されます。
+* 通常の行または別のヘッダーからヘッダーへの :py:func:`move_slot` には
+  ``header_anchor_uid`` が必要です。ない場合、結果は
+  ``header_role_required`` です。同じヘッダー内での ``before_uid`` / ``after_uid`` による移動には不要です。ヘッダーへの :py:func:`transfer_slot` には常に必要です。
+* ヘッダー内での ``before_uid`` / ``after_uid`` による :py:func:`add_slot` は、
+  Header LayoutがONの間は ``header_anchor_uid`` なしで動作し、
+  OFFの間は ``header_anchor_uid`` が必要です。
+* :py:func:`swap_slots` は2つのUIDだけを受け取ります。通常の項目とヘッダー項目、
+  または別々のヘッダーの項目を、整理なしで交換します。
+* アンカーを別のヘッダーへ移動することはできません。ヘッダー内にすでに保存されている
+  2つ目のアンカーは :py:func:`remove_slot` で削除できます。それを挿入する手段はありません。
+* ヘッダー項目は、Header LayoutがOFFの間も追加・移動・削除できます。呼び出しは
+  Header LayoutをONにしません。このとき結果の ``diagnostics`` に、``anchor_uid`` を伴う
+  ``header_layout_disabled`` が入ります。Preferencesはこれらの項目を編集用に表示し、実行時のメニューは非表示にします。
+* エディターでは、アンカーのメニューに空のヘッダー用の **Add** があり、**Move**
+  はヘッダーの先頭と末尾を提示し、Ctrl+Alt+クリックでヘッダー項目を一つ削除し、
+  **Delete Inactive Header** はHeader LayoutがOFFのヘッダーの全項目を削除します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - ``code``
+     - 原因と追加のキー
+   * - ``header_layout_disabled``
+     - 拒否ではありません。そのヘッダーのHeader LayoutがOFFです。``anchor_uid``。
+   * - ``panel_anchor_not_found``
+     - ``header_anchor_uid`` がLayout Panel アンカーを指していません。
+   * - ``header_target_mismatch``
+     - ``before_uid`` / ``after_uid`` がそのヘッダーのスロットではありません。
+   * - ``header_role_required``
+     - ``header_anchor_uid`` なしでヘッダーへ移動または転送しました。
+   * - ``panel_row``
+     - 挿入先がヘッダーの位置以外のLayout Panel行にある、
+       ``header_anchor_uid`` なしの :py:func:`add_slot` がHeader LayoutがOFFのヘッダーを対象にした、または移動する項目がアンカーです。
+
+.. code-block:: python
+
+   before = pme.editing.read_pm(pm_uid)
+   panel = next(row["panel"] for row in before["rows"] if row["panel"])
+   anchor_uid = panel["anchor_uid"]
+   checked = pme.editing.move_slot(
+       pm_uid, slot_uid, header_anchor_uid=anchor_uid, edge="END",
+       expected_version=before["version"], dry_run=True,
+   )
+   if checked["status"] == "validated":
+       moved = pme.editing.move_slot(
+           pm_uid, slot_uid, header_anchor_uid=anchor_uid, edge="END",
+           expected_version=checked["version"], expected=checked["expected"],
+       )
+       print(moved["status"], moved["diagnostics"], moved["after_rows"])
+
+.. _authoring-layout-positions:
+
+行内の項目の位置
+============================================================
+
+Pop-up DialogまたはFloating Panelでは、:py:func:`add_slot`、:py:func:`move_slot`、
+:py:func:`transfer_slot` は次の挿入先の形式のいずれか一つを受け取ります。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 20 50
+
+   * - 引数
+     - 関数
+     - 挿入先
+   * - ``before_uid`` / ``after_uid``
+     - 3つすべて
+     - その保存済みスロットの直前または直後。
+   * - ``row_ref`` と ``edge="START"`` / ``"END"``
+     - ``move_slot``、``transfer_slot``
+     - その行の左端（マーカーの後）または右端。行は空でもかまいません。Layout Panel行は ``panel_row`` で拒否されます。
+   * - ``new_row="END"``
+     - ``move_slot``、``transfer_slot``
+     - 新しい最後の行。
+   * - ``header_anchor_uid`` と位置
+     - 3つすべて
+     - Panel ヘッダー。:ref:`authoring-layout-header` を参照。
+
+* 受け付ける形式はちょうど一つです。形式を混在させると ``ValueError`` を送出します。
+  ``new_row`` はboolではなく、文字列 ``"END"`` です。
+* ``use_spacer`` は ``bool`` で、既定値は ``False`` です。Preferencesの設定は適用されません。
+* ``before_uid`` / ``after_uid`` は、基準スロットの保存indexを使います。マーカーと
+  spacerは飛ばしません。AとBの間にspacerがあると、``after_uid=A`` と ``before_uid=B`` は別の位置です。
+* :py:func:`move_slot` は、すべての形式でエディターの空行とspacerの整理を実行します。
+  移動した項目はUIDと保存値を保ち、選択と開いているSlot Editorの編集中の内容は、
+  それぞれの項目に結び付いたままです。
+* すでに満たされている ``before_uid`` / ``after_uid`` の移動は、自分自身を基準にした場合を含め、
+  spacer、整理、バージョンの変更、画面更新なしで ``unchanged`` を返します。
+  すでに満たされている行端への移動でも、エディターの画面更新は実行される場合があります。
+  行の唯一の項目を新しい行へ移動すると、整理の後で
+  ``unchanged`` になる場合があります。
+* :py:func:`swap_slots` は2つの項目をUIDと保存値ごと交換し、
+  空行やspacerの整理はしません。
+* エディターの **Move** の選択画面は、同じ前後の位置、交換、行端、**Add Row**
+  を提示します。
+
+.. code-block:: python
+
+   before = pme.editing.read_pm(pm_uid)
+   row_ref = before["rows"][-1]["row_ref"]
+   checked = pme.editing.move_slot(
+       pm_uid, slot_uid, row_ref=row_ref, edge="END",
+       expected_version=before["version"], dry_run=True,
+   )
+   if checked["status"] == "validated":
+       result = pme.editing.move_slot(
+           pm_uid, slot_uid, row_ref=row_ref, edge="END",
+           expected_version=checked["version"], expected=checked["expected"],
+       )
+       print(result["status"], result["after_rows"], result["structure_changes"])
+
+.. _authoring-layout-insertion-position:
+
+Popupの解決済み挿入位置を読む
+============================================================
+
+:py:func:`add_slot` と :py:func:`move_slot` のPopupの結果は ``insertion_position`` を含みます。
+:py:func:`transfer_slot` では ``result["to"]["insertion_position"]`` です。
+値は呼び出しが解決した位置で、dry runでも書き込みでも同じ方法で記録されます。
+呼び出し **前** の保存順にある隙間を表します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 16 62
+
+   * - キー
+     - 型
+     - 値
+   * - ``basis``
+     - str
+     - 常に ``"before"``。
+   * - ``index``
+     - int
+     - 0から保存スロット数までの隙間のindex。マーカーとspacerを含みます。
+   * - ``previous_slot_uid``
+     - str or None
+     - 隙間の直前のスロット。先頭では ``None``。
+   * - ``next_slot_uid``
+     - str or None
+     - 隙間の直後のスロット。末尾では ``None``。
+   * - ``row_ref``
+     - dict or None
+     - ``previous_slot_uid`` を含む、呼び出し前の状態の行。index 0では、
+       マーカーのない先頭行があればその行。それ以外は ``None``。
+   * - ``new_row``
+     - str or None
+     - 新しい最後の行では ``"END"``、それ以外は ``None``。
+
+保存順が ``[row, A, COLUMN, B]`` の場合、Aの後の位置は、Aと ``COLUMN`` spacerの間の
+index 2です。Bの前の位置は、``COLUMN`` spacerとBの間のindex 3です。
+隣接するマーカーとspacerのUIDが、境界の両側を区別します。
+
+* 新しい行への挿入は、呼び出し前の状態の末尾indexを ``row_ref=None`` とともに返します。将来の行参照やUIDは割り当てません。
+* 移動元の除去、spacerの挿入、整理によって、最終的なindexは変わる場合があります。
+  成功後も失敗後も、値は呼び出し前の基準のままです。保存結果は
+  ``after_*`` の値と順序が示します。
+* ``unchanged`` の移動は、要求された隙間を、移動元のUIDを隣接スロットとして返す場合があります。
+* 位置の解決前の拒否では ``None`` です。解決後の拒否は位置を持つ場合があります。呼び出しが許可されるかは ``status`` と ``diagnostics`` で判断します。
+  新しい検査が以前の検査の位置を再利用することはありません。
+* :py:func:`swap_slots`、:py:func:`remove_slot`、このページの関数、
+  他の種類のメニューへの転送は ``None`` を返します。
+* この値が記録するのは保存上の挿入境界だけです。列とsubrowの入れ子は木構造として報告しません。dry runは ``before_rows`` と ``after_rows`` に現在の保存行を入れ、整理の結果を予測しません。
+
+関連項目: :ref:`authoring-recipe-build-panel-rows`。

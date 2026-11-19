@@ -1,0 +1,35 @@
+/* 起動位置を点で比較する、Hotkey Modeの静止リファレンス。 */
+.pme-hkm-reference { margin: 1.2rem 0 .5rem; }
+.pme-hkm-reference table { width: 100%; table-layout: fixed; }
+.pme-hkm-reference th:first-child { width: 23%; }
+.pme-hkm-reference th:nth-child(2) { width: 43%; }
+.pme-hkm-reference th:nth-child(3) { width: 34%; }
+.pme-hkm-reference td, .pme-hkm-reference th { padding: .6rem .45rem; vertical-align: middle; }
+.pme-hkm-reference td p, .pme-hkm-reference th p { margin: 0; }
+.pme-hkm-reference td:first-child { font-size: .9rem; white-space: nowrap; }
+.pme-hkm-reference td:last-child { font-size: .86rem; }
+.pme-hkm-reference img { width: 22px; height: 22px; vertical-align: middle; margin-right: .25rem; background: #7b8187; border-radius: 3px; }
+.pme-hkm-reference small, .hkm-caption { color: var(--color-foreground-secondary); font-size: .78rem; line-height: 1.5; }
+.hkm-axis, .hkm-line { display: grid; grid-template-columns: repeat(4, 1fr); text-align: center; align-items: center; }
+.hkm-axis { font-size: .74rem; white-space: nowrap; font-weight: 500; }
+.hkm-line { --hkm-dot: var(--color-brand-content); position: relative; height: 1.7rem; }
+.hkm-line::before { content: ""; position: absolute; top: 50%; left: 12.5%; right: 12.5%; height: 2px; background: var(--color-background-border); }
+.hkm-line i { position: relative; justify-self: center; width: 7px; height: 7px; background: var(--color-background-border); border-radius: 50%; }
+.hkm-at-press i:nth-child(1), .hkm-at-hold i:nth-child(2), .hkm-at-release i:nth-child(3), .hkm-at-next i:nth-child(4) { width: 15px; height: 15px; background: var(--hkm-dot); }
+.hkm-with-note { height: auto; grid-template-rows: 1.7rem auto; }
+.hkm-with-note::before { top: .85rem; }
+.pme-hkm-reference .hkm-dot-note { grid-column: 2; font-size: .66rem; line-height: 1.3; white-space: nowrap; }
+.pme-hkm-routing { margin: 1rem 0; padding: 1rem; border: 1px solid var(--color-background-border); border-radius: 8px; background: var(--color-background-secondary); }
+.pme-hkm-start { text-align: center; font-size: .9rem; margin-bottom: .8rem; }
+.pme-hkm-start strong { color: var(--color-brand-content); }
+.pme-hkm-branches { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+.pme-hkm-branch { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding-top: .5rem; border-top: 2px solid var(--color-brand-content); font-size: .86rem; }
+.pme-hkm-result { color: var(--color-brand-content); font-size: 1rem; }
+.pme-hkm-routing figcaption { margin-top: .6rem; font-size: .75rem; color: var(--color-foreground-secondary); }
+@media (max-width: 700px) {
+  .pme-hkm-reference { overflow-x: auto; }
+  .pme-hkm-reference table { min-width: 660px; }
+}
+@media print {
+  .pme-hkm-reference, .pme-hkm-routing { break-inside: avoid; }
+}

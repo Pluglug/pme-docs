@@ -1,0 +1,705 @@
+:vocab: developer-facing
+
+.. _authoring-property:
+
+========
+Property
+========
+
+.. py:currentmodule:: pme.editing
+
+A Property (menu type ``PROPERTY``) defines one user property: its type,
+arguments, Enum items, callbacks, storage and Property ID. The definition is
+read and changed by field name. A Property Stack is described on
+:ref:`authoring-property-stack`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Function
+     - Purpose
+   * - :py:func:`read_pm`
+     - Returns the definition under ``property``.
+   * - :py:func:`update_property`
+     - Changes the definition, storage and Property ID.
+
+See also: :ref:`authoring-recipe-property-switch`.
+
+.. _authoring-property-read:
+
+Reading a Property
+==================
+
+``read_pm(pm_uid)["property"]`` is the definition under the field names that
+:py:func:`update_property` accepts, plus ``registered_property_id``, ``digest``
+and ``diagnostics``. Only the fields that apply to the Property's type and
+storage are present; see :ref:`authoring-property-definition`. Values are what
+the editor shows. Reading does not evaluate the Getter.
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(pm_uid)["property"]
+   {'type': 'BOOL', 'size': 1, 'default': False, 'expand': True,
+    'horizontal': True, 'restore_default': False, 'get': None, 'set': None,
+    'update': None, 'init': None, 'storage': None, 'property_id': 'my_toggle',
+    'property_id_locked': False, 'registered_property_id': 'my_toggle',
+    'digest': '42aaaef6...', 'diagnostics': []}
+
+A new Property is a stored Boolean without callbacks.
+
+``diagnostics`` lists problems in the saved definition:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - ``code``
+     - Cause, and extra keys
+   * - ``callback_compile_error``
+     - A saved callback has a syntax error. ``field`` names the callback;
+       ``severity`` is ``"warning"``.
+   * - ``argument_unreadable``
+     - A saved argument is not a Python literal. ``field`` names the argument
+       and ``text`` holds the saved text. The field shows the editor default
+       instead.
+
+.. _authoring-property-value:
+
+Where the value lives
+=====================
+
+``storage`` decides who owns the value. ``registered_property_id`` is the name
+the Property is registered under.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 33 45
+
+   * - ``storage``
+     - Value owner
+     - Read
+   * - ``None``
+     - Addon Preferences. PME holds one value.
+     - ``pme.props(registered_property_id)``.
+   * - An ID type name, such as ``"Object"``
+     - Each data-block of that type holds its own value, as an attribute named
+       ``registered_property_id``.
+     - ``getattr(data_block, registered_property_id)``. ``pme.props()`` does not
+       hold this value: ``pme.props(registered_property_id)`` returns ``None``,
+       or the value of a different Property that uses the same ID in Addon
+       Preferences.
+
+.. code-block:: python
+
+   prop = pme.editing.read_pm(property_uid)["property"]
+   name = prop["registered_property_id"]
+   if prop["storage"] is None:  # Addon Preferences: one value
+       value = pme.props(name)
+       widget = f"L.prop(props(), {name!r})"
+   else:  # "Object": a value on each object
+       value = getattr(bpy.context.object, name)
+       widget = f"L.prop(C.object, {name!r})"
+
+``registered_property_id`` is empty while the Property is disabled. Property ID
+rules are listed under :ref:`property-id`.
+
+.. _authoring-property-definition:
+
+Property definition
+===================
+
+The fields of ``read_pm()["property"]``. All except the last three are accepted
+by :py:func:`update_property`. *Default* is the value the editor shows when the
+field was never set. The arguments ``default``, ``min``, ``max``, ``step``,
+``precision``, ``subtype`` and ``unit`` are passed to Blender's ``bpy.props``
+function under the same names; ``None`` in :py:func:`update_property` returns
+an argument to its default.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 13 15 20 34
+
+   * - Field
+     - Type
+     - Applies to
+     - Default
+     - Meaning
+   * - ``type``
+     - str
+     - all
+     - ``"BOOL"``
+     - ``"BOOL"``, ``"INT"``, ``"FLOAT"``, ``"STRING"`` or ``"ENUM"``.
+   * - ``size``
+     - int
+     - BOOL, INT, FLOAT
+     - ``1``
+     - Property Size. 1 is a single value; 2 to 32 is a vector with that many
+       components.
+   * - ``default``
+     - bool, int, float, str or list
+     - all
+     - BOOL ``False``; INT and FLOAT ``0``; STRING ``""``; a vector: a list of
+       ``size`` such values; ENUM: the first item's identifier, ``None``
+       without items; Multi-Select: ``[]``
+     - Default Value. A vector default is a list of exactly ``size`` values.
+       An Enum default is one identifier. A Multi-Select default is a list,
+       tuple or set of identifiers, read back as a sorted list.
+   * - ``min``
+     - int or float
+     - INT, FLOAT
+     - ``-2147483648``
+     - Min Value. A 32-bit integer for INT, a finite number for FLOAT.
+   * - ``max``
+     - int or float
+     - INT, FLOAT
+     - ``2147483647``
+     - Max Value. Same rules as ``min``.
+   * - ``step``
+     - int or float
+     - INT, FLOAT
+     - ``1`` (INT), ``3`` (FLOAT)
+     - Step. Same rules as ``min``.
+   * - ``precision``
+     - int
+     - FLOAT
+     - ``2``
+     - Precision, 0 to 6.
+   * - ``subtype``
+     - str
+     - INT, FLOAT, STRING
+     - ``"NONE"``
+     - Subtype. See :ref:`authoring-property-subtypes`.
+   * - ``unit``
+     - str
+     - FLOAT
+     - ``"NONE"``
+     - Unit. See :ref:`authoring-property-units`.
+   * - ``multiselect``
+     - bool
+     - ENUM
+     - ``False``
+     - Multi-Select. The value is a set of identifiers.
+   * - ``expand``
+     - bool
+     - all
+     - ``True``
+     - Expand.
+   * - ``horizontal``
+     - bool
+     - BOOL, INT, FLOAT, ENUM
+     - ``True``
+     - Horizontal Layout.
+   * - ``restore_default``
+     - bool
+     - ``storage`` is ``None``
+     - ``False``
+     - Restore Default Value. PME initialization discards the saved value and
+       starts from ``default``.
+   * - ``items``
+     - list[dict]
+     - ENUM
+     - ``[]``
+     - Enum items in order. See :ref:`authoring-property-items`.
+   * - ``get``
+     - str or None
+     - all
+     - ``None``
+     - Getter text. Its ``return`` gives the value. ``None``: no Getter.
+   * - ``set``
+     - str or None
+     - all
+     - ``None``
+     - Setter text. Requires a Getter. ``None``: no Setter.
+   * - ``update``
+     - str or None
+     - all
+     - ``None``
+     - On Update text. ``None``: no On Update.
+   * - ``init``
+     - str or None
+     - all
+     - ``None``
+     - On Init text. ``None``: no On Init.
+   * - ``storage``
+     - str or None
+     - all
+     - ``None``
+     - ``None`` for Addon Preferences, or a Blender ID type name such as
+       ``"Object"`` or ``"Scene"``. See :ref:`authoring-property-value`.
+   * - ``property_id``
+     - str
+     - all
+     - Generated from the menu name
+     - Saved Property ID.
+   * - ``property_id_locked``
+     - bool
+     - all
+     - ``False``
+     - Lock. When ``True``, the Property ID does not follow menu renames.
+   * - ``registered_property_id``
+     - str
+     - read only
+     -
+     - Name the Property is registered under. Empty while the Property is
+       disabled or not registered.
+   * - ``digest``
+     - str
+     - read only
+     -
+     - Hex digest of the saved definition. Pass it as ``expected_digest``.
+   * - ``diagnostics``
+     - list[dict]
+     - read only
+     -
+     - Problems in the saved definition. See :ref:`authoring-property-read`.
+
+Callback variables are listed under :ref:`property-callbacks`.
+
+.. _authoring-property-items:
+
+Enum items
+----------
+
+Each entry of ``items``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 14 68
+
+   * - Key
+     - Type
+     - Value
+   * - ``uid``
+     - str
+     - UID of an existing item. On input, an existing UID keeps that item's
+       identity; omit it, or pass ``""`` or ``None``, for a new item.
+   * - ``identifier``
+     - str
+     - Required. The value used in scripts. Non-empty, without spaces or
+       ``|``, and unique within the Property.
+   * - ``name``
+     - str
+     - Display label. Without ``|``. Omitted or empty: the identifier.
+   * - ``icon``
+     - str
+     - Blender icon name. Omitted: ``""``.
+
+``items`` replaces the Enum items in the given order. Enum values follow item
+order, as in the editor. An identifier cannot be ``GET``, ``SET``, ``UPDATE``,
+``INIT``, ``CLASS``, ``default``, ``min``, ``max``, ``step``, ``precision``,
+``subtype`` or ``unit``. A Multi-Select Enum holds at most 31 items.
+
+.. _authoring-property-subtypes:
+
+Subtype values
+--------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Property
+     - Accepted ``subtype``
+   * - INT or FLOAT, ``size`` 1
+     - ``PIXEL``, ``UNSIGNED``, ``PERCENTAGE``, ``FACTOR``, ``ANGLE``,
+       ``TIME``, ``TIME_ABSOLUTE``, ``DISTANCE``, ``DISTANCE_CAMERA``,
+       ``POWER``, ``TEMPERATURE``, ``NONE``
+   * - INT or FLOAT, ``size`` 2 to 32
+     - ``COLOR``, ``TRANSLATION``, ``DIRECTION``, ``VELOCITY``,
+       ``ACCELERATION``, ``MATRIX``, ``EULER``, ``QUATERNION``, ``AXISANGLE``,
+       ``XYZ``, ``XYZ_LENGTH``, ``COLOR_GAMMA``, ``COORDINATES``, ``LAYER``,
+       ``LAYER_MEMBER``, ``NONE``
+   * - STRING
+     - ``FILE_PATH``, ``DIR_PATH``, ``FILE_NAME``, ``BYTE_STRING``,
+       ``PASSWORD``, ``NONE``
+
+.. _authoring-property-units:
+
+Unit values
+-----------
+
+``unit`` accepts the identifiers of Blender's ``FloatProperty.unit``. Blender
+5.2 has ``NONE``, ``LENGTH``, ``AREA``, ``VOLUME``, ``ROTATION``, ``TIME``,
+``TIME_ABSOLUTE``, ``VELOCITY``, ``ACCELERATION``, ``MASS``, ``CAMERA``,
+``POWER``, ``TEMPERATURE``, ``WAVELENGTH``, ``COLOR_TEMPERATURE`` and
+``FREQUENCY``. The list is read from the running Blender.
+
+.. _authoring-property-reset-rules:
+
+Reset rules
+===========
+
+The editor's own rules apply, in this order. Values supplied in the same call
+are applied after these resets.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - Change
+     - Effect
+   * - ``type``
+     - ``size`` becomes 1, ``multiselect`` ``False``, ``horizontal`` ``True``
+       and ``items`` ``[]``. ``default``, ``min``, ``max``, ``step``,
+       ``precision``, ``subtype`` and ``unit`` return to the editor defaults of
+       the new type. Callbacks, ``expand``, ``restore_default``, ``storage``
+       and the Property ID are kept.
+   * - ``items``
+     - A ``default`` that was never set, or that names the old first item,
+       follows the new first item. A ``default`` that names a removed
+       identifier is rejected with ``default_not_in_items`` unless ``default``
+       is also given.
+   * - ``multiselect``
+     - ``default`` returns to the editor default: ``[]`` when on, the first
+       item when off.
+   * - ``size``
+     - ``subtype`` and ``unit`` become ``"NONE"``. ``default`` is cut or padded
+       to the new size; size 1 keeps the first component.
+
+Functions
+=========
+
+.. py:function:: update_property(pm_uid, changes, *, expected_digest=None, dry_run=False)
+
+   Change a Property's definition, storage and Property ID as its editor does.
+
+   All changes are checked before the first write. If any is rejected, nothing
+   is written. The changes are then saved in three groups, in a fixed order.
+
+   :param str pm_uid: UID of the Property.
+   :param dict changes: Field name mapped to its new value. Field names are
+      those of :ref:`authoring-property-definition`, except the read-only ones.
+      Partial: fields that are not named keep their values, apart from the
+      :ref:`authoring-property-reset-rules`. ``None`` returns an argument to
+      the editor default and removes a callback.
+   :param expected_digest: ``read_pm()["property"]["digest"]``. The update is
+      rejected with ``stale_property`` when the saved Property has changed.
+   :type expected_digest: str or None
+   :param bool dry_run: Check the changes and return without writing.
+   :returns: The result described below.
+   :rtype: dict
+   :raises TypeError: ``changes`` is not a mapping; ``multiselect``,
+      ``expand``, ``horizontal``, ``restore_default`` or
+      ``property_id_locked`` is not a bool; a callback is not a string or
+      ``None``; ``property_id`` is not a string; ``storage`` is not ``None``
+      or a non-empty string; ``items`` is not a sequence of mappings, an item's
+      ``identifier`` is not a string, or its ``uid``, ``name`` or ``icon`` is
+      not a string or ``None``; ``expected_digest`` is not a string or
+      ``None``; ``dry_run`` is not a bool.
+   :raises ValueError: A field name is unknown; ``type`` is not one of the
+      five types; ``size`` is not an integer from 1 to 32; an item has a key
+      other than ``uid``, ``identifier``, ``name`` and ``icon``; the UID is
+      missing, invalid or ambiguous; the menu is not a Property.
+   :raises RuntimeError: The call is not on Blender's main thread, PME has not
+      finished loading, or PME preferences are unavailable.
+
+   .. rubric:: Groups
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 18 40 42
+
+      * - ``group``
+        - Runs when
+        - Saved through
+      * - ``storage``
+        - ``storage`` differs from the saved value.
+        - The editor's storage setting. It can choose a new Property ID for
+          the destination storage.
+      * - ``property_id``
+        - The saved Property ID or lock differs from the requested one,
+          including an ID the storage group chose.
+        - The editor's Edit Property ID.
+      * - ``definition``
+        - Any other field differs from the saved value.
+        - The editor's fields, then one registration with Blender.
+
+   Each group leaves a complete Property. ``groups`` lists the groups that ran
+   and ``pending`` the groups that did not.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - Key
+        - Type
+        - Value
+      * - ``status``
+        - str
+        - See *Status* below.
+      * - ``committed``
+        - bool
+        - ``True`` only when ``status`` is ``"committed"``.
+      * - ``dry_run``
+        - bool
+        - The ``dry_run`` argument.
+      * - ``pm_uid``
+        - str
+        - The ``pm_uid`` argument.
+      * - ``before``
+        - dict
+        - ``read_pm()["property"]`` before the call.
+      * - ``after``
+        - dict
+        - ``read_pm()["property"]`` after the call. Equal to ``before`` unless
+          something was written.
+      * - ``candidate``
+        - dict or None
+        - The definition to save, with ``storage``, ``property_id`` and
+          ``property_id_locked``. ``None`` when the changes are rejected.
+      * - ``changed_fields``
+        - list[str]
+        - Field names whose value differs between ``before`` and ``after``.
+          Empty after a dry run.
+      * - ``groups``
+        - list[dict]
+        - One entry per group that ran: ``group`` and ``status``
+          (``"committed"``, ``"rejected"``, ``"restored_failure"`` or
+          ``"unknown"``). Empty after a dry run.
+      * - ``pending``
+        - list[str]
+        - Groups that need to run and did not. After a dry run, the groups
+          that would run.
+      * - ``registration``
+        - dict or None
+        - Set when the ``definition`` group ran. See *Registration* below.
+          The ``storage`` and ``property_id`` groups register the Property
+          too; after any group, ``after["storage"]`` and
+          ``after["registered_property_id"]`` give where and under which
+          name it is registered.
+      * - ``recovery``
+        - dict or None
+        - Set after a failed group: ``scope`` (the group) and
+          ``saved_definition_matches``.
+      * - ``diagnostics``
+        - list[dict]
+        - One entry per problem: ``code``, ``field`` (or ``fields``) and
+          ``message``, plus the details listed under *Diagnostics*. Warnings
+          also have ``severity: "warning"``.
+
+   .. rubric:: Registration
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 26 10 64
+
+      * - Key
+        - Type
+        - Value
+      * - ``status``
+        - str
+        - ``"committed"``, ``"failed"``, or ``"not_applicable"`` while the
+          Property is disabled.
+      * - ``registered_property_id``
+        - str
+        - Name the Property is registered under. Empty when not registered.
+      * - ``reason_code``
+        - str
+        - Empty on success. ``property_disabled`` for a disabled Property.
+          Otherwise the code of the failed step, such as
+          ``host_registration_failed``.
+      * - ``failed_stage``
+        - str
+        - Empty on success. Otherwise the failed step: ``validate``,
+          ``claim``, ``resolve_owner``, ``prepare_metadata``,
+          ``inspect_native``, ``migrate``, ``migrate_native``,
+          ``prepare_cleanup``, ``register_new``, ``commit_ownership``,
+          ``publish`` or ``commit_metadata``.
+      * - ``blocked_owner``
+        - str
+        - The data-block that blocked moving a stored value, such as
+          ``Object 'Cube'``. Empty otherwise.
+
+   .. rubric:: Status
+
+   The shared vocabulary is under :ref:`authoring-results-status`.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - Meaning
+      * - ``committed``
+        - Every group that needed to run is saved.
+      * - ``validated``
+        - ``dry_run=True`` and the changes are acceptable. Nothing was
+          written.
+      * - ``unchanged``
+        - The changes match the saved Property. Nothing was written. Also
+          returned by a dry run.
+      * - ``rejected``
+        - The saved Property is unchanged. ``diagnostics`` names the cause:
+          a check, or the failure of the first group that ran.
+      * - ``partial``
+        - A group failed after an earlier group committed. The earlier group
+          stays saved; ``pending`` lists the groups that did not run.
+      * - ``restored_failure``
+        - Blender refused to register the saved definition, and the saved
+          definition was restored.
+      * - ``unknown``
+        - A failed group left the saved Property changed, or the restore could
+          not be confirmed. ``recovery["scope"]`` names the group. Call
+          :py:func:`read_pm` before retrying.
+
+   .. rubric:: Diagnostics
+
+   *Rejects*: checked before the first write; the status is ``rejected``.
+   *Warning*: the status is unaffected. *Group*: a group failed during the
+   write.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 30 12 58
+
+      * - ``code``
+        - Effect
+        - Cause, and extra keys
+      * - ``stale_property``
+        - Rejects
+        - ``expected_digest`` differs from the saved digest. ``field`` is
+          ``"digest"``.
+      * - ``field_not_applicable``
+        - Rejects
+        - The field does not apply to the resulting type, or
+          ``restore_default`` is given for ID storage.
+      * - ``default_type_mismatch``
+        - Rejects
+        - ``default`` has the wrong type or, for a vector, the wrong length.
+      * - ``default_not_in_items``
+        - Rejects
+        - ``default``, given or kept, names an identifier the items do not
+          have. ``missing`` lists them.
+      * - ``argument_type_mismatch``
+        - Rejects
+        - ``min``, ``max`` or ``step`` is not an integer (INT) or a finite
+          number (FLOAT), or ``precision`` is not an integer.
+      * - ``argument_out_of_range``
+        - Rejects
+        - ``precision`` is an integer outside 0 to 6; an INT ``default``,
+          ``min``, ``max`` or ``step`` is an integer outside the 32-bit range
+          (-2147483648 to 2147483647); or a FLOAT ``default``, ``min``,
+          ``max`` or ``step`` is a finite number outside the 32-bit float
+          range (about ±3.4028235e38), which Blender would register as
+          infinity. ``field`` names the field.
+      * - ``argument_not_a_choice``
+        - Rejects
+        - ``subtype`` or ``unit`` is not accepted for the type and size.
+          ``choices`` lists the accepted values.
+      * - ``min_greater_than_max``
+        - Rejects
+        - The resulting ``min`` is greater than ``max``. ``min`` and ``max``
+          give both values. Not checked when the other bound is unreadable.
+      * - ``multiselect_item_limit``
+        - Rejects
+        - A Multi-Select Enum would have more than 31 items. ``limit`` and
+          ``count`` give the numbers.
+      * - ``item_identifier_invalid``
+        - Rejects
+        - An identifier is empty or contains a space or ``|``. ``index``
+          names the item.
+      * - ``item_identifier_duplicate``
+        - Rejects
+        - An identifier repeats an earlier one. ``index`` names the item.
+      * - ``item_identifier_reserved``
+        - Rejects
+        - An identifier is a reserved entry name, listed under
+          :ref:`authoring-property-items`. ``index`` names the item.
+      * - ``item_name_invalid``
+        - Rejects
+        - A name contains ``|``. ``index`` names the item.
+      * - ``item_uid_duplicate``
+        - Rejects
+        - Two items give the same ``uid``.
+      * - ``item_uid_unknown``
+        - Rejects
+        - A ``uid`` is not an item of this Property. ``uids`` lists them.
+      * - ``set_requires_get``
+        - Rejects
+        - The result would have a Setter without a Getter.
+      * - ``argument_unreadable_would_be_replaced``
+        - Rejects
+        - A saved argument that is not a literal would be replaced by a value
+          the call did not name. ``text`` holds the saved text. Passing the
+          argument explicitly replaces it.
+      * - ``storage_type_unknown``
+        - Rejects
+        - ``storage`` is not a Blender ID type name.
+      * - ``empty``, ``too_long``, ``invalid_identifier``, ``non_ascii``,
+          ``python_keyword``, ``reserved_access_name``
+        - Rejects
+        - The Property ID is empty, longer than 63 bytes, not an ASCII letter
+          followed by letters, digits or ``_``, non-ASCII, a Python keyword,
+          or one of ``keys``, ``values``, ``items``, ``get``. Checked when
+          ``property_id`` or ``storage`` changes.
+      * - ``owner_reserved``
+        - Rejects
+        - The destination storage already has an attribute of that name,
+          such as a Blender property or a property another Property
+          registered.
+      * - ``manual_prop_id_collision``
+        - Rejects
+        - Another Property in the same storage saves that Property ID.
+      * - ``reserved``
+        - Rejects
+        - The Property ID is reserved for another reason.
+      * - ``callback_compile_error``
+        - Warning
+        - A given callback has a syntax error. It is saved, as in the editor.
+      * - ``argument_unreadable``
+        - Warning
+        - A saved argument that is not a literal is kept. ``text`` holds the
+          saved text.
+      * - ``property_readback_differs``
+        - Warning
+        - After a commit, the saved Property differs from ``candidate``.
+          ``fields`` lists the names.
+      * - ``storage_registration_failed``
+        - Group
+        - The storage group was not accepted. ``message`` joins the editor's
+          reports.
+      * - Code of the Property ID step
+        - Group
+        - The ``property_id`` group was not accepted. ``code`` is a Property
+          ID code above, ``runtime_prop_id_register_failed``, or the
+          registration's ``reason_code``. ``effect_codes`` lists the steps run.
+      * - ``definition_registration_failed``
+        - Group
+        - Blender refused to register the saved definition. ``registration``
+          holds the details.
+
+   .. rubric:: Example
+
+   Turn a new Property into a Float from 0 to 1 with a length unit:
+
+   .. code-block:: python
+
+      created = pme.create_pm(pme.PmCreationSpec("PROPERTY", name="Bevel Width"))
+      before = pme.editing.read_pm(created.pm_uid)["property"]
+      result = pme.editing.update_property(
+          created.pm_uid,
+          {"type": "FLOAT", "default": 0.1, "min": 0.0, "max": 1.0, "unit": "LENGTH"},
+          expected_digest=before["digest"],
+      )
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: Notes
+
+   * When ``storage`` changes, the Property ID that is requested or kept is
+     checked against the storage it moves to.
+   * No callback is executed by validation, saving or reading. On Init does
+     not run.
+   * Stored values follow the normal registration rules: changing ``type`` or
+     ``size`` discards the stored value, as in the editor. Stored values are
+     not restored after a failure.
+   * A committed group, or a group that ends ``unknown``, increments
+     ``read_pm()["version"]``.
+   * The selected menu and an open draft are not changed.
+   * An exception raised while the definition group is saved is re-raised
+     after the saved definition is restored. Its note states whether the
+     restore was confirmed. Call :py:func:`read_pm` before retrying.
+   * The call does not save Preferences to disk, add an Undo step, or display
+     the Property.

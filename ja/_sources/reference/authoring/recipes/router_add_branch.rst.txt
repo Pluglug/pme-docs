@@ -1,0 +1,98 @@
+:vocab: developer-facing
+
+.. _authoring-recipe-router-add-branch:
+
+============================================================
+Router の分岐を追加して条件を編集する
+============================================================
+
+.. py:currentmodule:: pme.editing
+
+3D Viewport の Mesh Edit Mode でメニューを呼び出す分岐を追加し、
+ほかの行を失わずに条件の 1 つを変更します。
+
+``router_uid`` は既存の Router の UID、``target_uid`` は呼び出すメニューの UID です。
+どちらも既存のメニューの UID です。
+
+手順
+============================================================
+
+1. 分岐を追加します。``enum_condition`` は、属性名から complete の Enum 条件を組み立てます。
+   ``C.area.type`` のような属性だけのパスを表すもので、Python の式を解析するものではありません。
+
+   .. code-block:: python
+
+      def enum_condition(*attributes, value):
+          return {
+              "source": {
+                  "kind": "rna_path", "root": "context",
+                  "segments": [{"kind": "attr", "name": part} for part in attributes],
+                  "detected_type": "enum", "readonly": True, "owner_type": None,
+              },
+              "op": "equals", "value": value, "value_type": "enum",
+          }
+
+      before = pme.editing.read_pm(router_uid)["router"]
+      result = pme.editing.update_router(
+          router_uid,
+          branches=[{
+              "name": "Edit Mesh", "combine_mode": "all",
+              "conditions": [enum_condition("area", "type", value="VIEW_3D"),
+                             enum_condition("mode", value="EDIT_MESH")],
+              "target": {"action": {"type": "menu", "value": target_uid, "opts": {}},
+                         "fallback_name": "Mesh Tools"},
+          }],
+          expected_digest=before["digest"],
+      )
+      print(result["status"], result["diagnostics"])
+      branch_uid = result["after"]["logic"]["branches"][-1]["branch_uid"]
+
+   新しい分岐は末尾に追加されるので、その UID は ``after`` の最後の分岐の UID です。
+
+2. その分岐の 2 番目の条件を ``EDIT_MESH`` から ``OBJECT`` に変えます。
+   条件の一覧全体をコピーし、1 行を変えて、一覧を渡し直します。
+   ``conditions`` は分岐の一覧全体を置き換えるため、変更した行だけを渡すとほかの行が削除されます。
+
+   .. code-block:: python
+
+      from copy import deepcopy
+
+      router = pme.editing.read_pm(router_uid)["router"]
+      branch = next(b for b in router["logic"]["branches"]
+                    if b["branch_uid"] == branch_uid)
+      print(branch["branch_uid"], branch["conditions"])
+      condition_uid = branch["conditions"][1]["condition_uid"]
+      conditions = deepcopy(branch["conditions"])
+      next(c for c in conditions if c["condition_uid"] == condition_uid)["value"] = "OBJECT"
+      result = pme.editing.update_router(
+          router_uid,
+          branches=[{"branch_uid": branch["branch_uid"], "conditions": conditions}],
+          expected_digest=router["digest"],
+      )
+      print(result["status"], result["diagnostics"])
+
+   コピーした一覧は、もう一方の行と既存のすべての ``condition_uid`` を保持します。
+   対象や位置を含め、指定しない分岐の項目は変わりません。
+   別の Router では、先に分岐の名前、参照元、値を読み取り、分岐と行を選んでください。
+
+確認
+============================================================
+
+* ``result["status"]`` が ``"committed"`` であること。``diagnostics`` は空であるか、
+  ``target_uid`` が解決されない場合は ``router_target_menu_unresolved`` の警告だけを含みます。
+* 手順 2 のあと、``read_pm(router_uid)["router"]["logic"]`` で、分岐が最後にあり、
+  条件が 2 つで、``condition_uid`` の値が変わっていないこと。
+* 保存できても、分岐が実行されることの証明にはなりません。一致するコンテキストと一致しないコンテキストで、Router のホットキーを呼び出します。**Pass Through** では、
+  一致しない場合は同じキーの次のメニュー、次に Blender へ渡ります。
+
+補足
+============================================================
+
+* アクティブな Mesh は、選択された Mesh とは限りません。``active_object.type``
+  の条件は選択を判定しません。選択されたものだけを対象にする分岐には、その判定を返す
+  Getter を持つ Property (例:
+  ``return C.active_object is not None and C.active_object.select_get()``) を、
+  ``pm_property_ref`` の条件で読み取る必要があります。:py:func:`update_router` はその Property を作成しません。Property の Getter は :py:func:`update_property` で設定します。
+
+使用する関数: :py:func:`read_pm`、:py:func:`update_router`。ロジックの項目:
+:ref:`authoring-router-logic`。

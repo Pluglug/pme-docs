@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "channel": "stable",
+  "latest_version": "2.1.0",
+  "published_at": "2026-10-03T20:45:34.174Z",
+  "minimum_blender": "4.2.0",
+  "release_notes_url": "https://docs.pie-menu-editor.com/support_community/changelog.html#changelog-2-1-0",
+  "action_url": "https://docs.pie-menu-editor.com/getting_started/installation.html#install-2-1-migrate",
+  "action_label": "Migration Guide",
+  "message": "PME 2.1.0 is now available as a Blender Extension.\nExport All Menus, then follow the migration guide to move from PME 2.0."
+}

@@ -1,0 +1,990 @@
+:vocab: developer-facing
+
+.. _authoring-router:
+
+============================================================
+Context Router
+============================================================
+
+.. py:currentmodule:: pme.editing
+
+Context Router(mode ID ``ROUTER``)は、順序付きの分岐の一覧と Otherwise を持ちます。
+これらの関数は、その保存されたロジックを分岐の UID で読み取り、変更します。
+メニューの作成は :py:func:`pme.create_pm` (:ref:`authoring-menus`)、ホットキーは
+:ref:`authoring-hotkeys`、エディターは :ref:`context-router-editor` で説明します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 関数
+     - 用途
+   * - :py:func:`read_pm`
+     - 保存されたロジックと digest を ``router`` に入れて返します。
+   * - :py:func:`update_router`
+     - 分岐を UID で変更し、分岐を追加し、Otherwise を変更します。
+   * - :py:func:`remove_router_branch`
+     - 分岐を 1 つ削除します。
+   * - :py:func:`move_router_branch`
+     - 分岐を 1 つ、別の分岐の前または後ろへ移動します。
+   * - :py:func:`reorder_router_branches`
+     - すべての分岐を指定した順序に並べます。
+
+関連項目: :ref:`authoring-recipe-router-add-branch`。
+
+Router を読み取る
+============================================================
+
+Router では、``read_pm(pm_uid)`` は ``router`` も返します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``logic``
+     - dict or None
+     - 保存されたロジック。:ref:`authoring-router-logic` で説明します。
+       保存されたロジックを読み取れないときは ``None``。
+   * - ``digest``
+     - str
+     - 保存されたロジックのテキストの SHA-256 16 進 digest。このページの関数に
+       ``expected_digest`` として渡します。
+   * - ``diagnostics``
+     - list[dict]
+     - 保存されたロジックを読み取れるときは空です。それ以外では問題ごとに 1 要素で、
+       それぞれ ``code`` と ``address`` を持ちます。コードは
+       ``router_authoring_`` に、:ref:`authoring-router-logic-codes` の接尾辞、
+       または ``storage_invalid`` (JSON ではない)、``storage_non_object``、
+       ``storage_not_string``、``storage_unsupported_version`` が続いたものです。
+
+新しい Router には分岐がなく、Otherwise は **Pass Through** に設定されています。
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(router_uid)["router"]
+   {'logic': {'version': 2, 'branches': [],
+              'otherwise': {'name': 'Otherwise',
+                            'target': {'action': None, 'fallback_name': ''},
+                            'pass': True}},
+    'digest': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    'diagnostics': []}
+
+返される辞書はコピーです。変更しても Router は変わりません。
+新しい Router には、まだ保存されたロジックのテキストがありません。その digest は空のテキストの digest です。
+上のロジックと等しい要求は ``unchanged`` を返し、テキストは空のままです。
+ロジックを変える書き込みはテキストを保存し、digest を変えます。次の編集の前に読み直してください。
+
+.. _authoring-router-results:
+
+共通の結果キー
+============================================================
+
+4 つの編集関数はすべて、次のキーを持つ辞書を返します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``status``
+     - str
+     - 下の *ステータス* を参照してください。
+   * - ``committed``
+     - bool
+     - ``status`` が ``"committed"`` のときだけ ``True``。
+   * - ``pm_uid``
+     - str
+     - ``pm_uid`` 引数。
+   * - ``dry_run``
+     - bool
+     - ``dry_run`` 引数。
+   * - ``before``
+     - dict or None
+     - 呼び出しの開始時に読み取った ``read_pm()["router"]``。Router を解決できなかった、
+       または先に引数が拒否されたときは ``None``。
+   * - ``after``
+     - dict or None
+     - 同じ構造で、書き込み後に読み取ったもの。``unchanged`` では ``before`` のコピー。
+       ``validated`` のとき、書き込み前に拒否された要求のとき、書き込み後の読み取りに失敗したときは ``None``。
+   * - ``candidate``
+     - dict or None
+     - 正規化後の、保存される (``dry_run=True`` では保存されるはずの) ロジック全体。
+       要求が組み立てられる前に拒否されたときは ``None``。
+   * - ``diagnostics``
+     - list[dict]
+     - 問題または警告ごとに 1 要素: ``code`` と ``path``、および *診断* に挙げる詳細。
+
+ステータス
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - ``status``
+     - 意味
+   * - ``committed``
+     - 保存されたロジックのテキストを読み戻し、``candidate`` と等しいことを確認しました。
+   * - ``validated``
+     - ``dry_run=True`` で、要求を受け付けられます。何も書き込んでいません。
+   * - ``unchanged``
+     - 結果のロジックが保存されたロジックと等しくなります (分岐がすでに要求した順序にある場合など)。何も書き込んでいません。dry run では代わりに ``validated`` を返します。
+   * - ``rejected``
+     - 何も保存していません。``diagnostics`` が原因を示します。
+   * - ``unknown``
+     - 書き込みを試み、保存されたテキストが古いロジックとも新しいロジックとも一致しません。
+       再試行の前に :py:func:`read_pm` を呼んでください。
+
+これらの値の共通の意味は :ref:`authoring-results` で定義しています。
+
+診断
+------------------------------------------------------------
+
+このページのすべての関数が返すコード:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 36 64
+
+   * - ``code``
+     - 原因と追加のキー
+   * - ``dry_run_must_be_a_boolean``
+     - ``dry_run`` が bool ではありません。``path`` は ``"dry_run"`` です。
+   * - ``expected_digest_must_be_a_string``
+     - ``expected_digest`` が文字列でも ``None`` でもありません。
+   * - ``preferences_unavailable``
+     - PME の Preferences を読み取れません。
+   * - ``pm_identity_*``
+     - UID が Router をちょうど 1 つ指していません。例: ``pm_identity_uid_not_found``、
+       ``pm_identity_uid_malformed``、``pm_identity_uid_duplicate``、
+       別の種類のメニューに対する ``pm_identity_expected_mode_mismatch``。
+   * - ``router_authoring_*``
+     - 保存されたロジックを読み取れません。これらの要素は
+       ``read_pm()["router"]["diagnostics"]`` の要素で、``code`` と
+       ``address`` を持ち、``path`` は持ちません。
+   * - ``stale_router_digest``
+     - ``expected_digest`` が保存されている digest と異なる、または呼び出しが書き込みを準備している間に保存されたロジックが変わりました。
+   * - ``schema_v2_router_logic_*``
+     - 結果のロジックが規則に反しています。``path`` は ``"logic"`` です。
+       :py:func:`update_router` は ``address`` も加えます。
+       :ref:`authoring-router-logic-codes` を参照してください。
+   * - ``router_target_menu_unresolved``
+     - 警告。``menu`` の対象が、対象にできる種類のメニュー 1 つに解決されない UID を指しています。保存は妨げません。``severity`` は ``"warning"``、
+       ``path`` は ``"logic.branches[<i>].target"`` または
+       ``"logic.otherwise.target"``、``address`` は
+       ``{"branch_index": "<i>", "branch_uid": ...}`` または
+       ``{"otherwise": "true"}``、``target_pm_uid`` はその UID、``reason`` は
+       ``pm_identity_*`` のコードです。
+   * - ``router_commit_rejected``
+     - 保存の段階で、保存されたテキストが変わりませんでした。エンコードしたロジックが最終検査に失敗した (traceback をコンソールに出力)、または書き込み後に読み戻したテキストが変わっていませんでした。``status`` は ``rejected`` です。
+   * - ``router_commit_unknown``
+     - 書き込みを試み、結果を確認できていません。``status`` は
+       ``unknown`` です。
+   * - ``router_readback_failed``
+     - 書き込み後の Router の読み取りで例外が発生しました。``after`` は ``None`` です。
+       traceback はコンソールに出力されます。再試行の前に :py:func:`read_pm` を呼んでください。
+   * - ``refresh_failed``
+     - 書き込み後のエディターの更新で例外が発生しました。保存は有効です。
+       traceback はコンソールに出力されます。
+
+``address`` の値は、``branch_index`` と ``row_index`` も含めて文字列です。
+
+関数
+============================================================
+
+.. py:function:: update_router(pm_uid, *, branches=(), otherwise=None, expected_digest=None, dry_run=False)
+
+   分岐を UID で変更し、分岐を追加し、Otherwise を変更します。
+
+   呼び出しで指定していない分岐も含め、結果のロジック全体を書き込みの前に検査します。
+   1 つでも規則に反すれば、何も保存しません。
+
+   :param str pm_uid: Router の UID。
+   :param branches: 分岐のパッチ。*パッチの規則* のとおりに適用されます。
+   :type branches: list or tuple of dict
+   :param otherwise: 置き換える Otherwise の項目。``None`` なら Otherwise を保持します。
+   :type otherwise: dict or None
+   :param expected_digest: ``read_pm()["router"]`` の digest。異なる場合、呼び出しは
+      ``stale_router_digest`` で拒否されます。
+   :type expected_digest: str or None
+   :param bool dry_run: 要求を検査し、書き込まずに候補を返します。
+   :returns: :ref:`authoring-router-results` で説明する結果。
+   :rtype: dict
+   :raises RuntimeError: Blender のメインスレッド以外から、または PME の読み込みが完了する前に呼ばれた。
+
+   .. rubric:: パッチの規則
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - 入力
+        - 影響
+      * - ``branch_uid`` を持つ要素
+        - その分岐を更新します。UID はこの Router の分岐を指す必要があります。
+          1 回の呼び出しで、同じ UID は 1 回だけ使えます。
+      * - ``branch_uid`` を持たない要素
+        - 新しい UID を持つ新しい分岐を末尾に追加します。要素はリストの順に追加されます。
+      * - 要素で省略した項目
+        - 保存値を保持します。新しい分岐では下の既定値を使います。
+      * - ``name``、``enabled``、``combine_mode``、``target`` の指定
+        - 保存値を置き換えます。``target`` は全体が置き換わります。
+      * - ``conditions`` の指定
+        - 分岐の条件の一覧全体を置き換えます。``condition_uid`` を持つ行はその UID を保ちます。持たない行には、呼び出し前にその分岐にあったどの行の UID とも異なる、
+          新しい UID が割り当てられます。
+      * - 行の ``enabled``、``authoring_state``、``label`` の省略
+        - ``True``、``"complete"``、``""``。
+      * - 指定しない分岐
+        - 位置を含めて変わりません。
+      * - ``otherwise`` の省略または ``None``
+        - 変わりません。
+      * - ``otherwise`` の指定
+        - 指定したキー (``name``、``target``、``pass``) だけを置き換えます。
+          ``target`` は全体が置き換わります。
+
+   新しい分岐の初期値は、``name`` が ``"Branch <n>"`` (``n`` は追加後の分岐の数)、
+   ``enabled`` が ``True``、``combine_mode`` が ``"all"``、条件なし、
+   ``target`` が ``{"action": None, "fallback_name": ""}`` です。
+
+   .. rubric:: ステータス
+
+   ``committed``、``validated``、``unchanged``、``rejected``、``unknown`` のいずれか。
+   結果のロジックが保存されたロジックと等しい要求は、新しい Router でも、書き込まずに
+   ``unchanged`` を返します。``dry_run=True`` では、同じ要求が ``validated`` を返します。
+
+   .. rubric:: 診断
+
+   :ref:`共通のコード <authoring-router-results>` に加えて、次のコードを返します。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``branches_must_be_a_sequence``
+        - ``branches`` が list でも tuple でもありません。``path`` は ``"branches"`` です。
+      * - ``otherwise_must_be_a_mapping``
+        - ``otherwise`` が dict でも ``None`` でもありません。
+      * - ``router_input_must_be_json_values``
+        - JSON に変換できない値があります: JSON 以外の型、循環参照、NaN、
+          無限大。
+      * - ``branch_must_be_a_mapping``
+        - ``branches`` の要素が dict ではありません。``path`` は
+          ``"branches[<i>]"`` です。
+      * - ``branch_uid_invalid``
+        - ``branch_uid`` が空でない文字列ではありません。
+      * - ``branch_not_found``
+        - ``branch_uid`` がこの Router のどの分岐も指していません。
+      * - ``duplicate_branch_edit``
+        - 2 つの要素が同じ ``branch_uid`` を指定しています。
+      * - ``conditions_must_be_a_sequence``
+        - ``conditions`` が list でも tuple でもありません。
+      * - ``condition_must_be_a_mapping``
+        - 条件行が dict ではありません。``path`` は
+          ``"branches[<i>].conditions[<j>]"`` です。
+
+   .. rubric:: 例
+
+   既存の Router の No Match を **Pass Through** にします。
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(router_uid)["router"]
+      result = pme.editing.update_router(
+          router_uid, otherwise={"pass": True}, expected_digest=before["digest"],
+      )
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: 補足
+
+   * 呼び出し元の辞書は変更しません。
+   * ``validated`` の候補に含まれる新しい UID は仮の値です。プレビューした内容を保存するには、
+     同じ ``branches`` と ``otherwise`` を ``dry_run=False`` で渡し直します。
+     候補で新たに割り当てられた分岐の UID を、既存の分岐として渡さないでください。
+   * 分岐の UID は 1 つの Router 内で一意です。:py:func:`remove_router_branch` で空いた UID は、後の新しい分岐に割り当てられることがあります。
+   * ``router_target_menu_unresolved`` の警告は、``validated`` や
+     ``committed`` と一緒に返ることがあります。
+   * この呼び出しは、条件の評価、対象の実行、選択中のメニューやエディターの下書きの変更、
+     Preferences のディスクへの保存、Undo ステップの追加を行いません。
+
+.. py:function:: remove_router_branch(pm_uid, branch_uid, *, expected_digest=None, dry_run=False)
+
+   分岐を 1 つ削除します。
+
+   :param str pm_uid: Router の UID。
+   :param str branch_uid: 削除する分岐の UID。
+   :param expected_digest: ``read_pm()["router"]`` の digest。
+   :type expected_digest: str or None
+   :param bool dry_run: 要求を検査し、書き込まずに候補を返します。
+   :returns: :ref:`authoring-router-results` で説明する結果。
+   :rtype: dict
+   :raises RuntimeError: Blender のメインスレッド以外から、または PME の読み込みが完了する前に呼ばれた。
+
+   .. rubric:: ステータス
+
+   ``committed``、``validated``、``rejected``、``unknown`` のいずれか。
+
+   .. rubric:: 診断
+
+   :ref:`共通のコード <authoring-router-results>` に加えて、次のコードを返します。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``branch_uid_invalid``
+        - ``branch_uid`` が空でない文字列ではありません。
+      * - ``branch_not_found``
+        - ``branch_uid`` がこの Router のどの分岐も指していません。
+      * - ``branch_identity_ambiguous``
+        - 保存された 2 つの分岐が同じ UID を持っています。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      router = pme.editing.read_pm(router_uid)["router"]
+      result = pme.editing.remove_router_branch(
+          router_uid, router["logic"]["branches"][-1]["branch_uid"],
+          expected_digest=router["digest"],
+      )
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: 補足
+
+   * 最後に残った分岐も削除できます。
+   * ほかの分岐、その条件の UID、Otherwise は保持されます。
+   * この呼び出しは、対象の実行、選択中のメニューやエディターの下書きの変更、
+     Preferences のディスクへの保存、Undo ステップの追加を行いません。
+
+.. py:function:: move_router_branch(pm_uid, branch_uid, *, before_uid=None, after_uid=None, expected_digest=None, dry_run=False)
+
+   分岐を 1 つ、同じ Router の別の分岐の直前または直後へ移動します。
+
+   :param str pm_uid: Router の UID。
+   :param str branch_uid: 移動する分岐の UID。
+   :param before_uid: 直前に置く基準の分岐の UID。
+   :type before_uid: str or None
+   :param after_uid: 直後に置く基準の分岐の UID。``before_uid`` と ``after_uid`` のどちらか一方だけを指定します。
+   :type after_uid: str or None
+   :param expected_digest: ``read_pm()["router"]`` の digest。
+   :type expected_digest: str or None
+   :param bool dry_run: 要求を検査し、書き込まずに候補を返します。
+   :returns: :ref:`authoring-router-results` で説明する結果。
+   :rtype: dict
+   :raises RuntimeError: Blender のメインスレッド以外から、または PME の読み込みが完了する前に呼ばれた。
+
+   .. rubric:: ステータス
+
+   ``committed``、``validated``、``unchanged``、``rejected``、``unknown`` のいずれか。
+   現在の位置 (``branch_uid`` と等しい基準を含む) は、書き込まずに ``unchanged``
+   を返します。``dry_run=True`` では、同じ要求が ``validated`` を返します。
+
+   .. rubric:: 診断
+
+   :ref:`共通のコード <authoring-router-results>` に加えて、次のコードを返します。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``branch_uid_invalid``
+        - ``branch_uid`` が空でない文字列ではありません。
+      * - ``branch_not_found``
+        - ``branch_uid`` がこの Router のどの分岐も指していません。
+      * - ``branch_identity_ambiguous``
+        - 保存された 2 つの分岐が同じ UID を持っています。
+      * - ``exactly_one_branch_anchor_required``
+        - ``before_uid`` と ``after_uid`` の両方が指定された、またはどちらも指定されていません。
+      * - ``branch_anchor_uid_invalid``
+        - 基準が空でない文字列ではありません。
+      * - ``branch_anchor_not_found``
+        - 基準がこの Router のどの分岐も指していません。
+
+   .. rubric:: 例
+
+   最後の分岐の優先度を最も高くします。
+
+   .. code-block:: python
+
+      snapshot = pme.editing.read_pm(router_uid)["router"]
+      branches = snapshot["logic"]["branches"]
+      result = pme.editing.move_router_branch(
+          router_uid, branches[-1]["branch_uid"], before_uid=branches[0]["branch_uid"],
+          expected_digest=snapshot["digest"],
+      )
+      print(result["status"], result["diagnostics"])
+
+   .. rubric:: 補足
+
+   * 分岐の内容、条件の UID、Otherwise は保持されます。
+   * 書き込み後に digest は変わります。次の編集の前に読み直してください。
+   * エディターの Branch メニューの **Move Up**、**Move Down**、**Remove Branch** も、
+     同じ分岐の規則に従います。エディターからの保存では、ほかの保存値にもエディター自身の正規化が適用されます。
+   * この呼び出しは、対象の実行、選択中のメニューやエディターの下書きの変更、
+     Preferences のディスクへの保存、Undo ステップの追加を行いません。
+
+.. py:function:: reorder_router_branches(pm_uid, branch_uids, *, expected_digest=None, dry_run=False)
+
+   1 回の書き込みで、すべての分岐を指定した順序に並べます。
+
+   :param str pm_uid: Router の UID。
+   :param branch_uids: Router の分岐の UID をすべて、それぞれ 1 回ずつ、新しい順序で並べたもの。順序のある iterable (list、tuple、generator、
+      ``dict.keys()``)。
+   :param expected_digest: ``read_pm()["router"]`` の digest。
+   :type expected_digest: str or None
+   :param bool dry_run: 要求を検査し、書き込まずに候補を返します。
+   :returns: :ref:`authoring-router-results` で説明する結果。
+   :rtype: dict
+   :raises RuntimeError: Blender のメインスレッド以外から、または PME の読み込みが完了する前に呼ばれた。
+
+   .. rubric:: ステータス
+
+   ``committed``、``validated``、``unchanged``、``rejected``、``unknown`` のいずれか。
+   現在の順序は、書き込まずに ``unchanged`` を返します。
+   ``dry_run=True`` では、同じ要求が ``validated`` を返します。
+
+   .. rubric:: 診断
+
+   :ref:`共通のコード <authoring-router-results>` に加えて、次のコードを返します。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``branch_uids_must_be_a_sequence``
+        - ``branch_uids`` が文字列、bytes、または iterable ではありません。``path`` は
+          ``"branch_uids"`` です。
+      * - ``branch_uids_must_be_ordered``
+        - ``branch_uids`` が ``set``、``frozenset`` などの集合型で、
+          順序が定まりません。``received_type`` がその型を示します。
+          ``dry_run=True`` でも返ります。
+      * - ``branch_uids_must_list_every_branch_once``
+        - 一覧が一部だけ、UID が重複している、または分岐の UID ではない値を含みます。
+          ``missing`` は指定されなかった分岐の UID、``unknown`` は分岐の UID
+          ではない指定値を列挙します。
+      * - ``branch_identity_ambiguous``
+        - 保存された 2 つの分岐が同じ UID を持っています。``path`` は ``"logic.branches"`` です。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      router = pme.editing.read_pm(router_uid)["router"]
+      order = [branch["branch_uid"] for branch in router["logic"]["branches"]]
+      result = pme.editing.reorder_router_branches(
+          router_uid, list(reversed(order)), expected_digest=router["digest"],
+      )
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: 補足
+
+   * 分岐の内容、その UID、Otherwise は保持されます。
+   * この呼び出しは、対象の実行、Preferences のディスクへの保存、Undo ステップの追加を行いません。
+
+.. _authoring-router-logic:
+
+Router のロジック
+============================================================
+
+``read_pm()["router"]["logic"]``、``candidate``、:py:func:`update_router` の入力は、
+PME の `Schema v2 の定義
+<https://github.com/pie-menu-editor/pie-menu-editor-fork-dev/blob/pme2-dev/src/pie_menu_editor/assets/schema/pme2-2.0.json>`__
+(``ContextRouterLogic``、``ContextRouterBranch``、
+``ContextRouterConditionRow``、``PmeLogicConditionRow``、
+``PmeLogicValueSource``、``ContextRouterTarget``、
+``ContextRouterTargetAction``、``ContextRouterOtherwise``) にある
+``ContextRouterLogic`` の形を使います。値は通常の JSON の値です。
+
+.. code-block:: python
+
+   {'branch_uid': 'branch_1', 'name': 'Edit Mesh', 'enabled': True,
+    'combine_mode': 'all',
+    'conditions': [{'condition_uid': 'cond_1', 'enabled': True,
+                    'authoring_state': 'complete', 'label': 'Condition',
+                    'source': {'kind': 'rna_path', 'root': 'context',
+                               'detected_type': 'enum', 'readonly': True,
+                               'segments': [{'kind': 'attr', 'name': 'mode'}],
+                               'owner_type': None},
+                    'op': 'equals', 'value': 'EDIT_MESH', 'value_type': 'enum'}],
+    'target': {'action': {'type': 'menu', 'value': 'pm_yp6o3mbh', 'opts': {}},
+               'fallback_name': 'Mesh Tools'}}
+
+ロジックオブジェクト
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``version``
+     - int
+     - ``2``。
+   * - ``branches``
+     - list[dict]
+     - 優先順位順の分岐。一致した最初の有効な分岐が選ばれます。最大 256。
+   * - ``otherwise``
+     - dict
+     - どの分岐にも一致しないときの動作。*Otherwise* を参照してください。
+
+分岐
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``branch_uid``
+     - str
+     - この Router 内の分岐の identity (``"branch_1"`` など)。
+   * - ``name``
+     - str
+     - 表示名。最大 256 文字。空の名前は ``"Branch <n>"`` として保存されます
+       (``n`` は 1 から数えた分岐の位置)。
+   * - ``enabled``
+     - bool
+     - ``False`` の分岐は、内容を保ったまま飛ばされます。
+   * - ``combine_mode``
+     - str
+     - ``"all"``: 評価するすべての条件が一致する必要があります。``"any"``: 1 つ一致すれば十分です。
+   * - ``conditions``
+     - list[dict]
+     - 条件行。最大 256。条件の UID は分岐内で一意です。評価できる条件のない分岐は一致しません。
+   * - ``target``
+     - dict
+     - 分岐が一致したときに実行するもの。*対象* を参照してください。
+
+条件
+------------------------------------------------------------
+
+行は値の条件かイベントの条件のどちらかです。``event`` キーを持つ行がイベントの条件です。
+
+値の条件 (``PmeLogicConditionRow``):
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 18 62
+
+   * - キー
+     - 型
+     - 値
+   * - ``condition_uid``
+     - str
+     - 分岐内の行の identity (``"cond_1"`` など)。
+   * - ``enabled``
+     - bool
+     - ``False`` の行は評価から外れます。
+   * - ``authoring_state``
+     - str
+     - ``"complete"`` または ``"incomplete"``。評価されるのは、有効で complete の行だけです。
+   * - ``label``
+     - str
+     - 表示名。最大 256 文字。空のラベルは ``"Condition"`` として保存されます。
+   * - ``source``
+     - dict or None
+     - 読み取る値。*条件の参照元* を参照してください。
+   * - ``op``
+     - str or None
+     - 比較方法。*比較の規則* を参照してください。
+   * - ``value``
+     - bool, int, float, str, list[str] or None
+     - 比較値。
+   * - ``value_type``
+     - str or None
+     - ``bool``、``int``、``float``、``string``、``enum``、``enum_set`` のいずれか。
+       未設定では ``None``。
+
+incomplete の行では、``source``、``op``、``value``、``value_type`` を ``None`` にするか省略できます。指定する値は、その場合も有効な型である必要があります。
+
+イベントの条件 (``ContextRouterEventModifierConditionRow``) は、Router を呼び出したイベントの修飾キーを判定します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 18 62
+
+   * - キー
+     - 型
+     - 値
+   * - ``condition_uid``、``enabled``、``authoring_state``
+     -
+     - 値の条件と同じです。
+   * - ``label``
+     - str
+     - 表示名。空のラベルは ``"Modifier"`` として保存されます。
+   * - ``event``
+     - dict
+     - ``kind``: ``"modifier"``。``modifiers``: ``shift``、``ctrl``、``alt``、
+       ``oskey`` から選んだ重複のない値の、空でないリスト。``pressed``:
+       ``True``。
+
+条件の参照元
+------------------------------------------------------------
+
+``source`` (``PmeLogicValueSource``):
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``kind``
+     - str
+     - ``rna_path``: Blender のデータパス。``condition_ref``: Property Stack の結果。
+       ``pm_property_ref``: Property の値。
+   * - ``root``
+     - str
+     - ``rna_path``: ``context`` (``C``)、``paint_settings``
+       (``paint_settings()``)、``pme_preferences`` (``pme.preferences``) のいずれか。
+       ``condition_ref`` と ``pm_property_ref``: ``pm``。
+   * - ``segments``
+     - list[dict]
+     - ``rna_path`` のみ、必須。ルートのあとのパスで、1 段ごとに 1 セグメント。
+       下を参照してください。
+   * - ``path``
+     - str
+     - ``condition_ref``: Property Stack の UID (``cn_…``)。
+       ``pm_property_ref``: Property の UID (``pr_…``)。``rna_path`` では受け付けません。
+   * - ``detected_type``
+     - str or None
+     - 値の型: ``bool``、``int``、``float``、``string``、``enum``、
+       ``enum_set`` のいずれか。incomplete の行の ``rna_path`` の参照元では、
+       ``vector``、``color``、``unsupported``、``None`` も受け付けます。
+       ``condition_ref`` は常に ``bool`` です。
+   * - ``readonly``
+     - bool
+     - 値が読み取り専用かどうか。``condition_ref`` と ``pm_property_ref`` では ``True``。
+       PME が書き込みを拒否するパスは ``True`` として保存されます。
+   * - ``owner_type``
+     - str or None
+     - エディターでパスを解決した RNA 型。省略すると ``None`` として保存されます。
+       評価では使いません。
+   * - ``component``
+     - int
+     - ``pm_property_ref`` のみ、省略可。配列の Property の値の要素インデックス。
+
+``rna_path`` の参照元のセグメント:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - セグメント
+     - 意味
+   * - ``{"kind": "attr", "name": <str>}``
+     - 属性アクセス。``name`` は ``_`` で始まらない ASCII の識別子です。
+   * - ``{"kind": "key", "key": <str>}``
+     - ``["name"]`` のような文字列キーによる参照。
+   * - ``{"kind": "index", "index": <int>}``
+     - 0 以上のインデックスによる参照。
+   * - ``{"kind": "index_source", "source": <dict>}``
+     - ``int`` の Property から読み取ったインデックスによる参照。``detected_type`` が
+       ``int`` で ``component`` のない ``pm_property_ref`` の参照元です。
+
+``C.area.type`` は、ルート ``context`` で
+``[{"kind": "attr", "name": "area"}, {"kind": "attr", "name": "type"}]`` です。
+パスで表せない計算値は、Property (``pm_property_ref``) または
+Property Stack (``condition_ref``) を通じて読み取ります。
+
+比較の規則
+------------------------------------------------------------
+
+complete の行では、``value_type`` は ``source.detected_type`` と等しく、``op``、
+``value_type``、``value`` は次のいずれかの組み合わせです。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 30 40
+
+   * - ``op``
+     - ``value_type``
+     - ``value``
+   * - ``is_true``、``is_false``
+     - ``bool``
+     - ``None``
+   * - ``equals``
+     - ``bool``、``int``、``float``、``string``、``enum``
+     - その型の値。``int`` は bool を含みません。``float`` は任意の数値を受け付けます。
+       ``enum`` は空でない識別子です。
+   * - ``not_equals``
+     - ``int``、``float``、``string``、``enum``
+     - ``equals`` と同じです。
+   * - ``lt``、``le``、``ge``、``gt``
+     - ``int``、``float``
+     - 数値。
+   * - ``contains``、``starts_with``
+     - ``string``
+     - 文字列。
+   * - ``equals_any``、``not_equals_any``
+     - ``enum``、``enum_set``
+     - 空でない識別子の、空でないリスト。
+
+この表にない組み合わせは ``schema_v2_router_logic_complete_condition_malformed`` で拒否されます。
+比較の意味は :ref:`router-condition-comparison` で説明します。
+
+対象
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``action``
+     - dict or None
+     - 実行するもの。``None`` または省略: 未設定の対象。
+   * - ``fallback_name``
+     - str
+     - 対象とともに保持する表示名。最大 256 文字。対象を指定するときは必須で、
+       空でもかまいません。対象の identity ではありません。
+   * - ``presentation``
+     - dict
+     - 省略可: ``{"auto_icon": True}``。``command`` のアクションのみ。読み取り結果には、
+       ``auto_icon`` が ``True`` のときだけ現れます。
+
+``action`` (``ContextRouterTargetAction``):
+
+.. list-table::
+   :header-rows: 1
+   :widths: 14 30 56
+
+   * - ``type``
+     - ``value``
+     - ``opts``
+   * - ``menu``
+     - メニューの UID: Pie Menu、Vector Menu、Regular Menu、Pop-up Dialog、
+       Floating Panel、Stack Key、Sticky Key、Macro Operator、Modal Operator。
+       Router、Property、Property Stack、Panel Group は不可。
+     - ``expand_menu`` (bool): メニューの内容をその場に描画します。Regular
+       Menu、Pop-up Dialog、Floating Panel のみ。``use_frame`` (bool):
+       枠を描画します。``expand_menu`` を使う Pop-up Dialog のみ。``True`` の値だけが保存されます。
+   * - ``command``
+     - Command スロットと同じ Python コマンドのテキスト。空または空白だけではなく、
+       NUL 文字を含みません。
+     - ``undo`` (bool)。``{"undo": <bool>}`` として保存されます。その他のキーは受け付けたうえで捨てられます。
+   * - ``hotkey``
+     - Hotkey スロットと同じホットキーのテキスト。空または空白だけではありません。
+     - 空。
+   * - ``custom``
+     - Custom スロットと同じレイアウトコード。空または空白だけではありません。
+     - 空。
+
+``opts`` は省略できます。Command と Custom のテキストは、前後の空白を削らず、
+渡したとおりに保存されます。
+
+Otherwise
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``name``
+     - str
+     - 表示名。最大 256 文字。空の名前は ``"Otherwise"`` として保存されます。
+   * - ``target``
+     - dict
+     - **Run Otherwise** で使う対象。分岐の対象と同じ形です。
+   * - ``pass``
+     - bool
+     - ``True``: **Pass Through**。どの分岐にも一致しないとき、Router は何も実行せず、
+       ホットキーは同じキーの次のメニュー、次に Blender へ渡ります。対象は保持されますが使われません。読み取り結果には ``True`` のときだけ現れます。
+       なし、または ``False``: **Run Otherwise**。
+
+新しい Router は ``pass`` が ``True`` の状態で始まります。
+このキーなしで保存された Router は **Run Otherwise** として読み込まれます。
+別のメニューから開いた Router には次の候補がなく、一致する分岐がなければ何も実行しません。
+:ref:`router-otherwise` を参照してください。
+
+語彙
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 74
+
+   * - 項目
+     - 値の範囲
+   * - ``combine_mode``
+     - ``all``、``any``
+   * - ``authoring_state``
+     - ``complete``、``incomplete``
+   * - ``source.kind``
+     - ``rna_path``、``condition_ref``、``pm_property_ref``
+   * - ``source.root``
+     - ``context``、``paint_settings``、``pme_preferences``。``condition_ref`` と
+       ``pm_property_ref`` では ``pm``
+   * - ``source.detected_type``
+     - ``bool``、``int``、``float``、``string``、``enum``、``enum_set``、
+       ``vector``、``color``、``unsupported``、``None``
+   * - ``value_type``
+     - ``bool``、``int``、``float``、``string``、``enum``、``enum_set``、
+       ``None``
+   * - ``op``
+     - ``is_true``、``is_false``、``equals``、``not_equals``、``lt``、``le``、
+       ``ge``、``gt``、``contains``、``starts_with``、``equals_any``、
+       ``not_equals_any``
+   * - ``event.modifiers``
+     - ``shift``、``ctrl``、``alt``、``oskey``
+   * - ``target.action.type``
+     - ``menu``、``command``、``hotkey``、``custom``
+
+.. _authoring-router-logic-codes:
+
+ロジックの検証コード
+============================================================
+
+結果のロジックを上の規則で検査します。失敗 1 件につき診断 1 件で、コードは
+``schema_v2_router_logic_`` に下の接尾辞が続いたものです。
+:py:func:`update_router` の結果では、``address`` が ``branch_index``、``branch_uid`` と、
+行の場合は ``row_index`` を持ちます。ロジックオブジェクトや Otherwise の問題では空です。
+読み取れない保存されたロジックは、同じ接尾辞に接頭辞 ``router_authoring_`` を付けたコードを
+``read_pm()["router"]["diagnostics"]`` に報告します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 接尾辞
+     - 原因
+   * - ``unknown_field``
+     - ロジックオブジェクトに ``version``、``branches``、``otherwise`` 以外のキーがあります。
+   * - ``branches_malformed``
+     - ``branches`` がリストではありません。
+   * - ``branch_malformed``
+     - 分岐が dict ではありません。
+   * - ``branch_count_exceeds_limit``
+     - 分岐が 256 を超えています。
+   * - ``branch_uid_malformed``
+     - ``branch_uid`` が空でない文字列ではありません。
+   * - ``branch_uid_duplicate``
+     - 2 つの分岐が同じ ``branch_uid`` を持っています。
+   * - ``branch_unknown_field``
+     - 分岐に ``branch_uid``、``name``、``enabled``、``combine_mode``、
+       ``conditions``、``target`` 以外のキーがあります。
+   * - ``branch_enabled_malformed``
+     - ``enabled`` が bool ではありません。
+   * - ``branch_name_malformed``
+     - ``name`` が文字列ではありません。
+   * - ``branch_name_too_long``
+     - ``name`` が 256 文字を超えています。
+   * - ``combine_mode_unsupported``
+     - ``combine_mode`` が ``all`` でも ``any`` でもありません。
+   * - ``conditions_malformed``
+     - ``conditions`` がリストではありません。
+   * - ``condition_malformed``
+     - 条件行が dict ではありません。
+   * - ``condition_count_exceeds_limit``
+     - 1 つの分岐の条件が 256 を超えています。
+   * - ``condition_uid_duplicate``
+     - 1 つの分岐の 2 つの行が同じ ``condition_uid`` を持っています。
+   * - ``condition_unknown_field``
+     - 行に、その行の種類が受け付けないキーがあります。
+   * - ``condition_uid_malformed``
+     - ``condition_uid`` が空でない文字列ではありません。
+   * - ``condition_enabled_malformed``
+     - ``enabled`` が bool ではありません。
+   * - ``condition_authoring_state_malformed``
+     - ``authoring_state`` が ``complete`` でも ``incomplete`` でもありません。
+   * - ``condition_label_malformed``
+     - ``label`` が文字列ではありません。
+   * - ``condition_label_too_long``
+     - ``label`` が 256 文字を超えています。
+   * - ``complete_condition_malformed``
+     - complete の行の ``source``、``op``、``value``、``value_type`` が有効な組み合わせになっていません。*比較の規則* を参照してください。
+   * - ``condition_source_unknown_field``
+     - ``source`` に *条件の参照元* の表にないキーがあります。
+   * - ``condition_source_owner_type_malformed``
+     - ``owner_type`` が文字列でも ``None`` でもありません。
+   * - ``condition_source_malformed``
+     - incomplete の行: ``source`` が指定されているが、有効な参照元ではありません。
+   * - ``condition_op_malformed``
+     - incomplete の行: ``op`` が指定されているが、語彙にありません。
+   * - ``condition_value_type_malformed``
+     - incomplete の行: ``value_type`` が指定されているが、語彙にありません。
+   * - ``condition_value_malformed``
+     - incomplete の行: ``value`` の型を ``op`` が受け付けません。
+   * - ``event_malformed``
+     - ``event`` が dict ではありません。
+   * - ``event_unknown_field``
+     - ``event`` に ``kind``、``modifiers``、``pressed`` 以外のキーがあります。
+   * - ``event_kind_unsupported``
+     - ``kind`` が ``modifier`` ではありません。
+   * - ``event_modifiers_unsupported``
+     - ``modifiers`` がない、空、値が重複している、または語彙にない値を含みます。
+   * - ``event_pressed_malformed``
+     - ``pressed`` が ``True`` ではありません。
+   * - ``branch_target_malformed``
+     - 分岐の ``target`` が dict ではありません。
+   * - ``target_unknown_field``
+     - 対象に ``action``、``fallback_name``、``presentation`` 以外のキーがあります。
+   * - ``target_fallback_name_malformed``
+     - ``fallback_name`` がない、または文字列ではありません。
+   * - ``target_fallback_name_too_long``
+     - ``fallback_name`` が 256 文字を超えています。
+   * - ``target_presentation_malformed``
+     - ``presentation`` が dict ではありません。
+   * - ``target_presentation_unknown_field``
+     - ``presentation`` に ``auto_icon`` 以外のキーがあります。
+   * - ``target_auto_icon_malformed``
+     - ``auto_icon`` が bool ではありません。
+   * - ``target_auto_icon_target_unsupported``
+     - ``command`` ではないアクションで ``auto_icon`` が ``True`` です。
+   * - ``target_action_malformed``
+     - ``action`` が dict でも ``None`` でもありません。
+   * - ``target_action_unknown_field``
+     - ``action`` に ``type``、``value``、``opts`` 以外のキーがあります。
+   * - ``target_action_type_unsupported``
+     - ``type`` が ``menu``、``command``、``hotkey``、``custom`` のいずれでもありません。
+   * - ``target_action_value_malformed``
+     - ``value`` が文字列ではない、またはコマンドのテキストが NUL 文字を含むか、
+       UTF-8 にエンコードできません。
+   * - ``target_action_value_missing``
+     - ``value`` が空、または空白だけです。
+   * - ``target_menu_uid_invalid``
+     - ``menu`` の値がメニューの UID ではありません (メニュー名など)。保存されたロジックの読み取り (``router_authoring_``) では検査しません。
+   * - ``target_menu_uid_mode_unsupported``
+     - ``menu`` の値が、対象にできない種類のメニューの UID です。
+       保存されたロジックの読み取りでは検査しません。
+   * - ``target_opts_unsupported``
+     - ``opts`` が dict ではない、またはアクションの種類や対象のメニューの種類が受け付けないオプションを含みます。
+   * - ``otherwise_malformed``
+     - ``otherwise`` が dict ではありません。
+   * - ``otherwise_unknown_field``
+     - ``otherwise`` に ``name``、``target``、``pass`` 以外のキーがあります。
+   * - ``otherwise_name_malformed``
+     - Otherwise の ``name`` が文字列ではありません。
+   * - ``otherwise_name_too_long``
+     - Otherwise の ``name`` が 256 文字を超えています。
+   * - ``otherwise_pass_malformed``
+     - ``pass`` が bool ではありません。
+   * - ``otherwise_target_malformed``
+     - Otherwise の ``target`` が dict ではありません。
+
+分岐の関数が扱う保存されたロジックにも、同じ規則が適用されます。
+有効なメニューの UID ではないメニューの対象が保存されていると、:py:func:`update_router` がその対象を置き換えるまで、:py:func:`remove_router_branch`、:py:func:`move_router_branch`、
+:py:func:`reorder_router_branches` は ``rejected`` を返します。

@@ -1,0 +1,1109 @@
+:vocab: developer-facing
+
+.. _authoring-property-stack:
+
+============================================================
+Property Stack
+============================================================
+
+.. py:currentmodule:: pme.editing
+
+Property Stack(メニューの種類 ``CONDITION``)は、条件行を 1 つの Boolean のスイッチにまとめ、
+スイッチが設定されたときに設定値を書き込みます。
+ロジックは全体を置き換えるか、条件行を 1 行ずつ編集します。
+While True HUD には専用の関数があります。ロジックの関数は HUD と Property ID を変更しません。
+単体の Property は :ref:`authoring-property` で説明します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 関数
+     - 用途
+   * - :py:func:`read_pm`
+     - ロジックと登録を ``property_stack`` に入れて返します。
+   * - :py:func:`update_property_stack`
+     - ロジック全体を置き換えます。
+   * - :py:func:`add_property_stack_row`
+     - 空の条件行を末尾に追加します。
+   * - :py:func:`update_property_stack_row`
+     - 条件行を 1 行変更します。
+   * - :py:func:`remove_property_stack_row`
+     - 条件行を 1 行と、その行から派生した書き込み項目を削除します。
+   * - :py:func:`update_property_stack_hud`
+     - While True HUD を変更します。
+
+関連項目: :ref:`authoring-recipe-property-stack-new`。
+評価だけに使う行と書き込み方式の意味は :ref:`Property Stack Editor <property-stack-editor>` を参照してください。
+
+.. _authoring-property-stack-read:
+
+Property Stack を読み取る
+============================================================
+
+``read_pm(pm_uid)["property_stack"]`` の内容:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 14 60
+
+   * - キー
+     - 型
+     - 値
+   * - ``logic``
+     - dict or None
+     - 保存データの decoder が読み取った、保存されているロジック。
+       :ref:`authoring-property-stack-logic` を参照してください。
+       保存されているロジックをデコードできないときは ``None``。
+   * - ``digest``
+     - str
+     - 保存されているロジックのテキストの 16 進 digest。``expected_digest`` として渡します。
+   * - ``property_id``
+     - str
+     - 保存された Property ID。
+   * - ``registered_property_id``
+     - str
+     - Property Stack が現在登録されている ID。登録されていないときは空です。
+   * - ``while_true_hud``
+     - dict
+     - While True HUD の設定。 :py:func:`update_property_stack_hud` で変更します。下を参照してください。
+   * - ``diagnostics``
+     - list[dict]
+     - 保存されているロジックの読み取りで見つかった問題。``scope`` は
+       ``"current_storage"`` です。下を参照してください。
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(stack_uid)["property_stack"]
+   {'logic': {'version': 1, 'combine_mode': 'all', 'predicate_rows': [],
+              'write_plan': {'false_policy': 'no_op', 'entries': []}},
+    'digest': 'e3b0c442...', 'property_id': 'surface',
+    'registered_property_id': 'surface',
+    'while_true_hud': {'enabled': False, 'message': '', 'is_expr': False,
+                       'area_type': 'VIEW_3D', 'alignment': 'TOP',
+                       'display': 'LABEL', 'icon': '', 'use_color': False,
+                       'color': [1.0, 1.0, 1.0]},
+    'diagnostics': []}
+
+読み取りでは Getter を評価せず、Setter も実行しません。
+``registered_property_id`` はウィジェットが使う ID です (例: ``L.prop(props(), registered_property_id)``)。
+メニュー名から導出される値ではありません。
+
+``while_true_hud`` は Schema v2 の ``PropertyStackWhileTrueHud`` のキーを持ちます。
+上の例は新しい Property Stack の値です。項目は :ref:`authoring-property-stack-hud` 、
+編集画面は :ref:`property-stack-hud` で説明します。
+
+``logic`` は保存データの decoder が正規化したビューで、保存されている生の JSON ではありません。
+このビューでは、未対応または古い書き込み項目が省かれたり、書き込みが無効になったりすることがあります。
+各差分は ``property_stack_storage_normalized`` が報告します。
+``logic`` が ``None`` のとき、行の操作はその Stack を拒否し、:py:func:`update_property_stack` は置き換えます。
+
+``diagnostics`` のコード:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - ``code``
+     - 原因と追加のキー
+   * - ``authoring_storage_invalid``
+     - 保存されているテキストが JSON ではない、または ``float`` 行の整数値を float にできません。
+       ``logic`` は ``None`` です。
+   * - ``authoring_storage_not_string``
+     - 保存されている値がテキストではありません。``logic`` は ``None`` です。
+   * - ``authoring_storage_non_object``
+     - 保存されている JSON がオブジェクトではありません。``logic`` は ``None`` です。
+   * - ``authoring_storage_unsupported_version``
+     - ``version`` が 1 ではありません。``logic`` は ``None`` です。
+   * - ``authoring_storage_write_entry_uid_duplicate``
+     - 2 つの書き込み項目が同じ ``entry_uid`` を持っています。``logic`` は ``None`` です。
+   * - ``authoring_storage_write_entry_enum_set_value_malformed``
+     - ``enum_set_write_values`` が空でない文字列のリストではありません。
+       ``logic`` は ``None`` です。
+   * - ``authoring_storage_write_entry_pm_property_fields_malformed``
+     - 書き込み項目に ``target_uid`` または ``write_mode`` があります。
+       ``logic`` は ``None`` です。
+   * - ``authoring_storage_write_entry_source_malformed``
+     - 書き込み項目の PME Property または Property Stack の参照元が読み取り専用ではありません。
+       ``logic`` は ``None`` です。
+   * - ``authoring_storage_write_entry_pm_property_ref_stale_dropped``
+     - PME Property への書き込みに、対応する条件行がありません。ビューではその項目を省きます。
+   * - ``authoring_storage_write_entry_kind_unsupported``
+     - 書き込み項目の ``kind`` が不明です。ビューには書き込み項目がありません。
+   * - ``property_stack_storage_normalized``
+     - ビューが保存されている JSON と異なります。``path`` が項目、
+       ``input`` が保存値、``normalized`` がビューの値を示します。
+       ``input_present`` と ``normalized_present`` で、項目の追加と削除を区別します。
+       ``normalization`` は、意味が同じなら ``"canonical"``、それ以外は ``"repair"`` です。
+
+各要素は ``code``、``path``、``severity``、``scope`` を持ちます。
+decoder のコードは、さらに ``address`` (``entry_index`` などの位置) と ``blocking``
+(``logic`` が ``None`` のとき ``True``) を持ちます。
+``severity`` は、blocking のコードでは ``"error"``、それ以外は ``"warning"`` です。
+
+.. _authoring-property-stack-results:
+
+共通の結果
+============================================================
+
+4 つの編集関数は同じキーを返します。行の操作は ``condition_uid`` を加えます。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``status``
+     - str
+     - 下の *ステータス* を参照してください。
+   * - ``committed``
+     - bool
+     - ``status`` が ``"committed"`` のときだけ ``True``。
+   * - ``pm_uid``
+     - str
+     - ``pm_uid`` 引数。
+   * - ``dry_run``
+     - bool
+     - ``dry_run`` 引数。
+   * - ``before``
+     - dict or None
+     - 呼び出し前の ``read_pm()["property_stack"]``。読み取る前に呼び出しが止まったときは
+       ``None``。
+   * - ``after``
+     - dict or None
+     - 書き込み後の ``read_pm()["property_stack"]``。``unchanged`` では ``before``
+       のコピー。何も試みなかったときは ``None``。
+   * - ``candidate``
+     - dict or None
+     - 保存するロジック (``logic`` と同じ形)。正規化が拒否されたあとは、正規化したロジックで、
+       保存はされません。それより前の検査で拒否されたときは ``None``。
+   * - ``diagnostics``
+     - list[dict]
+     - 問題ごとに 1 要素。下の *診断の項目* を参照してください。
+   * - ``condition_uid``
+     - str or None
+     - 行の操作のみ。呼び出しが対象にした行。
+
+.. rubric:: ステータス
+
+共通の語彙は :ref:`authoring-results-status` にあります。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - ``status``
+     - 意味
+   * - ``committed``
+     - ロジックがメモリ上に保存され、そのとおりに読み戻されました。
+   * - ``validated``
+     - ``dry_run=True`` で、入力が検査に合格しました。何も書き込んでいません。
+       実行できることや表示されることを意味しません。
+   * - ``unchanged``
+     - :py:func:`update_property_stack` と
+       :py:func:`update_property_stack_row` で返ります。編集後のロジックが保存されているロジックと等しいです。何も書き込んでいません。dry run では代わりに ``validated``
+       を返します。
+   * - ``rejected``
+     - 保存されているロジックは変わっていません。``diagnostics`` が原因を示します。
+   * - ``unknown``
+     - 書き込みを確認できませんでした。再試行の前に :py:func:`read_pm` を呼んでください。
+
+.. rubric:: 診断の項目
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 14 60
+
+   * - キー
+     - 型
+     - 値
+   * - ``code``
+     - str
+     - このページの各表を参照してください。
+   * - ``path``
+     - str
+     - ``"logic"``、``"logic.predicate_rows[1].condition_uid"`` などの項目のパス、
+       または ``""``。
+   * - ``severity``
+     - str
+     - ``"error"`` は拒否します。``"warning"`` と ``"info"`` は拒否しません。
+   * - ``scope``
+     - str
+     - ``"input"``: 渡したロジックまたは行の項目。``"current_storage"``:
+       呼び出し前の保存されているロジックで、結果では常に ``"warning"`` です。
+       下の要求のコードにはありません。
+   * - ``message``
+     - str
+     - ``property_stack_schema_invalid`` のみ。
+   * - ``input``、``normalized``、``input_present``、``normalized_present``
+     -
+     - 正規化のコード: 渡した値と正規化した値、およびそれぞれが存在するかどうか。
+   * - ``address``、``blocking``、``normalization``
+     -
+     - 現在の保存データのコード。:ref:`authoring-property-stack-read` を参照してください。
+   * - ``exception_type``
+     - str
+     - 書き込みのコード: 例外が発生したときの例外クラス名。
+
+.. rubric:: 要求と書き込みの診断
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - ``code``
+     - 原因
+   * - ``dry_run_must_be_a_boolean``
+     - ``dry_run`` が bool ではありません。``before`` は ``None`` です。
+   * - ``expected_digest_must_be_a_string``
+     - ``expected_digest`` が文字列でも ``None`` でもありません。``before`` は
+       ``None`` です。
+   * - ``preferences_unavailable``
+     - PME の Preferences を利用できません。``before`` は ``None`` です。
+   * - ``pm_identity_uid_not_found``
+     - その UID を持つメニューがありません。``before`` は ``None`` です。
+   * - ``pm_identity_uid_duplicate``
+     - 複数のメニューがその UID を持っています。``before`` は ``None`` です。
+   * - ``pm_identity_uid_missing``、``pm_identity_uid_malformed``、
+       ``pm_identity_field_type_invalid``
+     - UID が空、形式が不正、または文字列ではありません。``before`` は ``None`` です。
+   * - ``pm_identity_expected_mode_mismatch``
+     - メニューが Property Stack ではありません。``before`` は ``None`` です。
+   * - その他の ``pm_identity_*`` コード
+     - 呼び出し中にメニューの一覧が変わった、またはメニューの保存されている
+       identity に矛盾があります。
+   * - ``stale_property_stack_digest``
+     - ``expected_digest`` が保存されている digest と異なる、または呼び出し中に保存されているロジックが変わりました。
+   * - ``condition_authoring_read_failed``
+     - 書き込みの前に保存されているロジックを読み取れませんでした。ステータスは
+       ``rejected`` です。
+   * - ``condition_authoring_stale``
+     - 書き込みの直前に保存されているロジックが変わりました。ステータスは ``rejected`` です。
+   * - ``condition_authoring_write_failed``
+     - 書き込みが失敗し、保存されているロジックは変わっていません。ステータスは
+       ``rejected`` です。
+   * - ``condition_authoring_write_unverified``
+     - 読み戻した値が古いロジックとも新しいロジックとも異なります。ステータスは
+       ``unknown`` です。
+   * - ``property_stack_committed_after_exception``
+     - 警告。ロジックは保存され読み戻されましたが、書き込みで例外が発生しました。
+       ステータスは ``committed`` です。
+
+関数
+============================================================
+
+.. py:function:: update_property_stack(pm_uid, *, logic, expected_digest=None, dry_run=False)
+
+   Property Stack のロジック全体を置き換えます。
+
+   ``logic`` に含まれない行と書き込み項目は削除されます。UID の割り当てや修復は行いません。
+   各 ``condition_uid`` と ``entry_uid`` は、存在し、一意である必要があります。
+
+   :param str pm_uid: Property Stack の UID。
+   :param dict logic: ロジック全体。形式は :ref:`authoring-property-stack-logic`
+      のとおりです。``while_true_hud`` は含めません。HUD は :py:func:`update_property_stack_hud` で変更します。
+   :param expected_digest: ``read_pm()["property_stack"]["digest"]``。保存されているロジックが変わっている場合、更新は ``stale_property_stack_digest`` で拒否されます。
+   :type expected_digest: str or None
+   :param bool dry_run: ロジックを検査し、書き込まずに返ります。
+   :returns: :ref:`authoring-property-stack-results` で説明する結果。
+      ``condition_uid`` はありません。
+   :rtype: dict
+   :raises RuntimeError: Blender のメインスレッド以外から呼ばれた、または PME の読み込みが完了していない。
+
+   .. rubric:: ステータス
+
+   ``committed``、``validated``、``unchanged``、``rejected``、``unknown`` のいずれか。
+   読み取った ``logic`` と等しいロジックは、新しい Property Stack でも、書き込まずに
+   ``unchanged`` を返します。読み取った ``diagnostics`` に ``"repair"`` の正規化がある場合は、
+   同じロジックでも書き込みます。この書き込みで、読み取りのビューが省いたものが保存データから削除されます。
+
+   .. rubric:: 診断
+
+   :ref:`authoring-property-stack-results` のコードに加えて、次のコードを返します。
+   すべて ``scope`` は ``"input"`` です。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 40 60
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``property_stack_logic_must_be_a_mapping``
+        - ``logic`` が dict ではありません。
+      * - ``property_stack_hud_not_editable``
+        - ``logic`` に ``while_true_hud`` があります。
+      * - ``property_stack_input_must_be_json_values``
+        - ``logic`` に JSON で表せない値 (set や NaN など) があります。
+      * - ``property_stack_schema_invalid``
+        - ``logic`` が Schema v2 の ``PropertyStackLogic`` に合いません。``path``
+          が項目を、``message`` が規則を示します。
+      * - ``schema_v2_logic_condition_uid_repaired``
+        - ``condition_uid`` が前の値と重複しています。
+      * - ``schema_v2_logic_entry_uid_repaired``
+        - ``entry_uid`` が空、または前の値と重複しています。
+      * - ``schema_v2_logic_derived_condition_uid_repaired``、
+          ``schema_v2_logic_derived_condition_uid_unmatched``
+        - ``derived_from_condition_uid`` が修復された行を指している、またはある ``condition_uid`` から派生する項目が、その UID を持つ行の数より多くあります。
+      * - ``schema_v2_logic_write_entry_pm_property_ref_stale_dropped``
+        - PME Property への書き込みに、対応する条件行がありません。
+      * - ``schema_v2_logic_predicate_row_malformed``
+        - ``float`` 行の整数値を float にできません。
+      * - その他の ``schema_v2_logic_*`` コード
+        - Schema v2 の decoder がロジックを拒否または修復しました。``path`` は
+          ``"logic"`` です。
+      * - ``property_stack_normalization_rejected``
+        - decoder が、意味の異なる値に変更しました (修復された UID、破棄された項目、
+          ``off`` になった書き込み状態など)。
+          ``path``、``input``、``normalized`` が変更を示します。
+      * - ``property_stack_canonicalized``
+        - ``severity`` は ``"info"`` で、拒否しません。decoder が、意味の同じ値の形を変更しました (``1.0`` から ``1`` など)。
+
+   .. rubric:: 例
+
+   いずれかの条件が一致したときに Stack を TRUE にします。
+
+   .. code-block:: python
+
+      import copy
+
+      stack = pme.editing.read_pm(stack_uid)["property_stack"]
+      logic = copy.deepcopy(stack["logic"])
+      logic["combine_mode"] = "any"
+      result = pme.editing.update_property_stack(
+          stack_uid, logic=logic, expected_digest=stack["digest"],
+      )
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: 補足
+
+   * 既存の Stack の一部を変えるには、読み取った ``logic`` のその部分を変更し、
+     読み取った ``digest`` とともに渡します。その他の値、各 ``condition_uid``、
+     ``entry_uid``、``derived_from_condition_uid`` はすべて保持します。
+   * 読み取った ``logic`` を渡す前に、``scope="current_storage"`` の診断を確認します。
+     ビューでは、すでに項目が省かれていたり、書き込みが無効になっていたりすることがあります。
+     入力の検証は、読み取り時に適用された正規化を取り消しません。
+   * 現在の保存データの診断は、警告として結果に引き継がれます。それだけでは呼び出しを拒否しません。``logic`` が ``None`` の Stack も置き換えられます。
+   * dry run は、参照元の評価、実行時の書き込み可否の確認、Setter の実行、ウィジェットの検証を行いません。
+   * While True HUD と、保存されている Property ID および登録されている Property ID は変更しません。
+   * この呼び出しは、Preferences のディスクへの保存、Undo ステップの追加、Getter や
+     Setter の実行を行いません。
+   * 書き込み中に発生した例外は traceback を保持し、最後のステータスを示す注記が付きます。
+     再試行の前に :py:func:`read_pm` を呼んでください。
+
+.. py:function:: add_property_stack_row(pm_uid, *, expected_digest=None, dry_run=False)
+
+   エディターと同じ処理で、空の条件行を末尾に追加します。
+
+   新しい行は有効で ``incomplete`` です。``source``、``op``、``value``、
+   ``value_type`` は ``None``、ラベルは ``"Condition N"`` (N は行の位置) です。
+   行に定義が設定されるまで、書き込み項目は追加されません。
+
+   :param str pm_uid: Property Stack の UID。
+   :param expected_digest: ``read_pm()["property_stack"]["digest"]``。
+   :type expected_digest: str or None
+   :param bool dry_run: 検査し、書き込まずに返ります。
+   :returns: :ref:`authoring-property-stack-results` で説明する結果。
+      ``condition_uid`` は新しい行の UID で、dry run では行に割り当てられる予定の UID です。
+      候補ができる前に拒否されたときは ``None`` です。
+   :rtype: dict
+   :raises RuntimeError: Blender のメインスレッド以外から呼ばれた、または PME の読み込みが完了していない。
+
+   .. rubric:: 診断
+
+   :ref:`authoring-property-stack-results` のコードに加えて、次のコードを返します。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 40 60
+
+      * - ``code``
+        - 原因
+      * - ``property_stack_current_storage_requires_explicit_repair``
+        - 保存されているロジックをデコードできない、または読み取り時に意味や identity が修復されました (blocking のコード、または ``"repair"`` の正規化)。
+          :py:func:`update_property_stack` で置き換えます。
+      * - ``predicate_row_limit_reached``
+        - Stack にすでに 128 行あります。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(stack_uid)["property_stack"]
+      added = pme.editing.add_property_stack_row(
+          stack_uid, expected_digest=before["digest"],
+      )
+      assert added["status"] == "committed", added["diagnostics"]
+      row_uid = added["condition_uid"]
+
+   .. rubric:: 補足
+
+   * dry run の ``condition_uid`` は、後の呼び出しで確定するまで候補にすぎません。
+   * ほかの行、書き込み項目、HUD 設定、Property ID は保持されます。
+
+.. py:function:: update_property_stack_row(pm_uid, condition_uid, fields, *, expected_digest=None, dry_run=False)
+
+   エディターと同じ処理で、条件行 1 行の参照元、比較方法、値、値の型、ラベル、有効状態を変更します。
+
+   省略した項目は保持されます。行の ``authoring_state`` と、その行から派生した書き込み項目は、
+   エディターの規則に従います。
+
+   :param str pm_uid: Property Stack の UID。
+   :param str condition_uid: 行の ``condition_uid``。変更できません。
+   :param dict fields: ``source``、``op``、``value``、``value_type``、
+      ``label``、``enabled`` のいずれか。型は
+      :ref:`条件行 <authoring-property-stack-row>` と同じです。
+   :param expected_digest: ``read_pm()["property_stack"]["digest"]``。
+   :type expected_digest: str or None
+   :param bool dry_run: 検査し、書き込まずに返ります。
+   :returns: :ref:`authoring-property-stack-results` で説明する結果。
+      ``condition_uid`` は引数の値です。
+   :rtype: dict
+   :raises RuntimeError: Blender のメインスレッド以外から呼ばれた、または PME の読み込みが完了していない。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - 変更
+        - 影響
+      * - ``source``、``op``、``value``、``value_type`` の変更
+        - 行に定義が設定されます。比較方法がその値の型を受け付け、値が比較方法に合う場合、
+          ``authoring_state`` は ``complete``、それ以外は ``incomplete`` になります。
+          派生した書き込み項目が作成または更新されます。新しい項目の ``entry_uid`` は
+          ``"write_<condition_uid>"`` です。
+      * - 結果の ``op``、``value``、``value_type`` がすべて ``None``
+        - 参照元のみ。行は ``incomplete`` のままで、派生した書き込み項目は削除されます。
+      * - ``label`` のみ
+        - 書き込み計画は変わりません。
+      * - ``enabled``
+        - 派生した書き込み項目はエディターの規則に従います。行を無効にすると、その項目は
+          ``off`` になります。
+
+   保存値と等しい値は変更として扱いません。何も変わらない場合、ステータスは
+   ``unchanged`` です。
+
+   .. rubric:: 診断
+
+   :ref:`authoring-property-stack-results` のコードに加えて、次のコードを返します。
+   すべて ``scope`` は ``"input"`` です。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 40 60
+
+      * - ``code``
+        - 原因
+      * - ``property_stack_current_storage_requires_explicit_repair``
+        - :py:func:`add_property_stack_row` と同じです。
+      * - ``condition_uid_invalid``
+        - ``condition_uid`` が空でない文字列ではありません。
+      * - ``predicate_row_not_found``
+        - ``condition_uid`` を持つ行がありません。
+      * - ``condition_identity_ambiguous``
+        - 複数の行が ``condition_uid`` を持っています。
+      * - ``property_stack_row_fields_must_be_a_mapping``
+        - ``fields`` が dict ではありません。
+      * - ``property_stack_row_field_unsupported``
+        - ``fields`` に上の 6 つ以外のキーがあります。
+      * - ``property_stack_schema_invalid`` と、
+          :py:func:`update_property_stack` のその他のコード
+        - ``fields`` を適用した行が Schema v2 の
+          ``PmeLogicConditionRow`` に合いません。検査は入力に対して行い、
+          ``complete`` になった行に対してもう一度行います。``path`` は 1 行だけのロジックを基準にします (``"logic.predicate_rows[0].value"`` など)。
+      * - ``predicate_row_source_required``
+        - 定義の項目が指定されたが、行に参照元がありません。
+      * - ``predicate_row_operator_unsupported``
+        - ``value_type`` または ``value`` が設定されているのに、結果の ``op`` が
+          ``None`` です。
+      * - ``predicate_row_value_type_unsupported``
+        - ``op`` が設定されているのに、結果の ``value_type`` が ``None`` です。
+      * - ``predicate_row_operator_type_mismatch``
+        - ``op`` が ``value_type`` を受け付けません。
+      * - ``predicate_row_value_type_mismatch``
+        - ``value`` が ``op`` と ``value_type`` に合いません。
+      * - ``write_entry_limit_reached``
+        - 定義によって、書き込み項目が 128 を超えます。
+
+   .. rubric:: 例
+
+   フレーム 1 で真になる行を追加します。
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(stack_uid)["property_stack"]
+      added = pme.editing.add_property_stack_row(stack_uid,
+          expected_digest=before["digest"])
+      if added["status"] != "committed":
+          raise RuntimeError(added)
+      row_uid = added["condition_uid"]
+      updated = pme.editing.update_property_stack_row(stack_uid, row_uid, {
+          "source": {"kind": "rna_path", "root": "context", "detected_type": "int",
+                     "readonly": False, "segments": [
+                         {"kind": "attr", "name": "scene"},
+                         {"kind": "attr", "name": "frame_current"}]},
+          "op": "equals", "value": 1, "value_type": "int", "label": "First frame",
+      }, expected_digest=added["after"]["digest"])
+      print(updated["status"], updated["diagnostics"])
+
+   .. rubric:: 補足
+
+   * 空の行は ``label`` と ``enabled`` を受け付けます。定義の設定には、null ではない参照元が必要です。
+   * 値を必要とする比較方法を値なしで指定すると、行は ``incomplete`` のまま、
+     派生した書き込み項目は ``manual_required`` になります。
+   * 独立した書き込み項目、ほかの行、``combine_mode``、
+     ``false_policy``、HUD 設定、Property ID は保持されます。
+   * この呼び出しは、Preferences のディスクへの保存、Undo ステップの追加、Getter や
+     Setter の実行を行いません。``unknown`` または例外のあとは、再試行の前に
+     :py:func:`read_pm` を呼んでください。
+
+.. py:function:: remove_property_stack_row(pm_uid, condition_uid, *, expected_digest=None, dry_run=False)
+
+   条件行を 1 行と、その行から派生した書き込み項目を削除します。
+
+   最後の 1 行も削除できます。独立した書き込み項目は保持されます。
+
+   :param str pm_uid: Property Stack の UID。
+   :param str condition_uid: 行の ``condition_uid``。
+   :param expected_digest: ``read_pm()["property_stack"]["digest"]``。
+   :type expected_digest: str or None
+   :param bool dry_run: 検査し、書き込まずに返ります。
+   :returns: :ref:`authoring-property-stack-results` で説明する結果。
+      ``condition_uid`` は引数の値です。
+   :rtype: dict
+   :raises RuntimeError: Blender のメインスレッド以外から呼ばれた、または PME の読み込みが完了していない。
+
+   .. rubric:: 診断
+
+   :ref:`authoring-property-stack-results` のコードに加えて、
+   :py:func:`update_property_stack_row` と同じ
+   ``property_stack_current_storage_requires_explicit_repair``、
+   ``condition_uid_invalid``、``predicate_row_not_found``、
+   ``condition_identity_ambiguous`` を返します。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      current = pme.editing.read_pm(stack_uid)["property_stack"]
+      removed = pme.editing.remove_property_stack_row(stack_uid, row_uid,
+          expected_digest=current["digest"])
+
+.. py:function:: update_property_stack_hud(pm_uid, changes, *, expected=None, dry_run=False)
+
+   Property Stack の While True HUD を、Advanced settings と同じように変更します。
+
+   すべての値を、最初の書き込みの前に検査します。HUD は JSON の import や Duplicate と同じ書き込み境界を通して書き、 ``enabled`` を最後に設定して、読み戻します。
+
+   :param str pm_uid: Property Stack の UID。
+   :param changes: :ref:`authoring-property-stack-hud` の項目名と新しい値の対応。指定しない項目は保存値を保ちます。
+   :type changes: dict
+   :param expected: 保存されている ``while_true_hud`` の任意の一部。値が異なる場合は ``stale_property_stack_hud`` で拒否します。
+   :type expected: dict or None
+   :param bool dry_run: 書き込まずに検査し、候補を返します。
+   :returns: 下で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``changes`` か ``expected`` が文字列キーのマッピングでない場合、または ``dry_run`` が bool でない場合。
+   :raises ValueError: 項目名が未知の場合、または UID が存在しない、無効、曖昧、Property Stack でない場合。
+   :raises RuntimeError: Blender のメインスレッド以外から呼んだ場合、または PME の読み込みが終わる前に呼んだ場合。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 18 60
+
+      * - キー
+        - 型
+        - 値
+      * - ``status``
+        - str
+        - 下の「ステータス」を参照してください。
+      * - ``committed``
+        - bool
+        - ``status`` が ``"committed"`` のときだけ ``True`` です。
+      * - ``dry_run``
+        - bool
+        - 引数 ``dry_run`` 。
+      * - ``pm_uid``
+        - str
+        - 引数 ``pm_uid`` 。
+      * - ``before``
+        - dict
+        - 呼び出し開始時の ``while_true_hud`` 。
+      * - ``after``
+        - dict
+        - 呼び出し終了時の ``while_true_hud`` 。何も書き込まなかったときは ``before`` と同じです。
+      * - ``candidate``
+        - dict or None
+        - 保存する、または ``dry_run=True`` で保存される HUD 全体。候補を作る前に拒否したときは ``None`` です。
+      * - ``changed_fields``
+        - list[str]
+        - ``before`` と ``after`` で保存値が異なる項目。
+      * - ``recovery``
+        - dict or None
+        - 書き込みに失敗した後: ``scope`` ( ``"while_true_hud"`` ) と ``saved_hud_matches`` 。
+      * - ``diagnostics``
+        - list[dict]
+        - 下の「診断」を参照してください。
+
+   .. rubric:: ステータス
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - 意味
+      * - ``committed``
+        - HUD をメモリ内に保存し、要求どおりに読み戻しました。
+      * - ``validated``
+        - ``dry_run=True`` で、要求を受け付けられます。何も書き込んでいません。
+      * - ``unchanged``
+        - 候補が保存されている HUD と同じです。何も書き込んでいません。
+      * - ``rejected``
+        - 何も書き込んでいません。原因は ``diagnostics`` にあります。
+      * - ``restored_failure``
+        - 書き込みが例外を送出したか、値が保持されませんでした。直前の HUD を書き戻し、同じ値で読み戻しました。
+      * - ``unknown``
+        - 直前の HUD の書き戻しを確認できませんでした。再試行の前にメニューを読み直してください。
+
+   .. rubric:: 診断
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``stale_property_stack_hud``
+        - ``expected`` の値が異なります。 ``fields`` 。
+      * - ``property_stack_hud_value_invalid``
+        - HUD が保持できない値です。型の誤り、HUD を表示できないエディター、 ``LABEL`` と ``FRAME`` 以外の ``display`` 、表示形式が持たない ``alignment`` 、0.0〜1.0 の範囲外の ``color`` の成分、UTF-8 で 256 byte を超える ``message`` や ``icon`` 、Blender のアイコン名でも ``@custom`` アイコンでもない名前、HUD が描けない Blender のアイコンのいずれかです。 ``field`` 、 ``value`` 、 ``message`` 。 ``area_type`` 、 ``display`` 、 ``alignment`` では ``choices`` 、文字列の長さでは ``size`` と ``limit`` 。
+      * - ``invalid_syntax``
+        - ``is_expr`` が ``True`` で、 ``message`` をコンパイルできません。 ``field`` 、 ``message`` 、 ``line`` 、 ``column`` ( ``message`` の中の位置)。
+      * - ``icon_not_found``
+        - 警告: その ``@name`` のカスタムアイコンがありません。HUD は保存され、アイコンができるまでアイコンなしで表示します。 ``field`` と ``value`` 。
+      * - ``property_stack_hud_write_failed``
+        - 書き込みが例外を送出しました。 ``exception_type`` と ``message`` 。
+      * - ``property_stack_hud_value_not_retained``
+        - 項目が要求と異なる値で読み戻されました。 ``fields`` 、 ``requested`` 、 ``actual`` 。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      stack_uid = pme.create_pm(pme.PmCreationSpec("CONDITION", name="X Mirror")).pm_uid
+      result = pme.editing.update_property_stack_hud(stack_uid, {
+          "enabled": True, "message": "X-Axis Mirror", "display": "FRAME",
+          "alignment": "LEFT", "icon": "MOD_MIRROR",
+          "use_color": True, "color": [0.2, 0.6, 1.0],
+      })
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: 補足
+
+   * 編集画面は、新しい表示形式が持たない位置を ``TOP`` へ寄せます。この関数は寄せずに拒否します。 ``display`` と ``alignment`` は一緒に指定してください。
+   * ``is_expr`` だけを変えると、編集画面の Expression の切り替えと同じく ``message`` を変換します。 ``Mirror`` は ``return 'Mirror'`` になります。 ``message`` も指定した場合は、指定した本文をそのまま保存します。
+   * 文字列の上限は文字数ではなく UTF-8 の byte 数です。256 byte は日本語で 85 文字です。
+   * 編集画面と同じく、条件のない Property Stack でも HUD を有効にできます。
+   * ``logic`` 、その ``digest`` 、メニューのバージョンは変わりません。ロジックの関数は HUD を変更しません。
+   * 複製した Property Stack の HUD は ``enabled`` を切った状態で写されます。書き出しと import では ``logic.while_true_hud`` に入ります。
+   * この呼び出しは Preferences をディスクに保存せず、Undo ステップも追加しません。
+
+.. _authoring-property-stack-hud:
+
+While True HUD の項目
+============================================================
+
+``changes`` 、 ``expected`` 、 ``read_pm()["property_stack"]["while_true_hud"]`` は次の項目を使います。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 14 68
+
+   * - 項目
+     - 型
+     - 値
+   * - ``enabled``
+     - bool
+     - Property Stack が True の間 HUD を表示します。既定値は ``False`` 。
+   * - ``message``
+     - str
+     - 文字列。 ``is_expr`` が ``True`` のときは式です。空のときはメニュー名を表示します。UTF-8 で 256 byte まで。
+   * - ``is_expr``
+     - bool
+     - ``message`` を description の式( ``return ...`` )として、HUD を表示するエディターで評価します。既定値は ``False`` 。
+   * - ``area_type``
+     - str
+     - HUD を表示するエディター。 ``VIEW_3D`` (既定値)、 ``IMAGE_EDITOR`` 、 ``NODE_EDITOR`` 、 ``PROPERTIES`` など。HUD を表示できない値は、受け付ける ``choices`` を付けて拒否します。
+   * - ``display``
+     - str
+     - ``LABEL`` (既定値): ラベル。 ``FRAME`` : エディターを囲む枠。
+   * - ``alignment``
+     - str
+     - ``LABEL`` : ``TOP`` (既定値)、 ``TOP_LEFT`` 、 ``TOP_RIGHT`` 、 ``CENTER`` 、 ``BOTTOM`` 、 ``BOTTOM_LEFT`` 、 ``BOTTOM_RIGHT`` 。 ``FRAME`` : 同じものから ``CENTER`` を除き、 ``LEFT`` と ``RIGHT`` を加えたもの。
+   * - ``icon``
+     - str
+     - HUD が描ける Blender のアイコン名、 ``@custom`` アイコン、または空。
+   * - ``use_color``
+     - bool
+     - ``color`` をアクセントカラーとして使います。既定値は ``False`` 。
+   * - ``color``
+     - list[float]
+     - 0.0〜1.0 の 3 成分。既定値は ``[1.0, 1.0, 1.0]`` 。単精度で読み戻されます。 ``0.2`` は ``0.20000000298023224`` になります。
+
+.. _authoring-property-stack-logic:
+
+ロジック
+============================================================
+
+``logic`` は、``while_true_hud`` を除いた Schema v2 の ``PropertyStackLogic`` に従います。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``version``
+     - int
+     - ``1``。
+   * - ``combine_mode``
+     - str
+     - ``"all"`` または ``"any"``。:ref:`authoring-property-stack-vocabulary` を参照してください。
+   * - ``predicate_rows``
+     - list[dict]
+     - 順序どおりの条件行。
+   * - ``write_plan``
+     - dict
+     - ``false_policy`` と ``entries``。
+
+.. _authoring-property-stack-row:
+
+条件行
+------------------------------------------------------------
+
+Schema v2 の ``PmeLogicConditionRow``。すべてのキーが必須です。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 22 54
+
+   * - キー
+     - 型
+     - 値
+   * - ``condition_uid``
+     - str
+     - ローカル UID。空ではなく、Stack 内で一意です。書き込み項目はこの UID を参照します。
+   * - ``enabled``
+     - bool
+     - 無効な行は評価に加わりません。
+   * - ``authoring_state``
+     - str
+     - ``"complete"`` または ``"incomplete"``。
+   * - ``label``
+     - str
+     - 表示名。最大 256 文字。
+   * - ``source``
+     - dict or None
+     - 読み取る値。:ref:`authoring-property-stack-source` を参照してください。
+       空の行では ``None``。
+   * - ``op``
+     - str or None
+     - 比較方法。:ref:`authoring-property-stack-vocabulary` を参照してください。
+   * - ``value``
+     - bool, int, float, str, list[str] or None
+     - 比較値。形は ``op`` によって決まります。
+   * - ``value_type``
+     - str or None
+     - ``"bool"``、``"int"``、``"float"``、``"string"``、``"enum"``、
+       ``"enum_set"`` のいずれか。
+
+``complete`` の行には、``detected_type`` が ``value_type`` と等しい ``source``、
+``value_type`` を受け付ける ``op``、``op`` が求める形の ``value`` が必要です。
+
+.. _authoring-property-stack-source:
+
+値の参照元
+------------------------------------------------------------
+
+Schema v2 の ``PmeLogicValueSource``。条件行と書き込み項目で使います。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 18 60
+
+   * - キー
+     - 型
+     - 値
+   * - ``kind``
+     - str
+     - ``"rna_path"``: ルートからのパス。``"condition_ref"``: UID で指定する、
+       別の Property Stack の状態。``"pm_property_ref"``: UID で指定する、
+       PME Property の値。
+   * - ``root``
+     - str
+     - ``rna_path`` では ``"context"`` (``bpy.context``)、
+       ``"paint_settings"`` (``paint_settings()``)、``"pme_preferences"``
+       (``pme.preferences``) のいずれか。そのほかの種類では ``"pm"``。
+   * - ``segments``
+     - list[dict]
+     - ``rna_path`` のみ、必須。``root`` の下のパス。下を参照してください。
+   * - ``path``
+     - str
+     - ``condition_ref`` と ``pm_property_ref`` のみ、必須。Property
+       Stack の UID (``cn_`` と 8 文字) または Property の UID (``pr_`` と 8
+       文字)。
+   * - ``detected_type``
+     - str or None
+     - ``"bool"``、``"int"``、``"float"``、``"string"``、``"enum"``、
+       ``"enum_set"``、``"vector"``、``"color"``、``"unsupported"``、
+       ``None`` のいずれか。``condition_ref`` では常に ``"bool"``。
+   * - ``readonly``
+     - bool
+     - 参照元に書き込めないとき ``True``。``condition_ref`` と
+       ``pm_property_ref`` では常に ``True``。
+   * - ``owner_type``
+     - str or None
+     - 省略可。多態的な所有者の RNA 型 (``space_data`` の下の Space の型など)。
+       ``None`` のとき、読み取りの形式では省かれます。
+   * - ``component``
+     - int
+     - 省略可。``pm_property_ref`` のみ。ベクトルの Property の成分インデックス。
+
+``segments`` の各要素:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - ``kind``
+     - その他のキー
+     - 意味
+   * - ``attr``
+     - ``name``
+     - 属性 ``.name``。英字で始まり、英字、数字、``_`` が続く名前。
+   * - ``key``
+     - ``key``
+     - キーによる要素 ``["key"]``。
+   * - ``index``
+     - ``index``
+     - インデックスによる要素 ``[n]``。n は 0 以上。
+   * - ``index_source``
+     - ``source``
+     - 整数の PME Property の値による要素。``detected_type`` が ``"int"``、
+       ``readonly`` が ``True`` の ``pm_property_ref`` の参照元です。
+
+配列の要素1つは、パスの最後に ``index`` のセグメントを置いて指します。
+``C.scene.tool_settings.mesh_select_mode[0]`` は、root が ``"context"`` で、セグメントは次のとおりです。
+``[{"kind": "attr", "name": "scene"}, {"kind": "attr", "name": "tool_settings"}, {"kind": "attr", "name": "mesh_select_mode"}, {"kind": "index", "index": 0}]``
+
+書き込み計画
+------------------------------------------------------------
+
+Schema v2 の ``PropertyStackWritePlan``。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``false_policy``
+     - str
+     - ``"no_op"`` または ``"explicit_off_write"``。
+       :ref:`authoring-property-stack-vocabulary` を参照してください。
+   * - ``entries``
+     - list[dict]
+     - 順序どおりの書き込み項目。下を参照してください。
+
+各書き込み項目は Schema v2 の ``PropertyStackWriteEntry`` です。すべてのキーが必須です。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 28 22 50
+
+   * - キー
+     - 型
+     - 値
+   * - ``entry_uid``
+     - str
+     - ローカル UID。空ではなく、計画内で一意です。
+   * - ``kind``
+     - str
+     - ``"derived"``、``"manual_write"``、``"custom_set"`` のいずれか。
+   * - ``status``
+     - str
+     - ``"auto_resolved"``、``"manual_resolved"``、``"manual_required"``、
+       ``"off"`` のいずれか。
+   * - ``derived_from_condition_uid``
+     - str or None
+     - 項目が属する行の ``condition_uid``。
+   * - ``source``
+     - dict or None
+     - 書き込み先。:ref:`値の参照元 <authoring-property-stack-source>` です。
+   * - ``value``
+     - bool, int, float, str or None
+     - 書き込む値。
+   * - ``value_type``
+     - str or None
+     - 条件行と同じです。
+   * - ``custom_set_body``
+     - str
+     - Custom Set のコード。最大 32768 文字。ほかの種類では ``""``。
+   * - ``enum_set_write_mode``
+     - str or None
+     - ``enum_set`` の項目では ``"add"``、``"remove"``、``"replace"`` のいずれか。
+   * - ``enum_set_write_values``
+     - list[str]
+     - モードが適用する識別子。空でない文字列です。
+
+参照元が ``condition_ref`` の項目は、``kind`` が ``derived`` または
+``manual_write``、``value_type`` が ``"bool"`` で、Enum 集合への書き込みを持ちません。
+
+.. _authoring-property-stack-vocabulary:
+
+語彙
+------------------------------------------------------------
+
+.. list-table:: ``combine_mode``
+   :header-rows: 1
+   :widths: 24 76
+
+   * - 値
+     - 意味
+   * - ``all``
+     - 参加するすべての行が真のとき TRUE。
+   * - ``any``
+     - 参加する行が 1 つ以上真のとき TRUE。
+
+参加するのは、有効で ``complete`` の行だけです。参加する行がなければ、結果は FALSE です。
+
+.. list-table:: ``op``
+   :header-rows: 1
+   :widths: 30 30 40
+
+   * - ``op``
+     - ``value_type``
+     - ``value``
+   * - ``is_true``、``is_false``
+     - ``bool``
+     - ``None``
+   * - ``equals``
+     - ``bool``、``int``、``float``、``string``、``enum``
+     - その型の値 1 つ。``enum`` の値は空でない識別子です。
+   * - ``not_equals``
+     - ``int``、``float``、``string``、``enum``
+     - その型の値 1 つ。
+   * - ``lt``、``le``、``ge``、``gt``
+     - ``int``、``float``
+     - 数値。
+   * - ``contains``、``starts_with``
+     - ``string``
+     - 文字列。
+   * - ``equals_any``、``not_equals_any``
+     - ``enum``、``enum_set``
+     - 識別子の空でないリスト。
+
+比較の意味は :ref:`router-condition-comparison` にあります。
+
+.. list-table:: 書き込み項目の ``kind``
+   :header-rows: 1
+   :widths: 24 76
+
+   * - 値
+     - 意味
+   * - ``derived``
+     - ``derived_from_condition_uid`` を通じて条件行に属します。行の操作がこの項目を作成、更新、削除します。
+   * - ``manual_write``
+     - 明示した値の書き込み。
+   * - ``custom_set``
+     - ``custom_set_body`` を実行します。
+
+.. list-table:: 書き込み項目の ``status``
+   :header-rows: 1
+   :widths: 24 16 60
+
+   * - 値
+     - エディター
+     - 意味
+   * - ``auto_resolved``
+     - Auto
+     - 書き込む値を条件行から導きます。``derived`` のみ。
+   * - ``manual_resolved``
+     - Set
+     - 書き込む値または方法が明示されています。
+   * - ``manual_required``
+     - Need
+     - 項目が書き込むには、書き込む値の指定が必要です。
+   * - ``off``
+     - Off
+     - この項目は書き込みません。
+
+.. list-table:: ``false_policy``
+   :header-rows: 1
+   :widths: 24 76
+
+   * - 値
+     - ``derived`` と ``manual_write`` の項目に対する FALSE の要求
+   * - ``no_op``
+     - スイッチに追従する項目だけが書き込みます。``derived`` の
+       ``auto_resolved`` の Boolean 項目は反対の値を書き込み、``add`` または ``remove``
+       の ``derived`` の Enum 集合の項目は反対の変更を適用します。固定値は書き込みません。
+   * - ``explicit_off_write``
+     - スイッチに追従する項目は ``no_op`` と同じく書き込みます。さらに、固定値を持つ項目はその同じ値を書き込み、``add`` または ``remove`` のすべての Enum 集合の項目が反対の変更を適用します。
+
+.. list-table:: ``enum_set_write_mode``
+   :header-rows: 1
+   :widths: 24 38 38
+
+   * - 値
+     - TRUE の要求
+     - FALSE の要求
+   * - ``add``
+     - ``enum_set_write_values`` を追加します。
+     - 項目が FALSE で書き込む場合、それらを削除します。
+   * - ``remove``
+     - ``enum_set_write_values`` を削除します。
+     - 項目が FALSE で書き込む場合、それらを追加します。
+   * - ``replace``
+     - 集合を ``enum_set_write_values`` で置き換えます。
+     - 書き込みません。
+
+.. _authoring-property-stack-true-false:
+
+TRUE と FALSE
+============================================================
+
+FALSE の動作は、設定ごとに選びます。``false_policy="no_op"`` でも、Boolean の
+``auto_resolved`` 項目は FALSE のとき反転した値を書き込みます。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 36 42
+
+   * - 目的の操作
+     - TRUE
+     - FALSE／書き込み項目の選択
+   * - Surface または Volume プリセット
+     - 2 つの Boolean を指定値にする
+     - 書き込みなし。固定値の Boolean 項目には ``manual_resolved`` を使う
+   * - 3D Step Snap
+     - 全体の Snap を ON、対象の変形を ON、INCREMENT に設定
+     - 対象の変形だけを OFF にする。その Boolean 項目を ``auto_resolved`` にし、
+       ほかの固定値は manual のままにする
+   * - UV Step Snap
+     - UV Snap を ON、対象の変形を ON、INCREMENT に設定
+     - UV Snap を OFF にする。その Boolean 項目を ``auto_resolved`` にし、
+       ほかの固定値は manual のままにする
+
+Enum 集合では、``enum_set_write_mode="replace"`` と
+``enum_set_write_values=["INCREMENT"]`` を持つ ``manual_resolved`` 項目は、
+TRUE で集合を置き換え、FALSE では書き込みません。
+Getter は、目的の集合だけでなく、余分な要素を含む集合でも確かめてください。
+FALSE は以前の状態を復元しません。
+同じ規則のエディター側の説明は :ref:`property-stack-write-values` にあります。

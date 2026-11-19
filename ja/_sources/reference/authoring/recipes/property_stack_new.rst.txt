@@ -1,0 +1,79 @@
+:vocab: developer-facing
+
+.. _authoring-recipe-property-stack-new:
+
+============================================================
+Property Stack を作成して状態を表示する
+============================================================
+
+プロポーショナル編集の Surface を選択する Property Stack を作成し、
+メニューのスロットにトグルとして表示します。
+
+TRUE では Surface を選択します。Connected を ON、Projected を OFF にします。
+FALSE では何も書き込みません。ローカルの補助関数 ``fixed_bool`` は、
+1 つの Boolean の設定を、条件行とその書き込み項目として表します。
+
+.. code-block:: python
+
+   created = pme.create_pm(pme.PmCreationSpec("CONDITION", name="Surface"))
+   if not created.accepted:
+       raise RuntimeError(created.diagnostics)
+   stack_uid = created.pm_uid
+   before = pme.editing.read_pm(stack_uid)["property_stack"]
+
+   def fixed_bool(uid, property_name, value):
+       source = {"kind": "rna_path", "root": "context", "detected_type": "bool",
+                 "readonly": False, "segments": [{"kind": "attr", "name": part}
+                 for part in ("scene", "tool_settings", property_name)]}
+       row = {"condition_uid": uid, "enabled": True, "authoring_state": "complete",
+              "label": property_name, "source": source,
+              "op": "is_true" if value else "is_false", "value": None, "value_type": "bool"}
+       # manual_resolved: writes the fixed value on TRUE, nothing on FALSE.
+       entry = {"entry_uid": "set_" + uid, "kind": "derived", "status": "manual_resolved",
+                "derived_from_condition_uid": uid, "source": source,
+                "value": value, "value_type": "bool", "custom_set_body": "",
+                "enum_set_write_mode": None, "enum_set_write_values": []}
+       return row, entry
+
+   pairs = [fixed_bool("connected", "use_proportional_connected", True),
+            fixed_bool("projected", "use_proportional_projected", False)]
+   logic = {"version": 1, "combine_mode": "all",
+            "predicate_rows": [row for row, entry in pairs],
+            "write_plan": {"false_policy": "no_op", "entries": [entry for row, entry in pairs]}}
+   # Check first, then save the checked candidate.
+   check = pme.editing.update_property_stack(stack_uid, logic=logic,
+       expected_digest=before["digest"], dry_run=True)
+   if check["status"] != "validated":
+       raise ValueError(check["diagnostics"])
+   result = pme.editing.update_property_stack(stack_uid, logic=check["candidate"],
+       expected_digest=before["digest"])
+   if result["status"] != "committed":
+       raise RuntimeError(result["diagnostics"])
+   # Use the registered ID for the widget, not the menu name.
+   stack = pme.editing.read_pm(stack_uid)["property_stack"]
+   property_id = stack["registered_property_id"]
+   if not property_id:
+       raise RuntimeError(f"Property Stack is not registered: {stack['diagnostics']}")
+
+   # Known destination menu and slot UIDs, obtained by read_pm above.
+   slot_before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+   result = pme.editing.update_slots(pm_uid, {slot_uid: {"mode": "CUSTOM",
+       "custom": f"L.prop(props(), {property_id!r}, text='Surface', toggle=True)"}},
+       expected_version=slot_before["version"], expected={slot_uid: slot_before["slots"][0]})
+
+この補助関数は新しい Stack を組み立てます。既存の Stack は、読み取った ``logic`` から編集します。
+:py:func:`pme.editing.update_property_stack` の補足を参照してください。
+
+確認
+============================================================
+
+* ``registered_property_id`` が空ではなく、スロット更新の ``result["status"]`` が
+  ``"committed"`` であること。
+* dry run は、参照元の評価、実行時の書き込み可否の確認、Setter の実行、ウィジェットの検証を行いません。メニューで、実際の値、チェック状態、方向の選択と release、無関係な設定が変わらないことを別に確認してください。
+* これらの呼び出しは Preferences をディスクに保存しません。
+
+使用する関数: :py:func:`pme.create_pm`、:py:func:`pme.editing.read_pm`、
+:py:func:`pme.editing.update_property_stack`、
+:py:func:`pme.editing.update_slots`。ロジックの説明:
+:ref:`authoring-property-stack-logic`。FALSE の動作:
+:ref:`authoring-property-stack-true-false`。

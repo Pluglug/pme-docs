@@ -1,0 +1,49 @@
+:vocab: developer-facing
+
+.. _authoring-recipe-property-switch:
+
+============================================================
+設定を Property のスイッチにする
+============================================================
+
+Blender の Rest Position の設定を PME の Property のスイッチにし、メニューのスロットからつなぎます。
+
+新しい Property は値を保存する Boolean です。
+Getter と Setter を設定すると、代わりに別の設定を読み書きします。
+
+.. code-block:: python
+
+   created = pme.create_pm(pme.PmCreationSpec("PROPERTY", name="Rest Position"))
+   if not created.accepted:
+       raise RuntimeError(created.diagnostics)
+   before = pme.editing.read_pm(created.pm_uid)["property"]
+   changes = {
+       "get": "a = C.pose_object; return bool(a) and a.data.pose_position == 'REST'",
+       "set": "a = C.pose_object; a and setattr(a.data, 'pose_position', 'REST' if value else 'POSE')",
+   }
+   # Check first: nothing is written.
+   check = pme.editing.update_property(created.pm_uid, changes, dry_run=True)
+   if check["status"] != "validated":
+       raise ValueError(check["diagnostics"])
+   result = pme.editing.update_property(
+       created.pm_uid, changes, expected_digest=before["digest"],
+   )
+   if result["status"] != "committed":
+       raise RuntimeError(result["diagnostics"])
+
+   # Known destination menu and slot UIDs, obtained by read_pm above.
+   pme.editing.update_slots(pm_uid, {slot_uid: {
+       "mode": "MENU", "name": "Rest Position", "menu_target_uid": created.pm_uid,
+   }})
+
+確認
+============================================================
+
+* ``result["registration"]["status"]`` が ``"committed"`` で、
+  ``read_pm(created.pm_uid)["property"]["registered_property_id"]`` が空ではないこと。
+* これらの呼び出しはスイッチを表示しません。スイッチを使うメニューで確認してください。
+* これらの呼び出しは Preferences をディスクに保存しません。
+
+使用する関数: :py:func:`pme.create_pm`、:py:func:`pme.editing.read_pm`、
+:py:func:`pme.editing.update_property`、:py:func:`pme.editing.update_slots`。
+項目の説明: :ref:`authoring-property`。

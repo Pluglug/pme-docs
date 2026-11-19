@@ -1,0 +1,472 @@
+:vocab: developer-facing
+
+.. _authoring-overview:
+.. _authoring-api:
+
+=============
+Authoring API
+=============
+
+The Authoring API creates, reads, edits and exports PME menus from Python
+through the ``pme`` package and its ``pme.editing`` module. It is called from
+the Python Console, the Text Editor, another add-on, or an AI agent driving
+Blender. Code written inside a slot (Command, Custom, Poll) is a different
+subject, described in :doc:`../scripting`.
+
+.. py:module:: pme
+   :synopsis: Find, create, invoke and export menus; run code in PME's namespace; validate PME JSON.
+
+.. py:module:: pme.editing
+   :synopsis: Read and edit saved menu definitions by UID.
+
+.. toctree::
+   :hidden:
+
+   concepts
+   results
+   menus
+   slots
+   layout
+   settings
+   hotkeys
+   property
+   property_stack
+   router
+   export_validate
+   resources
+   execution
+   recipes/index
+
+Pages
+=====
+
+Every page can be read on its own. :ref:`authoring-concepts` and
+:ref:`authoring-results` define the rules that every editing function follows.
+The whole API is **Experimental**.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Page
+     - Covers
+   * - :doc:`concepts`
+     - Where the editing functions run, what they act on, what they do not do,
+       and what is stable.
+   * - :doc:`results`
+     - ``status`` values, ``dry_run``, the ``expected`` / ``expected_version`` /
+       ``expected_digest`` guards, diagnostics and exceptions, per operation.
+   * - :doc:`menus`
+     - Create, find, list, invoke, read, rename, enable, tag, duplicate and
+       delete menus; find what refers to a menu.
+   * - :doc:`slots`
+     - Read slot inputs; edit, clear, add, remove, move, exchange and transfer
+       slots.
+   * - :doc:`layout`
+     - Rows, spacers, alignment and Layout Panels of Pop-up Dialogs and Floating
+       Panels.
+   * - :doc:`settings`
+     - Settings that belong to a menu's type, such as a Pop-up Dialog's Mode and
+       width.
+   * - :doc:`hotkeys`
+     - Read and change a menu's hotkey binding.
+   * - :doc:`property`
+     - Author a Property: type, arguments, Enum items, callbacks, storage and
+       Property ID.
+   * - :doc:`property_stack`
+     - Author a Property Stack and edit its condition rows.
+   * - :doc:`router`
+     - Add, update, remove and reorder Context Router branches.
+   * - :doc:`export_validate`
+     - Export menus as PME's JSON document; validate a document.
+   * - :doc:`resources`
+     - Registered script and icon locations; script reference checks.
+   * - :doc:`execution`
+     - Run code, read and write user properties, identify the running add-on
+       package, check a UID's format.
+
+.. _public-api-import:
+
+Importing
+=========
+
+The examples use ``import pme``, the optional short alias configured in
+:doc:`../boot_options`. When the alias is disabled, the enabled add-on's package
+is imported by name. This needs no change to the startup configuration and no
+reload of Blender:
+
+.. code-block:: python
+
+   import bpy
+   import importlib
+
+   packages = [
+       addon.module for addon in bpy.context.preferences.addons
+       if addon.module.rsplit(".", 1)[-1].replace("-", "_") == "pie_menu_editor"
+   ]
+   if len(packages) != 1:
+       raise RuntimeError(f"Select the enabled PME package: {packages}")
+   pme = importlib.import_module(packages[0] + ".api")
+   print(pme.ADDON_ID)
+
+* The snippet also finds a Blender Extension installed as
+  ``bl_ext.<repository>.pie_menu_editor``, and one whose extension ID uses
+  hyphens (``bl_ext.<repository>.pie-menu-editor``). The module name follows
+  the repository's ID, so the comparison ignores the hyphen / underscore
+  difference.
+* When several packages are listed, the intended installation is identified
+  before any edit. The snippet raises ``RuntimeError`` with the list.
+* The ``pme`` variable from the explicit import is the same API as the alias.
+  Code that uses it omits ``import pme``.
+
+Quick start
+===========
+
+.. code-block:: python
+
+   import pme
+
+   # Runtime package identity (Legacy add-on or Blender Extension)
+   addon_id = pme.ADDON_ID
+
+   # Find a menu
+   pm = pme.find_pm("My Pie Menu")
+   pm = pme.find_pm(uid="pm_7f3c2k3h")
+
+   # Invoke a menu
+   pme.invoke_pm("My Pie Menu")
+   pme.invoke_pm(uid="pm_7f3c2k3h")
+
+   # List menus
+   all_menus = pme.list_pms()
+   pie_menus = pme.list_pms(mode="PMENU", enabled_only=True)
+   tags = pme.list_tags()
+
+   # Execute code
+   result = pme.execute("bpy.ops.mesh.primitive_cube_add()")
+   print(result.success, result.error_message)
+
+   # Evaluate an expression
+   value = pme.evaluate("len(C.selected_objects)")
+
+   # Validate JSON
+   result = pme.validate_json(json_string)
+   for err in result.errors:
+       print(err.code, err.message)
+
+Function index
+==============
+
+``pme``
+-------
+
+.. py:currentmodule:: pme
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 52 22
+
+   * - Function
+     - Purpose
+     - Page
+   * - :py:func:`create_pm`
+     - Create a menu with the editor's default contents from a
+       ``PmCreationSpec``; returns ``PmCreationResult``.
+     - :doc:`menus`
+   * - :py:func:`find_pm`
+     - Return a ``PMHandle`` for a menu found by name or UID, or ``None``.
+     - :doc:`menus`
+   * - :py:func:`list_pms`
+     - Return ``PMHandle`` objects, optionally filtered by menu type and
+       enabled state.
+     - :doc:`menus`
+   * - :py:func:`list_tags`
+     - Return the tag names in use, in Tag Registry order.
+     - :doc:`menus`
+   * - :py:func:`invoke_pm`
+     - Request a menu invocation, as its hotkey would.
+     - :doc:`menus`
+   * - :py:func:`export_menus`
+     - Export menus as PME's JSON document, optionally writing a file.
+     - :doc:`export_validate`
+   * - :py:func:`validate_json`
+     - Validate a PME JSON string statically; returns ``ValidationResult``.
+     - :doc:`export_validate`
+   * - :py:func:`validate_uid`
+     - Return whether a string has the format of a menu UID.
+     - :doc:`execution`
+   * - :py:func:`execute`
+     - Run code in PME's standard namespace; returns ``ExecuteResult``.
+     - :doc:`execution`
+   * - :py:func:`evaluate`
+     - Evaluate an expression in PME's standard namespace; raises on failure.
+     - :doc:`execution`
+   * - :py:func:`check_syntax`
+     - Check Python syntax without running the code; returns
+       ``SyntaxResult``.
+     - :doc:`execution`
+   * - :py:func:`props`
+     - Read or write a user property registered by PME.
+     - :doc:`execution`
+
+Other names exported by ``pme``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 52 22
+
+   * - Name
+     - Purpose
+     - Page
+   * - :py:class:`PmCreationSpec`
+     - Creation request for :py:func:`create_pm`: ``mode_id``, ``name``,
+       ``slots``, ``data``.
+     - :doc:`menus`
+   * - :py:class:`PmCreationResult`
+     - Result of :py:func:`create_pm`: ``accepted``, ``pm_uid``,
+       ``diagnostics``.
+     - :doc:`menus`
+   * - :py:class:`PmiSlotSpec`
+     - Slot entry of ``PmCreationSpec.slots`` (``mode``, ``name``, ``text``,
+       ``icon``). :py:func:`create_pm` rejects explicit slots with
+       ``slots_unsupported_by_create_pm``.
+     - :doc:`menus`
+   * - :py:data:`ADDON_ID`
+     - Module ID of the running add-on package, such as ``pie_menu_editor`` or
+       ``bl_ext.<repository>.<package>``.
+     - :doc:`execution`
+   * - :py:data:`preferences`
+     - PME's add-on preferences object. ``None`` while the add-on entry exists
+       without PME's preferences class; reading it raises ``KeyError`` when
+       PME is not enabled.
+     - :doc:`execution`
+   * - :py:data:`context`
+     - PME1 execution context, kept for backward compatibility
+       (:ref:`authoring-backward-compatibility`).
+     - :doc:`execution`
+
+Submodules:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 52 22
+
+   * - Module
+     - Purpose
+     - Page
+   * - :py:mod:`pme.editing`
+     - Read and edit saved menu definitions by UID. Functions are listed
+       below.
+     - This page
+   * - :py:mod:`pme.validation`
+     - Static validation of PME JSON: ``validate``, ``validate_json``,
+       ``validate_file``, ``ERROR_CODES``.
+     - :doc:`export_validate`
+   * - :py:mod:`pme.resources`
+     - Read-only discovery of registered script and icon folders and files;
+       script reference checks.
+     - :doc:`resources`
+   * - ``pme.types``
+     - Result and handle types: ``ExecuteResult`` and ``SyntaxResult``
+       (:doc:`execution`), ``PMHandle`` and ``PmCreationResult``
+       (:doc:`menus`), ``ValidationIssue`` and ``ValidationResult``
+       (:doc:`export_validate`).
+     - Per type
+   * - ``pme.constants``
+     - Menu type and slot mode identifiers (``MENU_MODES``, ``ITEM_MODES``,
+       ``UNTAGGED``) and ``get_mode_label()``, ``get_mode_icon()``,
+       ``is_valid_mode()``. ``MENU_MODES`` does not include ``FPANEL``.
+     - (none)
+   * - ``pme.dev``
+     - Namespace introspection for tool authors: ``is_public()``,
+       ``get_stability()``, ``validate_namespace()``, ``namespace_report()``,
+       ``get_logger()``.
+     - (none)
+
+``pme.editing``
+---------------
+
+.. py:currentmodule:: pme.editing
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 50 20
+
+   * - Function
+     - Purpose
+     - Page
+   * - :py:func:`update_pm`
+     - Change a menu's name, description, description format or Poll source.
+     - :doc:`menus`
+   * - :py:func:`set_enabled`
+     - Enable or disable menus through the bulk owner.
+     - :doc:`menus`
+   * - :py:func:`update_tags`
+     - Add and remove tag names across menus in one batch.
+     - :doc:`menus`
+   * - :py:func:`duplicate_pm`
+     - Copy one menu immediately after its source.
+     - :doc:`menus`
+   * - :py:func:`delete_pms`
+     - Delete menus, or preview the deletion and its references.
+     - :doc:`menus`
+   * - :py:func:`find_references`
+     - List the saved places that refer to menus. Read-only.
+     - :doc:`menus`
+   * - :py:func:`read_pm`
+     - Return one menu's saved definition, optionally for selected slot UIDs.
+     - :doc:`menus`
+   * - :py:func:`read_slot_inputs`
+     - Return slots under the input names :py:func:`update_slots` accepts.
+       Read-only.
+     - :doc:`slots`
+   * - :py:func:`slot_fields`
+     - Describe the Slot Editor input fields: names, types, Enum values.
+     - :doc:`slots`
+   * - :py:func:`resolve_auto_icons`
+     - Report whether each Auto Icon slot finds an icon in this Blender
+       session. Read-only.
+     - :doc:`slots`
+   * - :py:func:`update_slots`
+     - Change slot contents by slot UID through normal Slot Editor saves.
+     - :doc:`slots`
+   * - :py:func:`clear_slots`
+     - Clear slot contents, keeping their UIDs and positions.
+     - :doc:`slots`
+   * - :py:func:`add_slot`
+     - Add one default item next to a slot, at the end, or into a Panel
+       header.
+     - :doc:`slots`
+   * - :py:func:`remove_slot`
+     - Remove one item.
+     - :doc:`slots`
+   * - :py:func:`move_slot`
+     - Move one item before or after another, or to a row end, a new row or a
+       Panel header.
+     - :doc:`slots`
+   * - :py:func:`swap_slots`
+     - Exchange two fixed-slot items or two Pop-up items.
+     - :doc:`slots`
+   * - :py:func:`transfer_slot`
+     - Move one item's contents to another menu.
+     - :doc:`slots`
+   * - :py:func:`add_row`
+     - Add a layout row with a default button.
+     - :doc:`layout`
+   * - :py:func:`add_panel`
+     - Add a Layout Panel row with its default anchor.
+     - :doc:`layout`
+   * - :py:func:`remove_row`
+     - Remove a whole layout row and its contents.
+     - :doc:`layout`
+   * - :py:func:`move_row`
+     - Move a whole layout row before or after another row.
+     - :doc:`layout`
+   * - :py:func:`split_row`
+     - Split a layout row before one of its items.
+     - :doc:`layout`
+   * - :py:func:`join_rows`
+     - Join two adjacent layout rows.
+     - :doc:`layout`
+   * - :py:func:`update_row`
+     - Change saved row settings for one row, aligned rows or all rows.
+     - :doc:`layout`
+   * - :py:func:`update_spacer`
+     - Change one spacer setting, creating an adjacent spacer when needed.
+     - :doc:`layout`
+   * - :py:func:`align_slot`
+     - Place an item in a row's LEFT, CENTER or RIGHT section, or clear it.
+     - :doc:`layout`
+   * - :py:func:`setting_fields`
+     - Describe the settings the menu's type accepts.
+     - :doc:`settings`
+   * - :py:func:`update_settings`
+     - Change settings of the menu's type.
+     - :doc:`settings`
+   * - :py:func:`update_hotkey`
+     - Change a menu's hotkey binding, or preview the change.
+     - :doc:`hotkeys`
+   * - :py:func:`update_property`
+     - Change a Property's type, arguments, Enum items, callbacks, storage and
+       Property ID.
+     - :doc:`property`
+   * - :py:func:`update_property_stack`
+     - Replace a Property Stack's complete logic.
+     - :doc:`property_stack`
+   * - :py:func:`add_property_stack_row`
+     - Append an empty condition row.
+     - :doc:`property_stack`
+   * - :py:func:`update_property_stack_row`
+     - Change one condition row and its related SET entry.
+     - :doc:`property_stack`
+   * - :py:func:`remove_property_stack_row`
+     - Remove one condition row and its related SET entry.
+     - :doc:`property_stack`
+   * - :py:func:`update_property_stack_hud`
+     - Change a Property Stack's While True HUD.
+     - :doc:`property_stack`
+   * - :py:func:`update_router`
+     - Change, append and keep Context Router branches and Otherwise.
+     - :doc:`router`
+   * - :py:func:`remove_router_branch`
+     - Remove one branch, keeping Otherwise.
+     - :doc:`router`
+   * - :py:func:`move_router_branch`
+     - Move one branch before or after another.
+     - :doc:`router`
+   * - :py:func:`reorder_router_branches`
+     - Put every branch in the given order with one save.
+     - :doc:`router`
+
+Changes from PME1
+=================
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 34 42
+
+   * - Topic
+     - PME1
+     - PME2
+   * - Import
+     - ``from pie_menu_editor import pme``
+     - ``import pme``
+   * - Runtime add-on ID
+     - Hard-coded ``"pie_menu_editor"``
+     - ``pme.ADDON_ID``
+   * - Design
+     - Exposed internal module
+     - Public API facade
+   * - Menu invocation
+     - ``pme.context.open_menu(name)``
+     - ``pme.invoke_pm(name)`` / ``pme.invoke_pm(uid=...)``
+   * - Code execution
+     - ``pme.context.exe(code)``
+     - ``pme.execute(code)`` returning ``ExecuteResult``
+   * - Menu lookup
+     - None
+     - ``pme.find_pm()``, ``pme.list_pms()``
+   * - JSON validation
+     - None
+     - ``pme.validate_json()``
+   * - Types and constants
+     - None
+     - ``pme.types``, ``pme.constants``
+
+.. _authoring-backward-compatibility:
+
+Backward compatibility
+======================
+
+PME1's ``pme.context`` and the ``props()`` command global remain available.
+Existing ``props()`` scripts inside PME command slots keep working.
+
+.. code-block:: python
+
+   # These still work in PME2
+   pme.context.open_menu("My Menu")
+   pme.context.event.mouse_x
+   pme.context.add_global("my_var", value)
+   props("MyCounter", 10)
+
+New code uses ``pme.execute()`` and ``pme.invoke_pm()``.

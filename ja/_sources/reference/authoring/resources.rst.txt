@@ -1,0 +1,351 @@
+:vocab: developer-facing
+
+.. _authoring-resources:
+.. _resource-discovery:
+
+============================================================
+リソース
+============================================================
+
+.. py:module:: pme.resources
+
+``pme.resources`` は、登録されたリソースフォルダーとアイコン用フォルダー、
+その中のスクリプトとアイコンのファイル、スクリプト参照の解決結果を読み取ります。PME が現在使用している :ref:`リソース設定 <user_resources>` を読み取り、
+何も変更しません。外部スクリプトからは、``pme`` を
+:ref:`短縮エイリアスまたはパッケージ名による読み込み <public-api-import>` で参照します。
+
+.. versionadded:: 2.2.0
+   登録フォルダー、スクリプトとアイコンのファイル、スクリプト参照の解決を取得する読み取り専用の照会です。API の安定性は **Experimental** です。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 関数
+     - 用途
+   * - :py:func:`list_folders`
+     - 登録されたリソースフォルダーを、現在の状態とともに返します。
+   * - :py:func:`list_icon_folders`
+     - 登録されたアイコン用フォルダーを、現在の状態とともに返します。
+   * - :py:func:`list_files`
+     - それらのフォルダー内のスクリプトとアイコンのファイルを列挙します。
+   * - :py:func:`resolve_script`
+     - スクリプト実行と同じ方法でスクリプト参照を解決します。
+
+結果は変更不可の dataclass です。``dataclasses.asdict()`` は、入れ子のフォルダーも含めて結果を辞書に変換します。
+
+フォルダー
+============================================================
+
+.. py:function:: list_folders()
+
+   登録されたリソースフォルダーを、保存順に現在の状態とともに返します。
+
+   :returns: 登録フォルダーごとに一つのエントリ。存在しない場所も含みます。
+   :rtype: tuple[ResourceFolderInfo, ...]
+   :raises RuntimeError: リソース設定を読めず、以前の有効な設定もない場合。
+      メッセージは ``"Resource settings are unavailable"``。
+
+   .. rubric:: 補足
+
+   * リソースフォルダーが登録されていない場合、結果は空です。既定のフォルダーは作成しません。
+
+.. py:function:: list_icon_folders()
+
+   登録されたアイコン用フォルダーを、保存順に現在の状態とともに返します。
+
+   アイコン用フォルダーは、リソースフォルダーとは別に登録します。
+
+   :returns: 登録されたアイコン用フォルダーごとに一つのエントリ。``name``
+      は ``""``。
+   :rtype: tuple[ResourceFolderInfo, ...]
+   :raises RuntimeError: リソース設定を読めず、以前の有効な設定もない場合。
+      メッセージは ``"Resource settings are unavailable"``。
+
+   .. rubric:: 補足
+
+   * 結果が空の場合、同梱のアイコンだけを使います。既定のフォルダーは作成しません。
+
+.. py:class:: ResourceFolderInfo
+
+   呼び出し時点で観測した登録フォルダー。リソースフォルダーとアイコン用フォルダーの両方に使います。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 10 68
+
+      * - 属性
+        - 型
+        - 値
+      * - ``index``
+        - int
+        - 登録順の位置（0 から）。安定した識別子ではありません。
+      * - ``name``
+        - str
+        - リソースフォルダーの表示名。アイコン用フォルダーでは ``""``。
+          名前空間でも安定した識別子でもありません。
+      * - ``raw_path``
+        - str
+        - 保存されたとおりのパス。
+      * - ``resolved_path``
+        - str
+        - 絶対パス。相対の ``raw_path`` は、実行中の Blender 実行ファイルがあるディレクトリを基準に解決します。``~`` と環境変数は展開します。
+          ``status`` が ``invalid`` の場合は ``""``。
+      * - ``status``
+        - str
+        - *フォルダーの状態* を参照。
+
+   .. rubric:: フォルダーの状態
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 78
+
+      * - ``status``
+        - 意味
+      * - ``available``
+        - ディレクトリを開いて一覧を取得できます。配下は確認しないため、
+          読めないものが含まれる場合があります。
+      * - ``missing``
+        - 登録された場所が存在しません。
+      * - ``not_directory``
+        - その場所はディレクトリではありません。
+      * - ``unreadable``
+        - その場所を確認または走査できません。
+      * - ``invalid``
+        - 保存されたパスを解決できません。``resolved_path`` は ``""`` です。
+
+ファイル
+============================================================
+
+.. py:function:: list_files(kind=None)
+
+   登録フォルダー内に存在するスクリプトとアイコンのファイルを列挙します。
+   どのスロットも使っていないファイルも含みます。
+
+   呼び出しのたびに、有効なリソース設定とファイルシステムを読み直します。
+
+   :param kind: 両方の種類なら ``None``、または ``"script"``、``"icon"``。
+   :type kind: str or None
+   :returns: 見つかったファイルと、読めなかった場所。
+   :rtype: ResourceFileListing
+   :raises ValueError: ``kind`` がそれ以外の値の場合。メッセージは
+      ``"kind must be None, 'script', or 'icon'"``。
+   :raises RuntimeError: リソース設定を読めず、以前の有効な設定もない場合。
+      メッセージは ``"Resource settings are unavailable"``。
+
+   .. rubric:: 走査範囲
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 14 86
+
+      * - 種類
+        - 列挙するファイル
+      * - スクリプト
+        - 各リソースフォルダー内のどこかにある、小文字の ``.py`` で終わるファイル。相対のスクリプト参照はフォルダー自体を基準に解決するため、``scripts/`` の外も含みます。名前が ``.`` で始まるフォルダーと ``__pycache__`` は飛ばします。ディレクトリのシンボリックリンクはたどります。各実ディレクトリは、登録フォルダーごとに一度だけ走査します。
+      * - アイコン
+        - 各アイコン用フォルダーの直下にある、小文字の ``.png`` で終わるファイル。予約された接頭辞 ``_intr_`` を持つ名前は除きます。名前が衝突するファイルと、``_`` で始まる名前（Custom の選択一覧では非表示）も含みます。選択や描画ができると確認したアイコンの一覧ではありません。
+
+   .. rubric:: 例
+
+   登録フォルダーとファイルを、ほかのツールに渡す JSON にまとめます。
+
+   .. code-block:: python
+
+      from dataclasses import asdict
+      import json
+      import pme
+
+      folders = pme.resources.list_folders()
+      listing = pme.resources.list_files()
+
+      payload = {
+          "folders": [asdict(folder) for folder in folders],
+          "files": [asdict(item) for item in listing.files],
+          "issues": [asdict(issue) for issue in listing.issues],
+      }
+      print(json.dumps(payload, ensure_ascii=False, indent=2))
+
+   .. rubric:: 補足
+
+   * ``files`` が完全な一覧になるのは、``issues`` が空のときだけです。
+     ``available`` でないフォルダーは、問題を一つ加え、ファイルは加えません。
+     走査中に失敗したパスは問題を加えます。そのフォルダーの残りは引き続き列挙します。
+   * 存在しない登録済みのリソースフォルダーやアイコン用フォルダーは、問題になります。
+   * ``kind=None`` では、スクリプトが先、アイコンが後です。フォルダーは登録順で、名前は各ディレクトリ内で並べ替えます。
+   * 異なるフォルダーにある同じ名前のファイルは、別のエントリです。
+   * ファイルの内容は実行もデコードもしません。
+   * 外部エディターによるリソース設定ファイルの変更は、次の起動時、またはアドオンを再度有効にしたときに読み込みます。
+
+.. py:class:: ResourceFileListing
+
+   :py:func:`list_files` の結果。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 30 48
+
+      * - 属性
+        - 型
+        - 値
+      * - ``files``
+        - tuple[ResourceFileInfo, ...]
+        - 見つかったファイル。
+      * - ``issues``
+        - tuple[ResourcePathIssue, ...]
+        - 読めなかったフォルダーとパス。
+
+.. py:class:: ResourceFileInfo
+
+   存在するスクリプトまたはアイコンのファイル。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 20 58
+
+      * - 属性
+        - 型
+        - 値
+      * - ``folder``
+        - ResourceFolderInfo
+        - ファイルを含む登録フォルダー。走査時点の状態を持ちます。
+      * - ``kind``
+        - str
+        - ``"script"`` または ``"icon"``。
+      * - ``relative_path``
+        - str
+        - ``folder`` からの相対パス。区切りは ``/`` です。スクリプトでは
+          ``scripts/modeling/align.py`` など、アイコンでは ``name.png`` などのファイル名です。スクリプトの場合は検索用の参照です。ほかの登録フォルダーが同じ参照でファイルを持つ場合があり、
+          :py:func:`resolve_script` がそれを報告します。
+      * - ``absolute_path``
+        - str
+        - ファイルの絶対パス。
+
+.. py:class:: ResourcePathIssue
+
+   読めなかったフォルダーまたはパス。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 20 58
+
+      * - 属性
+        - 型
+        - 値
+      * - ``folder``
+        - ResourceFolderInfo
+        - 対象の登録フォルダー。
+      * - ``path``
+        - str
+        - 利用できないフォルダーでは、そのフォルダーの ``resolved_path``
+          （空の場合は ``raw_path``）。それ以外では、走査中に失敗したパス。
+          例外のテキストは含みません。
+      * - ``code``
+        - str
+        - ``missing``、``not_directory``、``unreadable``、``invalid`` のいずれか。意味は *フォルダーの状態* と同じです。
+
+スクリプト参照
+============================================================
+
+.. py:function:: resolve_script(reference)
+
+   スクリプト実行が使うリゾルバーでスクリプト参照を解決します。スクリプトは実行しません。
+
+   スロットは、登録フォルダー内のファイルのパスを、そのフォルダーからの相対パスで保存します。例: ``scripts/modeling/align.py``。解決した絶対パスは、
+   現時点で見つかったファイルを示します。
+
+   :param str reference: 絶対パスまたは相対参照。
+   :returns: 解決の状態と、該当するファイル。
+   :rtype: ScriptResolution
+
+   .. rubric:: 検索順
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 30 70
+
+      * - ``reference``
+        - 確認する場所
+      * - 絶対パス
+        - そのパスだけ。
+      * - ``assets/examples/scripts/...``
+        - アドオンパッケージ内の同梱サンプルだけ。
+      * - それ以外の相対参照
+        - すべての登録リソースフォルダー。``\`` は ``/`` として読みます。
+          アドオンパッケージを確認するのは、どの登録フォルダーにも候補がなく、すべての登録場所を確認できた場合だけです。パッケージ内では、
+          ``scripts/...`` の参照で、以前の場所にある同梱サンプルも見つけます。
+
+   .. rubric:: ステータス
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 78
+
+      * - ``status``
+        - 意味
+      * - ``resolved``
+        - ファイルが一つ見つかりました。読み取り権限と Python の構文は確認しません。
+      * - ``missing``
+        - 該当するファイルが見つかりません。
+      * - ``ambiguous``
+        - 異なる二つ以上のファイルが該当します。
+      * - ``unavailable``
+        - 場所を解決または確認できず、解決を完了できませんでした。
+
+   .. rubric:: 例
+
+   スロット用のコマンド文字列を作ります。スクリプトの実行もスロットの編集もしません。
+
+   .. code-block:: python
+
+      import pme
+
+      reference = "scripts/modeling/align.py"
+      result = pme.resources.resolve_script(reference)
+
+      if result.status == "resolved":
+          command = f"execute_script({reference!r})"
+          print(command)  # execute_script('scripts/modeling/align.py')
+      else:
+          print(result.status, result.candidates)
+
+   .. rubric:: 補足
+
+   * 異なるファイルは、内容が同じでも別の候補です。同じ実ファイルに至るパスは一つの候補として数えます。
+   * ``ambiguous`` は ``unavailable`` より優先します。
+   * 呼び出しの後にファイルが変わる場合があります。スクリプト実行時には参照を解決し直します。
+
+.. py:class:: ScriptResolution
+
+   :py:func:`resolve_script` の結果。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 20 58
+
+      * - 属性
+        - 型
+        - 値
+      * - ``reference``
+        - str
+        - 引数 ``reference`` の値。
+      * - ``status``
+        - str
+        - ``resolved``、``missing``、``ambiguous``、``unavailable`` のいずれか。
+      * - ``resolved_path``
+        - str or None
+        - ``status`` が ``resolved`` のときはファイルの絶対パス。それ以外は
+          ``None``。
+      * - ``candidates``
+        - tuple[str, ...]
+        - 見つかった該当ファイルのパス。``resolved`` では一つ、
+          ``ambiguous`` では二つ以上、``missing`` では空、``unavailable``
+          では確認できたもの。
+
+対象範囲
+============================================================
+
+* これらの関数は、スクリプトの実行、画像のデコード、ディレクトリの作成、
+  設定の移行を行いません。
+* どのスロットがファイルを使っているかは報告しません。ファイルを移動・改名しても、スロットの参照は更新しません。

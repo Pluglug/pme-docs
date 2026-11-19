@@ -1,0 +1,53 @@
+# Pie Menu Editor (PME) Documentation
+
+> PME is a Blender add-on for building pie menus, vector menus, pop-up dialogs, floating panels, macros and properties without code. This file indexes the pages an agent needs to create and edit PME menus from Python (the Authoring API) and to write code inside menu slots (Scripting).
+
+Every link below is the Markdown or reStructuredText source of a page. The rendered page is the same path under https://docs.pie-menu-editor.com/ without `_sources/` and with `.html` in place of `.md.txt` or `.rst.txt`.
+
+Two different things are called scripting in PME. Pick the section that matches the task:
+
+- Authoring API: Python that runs outside a menu (Console, Text Editor, another add-on, an agent) and creates, reads, edits or exports menus through `import pme` and `pme.editing`.
+- Scripting: Python written inside a menu slot (Command, Custom, Poll), using names PME provides there such as `C`, `L` and `open_menu()`.
+
+The Authoring API is Experimental. It edits saved definitions in memory; it does not save Preferences to disk, provide Undo, or run the authored actions. Read the result of every call: `committed` is the only success value for a write, and `unknown` means read the menu again before retrying.
+
+## Authoring API
+
+- [Overview](https://docs.pie-menu-editor.com/_sources/reference/authoring/index.rst.txt): What the API is, how to import it, a quick start, and every `pme.editing` function with its page.
+- [Concepts](https://docs.pie-menu-editor.com/_sources/reference/authoring/concepts.rst.txt): When the functions can run, what they act on, and what they do not promise.
+- [Results and guards](https://docs.pie-menu-editor.com/_sources/reference/authoring/results.rst.txt): `status`, `dry_run`, `expected`, digests, and the success and preview values per operation.
+- [Menus](https://docs.pie-menu-editor.com/_sources/reference/authoring/menus.rst.txt): Create, find, list, rename, enable, tag, duplicate and delete menus; find what refers to a menu.
+- [Slots](https://docs.pie-menu-editor.com/_sources/reference/authoring/slots.rst.txt): Read a menu; edit, clear, add, remove, move, exchange and transfer slots.
+- [Layout rows and panels](https://docs.pie-menu-editor.com/_sources/reference/authoring/layout.rst.txt): Rows, spacers, alignment and Layout Panels of Pop-up Dialogs and Floating Panels.
+- [Menu type settings](https://docs.pie-menu-editor.com/_sources/reference/authoring/settings.rst.txt): Per-type settings such as a Pop-up Dialog's Mode and width, a Pie Menu's radius, Panel Group placement.
+- [Hotkeys](https://docs.pie-menu-editor.com/_sources/reference/authoring/hotkeys.rst.txt): Read and change a menu's hotkey binding.
+- [Property](https://docs.pie-menu-editor.com/_sources/reference/authoring/property.rst.txt): Author a Property: type, arguments, Enum items, Getter and Setter, storage, Property ID.
+- [Property Stack](https://docs.pie-menu-editor.com/_sources/reference/authoring/property_stack.rst.txt): Author a Property Stack, edit its condition rows and set its While True HUD.
+- [Context Router](https://docs.pie-menu-editor.com/_sources/reference/authoring/router.rst.txt): Add, update, remove and reorder Context Router branches.
+- [Export and validation](https://docs.pie-menu-editor.com/_sources/reference/authoring/export_validate.rst.txt): Export menus as PME's JSON document; validate a document.
+- [Resources](https://docs.pie-menu-editor.com/_sources/reference/authoring/resources.rst.txt): Registered script and icon locations; script reference checks.
+- [Execution, user properties and identity](https://docs.pie-menu-editor.com/_sources/reference/authoring/execution.rst.txt): Run code, read user properties, identify the running add-on package.
+
+## Authoring recipes
+
+- [Build a panel row by row](https://docs.pie-menu-editor.com/_sources/reference/authoring/recipes/layout_build_panel_rows.rst.txt)
+- [Author a Property Stack and show its state](https://docs.pie-menu-editor.com/_sources/reference/authoring/recipes/property_stack_new.rst.txt)
+- [Turn a setting into a Property switch](https://docs.pie-menu-editor.com/_sources/reference/authoring/recipes/property_switch.rst.txt)
+- [Add a Router branch and edit its condition](https://docs.pie-menu-editor.com/_sources/reference/authoring/recipes/router_add_branch.rst.txt)
+- [Link a child menu and keep its icon flags](https://docs.pie-menu-editor.com/_sources/reference/authoring/recipes/slots_link_child_menu.rst.txt)
+
+## Scripting
+
+- [Writing and Running Code](https://docs.pie-menu-editor.com/_sources/reference/command_text.md.txt): Where slot code goes, when it runs, one-line rules, external files, operator context.
+- [Scripting Reference](https://docs.pie-menu-editor.com/_sources/reference/scripting.rst.txt): Names and functions available inside slot code.
+- [Bundled Utilities](https://docs.pie-menu-editor.com/_sources/reference/bundled_utilities.md.txt): Helper functions loaded by the bundled autorun scripts.
+- [Code Examples](https://docs.pie-menu-editor.com/_sources/reference/scripting_workflow.md.txt): Slot configurations and code to paste.
+- [Poll Method](https://docs.pie-menu-editor.com/_sources/reference/poll_method.md.txt): Conditions that decide whether a menu is available.
+
+## Optional
+
+- [Terminology](https://docs.pie-menu-editor.com/_sources/reference/terminology.md.txt): Names of PME's menu types and parts.
+- [File Locations](https://docs.pie-menu-editor.com/_sources/reference/file_locations.md.txt): Where PME stores settings, scripts and icons.
+- [Boot Options](https://docs.pie-menu-editor.com/_sources/reference/boot_options.md.txt): Startup configuration, including the `import pme` alias.
+- [Managing Scripts](https://docs.pie-menu-editor.com/_sources/reference/script_management.rst.txt): The Scripts list for files called with `execute_script()`.
+- [Context Browser](https://docs.pie-menu-editor.com/_sources/editors/context_browser.md.txt): Inspect what Blender's context holds at the pointer.
