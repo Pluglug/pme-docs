@@ -1,0 +1,50 @@
+:vocab: developer-facing
+
+.. _authoring-recipe-build-panel-rows:
+
+============================================================
+パネルを1行ずつ組み立てる
+============================================================
+
+.. py:currentmodule:: pme.editing
+
+各呼び出しが返すUIDを使い、2回の読み取りを比べずに、ボタンを2行に並べた
+Floating Panelを作成します。
+
+.. code-block:: python
+
+   panel = pme.create_pm(pme.PmCreationSpec("FPANEL", name="View Tools")).pm_uid
+
+   # A new Floating Panel has one row: its marker (slots[0]) and one button.
+   first_button = pme.editing.read_pm(panel)["slots"][1]["uid"]
+
+   # add_row() returns the new marker and its default button in created_uids,
+   # in that order (also slots[0] and slots[1]).
+   marker, second_button = pme.editing.add_row(panel)["created_uids"]
+
+   # add_slot() without a position appends a button to the last row and
+   # returns it as slots[0].
+   third_button = pme.editing.add_slot(panel)["slots"][0]["uid"]
+
+   pme.editing.update_slots(panel, {
+       first_button: {"mode": "PROP", "name": "Snap", "prop": "C.scene.tool_settings.use_snap"},
+       second_button: {"mode": "COMMAND", "name": "Frame", "cmd": "bpy.ops.view3d.view_selected()"},
+       third_button: {"mode": "COMMAND", "name": "All", "cmd": "bpy.ops.view3d.view_all()"},
+   })
+
+確認
+============================================================
+
+* ``pme.editing.read_pm(panel)["rows"]`` は2行を持ちます。1行目の
+  ``slot_uids`` はマーカーと ``first_button``、2行目は
+  ``marker``、``second_button``、``third_button`` です。
+* :py:func:`update_slots` の結果は ``status == "committed"`` です。
+
+使用する関数
+============================================================
+
+* :py:func:`pme.create_pm`
+* :py:func:`read_pm`、:ref:`authoring-layout-rows` を参照
+* :py:func:`add_row`
+* :py:func:`add_slot`
+* :py:func:`update_slots`

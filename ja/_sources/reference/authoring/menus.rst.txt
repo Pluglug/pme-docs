@@ -1,0 +1,1833 @@
+:vocab: developer-facing
+
+.. _authoring-menus:
+
+============================================================
+メニュー
+============================================================
+
+.. py:currentmodule:: pme
+
+メニュー全体の操作です。メニューの作成・検索・一覧・呼び出し（``pme``）と、
+メニューの保存定義の読み取り、名前・説明・Poll・有効状態・タグの変更、
+メニューの複製と削除、メニューを参照している箇所の検索（``pme.editing``）を扱います。
+スロット、レイアウトの行、種類ごとの設定、ホットキー、
+Property・Property Stack・Context Router の定義は、それぞれ別のページで扱います。
+メニューの書き出しは :ref:`authoring-export-validate` の :py:func:`export_menus` です。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 関数
+     - 用途
+   * - :py:func:`create_pm`
+     - 種類の既定の内容でメニューを作成します。
+   * - :py:func:`find_pm`
+     - UID または名前で 1 つのメニューを探し、ハンドルを返します。
+   * - :py:func:`list_pms`
+     - すべてのメニューのハンドルを返します（絞り込みは任意）。
+   * - :py:func:`list_tags`
+     - メニューが使っているタグ名を返します。
+   * - :py:func:`invoke_pm`
+     - メニューを開く要求を出します。
+   * - :py:func:`~pme.editing.read_pm`
+     - メニューの保存定義を返します。
+   * - :py:func:`~pme.editing.update_pm`
+     - 名前・説明・説明の形式・Poll を変更します。
+   * - :py:func:`~pme.editing.set_enabled`
+     - メニューを有効または無効にします。
+   * - :py:func:`~pme.editing.update_tags`
+     - メニューのタグ名を追加・解除します。
+   * - :py:func:`~pme.editing.duplicate_pm`
+     - メニューを複製します。
+   * - :py:func:`~pme.editing.delete_pms`
+     - メニューを削除します。
+   * - :py:func:`~pme.editing.find_references`
+     - メニューを参照している保存箇所を一覧にします。
+
+呼び出しの規則
+============================================================
+
+* メニューは UID で指定します。名前は変わることがあります。
+  名前で探すときは :py:func:`find_pm` を使い、得た UID を以降の呼び出しに使います。
+* このページの ``pme.editing`` の関数はすべて、Blender のメインスレッド以外から呼ばれたとき、
+  PME の読み込みが完了する前、PME の Preferences を利用できないときに ``RuntimeError`` を送出します。
+* このページの関数は、Preferences をディスクへ保存せず、Blender の Undo ステップも追加しません。
+  メニューを開くのは :py:func:`invoke_pm` だけです。メニューのアクションを実行する関数はありません。
+* ``status`` の値の定義は :ref:`authoring-results` にあります。
+  編集の一般的な規則は :ref:`authoring-concepts` にあります。
+
+.. _authoring-menu-types:
+
+メニューの種類の識別子
+============================================================
+
+識別子は、:py:class:`PmCreationSpec` の ``mode_id``、:py:class:`~pme.types.PMHandle` の ``mode``、
+``read_pm()["mode"]`` に使われる値です。
+メニューの UID は、種類の接頭辞と ``_`` で始まります（例: ``pm_a2b3c4d5``）。
+「ホットキー」列は、その種類がホットキーを持つかを示します。
+``editable_slots`` は :py:func:`~pme.editing.read_pm` が返す値です。
+``False`` の種類は、スロットの操作ではなく、その種類専用の操作で編集します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 26 14 12 30
+
+   * - ``mode_id``
+     - 名前
+     - UID 接頭辞
+     - ホットキー
+     - ``editable_slots``
+   * - ``PMENU``
+     - Pie Menu
+     - ``pm``
+     - あり
+     - ``True``
+   * - ``VMENU``
+     - Vector Menu
+     - ``vm``
+     - あり
+     - ``True``
+   * - ``RMENU``
+     - Regular Menu
+     - ``rm``
+     - あり
+     - ``True``
+   * - ``DIALOG``
+     - Pop-up Dialog
+     - ``pd``
+     - あり
+     - ``True``
+   * - ``FPANEL``
+     - Floating Panel
+     - ``fp``
+     - あり
+     - ``True``
+   * - ``SCRIPT``
+     - Stack Key
+     - ``s``
+     - あり
+     - ``True``
+   * - ``PANEL``
+     - Panel Group
+     - ``pg``
+     - なし
+     - ``False``
+   * - ``HPANEL``
+     - Hidden Panel Group
+     - ``hpg``
+     - なし
+     - ``False``
+   * - ``STICKY``
+     - Sticky Key
+     - ``sk``
+     - あり
+     - ``True``
+   * - ``MACRO``
+     - Macro Operator
+     - ``mc``
+     - あり
+     - ``True``
+   * - ``MODAL``
+     - Modal Operator
+     - ``md``
+     - あり
+     - ``True``
+   * - ``PROPERTY``
+     - Property
+     - ``pr``
+     - なし
+     - ``False``
+   * - ``CONDITION``
+     - Property Stack
+     - ``cn``
+     - なし
+     - ``False``
+   * - ``ROUTER``
+     - Context Router
+     - ``rt``
+     - あり
+     - ``False``
+
+共通の結果構造
+============================================================
+
+.. _authoring-menu-snapshot:
+
+保存済みメニューのスナップショット
+------------------------------------------------------------
+
+:py:func:`~pme.editing.duplicate_pm` と :py:func:`~pme.editing.delete_pms` は、
+メニューの保存状態を切り離した辞書で報告します。
+それぞれの ``expected`` の digest は、この値から計算します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 14 56
+
+   * - キー
+     - 型
+     - 値
+   * - ``data``
+     - dict
+     - メニューの保存プロパティ。その ``pmis`` リストは、
+       ``slots`` に含まれないスロットのプロパティを保持します。
+   * - ``slots``
+     - list[dict]
+     - スロットごとに 1 要素: ``uid``、``index``、``enabled``、``fields`` （保存されたスロットの項目）、
+       ``layout_panel_present``、``layout_panel``。
+   * - ``property_stack_hud_present``
+     - bool
+     - Property Stack HUD の設定がメニューに保存されているか。
+   * - ``property_stack_hud``
+     - dict
+     - Property Stack HUD の設定。
+
+.. _authoring-menu-selection:
+
+選択のスナップショット
+------------------------------------------------------------
+
+:py:func:`~pme.editing.duplicate_pm`、:py:func:`~pme.editing.delete_pms`、
+:py:func:`~pme.editing.update_tags` は、呼び出し前後のエディターのメニュー選択を報告します。
+読み取れなかったスナップショットは ``None`` です。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 16 58
+
+   * - キー
+     - 型
+     - 値
+   * - ``active_pm_uid``
+     - str or None
+     - アクティブなメニューの UID。メニューがないときは ``None``。
+   * - ``active_index``
+     - int
+     - アクティブなメニューのコレクション内のインデックス。
+   * - ``selected_pm_uids``
+     - list[str]
+     - 選択されているメニューの UID。
+   * - ``select_mode_active``
+     - bool
+     - Select Mode がオンか。
+   * - ``tree_row``
+     - dict or None
+     - 選択されている Tree の行: ``pm_uid``、``pm_name``、``group``、``path``、
+       ``label``。Tree 表示でないとき、または行が選択されていないときは ``None``。
+   * - ``active_visible``
+     - bool or None
+     - 一覧のリージョンが最後に描画されたとき、アクティブなメニューがその中にあったか。
+       不明なときは ``None``。
+   * - ``visibility_scope``
+     - str
+     - ``"last_rendered_region"``。``active_visible`` は、
+       新しいフレームが描画されたことを証明しません。
+
+メニューを探す・呼び出す
+============================================================
+
+.. py:function:: find_pm(name=None, *, uid=None)
+
+   UID または完全一致の名前で 1 つのメニューを探し、ハンドルを返します。
+
+   :param name: 完全一致で比較するメニュー名。``uid`` を指定しないときだけ使います。
+   :type name: str or None
+   :param uid: メニューの UID。指定すると ``name`` は無視されます。
+   :type uid: str or None
+   :returns: ハンドル。一致するメニューがないときは ``None``。
+   :rtype: :py:class:`~pme.types.PMHandle` or None
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      handle = pme.find_pm("Mesh Tools")
+      if handle:
+          pm_uid = handle.uid
+
+   .. rubric:: 補足
+
+   * 見つからない UID では ``None`` を返します。名前での検索は行いません。
+   * UID での検索は、その UID を持つ最初のメニューを返します。
+     複数のメニューが共有する UID は検出しません。
+   * PME の Preferences を利用できないとき、
+     または保留中の Tag の変更を適用できないときは ``None`` を返します。
+   * ハンドルは呼び出し時点のコピーです。その後の変更には追従しません。
+
+.. py:function:: list_pms(mode=None, *, enabled_only=False)
+
+   すべてのメニューのハンドルをコレクション順に返します。
+
+   :param mode: メニューの種類の識別子（:ref:`authoring-menu-types`）。
+      その種類のメニューだけを返します。``None`` ではすべての種類を返します。
+      未知の識別子では ``[]`` を返します。
+   :type mode: str or None
+   :param bool enabled_only: 有効なメニューだけを返します。
+   :returns: メニューごとに 1 つのハンドル。PME の Preferences を利用できないとき、
+      または保留中の Tag の変更を適用できないときは ``[]``。
+   :rtype: list[:py:class:`~pme.types.PMHandle`]
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      for handle in pme.list_pms(mode="PMENU", enabled_only=True):
+          print(handle.uid, handle.name, handle.tag)
+
+.. py:function:: list_tags()
+
+   メニューが使っているタグ名を返します。
+
+   :returns: 使われているタグ名を 1 回ずつ。Tag Registry が有効なときはその順、
+      それ以外は大文字と小文字を区別して並べ替えた順。``Untagged`` は含みません。
+      PME の Preferences を利用できないとき、
+      または保留中の Tag の変更を適用できないときは ``[]``。
+   :rtype: list[str]
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      >>> pme.list_tags()
+      ['Modeling', 'Sculpt', 'UV']
+
+.. py:function:: invoke_pm(pm_or_name=None, *, name=None, uid=None)
+
+   ホットキーと同じように、メニューを開く要求を出します。
+
+   ``True`` は、要求がエラーなく送られたことを表します。
+   メニューが表示されたことや、アクションが実行されたことは確認しません。
+
+   :param pm_or_name: ハンドルまたはメニュー名。``name`` と ``uid`` より優先します。
+      ハンドルは ``uid`` で解決するため、そのメニューや別のメニューが改名された後も、
+      同じメニューを開きます。``uid`` が空のハンドルは ``name`` で解決します。
+   :type pm_or_name: :py:class:`~pme.types.PMHandle`, str or None
+   :param name: メニュー名。``pm_or_name`` と ``uid`` を指定しないときに使います。
+   :type name: str or None
+   :param uid: メニューの UID。``pm_or_name`` を指定しないときに使います。
+      ``name`` より優先します。
+   :type uid: str or None
+   :returns: 要求を送ったか。
+   :rtype: bool
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      opened = pme.invoke_pm(uid=pm_uid)
+
+   .. rubric:: 補足
+
+   次の場合は、例外を送出せずに ``False`` を返します。
+
+   * 一致するメニューがない。
+   * メニューが無効。
+   * メニューの Poll または現在のコンテキストが許可しない。
+   * Blender のオペレーターの呼び出しが例外を送出した。
+   * PME が起動スクリプト（``scripts/autorun/``、
+     ``scripts/register/``）を実行中。
+
+.. py:currentmodule:: pme.types
+
+.. py:class:: PMHandle(name, mode=None, enabled=True, uid='', tag='')
+
+   1 つのメニューの識別情報のコピーです。:py:func:`~pme.find_pm` と
+   :py:func:`~pme.list_pms` が返します。項目を変更しても PME では何も変わりません。
+   クラスは ``pme.types.PMHandle`` です。``pme.PMHandle`` としては使えません。
+
+   .. py:attribute:: name
+      :type: str
+
+      メニュー名。
+
+   .. py:attribute:: mode
+      :type: str or None
+
+      メニューの種類の識別子（:ref:`authoring-menu-types`）。
+
+   .. py:attribute:: enabled
+      :type: bool
+
+      メニューが有効か。
+
+   .. py:attribute:: uid
+      :type: str
+
+      メニューの UID。
+
+   .. py:attribute:: tag
+      :type: str
+
+      保存されたタグのテキスト。名前をカンマで区切ったものです（例:
+      ``"Modeling, Sculpt"``）。タグがないときは空です。
+
+.. py:currentmodule:: pme
+
+メニューを作成する
+============================================================
+
+.. py:function:: create_pm(spec, *, request_refresh=None)
+
+   種類の既定の内容でメニューを作成します。
+
+   メニューは、エディターの New と同じように作成されます。スロットと設定は作成後に編集します。
+   スロットは :py:func:`~pme.editing.update_slots`、種類ごとの設定は
+   :py:func:`~pme.editing.update_settings`、Property は
+   :py:func:`~pme.editing.update_property` で編集します。
+
+   :param PmCreationSpec spec: 作成するメニュー。``slots`` は空、
+      ``data`` は ``None`` でなければなりません。
+   :param request_refresh: メニューの作成と Tree の更新の後、エディターを再描画するために、
+      引数 ``"global"`` で 1 回呼ばれます。``None`` では再描画を要求しません。
+   :type request_refresh: callable or None
+   :returns: 新しいメニューの UID、または拒否のコード。
+   :rtype: PmCreationResult
+
+   .. rubric:: 診断
+
+   結果の ``diagnostics`` は、辞書ではなくコードを持ちます。検査は表の順に行います。
+   spec の検査は、失敗したコードをすべてまとめて報告します。
+   後の検査は、前の検査に通ったときだけ行います。
+   ``refresh_failed`` 以外のコードは、メニューが作成されなかったことを表します。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 38 62
+
+      * - コード
+        - 原因
+      * - ``spec_shape_invalid``
+        - ``spec`` が :py:class:`PmCreationSpec` でない、または項目の型が誤っている
+          （``mode_id`` か ``name`` が str でない、``data`` が str でも ``None`` でもない、
+          ``slots`` が tuple でも list でもない、スロットの項目が
+          str でない）。このコードだけが報告されます。
+      * - ``unknown_mode``
+        - ``mode_id`` が :ref:`authoring-menu-types` にない。
+      * - ``logic_envelope_mode_unsupported``
+        - ``slots`` または ``data`` を指定した ``CONDITION`` か ``ROUTER``。
+      * - ``slot_count_exceeds_fixed``
+        - スロットが種類の固定数を超えている（``PMENU`` と ``VMENU`` は 10、
+          ``STICKY`` は 2、``CONDITION`` と ``ROUTER`` は 0）。
+      * - ``slot_count_below_fixed``
+        - スロットが 1 つの ``STICKY``。``PMENU`` と ``VMENU`` は固定数より少ないスロットを受け付けます。
+      * - ``data_marker_mismatch``
+        - ``data`` の ``?`` より前の部分が、種類のデータマーカーでない。
+      * - ``data_query_malformed``
+        - ``data`` の ``?`` より後の組が ``key=value`` でない。
+      * - ``unknown_slot_mode``
+        - スロットの ``mode`` が ``EMPTY``、``COMMAND``、``PROP``、``MENU``、
+          ``HOTKEY``、``CUSTOM``、``INVOKE``、``FINISH``、``CANCEL``、
+          ``UPDATE`` のどれでもない。
+      * - ``slots_unsupported_by_create_pm``
+        - ``slots`` が空でない。
+      * - ``data_unsupported_by_create_pm``
+        - ``data`` が ``None`` でない。
+      * - ``boot_worker_thread_unsupported``
+        - PME が起動スクリプトを実行している間に、Blender のメインスレッド以外から呼ばれた。
+      * - ``boot_refresh_callback_unsupported``
+        - PME が起動スクリプトを実行している間に ``request_refresh`` が指定された。
+      * - ``route_pm_identity_*``
+        - 保存されたメニューが UID の検査に通らない。例: 複数のメニューが UID を共有するときの
+          ``route_pm_identity_uid_duplicate``。
+      * - ``route_target_rejected``
+        - 作成先を準備できなかった。
+      * - ``route_dry_run_rejected``
+        - 準備から書き込みまでの間に、メニューのコレクションが変わったか、
+          新しい UID が衝突した。
+      * - ``route_apply_failed``
+        - メニューの作成で例外が発生した。追加した要素は取り除かれています。
+          元の例外は Blender のコンソールに出力されます。
+      * - ``route_receipt_invalid``
+        - 作成処理が有効な結果を返さなかった。
+      * - ``refresh_failed``
+        - 拒否ではありません。``accepted`` は ``True`` です。メニューは作成されましたが、
+          Tree の更新または ``request_refresh`` が例外を送出しました。例外は
+          Blender のコンソールに出力されます。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      created = pme.create_pm(pme.PmCreationSpec(mode_id="VMENU", name="Mesh Tools"))
+      print(created.accepted, created.pm_uid, created.diagnostics)
+      if created.accepted:
+          menu = pme.editing.read_pm(created.pm_uid)
+
+   .. rubric:: 補足
+
+   * ``accepted=True`` は、メニューが Preferences に存在することを表します。
+     Preferences のディスク保存、メニューの呼び出し、
+     実行時にすぐ使えることは意味しません。
+   * ``refresh_failed`` の後は、メニューを作り直さず、返された UID のメニューを読み取ります。
+   * 配置、Auto Tag、キーマップの継承は、現在の一覧の状態でのエディターの New に従います。
+     新しいメニューがアクティブなメニューになります。
+   * 空の ``name`` では種類の既定の名前を使います。使用中の名前には
+     ``.001`` のような接尾辞が付きます。
+   * ``route_*`` の検査より前に拒否された要求は、Preferences を読み取りも変更もしません。
+   * メインスレッドの起動スクリプトからの呼び出しでは、保存されたメニューだけを作成します。
+     ホットキーやエディターの登録と画面更新は、この呼び出しの中では行いません。
+
+.. py:class:: PmCreationSpec(mode_id, name='', slots=(), data=None)
+
+   :py:func:`create_pm` に渡すメニューを記述する、frozen な dataclass です。
+
+   .. py:attribute:: mode_id
+      :type: str
+
+      メニューの種類の識別子（:ref:`authoring-menu-types`）。
+
+   .. py:attribute:: name
+      :type: str
+
+      メニュー名。空のときは種類の既定の名前を使います。
+
+   .. py:attribute:: slots
+      :type: tuple[PmiSlotSpec, ...]
+
+      メニューのスロット。:py:func:`create_pm` は空の tuple だけを受け付けます。
+
+   .. py:attribute:: data
+      :type: str or None
+
+      ``read_pm()["data"]`` の形式の、保存された設定の生の文字列。
+      :py:func:`create_pm` は ``None`` だけを受け付けます。
+
+.. py:class:: PmiSlotSpec(mode='EMPTY', name='', text='', icon='')
+
+   :py:attr:`PmCreationSpec.slots` の 1 要素を記述する、frozen な dataclass です。
+   :py:func:`create_pm` はスロットを持つ spec を拒否します
+   （``slots_unsupported_by_create_pm``）。スロットは作成後に追加・編集します。
+
+   .. py:attribute:: mode
+      :type: str
+
+      スロットの種類（``COMMAND``、``MENU`` など）。
+
+   .. py:attribute:: name
+      :type: str
+
+      スロットのラベル。
+
+   .. py:attribute:: text
+      :type: str
+
+      スロットの保存テキスト。
+
+   .. py:attribute:: icon
+      :type: str
+
+      アイコン名。
+
+.. py:class:: PmCreationResult(accepted, pm_uid, diagnostics)
+
+   :py:func:`create_pm` が返す、frozen な dataclass です。
+   ``pme.types.PmCreationResult`` としても使えます。
+
+   .. py:attribute:: accepted
+      :type: bool
+
+      メニューが作成されたときは ``True``。
+
+   .. py:attribute:: pm_uid
+      :type: str
+
+      新しいメニューの UID。拒否されたときは ``""``。
+
+   .. py:attribute:: diagnostics
+      :type: tuple[str, ...]
+
+      拒否のコード、画面更新に失敗した作成の後は ``("refresh_failed",)``、
+      それ以外は ``()``。:py:func:`create_pm` を参照してください。
+
+.. py:currentmodule:: pme.editing
+
+メニューを読み取る
+============================================================
+
+.. py:function:: read_pm(pm_uid, *, slot_uids=None)
+
+   1 つのメニューの保存定義を、通常の Python の値で返します。
+
+   読み取りでは何も実行しません。Poll、説明の式、Getter、Setter は評価されず、
+   タグも同期されません。
+
+   :param str pm_uid: メニューの UID。
+   :param slot_uids: ``slots`` に含めるスロットの UID。``None`` ではすべてのスロットを含めます。
+      どちらの場合も ``rows`` は完全です。
+   :type slot_uids: iterable of str or None
+   :returns: 下で説明する定義。
+   :rtype: dict
+   :raises ValueError: UID が存在しない、無効、または曖昧な場合。
+      または ``slot_uids`` の UID がそのメニューのスロットでない場合。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 12 16 50
+
+      * - キー
+        - 型
+        - 含まれる条件
+        - 値
+      * - ``uid``
+        - str
+        - すべて
+        - メニューの UID。
+      * - ``name``
+        - str
+        - すべて
+        - メニュー名。
+      * - ``mode``
+        - str
+        - すべて
+        - メニューの種類の識別子（:ref:`authoring-menu-types`）。
+      * - ``enabled``
+        - bool
+        - すべて
+        - メニューが有効か。
+      * - ``description``
+        - str
+        - すべて
+        - メニューの説明、またはそれを返す式。
+      * - ``description_is_expr``
+        - bool
+        - すべて
+        - ``description`` が Python の式のときは ``True``。
+      * - ``poll_cmd``
+        - str
+        - すべて
+        - Poll のソース。``def poll(cls, context):`` の本体です。
+          :py:func:`update_pm` を参照してください。
+      * - ``tags``
+        - list[str]
+        - すべて
+        - 保存されたタグのテキストにあるタグ名を、並べ替えて 1 回ずつ。
+          タグのないメニューでは ``[]``。
+      * - ``hotkey``
+        - dict
+        - すべて
+        - 保存されたホットキーの割り当て。:ref:`authoring-hotkeys` を参照してください。
+      * - ``data``
+        - str
+        - すべて
+        - 保存された設定の生の文字列。種類のマーカーに続けて ``?`` と、
+          ``&`` で連結した ``key=value`` の組が並びます。値は ``settings`` から読み取ります。
+      * - ``settings``
+        - dict
+        - すべて
+        - 設定名と現在の値の対応。設定のない種類では
+          ``{}``。:ref:`authoring-settings` を参照してください。
+      * - ``settings_diagnostics``
+        - list[dict]
+        - 読み取れない ``data``
+        - ``data`` を解析できないときだけ存在します。コード
+          ``settings_data_unreadable`` の要素が 1 つ入り、そのとき ``settings`` は ``{}`` です。
+          :ref:`authoring-settings` を参照してください。
+      * - ``version``
+        - int
+        - すべて
+        - メニューの編集カウンター。スロットとレイアウトの操作に ``expected_version`` として渡します。
+          セッション内だけの値で、まだバージョンがないメニューでは ``0`` です。
+          Python からの直接の書き込みをすべて検出するわけではありません。
+      * - ``editable_slots``
+        - bool
+        - すべて
+        - その種類専用の操作で編集する種類では ``False``
+          （:ref:`authoring-menu-types`）。
+      * - ``slots``
+        - list[dict]
+        - すべて
+        - 保存順に、スロットごとに 1 要素。または ``slot_uids`` で指定したスロットだけ。
+          各要素の説明は :ref:`authoring-slot-snapshot` にあります。
+      * - ``rows``
+        - list[dict]
+        - ``DIALOG``、``FPANEL``
+        - レイアウトの行。常に完全です。:ref:`authoring-layout-rows` を参照してください。
+      * - ``router``
+        - dict
+        - ``ROUTER``
+        - Context Router の定義。:ref:`authoring-router` を参照してください。
+      * - ``property_stack``
+        - dict
+        - ``CONDITION``
+        - Property Stack の定義。:ref:`authoring-property-stack` を参照してください。
+      * - ``property``
+        - dict
+        - ``PROPERTY``
+        - Property の定義。:ref:`authoring-property` を参照してください。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      menu = pme.editing.read_pm(pm_uid)
+      print(menu["mode"], menu["name"], [slot["uid"] for slot in menu["slots"]])
+
+   .. rubric:: 補足
+
+   * 返す値は切り離したコピーです。変更しても何も変わりません。
+   * スロットの ``text`` は保存されているテキストです。:py:func:`read_slot_inputs` は、
+     同じスロットを :py:func:`update_slots` が受け付ける入力名で返します。
+   * ``tags`` は、保存されたタグのテキストを同期せずに読み取ります。
+     保存された空の名前の所属（``""``）と、文字どおりの ``"Untagged"`` は区別されたままです。
+     :py:attr:`PMHandle.tag <pme.types.PMHandle.tag>`、:py:func:`~pme.list_tags`、
+     ``PMItem.get_tags()`` は、それぞれの形式を保ちます。
+
+メニューの名前・説明・Poll を変更する
+============================================================
+
+.. py:function:: update_pm(pm_uid, changes, *, expected=None)
+
+   メニューの名前、説明、説明の形式、Poll のソースを変更します。
+
+   項目は 1 つずつ保存されます。呼び出しはアトミックではありません。
+   最初に拒否された項目で処理が止まり、それより前に保存された項目は保存されたまま残ります。
+
+   :param str pm_uid: メニューの UID。
+   :param dict changes: 項目名と新しい値の対応。受け付ける名前は
+      ``name``、``description``、``description_is_expr``、``poll_cmd`` です。
+      指定しない項目は値を保ちます。
+   :param expected: 項目名と、その項目が現在持っているべき値の対応。
+      4 つの項目の任意の部分集合を指定します。一致しないときは何も書き込みません
+      （``stale_metadata``）。
+   :type expected: dict or None
+   :returns: 下で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``changes`` か ``expected`` がマッピングでない場合、
+      ``description_is_expr`` が bool でない場合、またはほかの値が str でない場合。
+   :raises ValueError: 項目名が 4 つのどれでもない場合、文字列が NUL 文字または
+      UTF-8 にエンコードできないテキストを含む場合、または UID が存在しない、
+      無効、曖昧な場合。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - キー
+        - 型
+        - 値
+      * - ``status``
+        - str
+        - 下の「ステータス」を参照してください。
+      * - ``committed``
+        - bool
+        - ``status`` が ``"committed"`` のときだけ ``True``。
+      * - ``pm_uid``
+        - str
+        - 引数 ``pm_uid``。
+      * - ``before``
+        - dict
+        - 呼び出し前に読み取った 4 つの項目。
+      * - ``after``
+        - dict
+        - 呼び出し後に読み取った 4 つの項目。
+      * - ``changed_fields``
+        - list[str]
+        - ``before`` と ``after`` で値が異なる項目。
+          エディターのコールバックによる変更も含みます。
+      * - ``fields``
+        - list[dict]
+        - 試みた項目ごとに 1 要素（保存順）: ``field``、``status``
+          （``committed``、``unchanged``、``rejected`` のいずれか）、``before``、
+          ``after``、``diagnostics``。
+      * - ``pending``
+        - list[str]
+        - 試みなかった項目。
+      * - ``side_effects``
+        - list[dict]
+        - ``changes`` に ``name`` があり、いずれかのメニューのスロットが変わったときだけ存在します。
+          スロットごとに 1 要素: ``pm_uid``、``pmi_uid``、``before``、
+          ``after``。
+      * - ``diagnostics``
+        - list[dict]
+        - すべての項目の診断、または ``stale_metadata`` の要素。
+
+   .. rubric:: ステータス
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - 意味
+      * - ``committed``
+        - 1 つ以上の項目を保存し、拒否された項目はありません。
+          ほかの項目が ``unchanged`` のこともあります。
+      * - ``unchanged``
+        - すべての項目がすでに要求した値だった、または ``changes`` が空です。
+          何も書き込んでいません。
+      * - ``partial``
+        - 先の項目またはコールバックが保存値を変えた後に、項目が拒否されました。
+          再試行の前に ``fields``、``pending``、``before``/``after``、
+          ``side_effects`` を確認してください。
+      * - ``rejected``
+        - 何も変わっていません。``expected`` が一致しなかったか、
+          値が変わる前に項目が拒否されました。
+
+   .. rubric:: 診断
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``stale_metadata``
+        - ``expected`` の値が保存値と異なる。
+          ``fields`` に項目名が入ります。
+      * - ``rename_rejected``
+        - 異なる空でない名前を指定したのに、エディターが古い名前を保った。
+      * - ``name_adjusted``
+        - 保存された名前が要求した名前と異なる。``@`` が取り除かれたか、
+          名前が使用中のため ``.001`` のような接尾辞が付いた。
+          ``requested`` と ``actual`` に両方の名前が入ります。
+      * - ``metadata_value_not_retained``
+        - setter が、要求した ``description``、
+          ``description_is_expr``、``poll_cmd`` を保たなかった。
+      * - ``poll_compile_error``
+        - ``poll_cmd`` は保存されたが、コンパイルできない。``message`` にエラーが入ります。
+          この診断は項目の状態を変えません。
+
+   .. rubric:: 例
+
+   読み取った後に 4 つの項目が変わっていないことを確認しながら、
+   プレーンテキストのメニュー説明を追加します。
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid)
+      fields = ("name", "description", "description_is_expr", "poll_cmd")
+      result = pme.editing.update_pm(pm_uid, {
+          "description_is_expr": False,
+          "description": "Mesh tools. Unmatched contexts keep Blender's shortcut.",
+      }, expected={key: before[key] for key in fields})
+      print(result["status"], result["after"], result["diagnostics"])
+
+   .. rubric:: 補足
+
+   * ``description`` と ``description_is_expr`` の両方を指定すると、
+     ``description_is_expr`` が先に保存されます。そのため、形式の変換が指定した説明を書き換えることはありません。
+     ほかのエディターのコールバックも保存値を変えることがあり、その変更は ``changed_fields`` に現れます。
+   * 改名にはエディターの改名処理を使います。そのメニューにリンクする Menu スロット、
+     改名した Pop-up Dialog の名前を持つ Panel Group の項目、Tree、ホットキー登録が更新されます。
+     Command・Custom・Poll のソーステキストと Router のターゲットの ``fallback_name`` は書き換えられず、
+     ``side_effects`` にも含まれません。その中の名前による呼び出しは古い名前のままです。
+   * 要求した名前から ``@`` は取り除かれます。空の名前または現在の名前では、名前は変わりません。
+   * Property ID をロックしていない Property Stack を改名すると、新しい ID が生成されることがあります。
+     改名後に ``property_stack["registered_property_id"]`` を読み直してください。
+     古い ID を埋め込んだウィジェットは書き換えられません。
+   * ``poll_cmd`` は ``def poll(cls, context):`` の後に付け加えられます。
+     ``"return context.mode == 'EDIT_MESH'"`` のような 1 行の本体は、そのままで有効です。
+     複数行の本体は改行で始め、各行を字下げします。
+   * コンパイルできない Poll のソースは、エディターと同じように保存され、
+     ``poll_compile_error`` が付きます。一方、スロットの ``cmd``、``prop``、
+     ``custom`` の構文エラーは、スロットの保存前に拒否されます。
+     どちらの検査も実行時の動作を証明しません。
+   * 有効状態、ホットキー、種類ごとの設定は、この関数の項目ではありません。
+     Poll と説明のソースは評価されません。
+   * 予期しない例外は traceback を保ち、確定した項目を示す注記が加わります。
+     再試行の前に、そのメニューと、それを参照するメニューを読み取ってください。
+
+メニューを有効・無効にする
+============================================================
+
+.. py:function:: set_enabled(pm_uids, enabled, *, expected=None, dry_run=False)
+
+   エディターの一括の Enable と Disable と同じように、メニューを有効または無効にします。
+
+   最初の書き込みの前に、すべての対象を検査します。
+   書き込みが失敗すると、すでに書き込んだ有効状態の値を元に戻します。
+
+   :param pm_uids: 重複しないメニューの UID。対象はコレクション順に処理します。
+      空の iterable では ``unchanged`` を返します。
+   :type pm_uids: non-string iterable of str
+   :param bool enabled: すべての対象に設定する値。
+   :param expected: 要求した各 UID と、その UID が現在持っているべき保存値の対応。
+      要求した UID と過不足なく一致させます。一致しないときは、書き込みの前に拒否されます。
+      ``None`` では呼び出し開始時に読み取った値を使います。
+   :type expected: dict[str, bool] or None
+   :param bool dry_run: 書き込まずに検査して返します。
+   :returns: 下で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``enabled`` か ``dry_run`` が bool でない場合（int は受け付けません）、
+      ``pm_uids`` が文字列の場合、または ``expected`` が bool のマッピングでない場合。
+   :raises ValueError: ``pm_uids`` に無効または重複した UID がある場合、
+      または ``expected`` が要求した UID を過不足なく指定していない場合。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 18 60
+
+      * - キー
+        - 型
+        - 値
+      * - ``status``
+        - str
+        - 下の「ステータス」を参照してください。
+      * - ``committed``
+        - bool
+        - ``status`` が ``"committed"`` のときだけ ``True``。
+      * - ``dry_run``
+        - bool
+        - 引数 ``dry_run``。
+      * - ``target_uids``
+        - list[str]
+        - コレクション順の対象。
+          解決できなかったときは指定された順。
+      * - ``before``
+        - dict[str, bool]
+        - 呼び出し開始時の保存値。対象を解決できなかったときは
+          ``{}``。
+      * - ``after``
+        - dict[str, bool]
+        - 呼び出し後に読み取った値。読み取れなかった対象は省かれ、
+          ``diagnostics`` に示されます。
+          dry run の後は現在の値。
+      * - ``expected``
+        - dict[str, bool]
+        - ``expected`` に渡すための ``before`` のコピー。確定の後でも、
+          新しい状態ではありません。
+      * - ``planned_uids``
+        - list[str]
+        - 保存値が ``enabled`` と異なる対象。
+      * - ``attempted_uids``
+        - list[str]
+        - setter を呼んだ対象。dry run の後は ``[]``。
+      * - ``changed_uids``
+        - list[str]
+        - 呼び出しで変わった対象。dry run の後と、
+          復元を確認した後は ``[]``。
+      * - ``registration``
+        - dict[str, dict]
+        - 対象ごとに、呼び出し後に観測したホットキー登録:
+          ``scope`` （``"hotkey"``）、``status`` （``not_required``、
+          ``registered``、``partial``、``unknown`` のいずれか）、``required``、``lanes``、
+          ``diagnostics``。:ref:`authoring-hotkeys` を参照してください。
+      * - ``selection``
+        - dict
+        - ``before`` と ``after``: ``active_pm_uid``、``active_index``、
+          ``selected_pm_uids``、``select_mode_active``、``tree_cursor``、
+          ``mode``。読み取れないときは ``None``。
+      * - ``visibility``
+        - dict
+        - ``before`` と ``after``: ``scope`` （``"last_rendered_region"``）、
+          ``status`` （``observed`` または ``unknown``）、``visible_uids``、
+          ``targets`` （UID と、bool または ``None`` の対応）。
+      * - ``owner_status``
+        - str
+        - 共有の一括操作のステータス: ``APPLIED``、``VALIDATED``、
+          ``NO_CHANGE``、``REJECTED``、``RESTORED_FAILURE``、
+          ``ROLLBACK_FAILED`` のいずれか。
+      * - ``reason``
+        - str
+        - 拒否または失敗のコード。ないときは ``""``。
+      * - ``rollback_reason``
+        - str
+        - 復元を確認できなかった理由。ないときは ``""``。
+      * - ``diagnostics``
+        - list[dict]
+        - 下の「診断」を参照してください。
+
+   .. rubric:: ステータス
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - 意味
+      * - ``validated``
+        - ``dry_run=True`` で、1 つ以上の値が変わる見込みです。
+          何も書き込んでいません。
+      * - ``unchanged``
+        - すべての対象がすでにその値を持っている、または ``pm_uids`` が空です。
+          setter は実行されず、ホットキー登録も修復されていません。
+      * - ``committed``
+        - すべての値を書き込み、読み戻しました。
+      * - ``rejected``
+        - 何も書き込んでいません。``diagnostics`` に原因が示されます。
+      * - ``restored_failure``
+        - 書き込みが失敗し、元に戻した有効状態の値を確認しました。
+      * - ``unknown``
+        - 書き込みが失敗し、復元を確認できませんでした。
+          再試行の前にメニューを読み取ってください。
+
+   .. rubric:: 診断
+
+   拒否または失敗の要素は ``code`` （``reason`` の値）と
+   ``rollback_reason`` を持ちます。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 42 58
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``pm_availability_target_missing``
+        - UID がメニューのコレクションにない。
+      * - ``pm_availability_live_identity_invalid``
+        - 保存されたメニューが UID の検査に通らない（例: 複数のメニューが
+          UID を共有している）。検査の範囲は対象だけでなく、
+          コレクション全体です。
+      * - ``pm_availability_expected_mismatch``
+        - ``expected`` の値が保存値と異なる。
+          ``before`` に保存値が入ります。
+      * - ``pm_availability_target_state_unavailable``
+        - 対象の有効状態の値を読み取れなかった。
+      * - ``pm_availability_collection_stale``
+        - 呼び出し中にメニューのコレクションが変わった。
+          ``rollback_reason`` の値にもなります。
+      * - ``pm_availability_target_stale``
+        - 書き込みの前に対象の値が変わった。
+      * - ``pm_availability_apply_failed``
+        - setter が例外を送出した。
+      * - ``pm_availability_apply_readback_mismatch``
+        - setter が値を保たなかった。
+      * - ``pm_availability_post_apply_mismatch``
+        - 最後の読み取りが要求した値と異なる。
+      * - ``pm_availability_rollback_incomplete``
+        - ``rollback_reason`` の値としてだけ使われます。
+          元に戻した値をすべては確認できなかった。
+      * - ``pm_availability_target_unavailable``
+        - 呼び出し後に対象を解決できなかった。``pm_uid``、
+          ``phase``、``reason`` （解決処理のステータス）。
+      * - ``pm_availability_readback_unavailable``
+        - 呼び出し後の対象の読み取りで例外が発生した。``pm_uid``、``phase``、
+          ``exception_type``。
+      * - ``pm_availability_registration_unavailable``
+        - 対象のホットキー登録の読み取りで例外が発生した。``pm_uid``、
+          ``phase``、``exception_type``。
+      * - ``pm_availability_context_unavailable``
+        - 選択と可視性を読み取れなかった。``phase`` （``before``
+          または ``after``）、``exception_type``。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      preview = pme.editing.set_enabled([pm_uid], False, dry_run=True)
+      print(preview["status"], preview["before"], preview["planned_uids"])
+      if preview["status"] == "validated":
+          result = pme.editing.set_enabled(
+              [pm_uid], False, expected=preview["expected"],
+          )
+          print(result["status"], result["after"], result["registration"])
+          print(result["diagnostics"])
+
+   .. rubric:: 補足
+
+   * ``committed`` が確認するのは、保存された有効状態の値だけです。
+     ``registration`` は現在のホットキーの状態を報告します。Macro、Property、Property Stack、Panel の資源、
+     Poll、Getter、Setter、アクションが実行されるかは確認しません。
+     登録の警告や ``unknown`` の観測は、確定した ``status`` を変えません。
+   * 無効なメニュー、キーのないメニュー、ホットキーのない種類、Open Mode が ``CLICK`` の
+     Vector Menu は、ホットキー登録を必要としません（``not_required``）。
+   * dry run の後の ``registration`` は現在の登録で、予測ではありません。
+   * dry run は対象を予約せず、コールバックが成功することも証明しません。
+     後の呼び出しで、解決と検査をやり直します。
+   * 復元の範囲は有効状態の値だけで、ほかの保存項目やエディターの資源は含みません。
+     失敗の後は ``before``、``after``、``attempted_uids``、``changed_uids``、
+     ``reason``、``rollback_reason``、``diagnostics`` を合わせて読んでください。
+   * 選択、Slot Editor で編集中の内容（対象が持つものも含む）、一覧のフィルターは、
+     対象が非表示になってもそのまま残ります。``visibility`` は最後に描画されたリージョンでの観測で、
+     ``unknown`` の場合もあり、新しいフレームが描画されたことは証明しません。
+
+タグを追加・解除する
+============================================================
+
+.. py:function:: update_tags(pm_uids, *, add=(), remove=(), expected=None, dry_run=False)
+
+   複数のメニューのタグ名を、1 回の一括操作で追加・解除します。
+
+   呼び出しは 2 つの段階からなります。通常の Tag 同期と、
+   その後の、エディターのタグ操作が使う一括書き込みです。
+   2 つは 1 つのアトミックなトランザクションではありません。
+
+   :param pm_uids: 重複しないメニューの UID。
+   :type pm_uids: non-string iterable of str
+   :param add: 追加する名前。それぞれ前後の空白を除きます。カンマで複数の名前を区切ります。
+      空の名前と ``Untagged`` は無視され、
+      ``ignored_names`` に記録されます。
+   :type add: non-string iterable of str
+   :param remove: 解除する名前（完全一致）。空白を除かず、カンマでも分割しません。
+   :type remove: non-string iterable of str
+   :param expected: この関数の以前の結果の ``expected`` 全体を、変更せずに渡します:
+      ``activated``、``targets_digest``、
+      ``definitions_digest``。同期の前に比較します。
+   :type expected: dict or None
+   :param bool dry_run: 同期も書き込みもせずに検査して返します。
+   :returns: 下で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``dry_run`` が bool でない場合、``pm_uids``、``add``、
+      ``remove`` が文字列であるか文字列以外を含む場合、または
+      ``expected["activated"]`` が bool でない場合。
+   :raises ValueError: ``pm_uids`` に無効または重複した UID がある場合、
+      UID が存在しないか曖昧な場合、``remove`` に同じ名前が 2 回ある場合、
+      同じ名前が ``add`` 全体で 2 回出るか ``add`` と ``remove`` の両方に出る場合、
+      または ``expected`` が 3 つのキーをちょうど持つマッピングでないか、
+      小文字の SHA-256 16 進文字列でない digest を持つ場合。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 18 60
+
+      * - キー
+        - 型
+        - 値
+      * - ``status``
+        - str
+        - 下の「ステータス」を参照してください。
+      * - ``committed``
+        - bool
+        - ``status`` が ``"committed"`` のときだけ ``True``。
+      * - ``dry_run``
+        - bool
+        - 引数 ``dry_run``。
+      * - ``target_uids``
+        - list[str]
+        - 引数 ``pm_uids``。
+      * - ``expected``
+        - dict or None
+        - 開始時に読み取った状態の ``activated``、``targets_digest``、
+          ``definitions_digest``。その読み取りに失敗したときは ``None``。
+      * - ``before``
+        - dict or None
+        - 対象ごとに、同期の前に読み取った ``raw`` （保存されたタグのテキスト）、
+          ``tags``、``ref_uids``、``projection_stamp``。
+      * - ``after``
+        - dict or None
+        - 呼び出し後に読み取った同じキー。読み取れないときは ``None``。
+      * - ``changed_uids``
+        - list[str] or None
+        - 同期の後と最後の読み取りとで値が異なる対象。
+          段階が失敗した後は ``None``。
+      * - ``synchronized``
+        - dict or None
+        - 通常の同期が、任意のメニューやタグ定義に加えた変更:
+          ``pms``、``definitions``、``version``、
+          ``activated`` （あるものだけ）。``status`` が
+          ``unchanged`` でも値が入ることがあります。
+      * - ``ignored_names``
+        - list[dict]
+        - 無視された ``add`` の要素ごとに ``name`` と ``reason``
+          （``"legacy_add_noop"``）。
+      * - ``selection``
+        - dict
+        - ``before`` と ``after``: ``active_hidden_by_list_filter``
+          と ``list_filter_scope`` （``"mode_tag_new_health"``）を加えた
+          :ref:`選択のスナップショット <authoring-menu-selection>`。
+      * - ``recovery``
+        - dict or None
+        - 段階が失敗した後に入ります: ``phase``、``baseline``、
+          ``carrier_matches``、``attempted`` （``None``）、``scope``
+          （``"tag_carrier"``）。
+      * - ``diagnostics``
+        - list[dict]
+        - 下の「診断」を参照してください。
+
+   .. rubric:: ステータス
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - 意味
+      * - ``validated``
+        - ``dry_run=True`` で、対象と変更があり、``expected`` が一致しています。
+          何も書き込んでいません。
+      * - ``unchanged``
+        - 対象がない、``add`` と ``remove`` のどちらにも要素がない、
+          または一括書き込みがどのメニューも変えませんでした。
+          ``synchronized`` は別に確認してください。
+      * - ``committed``
+        - 一括書き込みが 1 つ以上のメニューを変えました。
+      * - ``rejected``
+        - 保存されたタグのデータは変わっていません。``expected`` が古い、
+          開始時の状態を読み取れなかった、または同期が失敗し、
+          保存されたタグのデータが ``before`` と同じままです。
+      * - ``unknown``
+        - 一括書き込みが失敗したか、同期が失敗し、
+          保存されたタグのデータが ``before`` と異なるか読み取れませんでした。
+          再試行の前に値を読み取ってください。
+
+   .. rubric:: 診断
+
+   各要素は ``phase`` と ``code`` を持ちます。例外による要素は
+   ``exception_type`` と ``message`` も持ちます。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 40 60
+
+      * - ``code``
+        - 原因
+      * - ``tag_expected_stale``
+        - ``expected`` が現在の状態と異なる。段階は ``preflight``。
+      * - ``tag_snapshot_failed``
+        - 開始時にタグのデータを読み取れなかった。
+      * - ``tag_update_failed``
+        - 同期または一括書き込みが例外を送出した。段階は ``synchronize`` または
+          ``batch``。独自のコードを持つ例外では、
+          代わりにそのコードを報告します。
+      * - ``tag_carrier_readback_failed``、``tag_targets_readback_failed``
+        - 呼び出し後の値を読み取れなかった。
+      * - ``tag_synchronization_readback_failed``
+        - 失敗の後に、同期による変更を読み取れなかった。
+      * - ``tag_selection_readback_failed``、``tag_filter_readback_failed``
+        - 選択または一覧のフィルターの状態を読み取れなかった。
+      * - ``refresh_pending``
+        - 画面更新が延期された。段階は ``refresh``。
+      * - ``tag_refresh_failed``
+        - 画面更新が例外を送出した。段階は ``refresh``。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      targets = [first_pm_uid, second_pm_uid]
+      preview = pme.editing.update_tags(
+          targets, add=["Review"], remove=["Draft"], dry_run=True,
+      )
+      if preview["status"] == "validated":
+          result = pme.editing.update_tags(
+              targets, add=["Review"], remove=["Draft"], expected=preview["expected"],
+          )
+          print(result["status"], result["after"], result["synchronized"])
+      print(pme.editing.read_pm(first_pm_uid)["tags"])
+
+   .. rubric:: 補足
+
+   * 一括処理は、Tag Registry が有効でも無効でも、エディターのタグの書き込み処理を使います。
+     タグ定義は削除しません。
+   * 名前は大文字小文字と Unicode をそのまま保ちます。
+     ``add=["A,B"], remove=["B"]`` は競合です（``ValueError``）。
+     無視される追加も重複の検査には含まれます。名前の長さに追加の制限はありません。
+   * 名前の集合が変わらない場合でも、
+     書き込みが保存されたタグのテキストの順序と重複を正規化することがあります
+     （例: すでに所属している名前の追加、存在しない名前の解除）。
+     名前の集合ではなく保存値を比べてください。
+   * ``expected`` は JSON の往復でも保たれます。対象の保存されたタグのテキスト、
+     参照、projection stamp と、レジストリの定義を範囲とします。
+     古い ``expected`` は書き込みなしで拒否されます。
+   * dry run は入力、対象、名前の変換を検査します。
+     同期、UID の割り当て、新しい定義の予測は行わず、
+     後の書き込みが成功することも証明しません。
+   * 空の変更または空の対象集合では、``expected`` の検査の後に、
+     同期も画面更新もせずに ``unchanged`` を返します。
+   * ``recovery.carrier_matches`` は保存されたタグのデータを ``baseline`` と比べます。
+     ``baseline`` は、同期が失敗したときは ``"before"``、
+     一括書き込みが失敗したときは ``"after_synchronize"`` です。
+     ``True`` が証明するのは保存データの一致だけです。
+     ロールバックが実行されたかは分からないため、``attempted`` は ``None`` です。
+     一致しても ``restored_failure`` としては報告されません。
+   * 一括書き込みの成功後の読み戻しや画面更新の失敗は、確定した結果を変えません。
+   * アクティブなメニュー、選択されているメニュー、Slot Editor で編集中の内容 はそのまま残ります。
+     同じ Tree の行がまだあり、画面更新が成功したときは、その行が選択されたままです。
+     ``active_hidden_by_list_filter`` は、現在の mode・tag・new・health のフィルターの結果で、
+     名前の検索と折りたたまれた行は含みません。不明なときは ``None`` です。
+
+メニューを複製する
+============================================================
+
+.. py:function:: duplicate_pm(source_pm_uid, *, name=None, expected=None, dry_run=False)
+
+   1 つのメニューを複製し、コピーを複製元の直後に挿入します。
+
+   コピーはエディターの Duplicate で作られます。アクティブなメニュー、選択、
+   Slot Editor で編集中の内容 はそのまま残ります。エディターの Duplicate はコピーを選択しますが、
+   この関数は選択しません。
+
+   :param str source_pm_uid: 複製するメニューの UID。
+   :param name: コピーの名前。``None`` または ``""`` では複製元の名前を基にします。
+      名前は空白を除かずに、重複しない名前を決める処理を通ります。
+   :type name: str or None
+   :param expected: dry run が返した ``expected`` 全体を、変更せずに渡します:
+      ``collection_version``、``source_pm_uid``、``source_digest``。
+   :type expected: dict or None
+   :param bool dry_run: 書き込まずに検査して返します。
+   :returns: 下で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``source_pm_uid`` が空でない str でない場合、
+      ``name`` が str でも ``None`` でもない場合、``dry_run`` が bool でない場合、
+      ``expected`` がマッピングでない場合、またはその値の型が誤っている場合。
+   :raises ValueError: ``expected`` が 3 つのキーをちょうど持たない場合、
+      またはその ``collection_version`` が負の場合。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 28 16 56
+
+      * - キー
+        - 型
+        - 値
+      * - ``status``
+        - str
+        - 下の「ステータス」を参照してください。
+      * - ``committed``
+        - bool
+        - ``status`` が ``"committed"`` のときだけ ``True``。
+      * - ``dry_run``
+        - bool
+        - 引数 ``dry_run``。
+      * - ``source_pm_uid``
+        - str
+        - 引数 ``source_pm_uid``。
+      * - ``created``
+        - dict or None
+        - コピーの ``pm_uid``、``name``、コレクション内の ``index``。dry run の後、
+          またはコピーが存在しないときは ``None``。
+      * - ``before``
+        - dict
+        - ``pm_uids`` （コレクション順）、
+          ``source`` （:ref:`保存済みメニューのスナップショット <authoring-menu-snapshot>`）、
+          ``created`` （常に ``None``）。
+      * - ``after``
+        - dict
+        - 呼び出し後に読み取った同じキー。
+          ``created`` はコピーの保存スナップショットです。
+      * - ``expected``
+        - dict or None
+        - ``collection_version``、``source_pm_uid``、``source_digest``。
+          複製元を読み取れなかったときは ``None``。
+      * - ``collection_version_before``、``collection_version_after``
+        - int or None
+        - 呼び出し前後のメニューのコレクションのバージョン。
+      * - ``selection_before``、``selection_after``
+        - dict or None
+        - :ref:`選択のスナップショット <authoring-menu-selection>`。
+      * - ``not_inherited``
+        - list[str]
+        - ``key``、``any``、``ctrl``、``shift``、``alt``、``oskey``、
+          ``key_mod``、``enabled``。
+      * - ``recovery``
+        - dict
+        - ``attempted`` （``False``、``True``、不明なときは ``None``）と、
+          ``uid_order``、``active_uid``、``source_digest``
+          （それぞれ呼び出し前の値と等しいか。bool または ``None``）。
+          ``data_scope`` は ``"collection_order_active_uid_source_saved_values"`` です。
+      * - ``diagnostics``
+        - list[dict]
+        - 下の「診断」を参照してください。
+
+   .. rubric:: ステータス
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - 意味
+      * - ``validated``
+        - ``dry_run=True`` で、検査に通りました。何も書き込んでいません。
+      * - ``rejected``
+        - 何も書き込んでいません。``diagnostics`` に原因が示されます。
+      * - ``committed``
+        - Duplicate が確定しました。
+      * - ``restored_failure``
+        - Duplicate が失敗しました。元の UID の順序、アクティブな UID、
+          複製元の保存値が変わっていないことを読み戻しで確認しました。
+      * - ``unknown``
+        - 結果または復旧を確認できませんでした。
+          再試行の前にコレクションを読み取ってください。
+
+   .. rubric:: 診断
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 38 62
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``pm_identity_*``
+        - 保存されたメニューが UID の検査に通らない。例: 複数のメニューが UID を共有するときの
+          ``pm_identity_uid_duplicate``。
+      * - ``pm_duplicate_source_unavailable``
+        - ``source_pm_uid`` を持つメニューがない。
+      * - ``pm_duplicate_unsupported_mode``
+        - 複製元の種類が既知のメニューの種類でない。
+      * - ``pm_duplicate_stale_expected``
+        - ``expected`` が現在のコレクションのバージョンまたは複製元と異なる。
+      * - ``pm_duplicate_snapshot_failed``
+        - 開始時の状態の読み取りで例外が発生した。``exception_type``、
+          ``message``。
+      * - ``target_rejected``、``dry_run_rejected``
+        - Duplicate が書き込みの前に拒否した（例: コレクションまたは複製元が変わった）。
+          ``status`` は ``rejected`` です。
+      * - ``apply_failed``
+        - Duplicate が書き込み中に例外を送出し、自身のロールバックを実行した。
+          ``status`` は ``restored_failure`` または ``unknown`` です。
+      * - ``pm_duplicate_failed``
+        - Duplicate が自身の処理の外で例外を送出した。
+          ``status`` は ``unknown`` です。``exception_type``、``message``。
+      * - ``pm_duplicate_refresh_failed``
+        - 確定の後、画面更新または Tree の選択の復元が失敗した。
+          確定はそのまま有効です。
+      * - ``pm_duplicate_readback_failed``
+        - 呼び出し後の値を読み取れなかった。その値は ``None`` です。
+          ``field``、``exception_type``、``message``。
+      * - ``pm_duplicate_readback_unavailable``
+        - 呼び出し後に複製元またはコピーを解決できなかった。
+          ``field``。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      preview = pme.editing.duplicate_pm(pm_uid, name="Working copy", dry_run=True)
+      print(preview["status"], preview["not_inherited"])
+      if preview["status"] == "validated":
+          result = pme.editing.duplicate_pm(
+              pm_uid, name="Working copy", expected=preview["expected"],
+          )
+          print(result["status"], result["created"], result["diagnostics"])
+
+   .. rubric:: 補足
+
+   * コピーは、アクティブなメニューや表示の並び順にかかわらず、
+     コレクション順で複製元の後に置かれます。
+   * コピーとそのスロットには新しい UID が割り当てられます。スロットの内容、スロットの ``enabled``、
+     タグ、エディターの種類ごとの複製動作は引き継がれます。
+     コピー内の参照は参照先を保ちます。
+   * ``not_inherited`` の項目は複製されません。コピーは有効で、
+     ホットキーのキーがない状態で始まります。
+   * Property Stack のコピーは HUD の外観を保ち、監視はオフになります。
+     複製元の Property ID は再利用しません。
+   * dry run は UID を作らず、バージョンを初期化せず、選択を変えず、何も登録せず、
+     HUD の設定も書き込みません。名前を予約したり、
+     コレクションの順序を固定したりもしません。
+   * ``expected`` は JSON の往復でも保たれます。
+     範囲は、複製元の保存値（バージョンを更新しない編集も含む）と、コレクションのバージョンです。
+   * 同じ Tree の行がまだあるときは、その行が選択されたままです。
+     コピーがフィルターで非表示になっても、別のメニューが選択されることはありません。
+   * 画面更新や読み戻しの失敗は、確認済みの確定を取り消しません。
+     ``recovery`` の範囲は Duplicate 自身のロールバックとその保存データの検査だけで、
+     エディターの登録や host の資源は含みません。
+
+メニューを1件または複数削除する
+============================================================
+
+.. py:function:: delete_pms(pm_uids, *, expected=None, dry_run=False)
+
+   エディターの Selected Remove と同じように、メニューを削除します。
+
+   削除するメニューへの参照は報告されますが、削除も書き換えもされません。
+   残ったメニューが、削除されたメニューへのリンクを持ち続けることがあります。
+
+   :param pm_uids: 1 つ以上の重複しないメニューの UID。
+      1 つのメニューでも 1 要素のリストで渡します。対象はコレクション順に処理します。
+   :type pm_uids: non-string iterable of str
+   :param expected: dry run が返した ``expected`` 全体を、変更せずに渡します:
+      ``collection_version``、``collection_digest``、``target_digests``、
+      ``references_digest``。
+      ``None`` では呼び出し開始時に読み取った状態を使います。
+   :type expected: dict or None
+   :param bool dry_run: 削除せずに検査して返します。
+   :returns: 下で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``pm_uids`` が文字列の場合、または ``dry_run`` が bool でない場合。
+   :raises ValueError: ``pm_uids`` が空であるか、無効または重複した UID を含む場合。
+      または ``expected`` の形が不正な場合
+      （キーの不足、負の ``collection_version``、要求した UID 以外の ``target_digests`` のキー、
+      小文字の SHA-256 16 進文字列でない digest）。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 28 16 56
+
+      * - キー
+        - 型
+        - 値
+      * - ``status``
+        - str
+        - 下の「ステータス」を参照してください。
+      * - ``committed``
+        - bool
+        - ``status`` が ``"committed"`` のときだけ ``True``。
+      * - ``dry_run``
+        - bool
+        - 引数 ``dry_run``。
+      * - ``target_uids``
+        - list[str]
+        - コレクション順の対象。
+          解決できなかったときは指定された順。
+      * - ``before``
+        - dict
+        - 対象ごとに、開始時に読み取った :ref:`保存済みメニューのスナップショット <authoring-menu-snapshot>`。
+          対象を解決できなかったときは ``{}``。
+      * - ``after``
+        - dict
+        - 対象ごとの呼び出し後のスナップショット。削除された対象では ``None``、
+          読み取れないときは ``{"readback_unavailable": True}``。
+      * - ``references``
+        - list[dict]
+        - 対象を指す、または読み取れなかった :ref:`参照の行 <authoring-reference-rows>`。
+          ``source_survives`` と ``target_missing_after`` が加わります。
+      * - ``expected``
+        - dict or None
+        - 開始時に読み取った状態の 4 つの前提条件。その読み取りに失敗したときは
+          ``None``。
+      * - ``removed_uids``
+        - list[str]
+        - コレクションにもうない対象。拒否されたときは ``[]``。
+      * - ``remaining_target_uids``
+        - list[str]
+        - まだコレクションにある対象。
+      * - ``remaining_uids``
+        - list[str] or None
+        - 最終的なコレクションの順序。
+      * - ``collection_version_before``、``collection_version_after``
+        - int
+        - 呼び出し前後のメニューのコレクションのバージョン。
+      * - ``selection_before``、``selection_after``
+        - dict or None
+        - :ref:`選択のスナップショット <authoring-menu-selection>`。
+      * - ``planned_active_uid``
+        - str or None
+        - 削除後にアクティブにする予定のメニュー。削除の計画が立たなかったときは
+          ``None``。
+      * - ``recovery``
+        - dict
+        - ``status`` （``APPLIED``、``REJECTED``、``RESTORED_FAILURE``、
+          ``BLOCKED_RECOVERY`` のいずれか）、``rollback_attempted``、
+          ``rollback_confirmed``、``rollback_reason``、
+          ``rollback_exception_type``、``data_scope``
+          （``"owned_menu_saved_values"``）、``host_scope``
+          （``"existing_batch_recovery_postconditions"``）、
+          ``hotkey_observation``。
+      * - ``diagnostics``
+        - list[dict]
+        - 下の「診断」を参照してください。
+
+   .. rubric:: ステータス
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - 意味
+      * - ``ready``
+        - ``dry_run=True`` で、検査に通りました。何も削除していません。
+      * - ``rejected``
+        - 何も削除していません。``diagnostics`` に原因が示されます。
+      * - ``committed``
+        - 要求したメニューをコレクションから削除しました。
+      * - ``restored_failure``
+        - 削除が失敗し、削除処理自身の復旧を確認しました。
+      * - ``unknown``
+        - 復旧を確認できなかったか、削除の後に対象が残っているか、
+          最後の読み取りが失敗しました。
+          再試行の前にコレクションを読み取ってください。
+
+   .. rubric:: 診断
+
+   すべての結果に ``static_reference_coverage`` （``severity`` は
+   ``"warning"``）が含まれます。``warning`` を持つ参照の行ごとに、
+   ``code`` （その warning）、``severity``、``source_pm_uid``、
+   ``path`` を持つ要素が加わります。拒否や失敗では、``code``、``phase``、
+   ``exception_type`` を持つ要素が加わります。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 40 60
+
+      * - ``code``
+        - 原因
+      * - ``static_reference_coverage``
+        - 常に含まれます。
+          実行時に参照を組み立てる Python は見つけられません。
+      * - ``pm_remove_target_missing``
+        - UID がメニューのコレクションにない。
+      * - ``pm_remove_live_identity_invalid``
+        - 保存されたメニューが UID の検査に通らない（例: 複数のメニューが
+          UID を共有している）。
+      * - ``pm_remove_host_name_ambiguous``
+        - 別のメニューが対象と同じ名前を持つ。
+      * - ``pm_remove_active_invalid``
+        - アクティブなメニューのインデックスが有効でない。
+      * - ``pm_remove_plan_invalid``
+        - 選択の状態またはコレクションのバージョンを、
+          削除の計画に使えない。
+      * - ``pm_remove_draft_conflict``
+        - Slot Editor で編集中の内容 が対象のものである。
+      * - ``pm_remove_saved_state_stale``
+        - ``expected`` が異なる、
+          または呼び出し中に対象の保存値かその対象への参照が変わった。
+      * - ``pm_remove_collection_stale``
+        - 呼び出し中に、コレクション、そのバージョン、または選択が変わった。
+      * - ``pm_remove_target_changed``
+        - 削除の前に、対象の名前、種類、または位置が変わった。
+      * - ``pm_remove_snapshot_failed``
+        - 開始時の状態の読み取りで例外が発生した。
+      * - ``pm_remove_apply_failed``
+        - メニューの削除で例外が発生した。
+      * - ``pm_remove_apply_readback_mismatch``
+        - コレクションを読み取っても、削除を確認できなかった。
+      * - ``pm_remove_terminal_failed``
+        - 最終的なアクティブなメニューと選択の設定が失敗した。
+      * - ``pm_remove_version_commit_failed``
+        - 削除の後にコレクションのバージョンを更新できなかった。
+      * - ``pm_remove_readback_failed``
+        - 最後の読み取りで例外が発生した。
+      * - ``pm_remove_hotkey_readback_failed``
+        - ``recovery.hotkey_observation`` を読み取れなかった。
+      * - ``pm_remove_refresh_failed``
+        - 削除の後、画面更新の処理が例外を送出した。
+          ``phase`` にその処理が入ります。確定はそのまま有効です。
+      * - ``pm_remove_recovery_publish_failed``
+        - 失敗した復旧の後の画面更新の処理が例外を送出した。
+
+   ``recovery.rollback_reason`` は、
+   ``pm_remove_rollback_failed`` （復元したコレクションまたは選択が異なる）、
+   ``pm_remove_host_recovery_unproven`` （ホットキーまたは Floating Panel の解除処理が始まっていた）、
+   ``pm_remove_version_commit_failed`` のいずれかです。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      preview = pme.editing.delete_pms([pm_uid], dry_run=True)
+      print(preview["status"], preview["references"], preview["diagnostics"])
+      if preview["status"] == "ready":
+          result = pme.editing.delete_pms([pm_uid], expected=preview["expected"])
+          print(result["status"], result["removed_uids"], result["recovery"])
+
+   .. rubric:: 補足
+
+   * dry run は保存値、バージョン、選択、編集中の内容、host の登録を変更しません。
+     ``before`` と ``after`` は同じ値を持ちます。
+     ``planned_active_uid`` を返します。対象を予約せず、
+     解除処理が成功することも証明しません。
+   * ``expected`` は、コレクションの識別情報と順序、対象の保存内容、
+     対象への保存された参照を比べます。コレクションのバージョンを増やさない変更も検出します。
+     古いと判定された後は、読み直して改めて判断します。
+     ``expected`` がなくても、各対象を削除する前に、開始時の状態を再び検査します。
+   * ``references`` には、無効または未完成の Router と Property Stack の参照も含まれます。
+     実行時に参照を組み立てる Python は見つかりません。
+     走査範囲の警告は削除を妨げません。
+   * ほかのメニューのSlot Editor で編集中の内容 はそのまま残ります。
+     対象外のアクティブなメニューは UID を保ちます。
+     アクティブなメニューが削除されたときは、その後ろで次に残っているメニューがアクティブになり、
+     後ろにないときは、前にある最も近いメニューがアクティブになります。
+     残ったメニューを表示するためにフィルターを解除することはありません。
+   * 保存データの復旧と host の登録の復旧は別です。定義が復元されても、
+     すべてのエディターの資源が復元されたことは証明されません。
+     削除の後に画面更新が失敗しても、確定した結果は保たれます。
+   * ``recovery.hotkey_observation`` の範囲は、削除の checkpoint と
+     PME 自身のホットキーの記録だけです。
+     記録がないことは、Blender のすべてのキーマップ項目や、
+     ほかのエディターの資源が取り除かれたことを証明しません。
+
+参照元を照会する
+============================================================
+
+.. py:function:: find_references(pm_uids)
+
+   指定したメニューを参照している保存箇所を一覧にします。
+
+   何も書き込みません。読み取るのは保存データ中の静的な参照だけです。
+   空の結果は、対応している参照が見つからなかったことを表し、
+   メニューが使われていないことは表しません。
+
+   :param pm_uids: 重複しないメニューの UID。
+   :type pm_uids: non-string iterable of str
+   :returns: 下で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``pm_uids`` が文字列の場合。
+   :raises ValueError: UID が無効または 2 回指定されている場合、または UID が存在しないか、
+      保存済みの複数のメニューで共有されている場合。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - キー
+        - 型
+        - 値
+      * - ``target_uids``
+        - list[str]
+        - 引数 ``pm_uids``。
+      * - ``references``
+        - list[dict]
+        - ``target_uid`` が対象のいずれかである
+          :ref:`参照の行 <authoring-reference-rows>`。
+      * - ``unscannable``
+        - list[dict]
+        - 対象に限らずすべてのメニューから集めた、内容を静的に読み取れなかった行。
+          ``target_uid`` は ``None`` です。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      found = pme.editing.find_references([pm_uid])
+      for row in found["references"]:
+          print(row["kind"], row["source_pm_name"], row["path"])
+      if found["unscannable"]:
+          print("Possibly referenced:", len(found["unscannable"]), "unreadable places")
+
+   .. rubric:: 補足
+
+   * 行は :py:func:`delete_pms` の事前確認と同じもので、
+     ``source_survives`` と ``target_missing_after`` を除いたものです。
+   * ``unscannable`` が空でない間は、メニューが参照されている可能性があるものとして扱ってください。
+
+.. _authoring-reference-rows:
+
+参照の行
+------------------------------------------------------------
+
+すべての行が次のキーを持ちます。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 16 58
+
+   * - キー
+     - 型
+     - 値
+   * - ``kind``
+     - str
+     - ``menu_reference``、``text_call``、``text_property_ref``、``target``、
+       ``source``、``unscannable`` のいずれか。下の表を参照してください。
+   * - ``source_pm_uid``、``source_pm_name``、``source_pm_mode``
+     - str
+     - 参照を持つメニュー。
+   * - ``source_enabled``
+     - bool
+     - そのメニューが有効か。
+   * - ``target_uid``
+     - str or None
+     - 参照されている対象。読み取れなかった行では ``None``。
+   * - ``path``
+     - list
+     - 参照元のメニュー内の場所。スロットでは ``["pmis", index, "text"]``、
+       それ以外では保存先の項目（``context_router_authoring`` または
+       ``condition_authoring``）に続く、保存されたロジック内のパス。
+   * - ``raw_value``
+     - any
+     - ``path`` にある保存値。
+   * - ``warning``
+     - str
+     - スロットの行と ``unscannable`` の行にあります。行を読み取れたときは ``""``、
+       それ以外は「``unscannable`` に含まれるもの」に挙げた理由です。
+   * - ``source_survives``
+     - bool
+     - :py:func:`delete_pms` だけ。参照元のメニューが対象でない。
+   * - ``target_missing_after``
+     - bool
+     - :py:func:`delete_pms` だけ。参照元が残り、行に対象があるため、
+       リンクが切れる。
+
+スロットからの行は ``source_pmi_uid`` も持ちます。
+``menu_reference``、``text_call``、``text_property_ref`` の行は、さらに
+``raw_target`` （見つかった名前または UID）、``item_name``、``item_mode``、``item_enabled``、
+``target_pm_uid`` （スロットに保存された参照先の UID）、
+``flags`` （Menu スロットの表示フラグ、または ``None``）を持ちます。
+
+Router と Property Stack のロジックからの行は、その場所を特定する項目を写して持ちます。
+``target`` と ``source`` の行は ``source_segment_index`` も持ちます
+（Router のターゲットでは ``-1``）。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - 場所
+     - 追加のキー
+   * - Router の分岐のターゲット
+     - ``branch_uid``、``branch_index``、``is_otherwise`` （``False``）、
+       ``branch_enabled``、``label``、``enabled``、``authoring_state``
+   * - Router の Otherwise のターゲット
+     - ``branch_uid`` （``None``）、``branch_index`` （``-1``）、``is_otherwise``
+       （``True``）、``label``、``enabled``、``authoring_state``、``pass``
+   * - Router の条件のソース
+     - ``branch_uid``、``branch_index``、``is_otherwise``、``branch_enabled``、
+       ``condition_uid``、``condition_index``、``label``、``enabled``、
+       ``authoring_state``
+   * - Property Stack の行のソース
+     - ``condition_uid``、``row_index``、``label``、``enabled``、
+       ``authoring_state``
+   * - Property Stack の書き込み項目のソース
+     - ``entry_uid``、``entry_index``、``entry_kind``、
+       ``derived_from_condition_uid``、``status``
+
+検出される参照:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 50 20
+
+   * - 保存箇所
+     - 見つかる参照
+     - ``kind``
+   * - Menu スロット（有効・無効を問わない）
+     - リンク先のメニュー。
+     - ``menu_reference``
+   * - Command または Custom スロットのテキスト（Property のコールバックを含む）
+     - 名前を第 1 引数または ``name=`` で渡した ``open_menu("Name")`` と
+       ``draw_menu("Name")``。
+       ``pie_menu_name`` または ``pie_menu_uid`` をリテラルで渡した ``pme_user_pie_menu_call()``。
+       ``pie_menu_name`` をリテラルで渡した ``pme_user_dialog_call()``。
+       オペレーターは ``bpy.ops.wm.<name>()`` と ``O.wm.<name>()`` の形で見つかります。
+     - ``text_call``
+   * - Command または Custom スロットのテキスト（Property のコールバックを含む）
+     - ``props("id")``、``props(name="id")``、``props().id``、
+       任意のレイアウトオブジェクトでの ``L.prop(props(), "id")``。
+     - ``text_property_ref``
+   * - Router の分岐または Otherwise
+     - メニューを開くターゲット。
+     - ``target``
+   * - Router の条件、Property Stack の行または書き込み項目
+     - Property または Property Stack を読むソース。
+     - ``source``
+
+``unscannable`` に含まれるもの（``warning`` 別）:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 38 62
+
+   * - ``warning``
+     - 保存箇所
+   * - ``invalid_text_syntax``
+     - 有効な Python でない Command または Custom スロットのテキスト。
+   * - ``unsupported_text_reference``
+     - 対象が実行時に計算されるメニューの呼び出しまたは ``props()`` の呼び出し、
+       または ``<layout>.operator("wm.pme_user_pie_menu_call")`` か
+       ``"wm.pme_user_dialog_call"`` で作ったボタン。
+       行の ``kind`` は ``text_call`` または ``text_property_ref`` のままです。
+   * - ``invalid_saved_logic``
+     - 解析できない、またはコンテナの形が不正な、
+       Router や Property Stack のロジック。
+   * - ``invalid_saved_value_source``
+     - 想定した形を持たない、
+       Router の条件または Property Stack のソース。
+   * - ``invalid_saved_reference``
+     - マッピングでない、保存されたターゲットまたはソース。
+   * - ``router_authoring_target_*``
+     - デコードできない Router のターゲット。
+
+読み取らず、``unscannable`` にも含まれないもの:
+
+* Property スロット。Property スロットに書いた ``props().id`` は見つかりません。
+* コマンドまたはカスタムスクリプトを実行する Router のターゲット。
+* Property Stack のカスタム Set のテキスト。
+* メニューの Poll と説明のスクリプト。
+* スクリプトファイル、ホットキー、PME の外の Python。

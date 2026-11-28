@@ -1,0 +1,580 @@
+:vocab: developer-facing
+
+.. _authoring-settings:
+
+==================
+Menu type settings
+==================
+
+.. py:currentmodule:: pme.editing
+
+Each menu type has its own settings, such as a Pop-up Dialog's Mode and width or
+a Pie Menu's radius. They are read and written by name. Slots, hotkeys and the
+menu name are separate operations.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Function
+     - Purpose
+   * - :py:func:`read_pm`
+     - Returns the current values under ``settings``.
+   * - :py:func:`setting_fields`
+     - Describes the settings a menu accepts.
+   * - :py:func:`update_settings`
+     - Changes settings.
+
+Reading settings
+================
+
+``read_pm(pm_uid)["settings"]`` is a mapping of setting name to current value.
+Names are the saved names listed under :ref:`authoring-settings-by-type`. Values
+are what the editor shows: an Enum is its identifier string, not a stored number.
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(pm_uid)["settings"]
+   {'pd_panel': 'PANEL', 'pd_width': 300, 'pd_title': True, 'pd_box': True,
+    'pd_use_property_split': False, 'pd_use_property_decorate': False,
+    'pd_extend_target': '', 'pd_extend_side': 'append', 'pd_extend_order': 0,
+    'pd_extend_is_right': False}
+
+A menu type without settings returns ``{}``. If the saved data cannot be parsed,
+``settings`` is ``{}`` and ``read_pm()`` also returns ``settings_diagnostics``
+with the code ``settings_data_unreadable``.
+
+Functions
+=========
+
+.. py:function:: setting_fields(pm_uid)
+
+   Describe the settings that the menu's type accepts.
+
+   :param str pm_uid: UID of the menu.
+   :returns: Setting name mapped to a description.
+   :rtype: dict[str, dict]
+   :raises ValueError: The UID is missing, invalid or ambiguous.
+   :raises RuntimeError: Called off Blender's main thread, or before PME has
+      finished loading.
+
+   Each description has these keys:
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 20 20 60
+
+      * - Key
+        - Present for
+        - Value
+      * - ``type``
+        - all
+        - ``"BOOLEAN"``, ``"INT"``, ``"STRING"`` or ``"ENUM"``
+      * - ``description``
+        - all
+        - The editor's tooltip text. Empty for Stack Key settings.
+      * - ``min``, ``max``
+        - ``INT``
+        - Inclusive range accepted by :py:func:`update_settings`
+      * - ``values``
+        - ``ENUM``
+        - Accepted identifiers
+      * - ``flags``
+        - ``vm_start_inputs``
+        - Flag name mapped to its bit value
+
+   .. code-block:: python
+
+      >>> pme.editing.setting_fields(pm_uid)["pd_width"]
+      {'type': 'INT', 'description': 'Width of the popup', 'min': 100, 'max': 2000}
+
+.. py:function:: update_settings(pm_uid, changes, *, expected=None, dry_run=False)
+
+   Change settings of the menu's type.
+
+   All changes are checked before the first write. If any is rejected, nothing
+   is written.
+
+   :param str pm_uid: UID of the menu.
+   :param dict changes: Setting name mapped to its new value. Partial: settings
+      that are not named keep their values.
+   :param expected: Setting name mapped to the value it must have now. Any
+      subset of the settings. The update is rejected with ``stale_settings``
+      when a value differs.
+   :type expected: dict or None
+   :param bool dry_run: Check the changes and return without writing.
+   :returns: The result described below.
+   :rtype: dict
+   :raises TypeError: ``changes`` or ``expected`` is not a mapping with string
+      keys, or ``dry_run`` is not a bool.
+   :raises ValueError: The UID is missing, invalid or ambiguous.
+   :raises RuntimeError: Called off Blender's main thread, or before PME has
+      finished loading.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - Key
+        - Type
+        - Value
+      * - ``status``
+        - str
+        - See *Status* below.
+      * - ``committed``
+        - bool
+        - ``True`` only when ``status`` is ``"committed"``.
+      * - ``dry_run``
+        - bool
+        - The ``dry_run`` argument.
+      * - ``pm_uid``
+        - str
+        - The ``pm_uid`` argument.
+      * - ``before``
+        - dict
+        - Settings read before the call.
+      * - ``after``
+        - dict
+        - Settings read after the call. Equal to ``before`` unless something was
+          written.
+      * - ``changed_fields``
+        - list[str]
+        - Names whose value differs between ``before`` and ``after``.
+      * - ``recovery``
+        - dict or None
+        - Set after a failed write: ``scope`` (``"settings"``),
+          ``saved_settings_match`` and ``saved_data_matches``.
+      * - ``diagnostics``
+        - list[dict]
+        - One entry per problem: ``code``, ``field`` (or ``fields``) and
+          ``message``, plus the details listed under *Diagnostics*.
+
+   .. rubric:: Status
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - Meaning
+      * - ``committed``
+        - Every requested value is saved.
+      * - ``validated``
+        - ``dry_run=True`` and the changes are acceptable. Nothing was written.
+      * - ``unchanged``
+        - Every requested value already equals the saved value.
+      * - ``rejected``
+        - Nothing was written. ``diagnostics`` names the cause.
+      * - ``restored_failure``
+        - A write failed and the settings were restored to ``before``.
+      * - ``unknown``
+        - A write failed and the restore could not be confirmed. Call
+          :py:func:`read_pm` before retrying.
+
+   .. rubric:: Diagnostics
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``setting_not_applicable``
+        - The name is not a setting of this menu type. ``available`` lists the
+          names that are.
+      * - ``setting_type_mismatch``
+        - The value has the wrong Python type. An ``INT`` setting does not
+          accept a float or a bool.
+      * - ``setting_out_of_range``
+        - An integer is outside ``min`` .. ``max``. The value is not clamped.
+      * - ``setting_not_a_choice``
+        - An Enum value is not in ``values``.
+      * - ``setting_not_representable``
+        - A string contains ``&`` or ``=``, which the saved format cannot hold.
+      * - ``extend_target_unknown``
+        - The extend target is not a registered Panel, Header or Menu type.
+      * - ``extend_target_not_extendable``
+        - The extend target is a type PME does not extend, such as PME's own
+          panels.
+      * - ``setting_requires_extend_target``
+        - An extend side, order or right-region flag was given without an
+          extend target.
+      * - ``stale_settings``
+        - A value in ``expected`` differs from the saved value. ``fields`` lists
+          the names.
+      * - ``settings_data_unreadable``
+        - The saved data cannot be parsed. ``exception_type`` names the error.
+      * - ``setting_value_not_retained``
+        - A setter did not keep the requested value. ``requested`` and
+          ``actual`` give both values.
+      * - ``setting_write_failed``
+        - A setter raised. ``exception_type`` names the error.
+
+   .. rubric:: Example
+
+   Create a Pop-up Dialog in Popup Mode, 420 pixels wide:
+
+   .. code-block:: python
+
+      created = pme.create_pm(pme.PmCreationSpec("DIALOG", name="Bone Collections"))
+      result = pme.editing.update_settings(
+          created.pm_uid,
+          {"pd_panel": "POPUP", "pd_width": 420},
+          expected={"pd_panel": "PANEL"},
+      )
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: Notes
+
+   * Extend settings are written in the order target, side, right region,
+     order. Setting an extend target also sets the side to ``"append"``.
+   * Extend targets and Panel Group placement register with Blender inside the
+     call, as they do in the editor.
+   * The call does not save Preferences to disk, add an Undo step, or invoke the
+     menu.
+
+.. _authoring-settings-by-type:
+
+Settings by menu type
+=====================
+
+The *Menu type* value is the ``mode_id`` given to ``PmCreationSpec`` and
+returned as ``read_pm()["mode"]``. Types that are not listed have no settings.
+A Property is edited with ``update_property()`` and a Property Stack with its
+own operations.
+
+Pie Menu (``PMENU``)
+--------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - Name
+     - Type
+     - Values
+     - Default
+     - Description
+   * - ``pm_radius``
+     - INT
+     - -1 .. 1000
+     - -1
+     - Radius of the pie menu. -1 uses the default.
+   * - ``pm_threshold``
+     - INT
+     - -1 .. 1000
+     - -1
+     - Minimum distance from the center before an item can be selected. -1 uses
+       the default.
+   * - ``pm_confirm``
+     - INT
+     - -1 .. 1000
+     - -1
+     - Additional distance beyond the threshold for automatic confirmation.
+       0 disables it; -1 uses the default.
+   * - ``pm_flick``
+     - BOOLEAN
+     -
+     - True
+     - Confirm the selection when the hotkey is released.
+
+Vector Menu (``VMENU``)
+-----------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - Name
+     - Type
+     - Values
+     - Default
+     - Description
+   * - ``vm_wait_for_input``
+     - BOOLEAN
+     -
+     - False
+     - Wait for a mouse button or pen tip before starting; release that input
+       to confirm.
+   * - ``vm_start_inputs``
+     - INT
+     - 0 .. 15
+     - 15
+     - Inputs that start the menu, as bit flags: 1 left mouse, 2 middle mouse,
+       4 right mouse, 8 pen tip.
+
+Regular Menu (``RMENU``)
+------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - Name
+     - Type
+     - Values
+     - Default
+     - Description
+   * - ``rm_title``
+     - BOOLEAN
+     -
+     - True
+     - Show the title.
+   * - ``rm_extend_target``
+     - STRING
+     - Menu type name
+     - ``""``
+     - Blender Menu that this menu's content is added to, for example
+       ``VIEW3D_MT_object``. Empty removes the extension.
+   * - ``rm_extend_side``
+     - ENUM
+     - ``prepend``, ``append``
+     - ``append``
+     - Position relative to the original content.
+   * - ``rm_extend_order``
+     - INT
+     - 0 and up
+     - 0
+     - Display order when several menus extend the same target.
+
+Pop-up Dialog (``DIALOG``)
+--------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - Name
+     - Type
+     - Values
+     - Default
+     - Description
+   * - ``pd_panel``
+     - ENUM
+     - ``PIE``, ``PANEL``, ``POPUP``
+     - ``PANEL``
+     - Mode: Pie Mode, Dialog Mode or Popup Mode.
+   * - ``pd_width``
+     - INT
+     - 100 .. 2000
+     - 300
+     - Width of the popup.
+   * - ``pd_title``
+     - BOOLEAN
+     -
+     - True
+     - Show the title.
+   * - ``pd_box``
+     - BOOLEAN
+     -
+     - True
+     - Use a frame.
+   * - ``pd_use_property_split``
+     - BOOLEAN
+     -
+     - False
+     - Draw property labels in a separate column, as Blender's property panels
+       do.
+   * - ``pd_use_property_decorate``
+     - BOOLEAN
+     -
+     - False
+     - Show the animation decorator column. Effective only with Property Split.
+   * - ``pd_extend_target``
+     - STRING
+     - Panel or Header type name
+     - ``""``
+     - Blender Panel or Header that this menu's content is added to, for
+       example ``VIEW3D_HT_header``. Empty removes the extension.
+   * - ``pd_extend_side``
+     - ENUM
+     - ``prepend``, ``append``
+     - ``append``
+     - Position relative to the original content.
+   * - ``pd_extend_order``
+     - INT
+     - 0 and up
+     - 0
+     - Display order when several menus extend the same target.
+   * - ``pd_extend_is_right``
+     - BOOLEAN
+     -
+     - False
+     - Draw in the right region of the Top Bar.
+
+Floating Panel (``FPANEL``)
+---------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - Name
+     - Type
+     - Values
+     - Default
+     - Description
+   * - ``fp_use_property_split``
+     - BOOLEAN
+     -
+     - False
+     - Draw property labels in a separate column.
+   * - ``fp_use_property_decorate``
+     - BOOLEAN
+     -
+     - False
+     - Show the animation decorator column. Effective only with Property Split.
+
+Panel Group (``PANEL``)
+-----------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - Name
+     - Type
+     - Values
+     - Default
+     - Description
+   * - ``pg_space``
+     - ENUM
+     - Space type, see :py:func:`setting_fields`
+     - ``VIEW_3D``
+     - Editor that shows the panels.
+   * - ``pg_region``
+     - ENUM
+     - ``TOOLS``, ``UI``, ``WINDOW``, ``HEADER``
+     - ``UI``
+     - Region that shows the panels.
+   * - ``pg_context``
+     - ENUM
+     - Context, see :py:func:`setting_fields`
+     - ``ANY``
+     - Panel context, such as ``.mesh_edit`` or ``object``.
+   * - ``pg_category``
+     - STRING
+     - Without ``&`` or ``=``
+     - ``My Category``
+     - Sidebar tab.
+   * - ``pg_wicons``
+     - BOOLEAN
+     -
+     - False
+     - Use wide icon buttons.
+
+Macro Operator (``MACRO``)
+--------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - Name
+     - Type
+     - Values
+     - Default
+     - Description
+   * - ``mc_undo``
+     - BOOLEAN
+     -
+     - True
+     - Add one step to Blender's undo history each time the Macro runs. When
+       False, its changes are not recorded.
+
+Modal Operator (``MODAL``)
+--------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - Name
+     - Type
+     - Values
+     - Default
+     - Description
+   * - ``md_confirm``
+     - BOOLEAN
+     -
+     - False
+     - Confirm when the key or mouse button that started the operator is
+       released.
+   * - ``md_block_ui``
+     - BOOLEAN
+     -
+     - True
+     - Block other hotkeys.
+   * - ``md_lock``
+     - BOOLEAN
+     -
+     - True
+     - Keep the mouse cursor within the current area.
+
+Sticky Key (``STICKY``)
+-----------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - Name
+     - Type
+     - Values
+     - Default
+     - Description
+   * - ``sk_block_ui``
+     - BOOLEAN
+     -
+     - False
+     - Block other tools while the Sticky Key is active.
+
+Stack Key (``SCRIPT``)
+----------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 18 12 34
+
+   * - Name
+     - Type
+     - Values
+     - Default
+     - Description
+   * - ``s_undo``
+     - BOOLEAN
+     -
+     - False
+     - Undo the previous command.
+   * - ``s_state``
+     - BOOLEAN
+     -
+     - False
+     - Remember the last executed slot.
+   * - ``s_cycle_trigger``
+     - ENUM
+     - ``EVERY_PRESS``, ``TIMED_REPEAT``
+     - ``EVERY_PRESS``
+     - When remembered slots advance: on every press, or only when pressed
+       again within the timeout.
+   * - ``s_repeat_timeout_ms``
+     - INT
+     - 1 and up
+     - 600
+     - Timed repeat window in milliseconds.
+   * - ``s_hold_list``
+     - BOOLEAN
+     -
+     - False
+     - Hold the hotkey to show the slots as a list and release over a slot to
+       run it. A short press then runs on release. Used with the Press hotkey
+       mode.
+   * - ``s_hold_list_descriptions``
+     - BOOLEAN
+     -
+     - True
+     - Show the description of the highlighted slot beside the list of
+       ``s_hold_list``. When False, descriptions are not shown and Python
+       descriptions are not evaluated.

@@ -1,0 +1,58 @@
+:vocab: developer-facing
+
+.. _authoring-recipe-link-child-menu:
+
+=========================================
+Link a child menu and keep its icon flags
+=========================================
+
+.. py:currentmodule:: pme.editing
+
+Turn an existing slot into a link to a child menu with a new icon, keeping the
+slot's label, presentation and icon flags.
+
+1. Read the child menu's UID from :py:func:`read_pm` or the menu list. Do not
+   construct it.
+2. Read the slot and split its icon flags (``#``, ``!``, ``^``) from the icon
+   name.
+3. Save the link and the new icon name with the old flags.
+
+.. code-block:: python
+
+   before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+   slot = before["slots"][0]
+   # Keep the leading flags and replace only the icon name.
+   old_icon = slot["icon"]
+   icon_flags = old_icon[:len(old_icon) - len(old_icon.lstrip("#!^"))]
+   result = pme.editing.update_slots(
+       pm_uid,
+       {slot_uid: {
+           "mode": "MENU",
+           "menu_target_uid": child_uid,
+           "icon": icon_flags + "TOOL_SETTINGS",
+           "auto_icon": False,
+       }},
+       expected_version=before["version"],
+       expected={slot_uid: slot},
+   )
+   assert result["status"] == "committed", result
+
+* Choose an icon that fits the child's category. A Vector Menu draws its own
+  Nest arrow.
+* For an icon-only edit, leave ``mode`` and ``menu_target_uid`` out. The
+  presentation settings stay as saved; a Submenu does not need to become a
+  Button to change its icon.
+* ``menu_presentation`` is the placement of a linked Regular Menu. Nest
+  gestures and Pie Menu confirmation settings are separate settings.
+
+Check
+=====
+
+* ``result["slots"][0]["after"]`` has ``mode`` ``"MENU"``, ``target_pm_uid``
+  equal to ``child_uid``, and ``icon`` starting with the old flags.
+* In the intended menu, the displayed icon, entering the child, selecting in
+  it, and leaving it work as intended.
+
+Functions used: :py:func:`read_pm`, :py:func:`update_slots`. Icon values are
+described in :ref:`authoring-slot-icon`, Menu slot text in
+:ref:`authoring-slot-menu-text`.

@@ -1,0 +1,1049 @@
+:vocab: developer-facing
+
+.. _authoring-router:
+
+==============
+Context Router
+==============
+
+.. py:currentmodule:: pme.editing
+
+A Context Router (mode ID ``ROUTER``) holds an ordered list of branches and an
+Otherwise. These functions read and change that saved logic by branch UID.
+Creating the menu is :py:func:`pme.create_pm` (:ref:`authoring-menus`), its
+hotkey is :ref:`authoring-hotkeys`, and the editor is described in
+:ref:`context-router-editor`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Function
+     - Purpose
+   * - :py:func:`read_pm`
+     - Returns the saved logic and its digest under ``router``.
+   * - :py:func:`update_router`
+     - Changes branches by UID, appends branches, and changes Otherwise.
+   * - :py:func:`remove_router_branch`
+     - Removes one branch.
+   * - :py:func:`move_router_branch`
+     - Moves one branch before or after another branch.
+   * - :py:func:`reorder_router_branches`
+     - Puts every branch in a given order.
+
+See also: :ref:`authoring-recipe-router-add-branch`.
+
+Reading a Router
+================
+
+For a Router, ``read_pm(pm_uid)`` also returns ``router``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``logic``
+     - dict or None
+     - The saved logic, described under :ref:`authoring-router-logic`.
+       ``None`` when the saved logic cannot be read.
+   * - ``digest``
+     - str
+     - SHA-256 hex digest of the saved logic text. Pass it as
+       ``expected_digest`` to the functions on this page.
+   * - ``diagnostics``
+     - list[dict]
+     - Empty when the saved logic is readable. Otherwise one entry per
+       problem, each with ``code`` and ``address``. A code is
+       ``router_authoring_`` followed by a suffix from
+       :ref:`authoring-router-logic-codes`, or by ``storage_invalid`` (not
+       JSON), ``storage_non_object``, ``storage_not_string`` or
+       ``storage_unsupported_version``.
+
+A new Router has no branches, and Otherwise is set to **Pass Through**:
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(router_uid)["router"]
+   {'logic': {'version': 2, 'branches': [],
+              'otherwise': {'name': 'Otherwise',
+                            'target': {'action': None, 'fallback_name': ''},
+                            'pass': True}},
+    'digest': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    'diagnostics': []}
+
+The returned dictionaries are copies. Changing them does not change the
+Router. A new Router has no saved logic text yet; its digest is the digest of an
+empty text. A request equal to the logic shown above returns ``unchanged`` and
+keeps the text empty. A write that changes the logic stores the text and
+changes the digest: read again before the next edit.
+
+.. _authoring-router-results:
+
+Common result keys
+==================
+
+All four editing functions return a dictionary with these keys:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``status``
+     - str
+     - See *Status* below.
+   * - ``committed``
+     - bool
+     - ``True`` only when ``status`` is ``"committed"``.
+   * - ``pm_uid``
+     - str
+     - The ``pm_uid`` argument.
+   * - ``dry_run``
+     - bool
+     - The ``dry_run`` argument.
+   * - ``before``
+     - dict or None
+     - ``read_pm()["router"]`` as read at the start of the call. ``None`` when
+       the Router could not be resolved or an argument was rejected first.
+   * - ``after``
+     - dict or None
+     - The same structure, read after a write. A copy of ``before`` for
+       ``unchanged``. ``None`` for ``validated``, for requests rejected before
+       writing, and when the read after the write failed.
+   * - ``candidate``
+     - dict or None
+     - The complete logic that is saved, or would be saved with
+       ``dry_run=True``, after normalization. ``None`` when the request was
+       rejected before it was built.
+   * - ``diagnostics``
+     - list[dict]
+     - One entry per problem or warning: ``code`` and ``path``, plus the
+       details listed under *Diagnostics*.
+
+Status
+------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - ``status``
+     - Meaning
+   * - ``committed``
+     - The saved logic text was read back equal to ``candidate``.
+   * - ``validated``
+     - ``dry_run=True`` and the request is acceptable. Nothing was written.
+   * - ``unchanged``
+     - The resulting logic equals the saved logic, for example branches that
+       are already in the requested order. Nothing was written. A dry run
+       returns ``validated`` instead.
+   * - ``rejected``
+     - Nothing was saved. ``diagnostics`` names the cause.
+   * - ``unknown``
+     - A write was attempted and the saved text matches neither the old nor
+       the new logic. Call :py:func:`read_pm` before retrying.
+
+The shared meaning of these values is defined on :ref:`authoring-results`.
+
+Diagnostics
+-----------
+
+Codes returned by every function on this page:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 36 64
+
+   * - ``code``
+     - Cause, and extra keys
+   * - ``dry_run_must_be_a_boolean``
+     - ``dry_run`` is not a bool. ``path`` is ``"dry_run"``.
+   * - ``expected_digest_must_be_a_string``
+     - ``expected_digest`` is neither a string nor ``None``.
+   * - ``preferences_unavailable``
+     - PME preferences cannot be read.
+   * - ``pm_identity_*``
+     - The UID does not name exactly one Router. For example
+       ``pm_identity_uid_not_found``, ``pm_identity_uid_malformed``,
+       ``pm_identity_uid_duplicate``, and
+       ``pm_identity_expected_mode_mismatch`` for a menu of another type.
+   * - ``router_authoring_*``
+     - The saved logic cannot be read. These entries are the
+       ``read_pm()["router"]["diagnostics"]`` entries: ``code`` and
+       ``address``, without ``path``.
+   * - ``stale_router_digest``
+     - ``expected_digest`` differs from the saved digest, or the saved logic
+       changed while the call was preparing the write.
+   * - ``schema_v2_router_logic_*``
+     - The resulting logic breaks a rule. ``path`` is ``"logic"``.
+       :py:func:`update_router` also adds ``address``. See
+       :ref:`authoring-router-logic-codes`.
+   * - ``router_target_menu_unresolved``
+     - Warning. A ``menu`` target names a UID that does not resolve to one
+       menu of a target type. It does not block saving. ``severity`` is
+       ``"warning"``; ``path`` is ``"logic.branches[<i>].target"`` or
+       ``"logic.otherwise.target"``; ``address`` is
+       ``{"branch_index": "<i>", "branch_uid": ...}`` or
+       ``{"otherwise": "true"}``; ``target_pm_uid`` is the UID; ``reason`` is
+       a ``pm_identity_*`` code.
+   * - ``router_commit_rejected``
+     - The save step did not change the saved text: the encoded logic failed
+       the final check (traceback printed to the console), or the text read
+       back unchanged after the write. ``status`` is ``rejected``.
+   * - ``router_commit_unknown``
+     - The write was attempted and the result is not confirmed. ``status`` is
+       ``unknown``.
+   * - ``router_readback_failed``
+     - Reading the Router after the write raised. ``after`` is ``None``. The
+       traceback is printed to the console. Call :py:func:`read_pm` before
+       retrying.
+   * - ``refresh_failed``
+     - Refreshing the editor after the write raised. The save stands. The
+       traceback is printed to the console.
+
+``address`` values are strings, including ``branch_index`` and ``row_index``.
+
+Functions
+=========
+
+.. py:function:: update_router(pm_uid, *, branches=(), otherwise=None, expected_digest=None, dry_run=False)
+
+   Change branches by UID, append branches, and change Otherwise.
+
+   The whole resulting logic, including branches the call does not mention, is
+   checked before the write. If any rule fails, nothing is saved.
+
+   :param str pm_uid: UID of the Router.
+   :param branches: Branch patches, applied as described under *Patch rules*.
+   :type branches: list or tuple of dict
+   :param otherwise: Otherwise fields to replace. ``None`` keeps Otherwise.
+   :type otherwise: dict or None
+   :param expected_digest: The digest from ``read_pm()["router"]``. The call
+      is rejected with ``stale_router_digest`` when it differs.
+   :type expected_digest: str or None
+   :param bool dry_run: Check the request and return the candidate without
+      writing.
+   :returns: The result described under :ref:`authoring-router-results`.
+   :rtype: dict
+   :raises RuntimeError: Called outside Blender's main thread, or before PME
+      has finished loading.
+
+   .. rubric:: Patch rules
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - Input
+        - Effect
+      * - Entry with ``branch_uid``
+        - Updates that branch. The UID must name a branch of this Router. A
+          UID may appear once per call.
+      * - Entry without ``branch_uid``
+        - Appends a new branch at the end with a new UID. Entries append in
+          list order.
+      * - Field omitted from an entry
+        - Keeps the saved value. A new branch uses the defaults below.
+      * - ``name``, ``enabled``, ``combine_mode``, ``target`` supplied
+        - Replace the saved value. ``target`` is replaced as a whole.
+      * - ``conditions`` supplied
+        - Replaces the branch's whole condition list. A row with
+          ``condition_uid`` keeps that UID. A row without one receives a new
+          UID that is not the UID of any row the branch had before the call.
+      * - Row ``enabled``, ``authoring_state``, ``label`` omitted
+        - ``True``, ``"complete"`` and ``""``.
+      * - Branch not mentioned
+        - Unchanged, including its position.
+      * - ``otherwise`` omitted or ``None``
+        - Unchanged.
+      * - ``otherwise`` supplied
+        - Replaces only the supplied keys (``name``, ``target``, ``pass``).
+          ``target`` is replaced as a whole.
+
+   A new branch starts with ``name`` ``"Branch <n>"`` (``n`` = number of
+   branches after appending), ``enabled`` ``True``, ``combine_mode`` ``"all"``,
+   no conditions, and ``target`` ``{"action": None, "fallback_name": ""}``.
+
+   .. rubric:: Status
+
+   ``committed``, ``validated``, ``unchanged``, ``rejected`` or ``unknown``.
+   A request whose resulting logic equals the saved logic, on a new Router
+   too, returns ``unchanged`` without writing. With ``dry_run=True`` the same
+   request returns ``validated``.
+
+   .. rubric:: Diagnostics
+
+   In addition to the :ref:`common codes <authoring-router-results>`:
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``branches_must_be_a_sequence``
+        - ``branches`` is not a list or tuple. ``path`` is ``"branches"``.
+      * - ``otherwise_must_be_a_mapping``
+        - ``otherwise`` is neither a dict nor ``None``.
+      * - ``router_input_must_be_json_values``
+        - A value cannot be converted to JSON: a non-JSON type, a cycle, NaN
+          or infinity.
+      * - ``branch_must_be_a_mapping``
+        - An entry of ``branches`` is not a dict. ``path`` is
+          ``"branches[<i>]"``.
+      * - ``branch_uid_invalid``
+        - ``branch_uid`` is not a non-empty string.
+      * - ``branch_not_found``
+        - ``branch_uid`` names no branch of this Router.
+      * - ``duplicate_branch_edit``
+        - Two entries name the same ``branch_uid``.
+      * - ``conditions_must_be_a_sequence``
+        - ``conditions`` is not a list or tuple.
+      * - ``condition_must_be_a_mapping``
+        - A condition row is not a dict. ``path`` is
+          ``"branches[<i>].conditions[<j>]"``.
+
+   .. rubric:: Example
+
+   Set an existing Router's No Match to **Pass Through**:
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(router_uid)["router"]
+      result = pme.editing.update_router(
+          router_uid, otherwise={"pass": True}, expected_digest=before["digest"],
+      )
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: Notes
+
+   * The caller's dictionaries are not changed.
+   * New UIDs in a ``validated`` candidate are provisional. To save a preview,
+     repeat the same ``branches`` and ``otherwise`` with ``dry_run=False``. Do
+     not pass the candidate's new branch UIDs as existing branches.
+   * Branch UIDs are unique within one Router. A UID freed by
+     :py:func:`remove_router_branch` can be given to a later new branch.
+   * ``router_target_menu_unresolved`` warnings can accompany ``validated``
+     and ``committed``.
+   * The call does not evaluate conditions, run targets, change the selected
+     menu or the editor's draft, save Preferences to disk, or add an Undo
+     step.
+
+.. py:function:: remove_router_branch(pm_uid, branch_uid, *, expected_digest=None, dry_run=False)
+
+   Remove one branch.
+
+   :param str pm_uid: UID of the Router.
+   :param str branch_uid: UID of the branch to remove.
+   :param expected_digest: The digest from ``read_pm()["router"]``.
+   :type expected_digest: str or None
+   :param bool dry_run: Check the request and return the candidate without
+      writing.
+   :returns: The result described under :ref:`authoring-router-results`.
+   :rtype: dict
+   :raises RuntimeError: Called outside Blender's main thread, or before PME
+      has finished loading.
+
+   .. rubric:: Status
+
+   ``committed``, ``validated``, ``rejected`` or ``unknown``.
+
+   .. rubric:: Diagnostics
+
+   In addition to the :ref:`common codes <authoring-router-results>`:
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``branch_uid_invalid``
+        - ``branch_uid`` is not a non-empty string.
+      * - ``branch_not_found``
+        - ``branch_uid`` names no branch of this Router.
+      * - ``branch_identity_ambiguous``
+        - Two saved branches share a UID.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      router = pme.editing.read_pm(router_uid)["router"]
+      result = pme.editing.remove_router_branch(
+          router_uid, router["logic"]["branches"][-1]["branch_uid"],
+          expected_digest=router["digest"],
+      )
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: Notes
+
+   * The last remaining branch can be removed.
+   * Other branches, their condition UIDs, and Otherwise are kept.
+   * The call does not run targets, change the selected menu or the editor's
+     draft, save Preferences to disk, or add an Undo step.
+
+.. py:function:: move_router_branch(pm_uid, branch_uid, *, before_uid=None, after_uid=None, expected_digest=None, dry_run=False)
+
+   Move one branch immediately before or after another branch of the same
+   Router.
+
+   :param str pm_uid: UID of the Router.
+   :param str branch_uid: UID of the branch to move.
+   :param before_uid: UID of the branch to place it before.
+   :type before_uid: str or None
+   :param after_uid: UID of the branch to place it after. Give exactly one of
+      ``before_uid`` and ``after_uid``.
+   :type after_uid: str or None
+   :param expected_digest: The digest from ``read_pm()["router"]``.
+   :type expected_digest: str or None
+   :param bool dry_run: Check the request and return the candidate without
+      writing.
+   :returns: The result described under :ref:`authoring-router-results`.
+   :rtype: dict
+   :raises RuntimeError: Called outside Blender's main thread, or before PME
+      has finished loading.
+
+   .. rubric:: Status
+
+   ``committed``, ``validated``, ``unchanged``, ``rejected`` or ``unknown``.
+   The current position, including an anchor equal to ``branch_uid``, returns
+   ``unchanged`` without writing. With ``dry_run=True`` the same request
+   returns ``validated``.
+
+   .. rubric:: Diagnostics
+
+   In addition to the :ref:`common codes <authoring-router-results>`:
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``branch_uid_invalid``
+        - ``branch_uid`` is not a non-empty string.
+      * - ``branch_not_found``
+        - ``branch_uid`` names no branch of this Router.
+      * - ``branch_identity_ambiguous``
+        - Two saved branches share a UID.
+      * - ``exactly_one_branch_anchor_required``
+        - Both or neither of ``before_uid`` and ``after_uid`` were given.
+      * - ``branch_anchor_uid_invalid``
+        - The anchor is not a non-empty string.
+      * - ``branch_anchor_not_found``
+        - The anchor names no branch of this Router.
+
+   .. rubric:: Example
+
+   Give the last branch the highest priority:
+
+   .. code-block:: python
+
+      snapshot = pme.editing.read_pm(router_uid)["router"]
+      branches = snapshot["logic"]["branches"]
+      result = pme.editing.move_router_branch(
+          router_uid, branches[-1]["branch_uid"], before_uid=branches[0]["branch_uid"],
+          expected_digest=snapshot["digest"],
+      )
+      print(result["status"], result["diagnostics"])
+
+   .. rubric:: Notes
+
+   * Branch contents, condition UIDs and Otherwise are kept.
+   * The digest changes after a write. Read again before the next edit.
+   * The Branch menu's **Move Up**, **Move Down** and **Remove Branch** in the
+     editor follow the same branch rules. A save from the editor also applies
+     the editor's own normalization to other saved values.
+   * The call does not run targets, change the selected menu or the editor's
+     draft, save Preferences to disk, or add an Undo step.
+
+.. py:function:: reorder_router_branches(pm_uid, branch_uids, *, expected_digest=None, dry_run=False)
+
+   Put every branch in the given order with one write.
+
+   :param str pm_uid: UID of the Router.
+   :param branch_uids: Every branch UID of the Router, each exactly once, in
+      the new order. An ordered iterable: a list, a tuple, a generator or
+      ``dict.keys()``.
+   :param expected_digest: The digest from ``read_pm()["router"]``.
+   :type expected_digest: str or None
+   :param bool dry_run: Check the request and return the candidate without
+      writing.
+   :returns: The result described under :ref:`authoring-router-results`.
+   :rtype: dict
+   :raises RuntimeError: Called outside Blender's main thread, or before PME
+      has finished loading.
+
+   .. rubric:: Status
+
+   ``committed``, ``validated``, ``unchanged``, ``rejected`` or ``unknown``.
+   The current order returns ``unchanged`` without writing. With
+   ``dry_run=True`` the same request returns ``validated``.
+
+   .. rubric:: Diagnostics
+
+   In addition to the :ref:`common codes <authoring-router-results>`:
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``branch_uids_must_be_a_sequence``
+        - ``branch_uids`` is a string, bytes, or not iterable. ``path`` is
+          ``"branch_uids"``.
+      * - ``branch_uids_must_be_ordered``
+        - ``branch_uids`` is a ``set``, ``frozenset`` or another set type,
+          which has no defined order. ``received_type`` names the type.
+          Returned for ``dry_run=True`` as well.
+      * - ``branch_uids_must_list_every_branch_once``
+        - The list is partial, repeats a UID, or contains a value that is not
+          a branch UID. ``missing`` lists branch UIDs not given; ``unknown``
+          lists given values that are not branch UIDs.
+      * - ``branch_identity_ambiguous``
+        - Two saved branches share a UID. ``path`` is ``"logic.branches"``.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      router = pme.editing.read_pm(router_uid)["router"]
+      order = [branch["branch_uid"] for branch in router["logic"]["branches"]]
+      result = pme.editing.reorder_router_branches(
+          router_uid, list(reversed(order)), expected_digest=router["digest"],
+      )
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: Notes
+
+   * Branch contents, their UIDs and Otherwise are kept.
+   * The call does not run targets, save Preferences to disk, or add an Undo
+     step.
+
+.. _authoring-router-logic:
+
+Router logic
+============
+
+``read_pm()["router"]["logic"]``, ``candidate``, and the input of
+:py:func:`update_router` use the ``ContextRouterLogic`` shape of PME's
+`Schema v2 definitions
+<https://github.com/pie-menu-editor/pie-menu-editor-fork-dev/blob/pme2-dev/src/pie_menu_editor/assets/schema/pme2-2.0.json>`__
+(``ContextRouterLogic``, ``ContextRouterBranch``,
+``ContextRouterConditionRow``, ``PmeLogicConditionRow``,
+``PmeLogicValueSource``, ``ContextRouterTarget``,
+``ContextRouterTargetAction``, ``ContextRouterOtherwise``). Values are plain
+JSON values.
+
+.. code-block:: python
+
+   {'branch_uid': 'branch_1', 'name': 'Edit Mesh', 'enabled': True,
+    'combine_mode': 'all',
+    'conditions': [{'condition_uid': 'cond_1', 'enabled': True,
+                    'authoring_state': 'complete', 'label': 'Condition',
+                    'source': {'kind': 'rna_path', 'root': 'context',
+                               'detected_type': 'enum', 'readonly': True,
+                               'segments': [{'kind': 'attr', 'name': 'mode'}],
+                               'owner_type': None},
+                    'op': 'equals', 'value': 'EDIT_MESH', 'value_type': 'enum'}],
+    'target': {'action': {'type': 'menu', 'value': 'pm_yp6o3mbh', 'opts': {}},
+               'fallback_name': 'Mesh Tools'}}
+
+Logic object
+------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``version``
+     - int
+     - ``2``.
+   * - ``branches``
+     - list[dict]
+     - Branches in priority order. The first enabled branch that matches
+       wins. At most 256.
+   * - ``otherwise``
+     - dict
+     - What happens when no branch matches. See *Otherwise*.
+
+Branch
+------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``branch_uid``
+     - str
+     - Identity of the branch within this Router, such as ``"branch_1"``.
+   * - ``name``
+     - str
+     - Display name, at most 256 characters. An empty name is saved as
+       ``"Branch <n>"``, ``n`` being the branch's 1-based position.
+   * - ``enabled``
+     - bool
+     - ``False`` skips the branch and keeps its contents.
+   * - ``combine_mode``
+     - str
+     - ``"all"``: every evaluated condition must match. ``"any"``: one is
+       enough.
+   * - ``conditions``
+     - list[dict]
+     - Condition rows, at most 256. Condition UIDs are unique within the
+       branch. A branch without an evaluable condition does not match.
+   * - ``target``
+     - dict
+     - What runs when the branch matches. See *Target*.
+
+Condition
+---------
+
+A row is either a value condition or an event condition. A row with an
+``event`` key is an event condition.
+
+Value condition (``PmeLogicConditionRow``):
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 18 62
+
+   * - Key
+     - Type
+     - Value
+   * - ``condition_uid``
+     - str
+     - Identity of the row within its branch, such as ``"cond_1"``.
+   * - ``enabled``
+     - bool
+     - ``False`` excludes the row from evaluation.
+   * - ``authoring_state``
+     - str
+     - ``"complete"`` or ``"incomplete"``. Only enabled, complete rows are
+       evaluated.
+   * - ``label``
+     - str
+     - Display name, at most 256 characters. An empty label is saved as
+       ``"Condition"``.
+   * - ``source``
+     - dict or None
+     - The value to read. See *Condition source*.
+   * - ``op``
+     - str or None
+     - Comparison. See *Comparison rules*.
+   * - ``value``
+     - bool, int, float, str, list[str] or None
+     - Comparison value.
+   * - ``value_type``
+     - str or None
+     - ``bool``, ``int``, ``float``, ``string``, ``enum`` or ``enum_set``.
+       ``None`` when unconfigured.
+
+In an incomplete row, ``source``, ``op``, ``value`` and ``value_type`` may be
+``None`` or omitted. A supplied value must still have a valid type.
+
+Event condition (``ContextRouterEventModifierConditionRow``) tests modifier
+keys of the event that invoked the Router:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 18 62
+
+   * - Key
+     - Type
+     - Value
+   * - ``condition_uid``, ``enabled``, ``authoring_state``
+     -
+     - As for a value condition.
+   * - ``label``
+     - str
+     - Display name. An empty label is saved as ``"Modifier"``.
+   * - ``event``
+     - dict
+     - ``kind``: ``"modifier"``. ``modifiers``: non-empty list of distinct
+       values from ``shift``, ``ctrl``, ``alt``, ``oskey``. ``pressed``:
+       ``True``.
+
+Condition source
+----------------
+
+``source`` (``PmeLogicValueSource``):
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``kind``
+     - str
+     - ``rna_path``: a Blender data path. ``condition_ref``: the result of a
+       Property Stack. ``pm_property_ref``: the value of a Property.
+   * - ``root``
+     - str
+     - ``rna_path``: ``context`` (``C``), ``paint_settings``
+       (``paint_settings()``) or ``pme_preferences`` (``pme.preferences``).
+       ``condition_ref`` and ``pm_property_ref``: ``pm``.
+   * - ``segments``
+     - list[dict]
+     - ``rna_path`` only, required. The path after the root, one segment per
+       step. See below.
+   * - ``path``
+     - str
+     - ``condition_ref``: UID of a Property Stack (``cn_…``).
+       ``pm_property_ref``: UID of a Property (``pr_…``). Not accepted for
+       ``rna_path``.
+   * - ``detected_type``
+     - str or None
+     - Type of the value: ``bool``, ``int``, ``float``, ``string``, ``enum`` or
+       ``enum_set``. An ``rna_path`` source of an incomplete row also accepts
+       ``vector``, ``color``, ``unsupported`` and ``None``.
+       ``condition_ref`` is always ``bool``.
+   * - ``readonly``
+     - bool
+     - Whether the value is read-only. ``True`` for ``condition_ref`` and
+       ``pm_property_ref``. Paths PME refuses to write are saved as ``True``.
+   * - ``owner_type``
+     - str or None
+     - RNA type that resolved the path in the editor. Saved as ``None`` when
+       omitted. Evaluation does not use it.
+   * - ``component``
+     - int
+     - ``pm_property_ref`` only, optional. Element index of an array
+       Property value.
+
+Segments of an ``rna_path`` source:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Segment
+     - Meaning
+   * - ``{"kind": "attr", "name": <str>}``
+     - Attribute access. ``name`` is an ASCII identifier that does not start
+       with ``_``.
+   * - ``{"kind": "key", "key": <str>}``
+     - Lookup by string key, as ``["name"]``.
+   * - ``{"kind": "index", "index": <int>}``
+     - Lookup by index 0 or greater.
+   * - ``{"kind": "index_source", "source": <dict>}``
+     - Lookup by an index read from an ``int`` Property: a
+       ``pm_property_ref`` source with ``detected_type`` ``int`` and no
+       ``component``.
+
+``C.area.type`` is
+``[{"kind": "attr", "name": "area"}, {"kind": "attr", "name": "type"}]`` with
+root ``context``. A computed value that a path cannot express is read through
+a Property (``pm_property_ref``) or a Property Stack (``condition_ref``).
+
+Comparison rules
+----------------
+
+In a complete row, ``value_type`` equals ``source.detected_type``, and ``op``,
+``value_type`` and ``value`` form one of these combinations:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 30 40
+
+   * - ``op``
+     - ``value_type``
+     - ``value``
+   * - ``is_true``, ``is_false``
+     - ``bool``
+     - ``None``
+   * - ``equals``
+     - ``bool``, ``int``, ``float``, ``string``, ``enum``
+     - A value of that type. ``int`` excludes bool; ``float`` accepts any
+       number; ``enum`` is a non-empty identifier.
+   * - ``not_equals``
+     - ``int``, ``float``, ``string``, ``enum``
+     - As for ``equals``.
+   * - ``lt``, ``le``, ``ge``, ``gt``
+     - ``int``, ``float``
+     - A number.
+   * - ``contains``, ``starts_with``
+     - ``string``
+     - A string.
+   * - ``equals_any``, ``not_equals_any``
+     - ``enum``, ``enum_set``
+     - A non-empty list of non-empty identifiers.
+
+A combination outside this table is rejected with
+``schema_v2_router_logic_complete_condition_malformed``. The comparison
+semantics are described under :ref:`router-condition-comparison`.
+
+Target
+------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``action``
+     - dict or None
+     - What runs. ``None`` or omitted: an unconfigured target.
+   * - ``fallback_name``
+     - str
+     - Display name kept with the target, at most 256 characters. Required
+       in a supplied target; may be empty. It is not the target's identity.
+   * - ``presentation``
+     - dict
+     - Optional: ``{"auto_icon": True}``, ``command`` actions only. Present in
+       read results only when ``auto_icon`` is ``True``.
+
+``action`` (``ContextRouterTargetAction``):
+
+.. list-table::
+   :header-rows: 1
+   :widths: 14 30 56
+
+   * - ``type``
+     - ``value``
+     - ``opts``
+   * - ``menu``
+     - UID of a menu: Pie Menu, Vector Menu, Regular Menu, Pop-up Dialog,
+       Floating Panel, Stack Key, Sticky Key, Macro Operator or Modal Operator.
+       Not a Router, Property, Property Stack or Panel Group.
+     - ``expand_menu`` (bool): draw the menu's contents in place; Regular
+       Menu, Pop-up Dialog and Floating Panel only. ``use_frame`` (bool):
+       draw a frame; Pop-up Dialog with ``expand_menu`` only. Only ``True``
+       values are saved.
+   * - ``command``
+     - Python command text, as in a Command slot. Not blank; no NUL
+       character.
+     - ``undo`` (bool). Saved as ``{"undo": <bool>}``; other keys are
+       accepted and dropped.
+   * - ``hotkey``
+     - Hotkey text, as in a Hotkey slot. Not blank.
+     - Empty.
+   * - ``custom``
+     - Layout code, as in a Custom slot. Not blank.
+     - Empty.
+
+``opts`` may be omitted. Command and Custom text is saved as given, without
+stripping.
+
+Otherwise
+---------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``name``
+     - str
+     - Display name, at most 256 characters. An empty name is saved as
+       ``"Otherwise"``.
+   * - ``target``
+     - dict
+     - The target used with **Run Otherwise**. Same shape as a branch target.
+   * - ``pass``
+     - bool
+     - ``True``: **Pass Through**. When no branch matches, the Router runs
+       nothing and the hotkey goes to the next menu on the same key, then to
+       Blender. The target is kept but not used. Present in read results only
+       when ``True``. Absent or ``False``: **Run Otherwise**.
+
+A new Router starts with ``pass`` set to ``True``. A Router saved without the
+key reads as **Run Otherwise**. A Router opened from another menu has no next
+candidate and runs nothing when no branch matches. See
+:ref:`router-otherwise`.
+
+Vocabularies
+------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 74
+
+   * - Field
+     - Values
+   * - ``combine_mode``
+     - ``all``, ``any``
+   * - ``authoring_state``
+     - ``complete``, ``incomplete``
+   * - ``source.kind``
+     - ``rna_path``, ``condition_ref``, ``pm_property_ref``
+   * - ``source.root``
+     - ``context``, ``paint_settings``, ``pme_preferences``; ``pm`` for
+       ``condition_ref`` and ``pm_property_ref``
+   * - ``source.detected_type``
+     - ``bool``, ``int``, ``float``, ``string``, ``enum``, ``enum_set``,
+       ``vector``, ``color``, ``unsupported``, ``None``
+   * - ``value_type``
+     - ``bool``, ``int``, ``float``, ``string``, ``enum``, ``enum_set``,
+       ``None``
+   * - ``op``
+     - ``is_true``, ``is_false``, ``equals``, ``not_equals``, ``lt``, ``le``,
+       ``ge``, ``gt``, ``contains``, ``starts_with``, ``equals_any``,
+       ``not_equals_any``
+   * - ``event.modifiers``
+     - ``shift``, ``ctrl``, ``alt``, ``oskey``
+   * - ``target.action.type``
+     - ``menu``, ``command``, ``hotkey``, ``custom``
+
+.. _authoring-router-logic-codes:
+
+Logic validation codes
+======================
+
+The resulting logic is checked against the rules above. Each failure is one
+diagnostic whose code is ``schema_v2_router_logic_`` followed by the suffix
+below. In :py:func:`update_router` results, ``address`` holds
+``branch_index``, ``branch_uid`` and, for a row, ``row_index``; it is empty
+for a problem of the logic object or Otherwise. Saved logic that cannot be read
+reports the same suffixes with the prefix ``router_authoring_`` in
+``read_pm()["router"]["diagnostics"]``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Suffix
+     - Cause
+   * - ``unknown_field``
+     - The logic object has a key other than ``version``, ``branches``,
+       ``otherwise``.
+   * - ``branches_malformed``
+     - ``branches`` is not a list.
+   * - ``branch_malformed``
+     - A branch is not a dict.
+   * - ``branch_count_exceeds_limit``
+     - More than 256 branches.
+   * - ``branch_uid_malformed``
+     - ``branch_uid`` is not a non-empty string.
+   * - ``branch_uid_duplicate``
+     - Two branches share a ``branch_uid``.
+   * - ``branch_unknown_field``
+     - A branch has a key other than ``branch_uid``, ``name``, ``enabled``,
+       ``combine_mode``, ``conditions``, ``target``.
+   * - ``branch_enabled_malformed``
+     - ``enabled`` is not a bool.
+   * - ``branch_name_malformed``
+     - ``name`` is not a string.
+   * - ``branch_name_too_long``
+     - ``name`` is longer than 256 characters.
+   * - ``combine_mode_unsupported``
+     - ``combine_mode`` is not ``all`` or ``any``.
+   * - ``conditions_malformed``
+     - ``conditions`` is not a list.
+   * - ``condition_malformed``
+     - A condition row is not a dict.
+   * - ``condition_count_exceeds_limit``
+     - More than 256 conditions in one branch.
+   * - ``condition_uid_duplicate``
+     - Two rows of one branch share a ``condition_uid``.
+   * - ``condition_unknown_field``
+     - A row has a key that its row type does not accept.
+   * - ``condition_uid_malformed``
+     - ``condition_uid`` is not a non-empty string.
+   * - ``condition_enabled_malformed``
+     - ``enabled`` is not a bool.
+   * - ``condition_authoring_state_malformed``
+     - ``authoring_state`` is not ``complete`` or ``incomplete``.
+   * - ``condition_label_malformed``
+     - ``label`` is not a string.
+   * - ``condition_label_too_long``
+     - ``label`` is longer than 256 characters.
+   * - ``complete_condition_malformed``
+     - A complete row's ``source``, ``op``, ``value`` and ``value_type`` do not
+       form a valid combination. See *Comparison rules*.
+   * - ``condition_source_unknown_field``
+     - ``source`` has a key outside the *Condition source* table.
+   * - ``condition_source_owner_type_malformed``
+     - ``owner_type`` is neither a string nor ``None``.
+   * - ``condition_source_malformed``
+     - Incomplete row: ``source`` is given but is not a valid source.
+   * - ``condition_op_malformed``
+     - Incomplete row: ``op`` is given but is not in the vocabulary.
+   * - ``condition_value_type_malformed``
+     - Incomplete row: ``value_type`` is given but is not in the vocabulary.
+   * - ``condition_value_malformed``
+     - Incomplete row: ``value`` has a type that ``op`` does not accept.
+   * - ``event_malformed``
+     - ``event`` is not a dict.
+   * - ``event_unknown_field``
+     - ``event`` has a key other than ``kind``, ``modifiers``, ``pressed``.
+   * - ``event_kind_unsupported``
+     - ``kind`` is not ``modifier``.
+   * - ``event_modifiers_unsupported``
+     - ``modifiers`` is missing, empty, repeats a value, or has a value
+       outside the vocabulary.
+   * - ``event_pressed_malformed``
+     - ``pressed`` is not ``True``.
+   * - ``branch_target_malformed``
+     - A branch ``target`` is not a dict.
+   * - ``target_unknown_field``
+     - A target has a key other than ``action``, ``fallback_name``,
+       ``presentation``.
+   * - ``target_fallback_name_malformed``
+     - ``fallback_name`` is missing or not a string.
+   * - ``target_fallback_name_too_long``
+     - ``fallback_name`` is longer than 256 characters.
+   * - ``target_presentation_malformed``
+     - ``presentation`` is not a dict.
+   * - ``target_presentation_unknown_field``
+     - ``presentation`` has a key other than ``auto_icon``.
+   * - ``target_auto_icon_malformed``
+     - ``auto_icon`` is not a bool.
+   * - ``target_auto_icon_target_unsupported``
+     - ``auto_icon`` is ``True`` for an action that is not ``command``.
+   * - ``target_action_malformed``
+     - ``action`` is neither a dict nor ``None``.
+   * - ``target_action_unknown_field``
+     - ``action`` has a key other than ``type``, ``value``, ``opts``.
+   * - ``target_action_type_unsupported``
+     - ``type`` is not ``menu``, ``command``, ``hotkey`` or ``custom``.
+   * - ``target_action_value_malformed``
+     - ``value`` is not a string, or command text contains a NUL character
+       or cannot be encoded as UTF-8.
+   * - ``target_action_value_missing``
+     - ``value`` is empty or only whitespace.
+   * - ``target_menu_uid_invalid``
+     - A ``menu`` value is not a menu UID, for example a menu name. Not
+       checked when reading saved logic (``router_authoring_``).
+   * - ``target_menu_uid_mode_unsupported``
+     - A ``menu`` value is the UID of a menu type that cannot be a target.
+       Not checked when reading saved logic.
+   * - ``target_opts_unsupported``
+     - ``opts`` is not a dict, or holds an option the action type or target
+       menu type does not accept.
+   * - ``otherwise_malformed``
+     - ``otherwise`` is not a dict.
+   * - ``otherwise_unknown_field``
+     - ``otherwise`` has a key other than ``name``, ``target``, ``pass``.
+   * - ``otherwise_name_malformed``
+     - Otherwise ``name`` is not a string.
+   * - ``otherwise_name_too_long``
+     - Otherwise ``name`` is longer than 256 characters.
+   * - ``otherwise_pass_malformed``
+     - ``pass`` is not a bool.
+   * - ``otherwise_target_malformed``
+     - Otherwise ``target`` is not a dict.
+
+The same rules apply to the saved logic of the branch functions: a saved menu
+target that is not a valid menu UID makes :py:func:`remove_router_branch`,
+:py:func:`move_router_branch` and :py:func:`reorder_router_branches` return
+``rejected`` until :py:func:`update_router` replaces that target.

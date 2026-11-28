@@ -1,0 +1,19 @@
+:vocab: developer-facing
+
+.. _authoring-recipes:
+
+============================================================
+レシピ
+============================================================
+
+各レシピは、オーサリング API の複数の関数を組み合わせて 1 つの目的を達成します。
+関数そのものは、リファレンスの各ページで説明します。
+
+.. toctree::
+   :maxdepth: 1
+
+   layout_build_panel_rows
+   property_stack_new
+   property_switch
+   router_add_branch
+   slots_link_child_menu

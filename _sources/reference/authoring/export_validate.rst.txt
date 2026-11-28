@@ -1,0 +1,612 @@
+:vocab: developer-facing
+
+.. _authoring-export-validate:
+
+=====================
+Export and validation
+=====================
+
+.. py:currentmodule:: pme
+
+:py:func:`export_menus` writes menus as PME's JSON document. The validation
+functions check a document against the bundled JSON Schema v2 and PME's UID
+rules, without changing or running it.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Function
+     - Purpose
+   * - :py:func:`export_menus`
+     - Exports menus as a JSON document, optionally to a file.
+   * - :py:func:`validate_json`
+     - Validates a JSON string. Returns
+       :py:class:`~pme.validation.ValidationResult`.
+   * - :py:func:`pme.validation.validate`
+     - Validates already-parsed JSON data.
+   * - :py:func:`pme.validation.validate_file`
+     - Validates a UTF-8 JSON file.
+   * - :py:func:`validate_uid`
+     - Checks the format of a menu UID. Described in
+       :ref:`authoring-execution`.
+
+Export
+======
+
+.. py:function:: export_menus(pm_uids=None, *, include_referenced_menus=True, export_tags=True, filepath=None, profile="interactive")
+
+   Export menus as PME's JSON document.
+
+   The exporter and file writer are those of the **Export Menus** dialog. The
+   selected menu, Select Mode and the list filters are neither read nor
+   changed.
+
+   :param pm_uids: UIDs of the menus to export, as a non-string iterable.
+      ``None`` exports every menu.
+   :type pm_uids: iterable of str or None
+   :param bool include_referenced_menus: Also export the menus that the named
+      menus refer to. See :ref:`authoring-export-closure`. With ``pm_uids=None``,
+      every menu is included and unresolved text references are still reported.
+   :param bool export_tags: Include tag names, tag UIDs and the tag registry.
+   :param filepath: File to write the JSON text to. ``.json`` is appended when
+      the path does not end in ``.json`` (case-sensitive). An existing file is
+      replaced.
+   :type filepath: str or None
+   :param str profile: ``"interactive"`` (default) or ``"stable_snapshot"``.
+      Stable snapshots omit ``exported_at``, sort JSON keys and menus by
+      ``(name, uid)``, and end with one LF. Slot order is preserved. Files
+      use UTF-8 and LF on every platform. Both profiles contain the same
+      selected menu definitions; stable snapshots do not include backup-only
+      inactive geometry or unused tag definitions.
+   :returns: The result described below.
+   :rtype: dict
+   :raises TypeError: ``pm_uids`` is a string, bytes or not iterable;
+      ``include_referenced_menus`` or ``export_tags`` is not a bool; or
+      ``filepath`` is not a non-empty string.
+   :raises ValueError: ``pm_uids`` is empty, a UID in it is rejected, or the
+      data cannot be exported. See *Errors*.
+   :raises RuntimeError: Called off Blender's main thread
+      (``"Menu export requires Blender's main thread"``), while PME runs its
+      startup scripts (``"Menu export requires PME to finish loading"``), or
+      while :py:data:`preferences` is ``None``
+      (``"PME preferences are unavailable"``).
+   :raises KeyError: :py:data:`ADDON_ID` is not in
+      ``bpy.context.preferences.addons``, as for :py:data:`preferences`.
+   :raises OSError: The file cannot be written, for example
+      ``FileNotFoundError`` when its directory does not exist.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 16 62
+
+      * - Key
+        - Type
+        - Value
+      * - ``data``
+        - dict
+        - The document. See :ref:`authoring-export-document`.
+      * - ``text``
+        - str
+        - The exact JSON text of ``data``, as written to the file.
+      * - ``pm_uids``
+        - list[str]
+        - UIDs of the exported menus, in document order.
+      * - ``warnings``
+        - list[str]
+        - Problems that did not stop the export. See *Warnings*.
+      * - ``filepath``
+        - str or None
+        - The path of the written file, including an appended ``.json``.
+          ``None`` when ``filepath`` was not given.
+
+   .. rubric:: Errors
+
+   Every error is a ``ValueError``. The ``pm_uids`` checks run in the given
+   order and name the first UID that fails.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 50 50
+
+      * - Message
+        - Cause
+      * - ``pm_uids must name at least one menu; pass None to export all``
+        - ``pm_uids`` is empty.
+      * - ``Menu UID is invalid: <uid>``
+        - Not a menu UID in the format :py:func:`validate_uid` accepts. The UID
+          is shown with ``repr()``.
+      * - ``Menu UID is listed more than once in pm_uids: <uid>``
+        - The UID appears twice in ``pm_uids``.
+      * - ``Menu UID is missing: <uid>``
+        - No saved menu has the UID.
+      * - ``Menu UID is ambiguous: <n> saved menus share <uid>``
+        - Several saved menus have the UID.
+      * - ``PME: Context Router logic export failed for menu '<name>': <source>
+          refers to <target>, which is outside the exported menu set``
+        - A Context Router's target menu is not exported. ``<source>`` is
+          ``branch '<label>'``, ``otherwise '<label>'`` or
+          ``condition '<label>'``. ``<target>`` is ``menu '<current name>'``,
+          or ``a menu that is not in Preferences (UID <uid>)``.
+      * - ``PME: Context Router logic export failed for menu '<name>': <codes>``
+        - The Context Router's saved logic cannot be read or exported.
+      * - ``PME: <mode> export requires at most <n> slots: <name>``
+        - A menu type with a fixed number of slots has more slots.
+      * - ``PME: Export blocked by invalid menu identity (<reason>,
+          count=<n>)``
+        - The saved menus fail PME's menu identity check, such as a missing,
+          invalid or duplicated menu UID. ``<reason>`` names the check.
+      * - A tag registry code, such as ``tag_registry_export_plan_failed``
+        - The tag registry cannot be exported.
+
+   The data errors (Context Router and slot count) are
+   ``ExportDataError``. An error raised after warnings were collected is an
+   ``ExportError`` whose ``warnings`` attribute holds them. Both classes
+   subclass ``ValueError`` and are not exported by ``pme``; read the warnings
+   with ``getattr(error, "warnings", ())``.
+
+   .. rubric:: Warnings
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 50 50
+
+      * - Message
+        - Cause
+      * - ``PME: <n> Command/Custom slot(s) call menus that could not be
+          resolved, so those menus were not included: <slots>``
+        - A Command or Custom slot calls a menu that cannot be identified.
+          Reason per slot: ``menu not found``, ``duplicate menu name`` or
+          ``target not static``.
+      * - ``PME: <n> Command/Custom slot(s) reference properties that could not
+          be resolved, so those properties were not included: <slots>``
+        - A ``props()`` reference in a Command or Custom slot cannot be
+          identified. Reason per slot: ``prop id not found``,
+          ``display name ambiguous`` or ``target not static``.
+      * - ``PME: Property Stack logic omitted for menu '<name>': <codes>``
+        - The saved logic cannot be read. The menu is exported without it.
+      * - ``PME: Property Stack logic repaired for menu '<name>': <codes>``
+        - The saved logic was read after normalization.
+
+   ``<slots>`` lists up to 10 slots as ``'<menu>' slot <position> '<slot
+   name>' (<reasons>)``, then ``and <n> more``. The two slot warnings are
+   produced for a partial export with ``include_referenced_menus=True``.
+   Poll, description expressions,
+   Router command/custom targets and Property Stack custom Set text name their
+   saved path in warnings. Syntax errors and external ``execute_script`` calls
+   also warn: external files are neither read nor bundled.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      result = pme.export_menus([pm_uid], filepath="C:/exports/shading_pie")
+      print(result["filepath"], result["pm_uids"], result["warnings"])
+      stable = pme.export_menus([pm_uid], profile="stable_snapshot",
+                                filepath="C:/presets/shading_pie.json")
+      checked = pme.validate_json(stable["text"], blender_version=(4, 5, 0))
+      print(checked.format_report())
+
+   .. rubric:: Notes
+
+   * A Context Router's target is exported when ``include_referenced_menus`` is
+     ``True`` or when its UID is in ``pm_uids``; then the "outside the exported
+     menu set" error does not occur for it.
+   * Before the export, a slot of an exported menu whose slot UID is missing,
+     invalid or used twice in that menu receives a new UID. The new UID is
+     kept in the saved menu.
+   * Menus are written in the order of the menu list, not in the order of
+     ``pm_uids``. The developer option **Sort Exported Menus by Name** sorts
+     them by name.
+
+.. _authoring-export-document:
+
+Exported document
+-----------------
+
+The document follows JSON Schema v2. Hotkeys of the exported menus are part of
+it. Script files that slots call are not; a recipient needs them as separate
+files.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Key
+     - Value
+   * - ``$schema``
+     - ``"https://docs.pie-menu-editor.com/schema/pme2-2.0.json"``
+   * - ``schema_version``
+     - ``"2.0"``
+   * - ``addon_version``
+     - PME version, such as ``"2.3.1"``.
+   * - ``exported_at``
+     - UTC time of the export, such as ``"2026-11-18T06:59:46Z"``.
+   * - ``menus``
+     - One object per menu: ``uid``, ``name``, ``mode``, ``enabled``,
+       ``hotkey``, ``settings``, ``items``, and as applicable ``tags``,
+       ``extensions`` (Property Stack and Context Router logic, tag UIDs),
+       ``description``, ``description_is_expr`` and ``poll``.
+   * - ``extensions``
+     - ``pme.exported_with.blender_version``, ``pme.requires`` (features the
+       document uses, and a minimum Blender version when one applies) and
+       ``pme.tag_registry``.
+   * - ``tags``
+     - All tag names used by the exported menus, when ``export_tags`` is
+       ``True`` and there are any.
+
+``hotkey`` holds ``key``, ``ctrl``, ``shift``, ``alt``, ``oskey``, ``any``,
+``key_mod``, ``chord``, ``keymaps``, ``activation`` and ``drag_direction``, plus
+``repeat`` and ``tweak_direction`` when set.
+
+.. _authoring-export-closure:
+
+Referenced menus
+----------------
+
+With ``pm_uids`` and ``include_referenced_menus=True``, the exported set is the
+named menus plus every menu they reach, repeated until nothing is added:
+
+* Menu slots, including disabled slots.
+* Property Stack and Context Router references to other menus.
+* Menu calls and ``props()`` references in the text of Command and Custom
+  slots, when they resolve to one menu by UID or by a name that only one menu
+  has.
+
+A reference that cannot be resolved adds nothing; Command and Custom slot
+references of that kind are listed in ``warnings``. With
+``include_referenced_menus=False``, only the named menus are exported.
+
+Validation
+==========
+
+``valid=True`` means that the requested checks passed. It does not guarantee
+that an import succeeds in the current Blender setup or that the stored
+commands run.
+
+.. _authoring-validation-stages:
+
+Validation stages
+-----------------
+
+1. **Text** (:py:func:`validate_json` only). An empty or whitespace-only string,
+   or ``None``, gives ``E102``. Text that is not JSON gives ``E101``.
+2. **Root.** An empty or false value (``{}``, ``[]``, ``""``, ``0``, ``null``)
+   gives ``E102``. An object with ``$schema`` or ``schema_version`` is checked
+   as Schema v2 (stages 3 to 6). A list, or an object with a ``menus`` list and
+   a ``version`` string of dot-separated integers such as ``"1.18.7"``, is a
+   PME1 document: the result
+   has warning ``W301`` and no further check runs. Anything else gives
+   ``E206``.
+3. **Schema.** The document is checked against the bundled schema
+   ``pme2-2.0.json``. One failure is reported per call. When the failure is a
+   missing required field, each missing field of that object is an issue with
+   the same message. Failures of type and required fields are reported before
+   failures of conditional rules. The next failure appears after the first is
+   fixed.
+4. **Import compatibility.** When ``blender_version`` is supplied and the
+   schema check passes, checks the target Blender version and this PME's
+   supported required features. These failures do not stop UID/reference checks.
+5. **UIDs.** Runs when the schema check passes. Menu UIDs must be valid and
+   match the menu's ``mode``, and must be unique in the document. Slot UIDs must
+   be valid and unique within their menu. Several issues can be reported.
+6. **References.** Runs after the UID stage when ``check_references`` is
+   ``True``. Several issues can be reported.
+
+   * A Menu slot whose target is a menu UID must find that UID in the same
+     document. A target given as a name is not checked.
+   * The logic of a Property Stack (``CONDITION``) or Context Router
+     (``ROUTER``) is decoded, and the menu UIDs it depends on must be in the
+     same document. A ``CONDITION`` without logic is skipped.
+
+With ``strict=True``, a result with any warning has ``valid=False``. The
+warnings stay in ``warnings``.
+
+Pass ``blender_version=(major, minor, patch)`` (or ``bpy.app.version``)
+to any validation entry point to also check import compatibility. ``None``
+keeps the existing environment-independent static checks. The target Blender
+version and the features supported by the installed PME are checked using
+the importer's rules. Incompatible Blender versions produce ``E501``;
+unsupported required PME features produce ``E502``. Both are errors even
+when ``strict=False``. No import or user script is executed. A successful
+check still does not guarantee that every menu will execute in a given scene.
+
+.. py:function:: validate_json(json_string, *, strict=False, check_references=True, blender_version=None)
+
+   Validate a PME JSON document given as text.
+
+   The same function is ``pme.validation.validate_json``. The document is read
+   only: it is not changed, its Python code is not run, and its ``$schema`` URL
+   is not downloaded.
+
+   :param json_string: The JSON text. ``bytes`` and ``bytearray`` are read as
+      :py:func:`json.loads` reads them. ``None`` counts as empty text.
+   :type json_string: str, bytes, bytearray or None
+   :param bool strict: Make any warning invalidate the result.
+   :param bool check_references: Run the reference stage. ``False`` skips it;
+      the schema and UID stages still run.
+   :returns: The issues found and the document's metadata.
+   :rtype: ValidationResult
+   :raises TypeError: ``json_string`` is of another type, such as an ``int``
+      or an already-parsed ``dict``. The message names the type, for example
+      ``"json_string must be str, bytes, bytearray or None, not dict"``.
+      Validate parsed data with :py:func:`pme.validation.validate`.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      result = pme.validate_json(pme.export_menus([pm_uid])["text"])
+      if not result.valid:
+          print(result.format_report())
+
+   .. rubric:: Notes
+
+   * Problems in the document are returned as issues, not raised.
+   * ``check_references=False`` fits a document whose target menus are
+     supplied in another document, such as part of an export.
+   * Legacy name references and Blender menu type names are not resolved
+     against the running Blender session.
+   * ``W301`` means that the item contents and name references of the PME1
+     document have not been validated against Schema v2. Import has its own
+     checks.
+   * The Extension bundles fastjsonschema 2.22.2. Blender can already have
+     loaded its own 2.21 in the same Python process, so the version in use can
+     differ. Validation uses their shared API and does not replace the loaded
+     library.
+
+.. py:module:: pme.validation
+
+.. py:function:: validate(data, *, strict=False, check_references=True, blender_version=None)
+
+   Validate already-parsed JSON data.
+
+   Starts at the *Root* stage. ``data`` is not changed.
+
+   :param object data: A parsed JSON value, such as the result of
+      ``json.loads()``.
+   :param bool strict: Make any warning invalidate the result.
+   :param bool check_references: Run the reference stage.
+   :returns: The issues found and the document's metadata.
+   :rtype: ValidationResult
+
+.. py:function:: validate_file(filepath, *, strict=False, check_references=True, blender_version=None)
+
+   Read a UTF-8 JSON file and validate its text as :py:func:`pme.validate_json`
+   does.
+
+   :param str filepath: Path of the file.
+   :param bool strict: Make any warning invalidate the result.
+   :param bool check_references: Run the reference stage.
+   :returns: The issues found and the document's metadata.
+   :rtype: ValidationResult
+
+   .. rubric:: Notes
+
+   * A file that cannot be read gives ``E101`` with the message
+     ``"File not found: <path>"``, ``"Permission denied: <path>"`` or
+     ``"Failed to read file: <error>"``. A file that is not UTF-8 gives the last
+     form. Nothing is raised.
+
+.. py:data:: ERROR_CODES
+   :type: dict[str, str]
+
+   Issue code mapped to a short description. Lists the codes in
+   :ref:`authoring-validation-codes`: every code the validator returns.
+
+.. py:class:: ValidationResult
+
+   Result of the validation functions. A dataclass, also available as
+   ``pme.types.ValidationResult``.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 24 54
+
+      * - Attribute
+        - Type
+        - Value
+      * - ``valid``
+        - bool
+        - ``True`` when ``errors`` is empty, and with ``strict=True`` also
+          ``warnings``.
+      * - ``errors``
+        - list[ValidationIssue]
+        - Issues with severity ``"error"``.
+      * - ``warnings``
+        - list[ValidationIssue]
+        - Issues with severity ``"warning"``. Kept when ``strict=True`` makes
+          the result invalid.
+      * - ``schema_version``
+        - str or None
+        - The document's ``schema_version`` when it is a string; otherwise
+          ``None``, including for a PME1 document.
+      * - ``menu_count``
+        - int
+        - Length of the document's ``menus`` list, also when the document is
+          invalid. 0 when there is no list.
+      * - ``has_warnings``
+        - bool
+        - Read-only. ``True`` when ``warnings`` is not empty.
+      * - ``issue_count``
+        - int
+        - Read-only. Number of errors plus warnings.
+
+   .. py:method:: format_report(*, include_warnings=True, max_issues=50)
+
+      Return the result as readable text.
+
+      :param bool include_warnings: Include the warnings.
+      :param int max_issues: Maximum number of errors, and separately of
+         warnings, to list. 0 lists all.
+      :returns: Lines of text. The first line is ``✓ Valid (<n> menus)``,
+         followed by ``Schema version: <version>``, or
+         ``✗ Invalid (<n> errors)``. The issues follow under ``Errors:`` and
+         ``Warnings:``, one per line as ``[<code>] <path>: <message>``, and
+         ``... and <n> more errors`` when ``max_issues`` is reached.
+      :rtype: str
+
+.. py:class:: ValidationIssue
+
+   One issue. A dataclass, also available as ``pme.types.ValidationIssue``.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - Attribute
+        - Type
+        - Value
+      * - ``severity``
+        - str
+        - ``"error"`` or ``"warning"``.
+      * - ``code``
+        - str
+        - See :ref:`authoring-validation-codes`.
+      * - ``path``
+        - str
+        - Location in the document, such as
+          ``menus[0].items[0].action.value``. ``""`` for the document as a
+          whole.
+      * - ``message``
+        - str
+        - Description. Schema issues carry the schema library's message, such
+          as ``data must contain ['addon_version'] properties``.
+      * - ``suggestion``
+        - str or None
+        - ``None`` in the issues the current validator returns.
+
+   .. code-block:: python
+
+      ValidationIssue(severity='error', code='E601',
+                      path='menus[0].items[0].action.value',
+                      message='PM UID reference is not present in this document: rm_6sshkekp',
+                      suggestion=None)
+
+.. _authoring-validation-codes:
+
+Issue codes
+-----------
+
+``menus[i]`` is a menu and ``items[j]`` one of its slots.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 10 12 28 50
+
+   * - ``code``
+     - Stage
+     - ``path``
+     - Cause
+   * - ``E101``
+     - Text
+     - ``""``
+     - Not JSON: ``Invalid JSON: <reason> (line <l>, column <c>)``. Also a file
+       that :py:func:`validate_file` cannot read.
+   * - ``E102``
+     - Text, Root
+     - ``""``
+     - Empty text (``Empty JSON string``) or empty data (``Empty data``).
+   * - ``E206``
+     - Root, Schema
+     - ``""`` or the failing path
+     - The root is not a recognized document; the message names the problem,
+       such as ``Invalid PME1 JSON: missing or invalid 'version'``. Also a
+       schema failure at a path not listed below.
+   * - ``E201``
+     - Schema
+     - ``$schema``
+     - ``$schema`` is missing. Another failure of it is ``E206``.
+   * - ``E202``
+     - Schema
+     - ``schema_version``
+     - ``schema_version`` is missing.
+   * - ``E203``
+     - Schema
+     - ``schema_version``
+     - ``schema_version`` has a value the schema does not accept.
+   * - ``E204``
+     - Schema
+     - ``menus``
+     - ``menus`` is missing.
+   * - ``E205``
+     - Schema
+     - ``menus``
+     - ``menus`` fails another rule, such as not being an array.
+   * - ``E301``
+     - Schema
+     - ``menus[i].uid``, ``menus[i].items[j].uid``
+     - A required ``uid`` is missing.
+   * - ``E302``
+     - Schema, UIDs
+     - ``menus[i].uid``, ``menus[i].items[j].uid``
+     - The UID fails the schema; or it is not a valid UID
+       (``Invalid UID: '<uid>'``); or a menu UID's prefix does not match the
+       menu's ``mode`` (``UID '<uid>' does not match menu mode '<mode>'``).
+   * - ``E303``
+     - UIDs
+     - ``menus[i].uid``, ``menus[i].items[j].uid``
+     - ``Duplicate UID: <uid>``: a menu UID used twice in the document, or a
+       slot UID used twice in one menu.
+   * - ``E304``
+     - Schema
+     - ``menus[i].name``
+     - ``name`` is missing. Another failure of it is ``E206``.
+   * - ``E305``
+     - Schema
+     - ``menus[i].mode``
+     - ``mode`` is missing or not an accepted menu type.
+   * - ``E306``
+     - Schema
+     - ``menus[i].items``
+     - ``items`` is missing.
+   * - ``E307``
+     - Schema
+     - ``menus[i].items``
+     - ``items`` fails another rule, such as not being an array.
+   * - ``E401``
+     - Schema
+     - ``menus[i].items[j].action``
+     - ``action`` is missing.
+   * - ``E404``
+     - Schema
+     - ``menus[i].items[j].action``
+     - ``action`` fails another rule.
+   * - ``E402``
+     - Schema
+     - ``menus[i].items[j].action.type``
+     - ``type`` is missing or invalid.
+   * - ``E403``
+     - Schema
+     - ``menus[i].items[j].action.value``
+     - ``value`` is missing or invalid.
+   * - ``E501``
+     - Import compatibility
+     - ``extensions.pme.requires.minimum_blender_version``
+     - The target Blender version cannot import the document.
+   * - ``E502``
+     - Import compatibility
+     - ``extensions.pme.requires.features``
+     - One or more required features are unsupported by this PME.
+   * - ``E601``
+     - References
+     - ``menus[i].items[j].action.value``, ``menus[i].extensions.pme.logic``
+     - ``PM UID reference is not present in this document: <uid>``. For
+       logic, the reference kind follows in parentheses.
+   * - ``E603``
+     - References
+     - ``menus[i].extensions.pme.logic``
+     - The logic cannot be decoded:
+       ``PM UID reference check could not decode its source: <codes>``.
+   * - ``W202``
+     - References
+     - ``menus[i].extensions.pme.logic``
+     - Decoding the logic needed normalization. One warning per diagnostic
+       code: ``Reference source normalization diagnostic: <code>``. The
+       supplied data is not changed.
+   * - ``W301``
+     - Root
+     - ``""``
+     - A PME1 document was recognized. Its contents were not validated.

@@ -1,0 +1,193 @@
+(side-panel-editor)=
+
+# Side Panel Editor
+
+**Side Panel** places PME Popup Dialogs or existing Blender panels in an editor's sidebar or header. Keep the content definition separate from its placement.
+
+This page describes PME 2.1 settings.
+
+(side-configuration-guide)=
+
+:::{dropdown} Configuration guide — features, combinations, and uses (for AI)
+
+**Name: Side Panel / Type ID: `PANEL`.**
+Arranges Popup Dialog contents or Blender panels as persistent UI.
+
+- **Inputs**: a Popup Dialog reference or Blender panel ID selected through Add Panel. One panel occupies each row. This editor does not use ordinary Command / Custom code tabs.
+- **Placement**: select Space / Region / Context / Category. Category defines the tab name, separately from the PME menu name. See {ref}`placement settings <side-placement>`.
+- **Structure**: ordinary panels and Sub-Panels belonging to the nearest ordinary panel above them. See the {ref}`panel list <side-slots>`.
+- **Combinations**: create buttons in a Popup Dialog, then choose their placement here. When regrouping existing panels, you can hide the originals with {doc}`hiding_unused_panels`.
+- **Constraints**: moving a panel does not remove its actions' Blender context requirements. Check values, operators, and display conditions when placing a panel in another editor.
+- **Example**: collect modeling Popup Dialogs in the same 3D Viewport Category, using collapsible Sub-Panels as needed. See {ref}`usage patterns <side-patterns>`.
+- **Validation**: display it in the intended editor and region; test enabling/disabling the group, child panels, and actual button actions.
+:::
+
+## Interface and editing workflow
+
+```{raw} html
+:file: common/_side_panel_editor_overview_map.html
+```
+
+1. {ref}`Name and basic controls <side-basic-settings>`
+2. {ref}`Advanced settings <side-advanced-settings>`
+3. {ref}`Destination and category <side-placement>`
+4. {ref}`Panels and parent–child relationships <side-slots>`
+
+Select Side Panel in the list, configure its destination on the right, then reference content with **Add Panel**.
+See [Common Editor Elements](editor_common_elements.md) for menu list controls.
+
+1. Check the {ref}`name and enabled state <side-basic-settings>`.
+2. Set {ref}`Space / Region / Context / Category <side-placement>`.
+3. Set the content references and order in the {ref}`panel list <side-slots>`.
+4. Check the display and each button in the destination editor.
+
+(side-basic-settings)=
+
+## Name and basic controls
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-11.42857143%">
+<img src="../_static/images/editors/overview/side-panel-blender-5-2.png" width="663" height="280" alt="Mesh Edit N-Panel name and enabled state.">
+</div>
+<figcaption>Name and basic controls in this example.</figcaption>
+</figure>
+```
+
+The menu name identifies this panel configuration within PME. Set the N-Panel tab name separately in **Category** below.
+Enabling registers the panels at their destination; disabling removes this configuration's panels.
+See {ref}`selected menu settings <overview-selected>` for names, tags, and references.
+This type has no Hotkey settings or preview.
+
+(side-placement)=
+
+## Placement (Space / Region / Context / Category)
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 42;--crop-offset:-50.71428571%">
+<img src="../_static/images/editors/overview/side-panel-blender-5-2.png" width="663" height="280" alt="Mesh Edit N-Panel destination editor, region, context, and category.">
+</div>
+<figcaption>Destination and category in this example.</figcaption>
+</figure>
+```
+
+| Item | Role |
+|---|---|
+| **Space** | Destination Blender editor |
+| **Region** | Destination within the editor. Use **UI (Side Panel)** for the N-Panel |
+| **Context** | Filters by Blender panel context. Choose a value supported by the destination |
+| **Category** | Sidebar tab name. Panels sharing a destination and Category appear in the same tab |
+
+Context does not accept arbitrary `C.mode` values. Its choices come from contexts on registered Blender panels.
+Use Poll to test a specific mode or selection state.
+Context / Category fields are hidden when Region is **Header**.
+
+(side-slots)=
+
+## Panel list
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 90;--crop-offset:-66.78571429%">
+<img src="../_static/images/editors/overview/side-panel-blender-5-2.png" width="663" height="280" alt="Mesh Edit N-Panel panels and parent–child relationships, including child panels.">
+</div>
+<figcaption>Panels and parent–child relationships in this example.</figcaption>
+</figure>
+```
+
+Choose a PME Popup Dialog or existing Blender panel through **Add Panel**.
+Edit a Popup Dialog's buttons and properties at its source. Here, set the panel label, order, and parent–child relationships.
+
+| Control | Role |
+|---|---|
+| Panel/folder icon on the left | Switches between an ordinary panel and Sub-Panel |
+| Label | Edits the displayed panel name |
+| Open reference button | Opens the corresponding Popup Dialog for editing |
+| Row menu | Sub-Panel, Add Panel, Move Panel, Remove |
+
+### Sub-Panel
+
+Making any row except the first a Sub-Panel assigns it to the nearest ordinary panel above it.
+Adding another ordinary panel makes subsequent Sub-Panels its children.
+The first row cannot be a Sub-Panel. This structure supports one child level beneath ordinary panels;
+Sub-Panels cannot have further nested children.
+
+```{mermaid}
+flowchart TD
+    A["Category: My Tools"] --> B["Panel: Modeling"]
+    B --> C["Sub-Panel: Selection"]
+    B --> D["Sub-Panel: Modifiers"]
+    A --> E["Panel: View"]
+```
+
+Check parent and child visibility and expansion at the actual destination.
+
+(side-advanced-settings)=
+
+## Advanced settings
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 73;--crop-offset:-23.21428571%">
+<img src="../_static/images/editors/overview/side-panel-blender-5-2.png" width="663" height="280" alt="Mesh Edit N-Panel advanced settings: description, availability, and icon button width.">
+</div>
+<figcaption>Advanced settings in this example.</figcaption>
+</figure>
+```
+
+Open these with the gear button. See the {ref}`shared advanced settings <editor-extra-settings>` for Description and Poll.
+Poll determines the contexts in which this panel configuration is available.
+
+**Use Wide Icon Buttons** gives icon-only controls wider buttons.
+It does not stretch the icon artwork horizontally.
+
+(side-patterns)=
+
+## Usage patterns and conditions to check
+
+### Create your own N-Panel tab
+
+Prepare a Popup Dialog, set Space to **3D View** and Region to **UI (Side Panel)**,
+then enter the desired tab name in Category. Add the dialog with Add Panel and check it in the 3D Viewport sidebar.
+Multiple Side Panels using the same Category appear in the same tab.
+
+### Place buttons in a header
+
+Set Region to **Header** and reference a Popup Dialog containing the buttons.
+Headers have limited horizontal space, so keep the contents compact and check narrow widths.
+This differs from tab placement with Context / Category.
+
+### Vary visibility by mode or state
+
+Write the visibility condition in Poll—for example, whether an active object exists or the mode is Mesh Edit.
+Check both panel visibility and whether its operators can run in that context.
+
+### Regroup existing panels
+
+Use Add Panel's Blender panel selector or [Interactive Panels](interactive_panels.md).
+Moving an existing panel alone can leave it without values or conditions it expects from its original editor.
+Start with one panel at a time and check both value display and editing.
+
+---
+
+## Related pages
+
+- [Common Editor Elements](editor_common_elements.md)
+- [Popup Dialog Editor](popup_dialog_editor.md)
+- [Interactive Panels and Extend Panel](interactive_panels.md)
+- [Hiding Unused Panels](hiding_unused_panels.md)
+- [Poll Method](../reference/poll_method.md)
+
+## Reference videos (original author's channel)
+
+Older-version reference videos — [original author roaoao's channel](../reference/original_author_videos.md)
+
+:::{dropdown} Side Panel Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/BGs0de6ZYdw" title="Side Panel Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Side Panel Editor for Blender — Open on YouTube](https://www.youtube.com/watch?v=BGs0de6ZYdw)
+:::

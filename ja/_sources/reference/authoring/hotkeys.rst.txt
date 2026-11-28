@@ -1,0 +1,428 @@
+:vocab: developer-facing
+
+.. _authoring-hotkeys:
+
+============================================================
+ホットキー
+============================================================
+
+.. py:currentmodule:: pme.editing
+
+メニューのホットキー割り当ては、保存される 13 個の項目で構成されます。
+:py:func:`read_pm` で読み、:py:func:`update_hotkey` で変更します。
+:py:func:`update_hotkey` は、Blender のキーマップへの登録を保存値とは分けて報告します。Hotkey Mode は :ref:`hotkey-modes`、編集画面は
+:ref:`hotkey-editor` で説明しています。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 関数
+     - 用途
+   * - :py:func:`read_pm`
+     - 保存された割り当てを ``hotkey`` に入れて返します。
+   * - :py:func:`update_hotkey`
+     - 割り当てを変更し、登録状態を報告します。
+
+ホットキーを読む
+============================================================
+
+``read_pm(pm_uid)["hotkey"]`` は、各項目名と保存値のマッピングです。すべてのメニューの種類で返ります。読み取りでは値を正規化せず、Blender のキーマップにも触れません。
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(pm_uid)["hotkey"]
+   {'key': 'F6', 'key_mod': 'NONE', 'ctrl': True, 'shift': False, 'alt': False,
+    'oskey': False, 'any': False, 'open_mode': 'PRESS', 'km_name': 'Window',
+    'chord': 'NONE', 'drag_dir': 'ANY', 'tweak_dir': 'ANY', 'repeat': False}
+
+.. _authoring-hotkeys-fields:
+
+ホットキーの項目
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 14 9 25 11 41
+
+   * - 項目
+     - 型
+     - 受け付ける値
+     - 既定値
+     - 意味
+   * - ``key``
+     - str
+     - ``bpy.types.Event.type`` の識別子、または ``NONE``
+     - ``NONE``
+     - メニューを呼び出すキーまたはボタン。``NONE`` はホットキーなし。
+   * - ``key_mod``
+     - str
+     - ``bpy.types.Event.type`` の識別子、または ``NONE``
+     - ``NONE``
+     - 修飾キーとして押し続けるキー（**Key Modifier**）。マウスボタン
+       （``LEFTMOUSE``、``MIDDLEMOUSE``、``RIGHTMOUSE``、``BUTTON4MOUSE``
+       から ``BUTTON7MOUSE``）は、PME の別の observer キーマップ項目が追跡します。
+   * - ``ctrl``
+     - bool
+     - ``True``, ``False``
+     - ``False``
+     - Ctrl を押した状態。
+   * - ``shift``
+     - bool
+     - ``True``, ``False``
+     - ``False``
+     - Shift を押した状態。
+   * - ``alt``
+     - bool
+     - ``True``, ``False``
+     - ``False``
+     - Alt を押した状態。
+   * - ``oskey``
+     - bool
+     - ``True``, ``False``
+     - ``False``
+     - OS キーを押した状態。
+   * - ``any``
+     - bool
+     - ``True``, ``False``
+     - ``False``
+     - 修飾キーに関係なく一致します（**Any Modifier**）。このときキーマップ項目は四つの修飾キーの項目を無視します。
+   * - ``open_mode``
+     - str
+     - ``PRESS``, ``HOLD``, ``DOUBLE_CLICK``, ``TWEAK``, ``CHORDS``,
+       ``CLICK``, ``CLICK_DRAG``
+     - ``PRESS``
+     - Hotkey Mode。
+   * - ``km_name``
+     - str
+     - ``;`` で区切ったキーマップ名
+     - ``Window``
+     - ホットキーが有効なキーマップ。例: ``"Window; 3D View"``。
+   * - ``chord``
+     - str
+     - ``bpy.types.Event.type`` の識別子、または ``NONE``
+     - ``NONE``
+     - Key Chords の 2 番目のキー（``open_mode`` が ``CHORDS``）。
+   * - ``drag_dir``
+     - str
+     - ``ANY``, ``NORTH``, ``NORTH_EAST``, ``EAST``, ``SOUTH_EAST``,
+       ``SOUTH``, ``SOUTH_WEST``, ``WEST``, ``NORTH_WEST``
+     - ``ANY``
+     - ``CLICK_DRAG`` のドラッグ方向。
+   * - ``tweak_dir``
+     - str
+     - ``drag_dir`` と同じ
+     - ``ANY``
+     - ``TWEAK`` のドラッグ方向。``drag_dir`` とは別の項目で、``open_mode``
+       を変えても両方とも維持します。
+   * - ``repeat``
+     - bool
+     - ``True``, ``False``
+     - ``False``
+     - キーを押し続けている間のキーリピートを受け付けます。
+
+*既定値* は RNA の既定値です。Enum の値は実行中の Blender の識別子なので、
+``key`` の識別子の集合は Blender のバージョンによって異なる場合があります。
+
+Property、Property Stack、Panel Group、Hidden Panel Group のメニューはこれらの項目を保存しますが、ホットキーを持ちません。登録が必要になることはありません。
+
+関数
+============================================================
+
+.. py:function:: update_hotkey(pm_uid, changes, *, expected=None, dry_run=False)
+
+   メニューのホットキー割り当てを変更します。
+
+   最初の書き込みの前に、すべての入力を確認します。保存値は読み戻して確認します。Blender のキーマップの状態は ``registration`` で別に報告します。
+
+   :param str pm_uid: メニューの UID。
+   :param changes: 項目名と新しい値の対応。部分指定です。指定しない項目は値を維持します。
+   :type changes: Mapping
+   :param expected: 事前に読んだ ``read_pm()["hotkey"]`` のマッピング全体。
+      保存値が異なると ``stale_hotkey`` で拒否します。``None`` は確認を省略します。
+   :type expected: Mapping or None
+   :param bool dry_run: 変更を確認し、書き込まずに返ります。
+   :returns: 下記の結果。
+   :rtype: dict
+   :raises TypeError: ``changes`` または ``expected`` がマッピングでない場合、
+      Boolean の項目の値が bool でない場合（``1`` は拒否）、ほかの項目の値が文字列でない場合、``dry_run`` が bool でない場合。
+   :raises ValueError: UID が見つからない、不正、または曖昧な場合、項目名が未知の場合、Enum の値が受け付ける識別子でない場合、``expected`` がちょうど 13 個の項目を持たない場合。
+   :raises RuntimeError: Blender のメインスレッド以外から、PME の読み込みが終わる前に、または PME の Preferences を利用できない間に呼び出された場合。書き込みの開始後にも送出します。*補足* を参照。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - キー
+        - 型
+        - 値
+      * - ``status``
+        - str
+        - 下記の *ステータス* を参照。
+      * - ``committed``
+        - bool
+        - ``status`` が ``"committed"`` のときだけ ``True``。
+      * - ``dry_run``
+        - bool
+        - 引数 ``dry_run`` の値。
+      * - ``pm_uid``
+        - str
+        - メニューの UID。
+      * - ``before``
+        - dict
+        - 呼び出し前に読んだ 13 個の項目。
+      * - ``after``
+        - dict
+        - 最後に読んだ 13 個の項目。``status`` が ``"committed"`` でない場合は ``before`` と同じです。
+      * - ``proposed``
+        - dict
+        - 正規化後に、この呼び出しが書き込む、または書き込む予定の割り当て全体。
+      * - ``changed_fields``
+        - list[str]
+        - ``before`` と ``after`` で値が異なる項目。
+      * - ``planned_fields``
+        - list[str]
+        - ``before`` と ``proposed`` で値が異なる項目。
+      * - ``adjustments``
+        - list[dict]
+        - 正規化した項目ごとに一つのエントリ。``field``、``requested``、
+          ``proposed`` を持ちます。*正規化* を参照。
+      * - ``diagnostics``
+        - list[dict]
+        - 問題または警告ごとに一つのエントリ。``code`` と、*診断* に挙げた詳細を持ちます。
+      * - ``registration``
+        - dict
+        - 呼び出し終了時の Blender のキーマップの状態。
+          :ref:`authoring-hotkeys-registration` を参照。
+
+   .. rubric:: ステータス
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - 意味
+      * - ``committed``
+        - ``proposed`` のすべての項目を読み戻しました。キーマップを更新しました。その状態は ``registration`` で確認します。
+      * - ``ready``
+        - ``dry_run=True`` で、変更は実行可能と確認済みです。何も書き込んでいません。``proposed`` と ``planned_fields`` が変更内容を示します。
+          この関数は ``validated`` ではなく ``ready`` を返します。
+      * - ``unchanged``
+        - ``proposed`` が保存された割り当てと同じです。何も書き込んでいません。登録は修復しません。
+      * - ``rejected``
+        - 何も保存していません。``diagnostics`` が原因を示します。
+
+   これらの値の共通の意味は :ref:`authoring-results` で定義しています。
+   書き込みの開始後の失敗は、ステータスを返さずに例外を送出します。
+
+   .. rubric:: 診断
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``stale_hotkey``
+        - ``expected`` の値が保存値と異なります。``fields`` に項目名を列挙します。``dry_run=True`` でも ``status`` は ``rejected`` です。
+      * - ``keymap_names_unavailable``
+        - ``km_name`` を指定しましたが、Blender のユーザーキーマップを読めません。``message`` にエラーが入ります。``status`` は
+          ``rejected`` です。
+      * - ``menu_hotkey_screen_editing_leftmouse``
+        - 割り当てが Screen Editing キーマップに Left Mouse のイベントを置きます。これは通常のクリックを妨げます。``keymap_name`` がキーマップ名を示します。``status`` は ``rejected`` です。
+      * - ``hotkey_write_mismatch``
+        - 書き込んだ項目を読み戻すと、書き込んだ値と異なりました。保存値を復元し、復元を確認しました。``status`` は ``rejected`` です。
+      * - ``current_hotkey_collision``
+        - 警告。メニューの現在の登録が、ほかのキーマップ項目と衝突しています。``severity`` は ``"warning"`` で、``collision`` は
+          ``target`` と ``opponent`` を持ちます。保存は妨げません。
+      * - ``current_hotkey_collision_unavailable``
+        - 衝突の確認で例外が発生しました。``message`` にエラーが入ります。
+
+   .. rubric:: 正規化
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 30 70
+
+      * - 入力
+        - ``proposed`` への影響
+      * - ``km_name`` を指定
+        - ``;`` で分割し、前後の空白を除きます。Blender のユーザー
+          keyconfig のキーマップでない名前は除外します。残りを ``"; "``
+          で連結します。結果が空なら ``"Window"`` になります。
+      * - ``km_name`` を指定しない
+        - 保存された名前を維持します。import したものなど、まだ存在しないキーマップの名前も維持します。
+      * - ``open_mode`` に ``CHORDS`` を指定
+        - ``NONE`` の ``chord`` は ``A`` になります。
+      * - ``open_mode`` にほかのモードを指定
+        - ``chord`` は ``NONE`` になります。
+      * - ``open_mode`` を指定しない
+        - ``chord`` は指定した値、または保存値のままです。
+
+   Screen Editing の確認は、要求したキーマップ名と正規化後のキーマップ名の両方に対して行います。そのため、正規化で除外された名前でも拒否されます。
+   この確認は、ホットキーを持つメニューの種類に適用します。
+
+   .. rubric:: 例
+
+   F6 と Ctrl の割り当てを確認してから適用します。
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid)["hotkey"]
+      changes = {"key": "F6", "ctrl": True, "open_mode": "PRESS"}
+      preview = pme.editing.update_hotkey(
+          pm_uid, changes, expected=before, dry_run=True,
+      )
+      if preview["status"] == "ready":
+          result = pme.editing.update_hotkey(pm_uid, changes, expected=before)
+          print(result["after"], result["registration"])
+
+   .. rubric:: 補足
+
+   * 項目は ``open_mode``、``chord``、その後ほかの項目を表の順に書き込みます。値が異なる項目だけを設定します。キーマップは、すべての項目を読み戻した後に一度だけ更新します。
+   * 最新かどうかは ``expected`` だけで確認します。ホットキーの変更は
+     ``read_pm()["version"]`` を変えません。
+   * ``ready``、``unchanged``、``rejected`` の結果では、``registration`` と衝突の警告は、``proposed`` ではなく保存された割り当てを示します。
+     ``update_hotkey(pm_uid, {}, dry_run=True)`` は、書き込まずに現在の登録を返します。
+   * 書き込みが例外を送出するか、読み戻した値が異なる場合、キーマップに触れる前に保存値を復元します。読み戻しの相違の後に復元を確認できた場合は、``hotkey_write_mismatch`` を含む ``rejected`` を返します。
+     書き込みが例外を送出した場合は、その例外が伝播します。復元を確認できない場合、復元の段階が *Hotkey
+     saved-value restoration is unconfirmed; host application has not
+     started* という note を付けて例外を送出します（値が異なる場合は
+     ``RuntimeError("hotkey_saved_value_restore_mismatch")``）。
+   * キーマップの更新または画面更新が例外を送出した場合、または最後の読み戻しが ``proposed`` と異なる場合
+     （``RuntimeError("hotkey_final_saved_value_mismatch")``）、例外が伝播します。例外には、読み戻した保存値、変更された項目、登録を示す
+     note が付きます。保存値はすでに変わっている場合があります。再試行の前にホットキーを読み直してください。
+   * 新しい ``key_mod`` のマウスボタン observer を登録できない場合、
+     ``key_mod`` を復元し、書き込んだほかの項目は新しい値のままです。
+     この復旧は ``key_mod`` だけが対象で、このとき登録は ``partial`` になる場合があります。
+   * この呼び出しは、選択中のメニューや Slot Editor で編集中の内容の変更、
+     Preferences のディスク保存、Undo ステップの追加、ホットキーの呼び出しを行いません。
+
+.. _authoring-hotkeys-registration:
+
+登録
+============================================================
+
+``registration`` は、このメニューについて PME が Blender のアドオン
+keyconfig に持つキーマップ項目を示します。ユーザーキーマップ間の最終的な優先順位、入力の配送、Poll、実行は証明しません。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``status``
+     - str
+     - 下記を参照。
+   * - ``required``
+     - bool
+     - メニューの種類がホットキーを持ち、メニューが有効で、``key`` が
+       ``NONE`` でなく、Vector Menu では ``open_mode`` が ``CLICK`` でないときに ``True``。
+   * - ``lanes``
+     - list[dict]
+     - 期待するキーマップ項目ごとに一つのエントリ（``km_name`` の各キーマップ
+       × 各イベント）と、残ったキーマップ項目ごとに一つのエントリ。
+   * - ``diagnostics``
+     - list[dict]
+     - 観測の問題。``code`` と、得られる場合は ``keymap_name`` または
+       ``message`` を持ちます。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - ``status``
+     - 意味
+   * - ``not_required``
+     - 登録は不要で、残ったキーマップ項目もありません。
+   * - ``registered``
+     - 期待するキーマップ項目がすべて存在し、一致しています。
+   * - ``partial``
+     - 少なくとも一つの lane が ``reason`` を持ちます。キーマップ項目の欠落・相違・残留、またはマウスボタン observer が未確認の場合です。
+   * - ``unknown``
+     - 登録を完全には観測できませんでした。``diagnostics`` が原因を示します。
+
+Lane
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 18 62
+
+   * - キー
+     - 型
+     - 値
+   * - ``keymap_name``
+     - str
+     - キーマップ項目が属するキーマップ。
+   * - ``event_type``
+     - str
+     - キーマップ項目のイベントの種類。読めなかった残留キーマップ項目では
+       ``"UNKNOWN"``。
+   * - ``expected``
+     - dict or None
+     - PME が登録するキーマップ項目。``type``、``value``、``any``、
+       ``shift``、``ctrl``、``alt``、``oskey``、``hyper`` （``0`` または
+       ``1``）、``key_modifier``、``direction``、``active``、``repeat``、
+       ``idname`` （``"wm.pme_user_pie_menu_call"``）、``pie_menu_name``、
+       ``invoke_mode`` （``"HOTKEY"``）、``keymap``、``source_pm_mode`` を持ちます。残留キーマップ項目では ``None``。
+   * - ``observed``
+     - dict or None
+     - 実際のキーマップ項目から読んだ同じキー。キーマップ項目が存在しない場合は ``None``。
+   * - ``reason``
+     - str or None
+     - ``observed`` が ``expected`` と等しい場合は ``None``。それ以外は下記の理由のいずれか。
+   * - ``mouse_observer``
+     - dict
+     - ``key_mod`` がマウスボタンのときに存在します。``key``、``recorded``
+       （PME が observer を使用中として記録している）、``present`` （有効な
+       observer のキーマップ項目がキーマップに存在する）を持ちます。
+
+``key_mod`` のマウスボタンは observer が扱うため、このとき ``expected`` の
+``key_modifier`` は ``"NONE"`` です。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - ``reason``
+     - 意味
+   * - ``hotkey_kmi_missing``
+     - 期待するキーマップ項目が登録されていません。
+   * - ``hotkey_handle_missing_from_addon``
+     - PME の記録が、アドオン keyconfig にないキーマップ項目を指しています。
+   * - ``hotkey_projection_mismatch``
+     - キーマップ項目が ``expected`` と異なります。
+   * - ``mouse_modifier_observer_unconfirmed``
+     - ``key_mod`` のマウスボタン observer に使用記録がない、または observer
+       が存在しません。
+   * - ``hotkey_projection_unreadable``
+     - キーマップ項目を読めませんでした。``status`` は ``unknown`` です。
+   * - ``unexpected_hotkey_projection``
+     - PME の記録が、そのキーマップについて期待より多くのキーマップ項目を持っています。
+   * - ``untracked_hotkey_projection``
+     - アドオン keyconfig に、PME の記録が追跡していない、このメニューのキーマップ項目があります。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 登録の ``diagnostics`` のコード
+     - 原因
+   * - ``hotkey_owner_unavailable``
+     - 登録が必要ですが、PME にこのメニューの記録がありません。
+       ``status`` は ``unknown`` です。
+   * - ``hotkey_registration_unavailable``
+     - Blender のアドオン keyconfig を読めませんでした。``message`` にエラーが入ります。``status`` は ``unknown`` で、``lanes`` は期待するキーマップ項目だけを列挙します。
+   * - ``hotkey_projection_unreadable``
+     - キーマップ項目を読めませんでした。``message`` にエラーが入ります。
+   * - ``mouse_modifier_owner_remaining``
+     - 登録は不要ですが、マウスボタン observer の使用記録が残っています。
+       ``status`` は ``unknown`` です。
+
+無効なメニュー、``key`` が ``NONE`` のメニュー、``CLICK`` の Vector Menu は登録を必要としません。ステータスが ``not_required`` になるのは、キーマップ項目も observer の使用記録も残っていない場合だけです。

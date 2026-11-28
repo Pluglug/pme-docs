@@ -1,0 +1,1861 @@
+:vocab: developer-facing
+
+.. _authoring-menus:
+
+=====
+Menus
+=====
+
+.. py:currentmodule:: pme
+
+Whole-menu operations: create, find, list and invoke menus (``pme``); read a
+menu's saved definition, change its name, description, Poll, enabled state and
+tags, duplicate and delete menus, and find what refers to a menu
+(``pme.editing``). Slots, layout rows, type settings, hotkeys and the
+definitions of Properties, Property Stacks and Context Routers have their own
+pages. Exporting menus is :py:func:`export_menus` on
+:ref:`authoring-export-validate`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Function
+     - Purpose
+   * - :py:func:`create_pm`
+     - Creates a menu with the default contents of its type.
+   * - :py:func:`find_pm`
+     - Returns a handle to one menu, found by UID or name.
+   * - :py:func:`list_pms`
+     - Returns handles to all menus, optionally filtered.
+   * - :py:func:`list_tags`
+     - Returns the tag names that menus use.
+   * - :py:func:`invoke_pm`
+     - Requests that a menu opens.
+   * - :py:func:`~pme.editing.read_pm`
+     - Returns a menu's saved definition.
+   * - :py:func:`~pme.editing.update_pm`
+     - Changes the name, description, description format and Poll.
+   * - :py:func:`~pme.editing.set_enabled`
+     - Enables or disables menus.
+   * - :py:func:`~pme.editing.update_tags`
+     - Adds and removes tag names on menus.
+   * - :py:func:`~pme.editing.duplicate_pm`
+     - Copies a menu.
+   * - :py:func:`~pme.editing.delete_pms`
+     - Deletes menus.
+   * - :py:func:`~pme.editing.find_references`
+     - Lists the saved places that refer to menus.
+
+Calling rules
+=============
+
+* Menus are addressed by UID. A name can change; find a menu by name with
+  :py:func:`find_pm` and keep its UID for later calls.
+* Every ``pme.editing`` function on this page raises ``RuntimeError`` when it
+  is called off Blender's main thread, before PME has finished loading, or
+  when PME's Preferences are unavailable.
+* No function on this page saves Preferences to disk or adds a Blender Undo
+  step. Only :py:func:`invoke_pm` opens a menu; no function runs a menu's
+  actions.
+* ``status`` values are defined on :ref:`authoring-results`. General rules for
+  editing are on :ref:`authoring-concepts`.
+
+.. _authoring-menu-types:
+
+Menu type identifiers
+=====================
+
+The identifier is the ``mode_id`` of :py:class:`PmCreationSpec`, the ``mode``
+of :py:class:`~pme.types.PMHandle` and ``read_pm()["mode"]``. A menu UID starts
+with its type's prefix and ``_``, for example ``pm_a2b3c4d5``. *Hotkey* tells
+whether the type has a hotkey. ``editable_slots`` is the value
+:py:func:`~pme.editing.read_pm` returns: ``False`` types are edited with their
+own operations, not the slot operations.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 26 14 12 30
+
+   * - ``mode_id``
+     - Name
+     - UID prefix
+     - Hotkey
+     - ``editable_slots``
+   * - ``PMENU``
+     - Pie Menu
+     - ``pm``
+     - yes
+     - ``True``
+   * - ``VMENU``
+     - Vector Menu
+     - ``vm``
+     - yes
+     - ``True``
+   * - ``RMENU``
+     - Regular Menu
+     - ``rm``
+     - yes
+     - ``True``
+   * - ``DIALOG``
+     - Pop-up Dialog
+     - ``pd``
+     - yes
+     - ``True``
+   * - ``FPANEL``
+     - Floating Panel
+     - ``fp``
+     - yes
+     - ``True``
+   * - ``SCRIPT``
+     - Stack Key
+     - ``s``
+     - yes
+     - ``True``
+   * - ``PANEL``
+     - Panel Group
+     - ``pg``
+     - no
+     - ``False``
+   * - ``HPANEL``
+     - Hidden Panel Group
+     - ``hpg``
+     - no
+     - ``False``
+   * - ``STICKY``
+     - Sticky Key
+     - ``sk``
+     - yes
+     - ``True``
+   * - ``MACRO``
+     - Macro Operator
+     - ``mc``
+     - yes
+     - ``True``
+   * - ``MODAL``
+     - Modal Operator
+     - ``md``
+     - yes
+     - ``True``
+   * - ``PROPERTY``
+     - Property
+     - ``pr``
+     - no
+     - ``False``
+   * - ``CONDITION``
+     - Property Stack
+     - ``cn``
+     - no
+     - ``False``
+   * - ``ROUTER``
+     - Context Router
+     - ``rt``
+     - yes
+     - ``False``
+
+Shared result structures
+========================
+
+.. _authoring-menu-snapshot:
+
+Saved menu snapshot
+-------------------
+
+:py:func:`~pme.editing.duplicate_pm` and :py:func:`~pme.editing.delete_pms`
+report a menu's saved state as a detached dictionary. It is the value their
+``expected`` digests are computed from.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 14 56
+
+   * - Key
+     - Type
+     - Value
+   * - ``data``
+     - dict
+     - The menu's saved properties. Its ``pmis`` list keeps the slot
+       properties that are not under ``slots``.
+   * - ``slots``
+     - list[dict]
+     - One entry per slot: ``uid``, ``index``, ``enabled``, ``fields`` (the
+       saved slot fields), ``layout_panel_present`` and ``layout_panel``.
+   * - ``property_stack_hud_present``
+     - bool
+     - Whether Property Stack HUD settings are stored on the menu.
+   * - ``property_stack_hud``
+     - dict
+     - The Property Stack HUD settings.
+
+.. _authoring-menu-selection:
+
+Selection snapshot
+------------------
+
+:py:func:`~pme.editing.duplicate_pm`, :py:func:`~pme.editing.delete_pms` and
+:py:func:`~pme.editing.update_tags` report the editor's menu selection before
+and after the call. A snapshot that could not be read is ``None``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 16 58
+
+   * - Key
+     - Type
+     - Value
+   * - ``active_pm_uid``
+     - str or None
+     - UID of the active menu. ``None`` when there are no menus.
+   * - ``active_index``
+     - int
+     - Collection index of the active menu.
+   * - ``selected_pm_uids``
+     - list[str]
+     - UIDs of the selected menus.
+   * - ``select_mode_active``
+     - bool
+     - Whether Select Mode is on.
+   * - ``tree_row``
+     - dict or None
+     - The selected Tree row: ``pm_uid``, ``pm_name``, ``group``, ``path``,
+       ``label``. ``None`` outside Tree view or without a selected row.
+   * - ``active_visible``
+     - bool or None
+     - Whether the active menu was in the list region when it last drew.
+       ``None`` when unknown.
+   * - ``visibility_scope``
+     - str
+     - ``"last_rendered_region"``. ``active_visible`` does not prove that a
+       new frame has drawn.
+
+Finding and invoking menus
+==========================
+
+.. py:function:: find_pm(name=None, *, uid=None)
+
+   Return a handle to one menu, found by UID or by exact name.
+
+   :param name: Exact menu name. Used only when ``uid`` is not given.
+   :type name: str or None
+   :param uid: Menu UID. When given, ``name`` is ignored.
+   :type uid: str or None
+   :returns: A handle, or ``None`` when no menu matches.
+   :rtype: :py:class:`~pme.types.PMHandle` or None
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      handle = pme.find_pm("Mesh Tools")
+      if handle:
+          pm_uid = handle.uid
+
+   .. rubric:: Notes
+
+   * A UID that is not found returns ``None``. The name is not tried.
+   * A UID search returns the first menu with that UID. It does not detect a
+     UID shared by several menus.
+   * Returns ``None`` when PME's Preferences are unavailable or pending Tag
+     changes cannot be applied.
+   * The handle is a copy taken at the call. It does not follow later changes.
+
+.. py:function:: list_pms(mode=None, *, enabled_only=False)
+
+   Return handles to all menus in collection order.
+
+   :param mode: A menu type identifier (:ref:`authoring-menu-types`). Only
+      menus of that type are returned. ``None`` returns all types. An unknown
+      identifier returns ``[]``.
+   :type mode: str or None
+   :param bool enabled_only: Return only enabled menus.
+   :returns: One handle per menu. ``[]`` when PME's Preferences are unavailable
+      or pending Tag changes cannot be applied.
+   :rtype: list[:py:class:`~pme.types.PMHandle`]
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      for handle in pme.list_pms(mode="PMENU", enabled_only=True):
+          print(handle.uid, handle.name, handle.tag)
+
+.. py:function:: list_tags()
+
+   Return the tag names that menus use.
+
+   :returns: Each used tag name once: in Tag Registry order when the registry
+      is active, otherwise sorted by exact case. ``Untagged`` is not included.
+      ``[]`` when PME's Preferences are unavailable or pending Tag changes
+      cannot be applied.
+   :rtype: list[str]
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      >>> pme.list_tags()
+      ['Modeling', 'Sculpt', 'UV']
+
+.. py:function:: invoke_pm(pm_or_name=None, *, name=None, uid=None)
+
+   Request that a menu opens, as its hotkey does.
+
+   ``True`` means the request was sent without an error. It does not confirm
+   that the menu was displayed or that an action ran.
+
+   :param pm_or_name: A handle or a menu name. Takes precedence over ``name``
+      and ``uid``. A handle is resolved by its ``uid``, so it opens the same
+      menu after the menu or another menu is renamed. A handle with an empty
+      ``uid`` is resolved by its ``name``.
+   :type pm_or_name: :py:class:`~pme.types.PMHandle`, str or None
+   :param name: Menu name. Used when ``pm_or_name`` and ``uid`` are not given.
+   :type name: str or None
+   :param uid: Menu UID. Used when ``pm_or_name`` is not given. Takes
+      precedence over ``name``.
+   :type uid: str or None
+   :returns: Whether the request was sent.
+   :rtype: bool
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      opened = pme.invoke_pm(uid=pm_uid)
+
+   .. rubric:: Notes
+
+   Returns ``False`` without raising when:
+
+   * no menu matches;
+   * the menu is disabled;
+   * the menu's Poll or the current context does not allow it;
+   * the call to Blender's operator raises;
+   * PME is running its startup scripts (``scripts/autorun/``,
+     ``scripts/register/``).
+
+.. py:currentmodule:: pme.types
+
+.. py:class:: PMHandle(name, mode=None, enabled=True, uid='', tag='')
+
+   A copy of one menu's identity, returned by :py:func:`~pme.find_pm` and
+   :py:func:`~pme.list_pms`. Changing its fields changes nothing in PME. The
+   class is ``pme.types.PMHandle``; it is not available as ``pme.PMHandle``.
+
+   .. py:attribute:: name
+      :type: str
+
+      Menu name.
+
+   .. py:attribute:: mode
+      :type: str or None
+
+      Menu type identifier (:ref:`authoring-menu-types`).
+
+   .. py:attribute:: enabled
+      :type: bool
+
+      Whether the menu is enabled.
+
+   .. py:attribute:: uid
+      :type: str
+
+      Menu UID.
+
+   .. py:attribute:: tag
+      :type: str
+
+      The saved tag text: names separated by commas, for example
+      ``"Modeling, Sculpt"``. Empty when the menu has no tag.
+
+.. py:currentmodule:: pme
+
+Creating menus
+==============
+
+.. py:function:: create_pm(spec, *, request_refresh=None)
+
+   Create a menu with the default contents of its type.
+
+   The menu is created as New in the editor creates it. Its slots and settings
+   are edited afterwards: slots with :py:func:`~pme.editing.update_slots`, type
+   settings with :py:func:`~pme.editing.update_settings`, a Property with
+   :py:func:`~pme.editing.update_property`.
+
+   :param PmCreationSpec spec: The menu to create. ``slots`` must be empty and
+      ``data`` must be ``None``.
+   :param request_refresh: Called once with the argument ``"global"`` after the
+      menu is created and the Tree is updated, to redraw the editor. ``None``
+      requests no redraw.
+   :type request_refresh: callable or None
+   :returns: The UID of the new menu, or the rejection codes.
+   :rtype: PmCreationResult
+
+   .. rubric:: Diagnostics
+
+   ``diagnostics`` of the result holds codes, not dictionaries. The checks run
+   in the order of the table. The spec checks report every failing code
+   together. Later checks run only when the earlier ones pass. Every code
+   except ``refresh_failed`` means that no menu was created.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 38 62
+
+      * - Code
+        - Cause
+      * - ``spec_shape_invalid``
+        - ``spec`` is not a :py:class:`PmCreationSpec`, or a field has the
+          wrong type: ``mode_id`` or ``name`` is not a str, ``data`` is not a
+          str or ``None``, ``slots`` is not a tuple or list, or a slot field is
+          not a str. Reported alone.
+      * - ``unknown_mode``
+        - ``mode_id`` is not in :ref:`authoring-menu-types`.
+      * - ``logic_envelope_mode_unsupported``
+        - ``CONDITION`` or ``ROUTER`` with ``slots`` or ``data``.
+      * - ``slot_count_exceeds_fixed``
+        - More slots than the type's fixed count (``PMENU`` and ``VMENU`` 10,
+          ``STICKY`` 2, ``CONDITION`` and ``ROUTER`` 0).
+      * - ``slot_count_below_fixed``
+        - ``STICKY`` with one slot. ``PMENU`` and ``VMENU`` accept fewer slots.
+      * - ``data_marker_mismatch``
+        - The part of ``data`` before ``?`` is not the type's data marker.
+      * - ``data_query_malformed``
+        - A pair after ``?`` in ``data`` is not ``key=value``.
+      * - ``unknown_slot_mode``
+        - A slot's ``mode`` is not ``EMPTY``, ``COMMAND``, ``PROP``, ``MENU``,
+          ``HOTKEY``, ``CUSTOM``, ``INVOKE``, ``FINISH``, ``CANCEL`` or
+          ``UPDATE``.
+      * - ``slots_unsupported_by_create_pm``
+        - ``slots`` is not empty.
+      * - ``data_unsupported_by_create_pm``
+        - ``data`` is not ``None``.
+      * - ``boot_worker_thread_unsupported``
+        - Called off Blender's main thread while PME runs its startup scripts.
+      * - ``boot_refresh_callback_unsupported``
+        - ``request_refresh`` given while PME runs its startup scripts.
+      * - ``route_pm_identity_*``
+        - The saved menus fail the UID check, for example
+          ``route_pm_identity_uid_duplicate`` when several menus share a UID.
+      * - ``route_target_rejected``
+        - The creation target could not be prepared.
+      * - ``route_dry_run_rejected``
+        - The menu collection changed, or the new UID collided, between
+          preparation and writing.
+      * - ``route_apply_failed``
+        - Creating the menu raised. The added entry was removed again. The
+          original exception is printed to Blender's console.
+      * - ``route_receipt_invalid``
+        - The creation step returned no valid result.
+      * - ``refresh_failed``
+        - Not a rejection: ``accepted`` is ``True``. The menu was created, but
+          the Tree update or ``request_refresh`` raised. The exception is
+          printed to Blender's console.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      created = pme.create_pm(pme.PmCreationSpec(mode_id="VMENU", name="Mesh Tools"))
+      print(created.accepted, created.pm_uid, created.diagnostics)
+      if created.accepted:
+          menu = pme.editing.read_pm(created.pm_uid)
+
+   .. rubric:: Notes
+
+   * ``accepted=True`` means the menu exists in Preferences. It does not mean
+     that Preferences were saved to disk, that the menu was invoked, or that it
+     is available at run time immediately.
+   * After ``refresh_failed``, read the returned UID instead of creating the
+     menu again.
+   * Placement, Auto Tag and keymap inheritance follow New in the editor with
+     the current list state. The new menu becomes the active menu.
+   * An empty ``name`` uses the type's default name. A name that is in use
+     receives a suffix such as ``.001``.
+   * A request rejected before the ``route_*`` checks does not read or change
+     Preferences.
+   * From a startup script on the main thread, only the saved menu is created:
+     no hotkey or editor registration and no display refresh run in the call.
+
+.. py:class:: PmCreationSpec(mode_id, name='', slots=(), data=None)
+
+   Frozen dataclass describing a menu for :py:func:`create_pm`.
+
+   .. py:attribute:: mode_id
+      :type: str
+
+      Menu type identifier (:ref:`authoring-menu-types`).
+
+   .. py:attribute:: name
+      :type: str
+
+      Menu name. Empty uses the type's default name.
+
+   .. py:attribute:: slots
+      :type: tuple[PmiSlotSpec, ...]
+
+      Slots of the menu. :py:func:`create_pm` accepts only an empty tuple.
+
+   .. py:attribute:: data
+      :type: str or None
+
+      The raw saved settings string, in the form of ``read_pm()["data"]``.
+      :py:func:`create_pm` accepts only ``None``.
+
+.. py:class:: PmiSlotSpec(mode='EMPTY', name='', text='', icon='')
+
+   Frozen dataclass describing one entry of :py:attr:`PmCreationSpec.slots`.
+   :py:func:`create_pm` rejects a spec with slots
+   (``slots_unsupported_by_create_pm``); add and edit slots after creation.
+
+   .. py:attribute:: mode
+      :type: str
+
+      Slot type, such as ``COMMAND`` or ``MENU``.
+
+   .. py:attribute:: name
+      :type: str
+
+      Slot label.
+
+   .. py:attribute:: text
+      :type: str
+
+      Saved slot text.
+
+   .. py:attribute:: icon
+      :type: str
+
+      Icon name.
+
+.. py:class:: PmCreationResult(accepted, pm_uid, diagnostics)
+
+   Frozen dataclass returned by :py:func:`create_pm`. Also available as
+   ``pme.types.PmCreationResult``.
+
+   .. py:attribute:: accepted
+      :type: bool
+
+      ``True`` when the menu was created.
+
+   .. py:attribute:: pm_uid
+      :type: str
+
+      UID of the new menu. ``""`` when rejected.
+
+   .. py:attribute:: diagnostics
+      :type: tuple[str, ...]
+
+      Rejection codes, ``("refresh_failed",)`` after a creation whose display
+      refresh failed, or ``()``. See :py:func:`create_pm`.
+
+.. py:currentmodule:: pme.editing
+
+Reading a menu
+==============
+
+.. py:function:: read_pm(pm_uid, *, slot_uids=None)
+
+   Return one menu's saved definition as plain Python values.
+
+   Reading runs nothing: no Poll, description expression, Getter or Setter is
+   evaluated, and tags are not synchronized.
+
+   :param str pm_uid: UID of the menu.
+   :param slot_uids: UIDs of the slots to include in ``slots``. ``None``
+      includes every slot. ``rows`` is complete either way.
+   :type slot_uids: iterable of str or None
+   :returns: The definition described below.
+   :rtype: dict
+   :raises ValueError: The UID is missing, invalid or ambiguous, or a UID in
+      ``slot_uids`` is not a slot of the menu.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 12 16 50
+
+      * - Key
+        - Type
+        - Present for
+        - Value
+      * - ``uid``
+        - str
+        - all
+        - UID of the menu.
+      * - ``name``
+        - str
+        - all
+        - Menu name.
+      * - ``mode``
+        - str
+        - all
+        - Menu type identifier (:ref:`authoring-menu-types`).
+      * - ``enabled``
+        - bool
+        - all
+        - Whether the menu is enabled.
+      * - ``description``
+        - str
+        - all
+        - The menu's description, or the expression that returns it.
+      * - ``description_is_expr``
+        - bool
+        - all
+        - ``True`` when ``description`` is a Python expression.
+      * - ``poll_cmd``
+        - str
+        - all
+        - Poll source, the body of ``def poll(cls, context):``. See
+          :py:func:`update_pm`.
+      * - ``tags``
+        - list[str]
+        - all
+        - Tag names in the saved tag text, sorted, each once. ``[]`` for an
+          untagged menu.
+      * - ``hotkey``
+        - dict
+        - all
+        - The saved hotkey binding. See :ref:`authoring-hotkeys`.
+      * - ``data``
+        - str
+        - all
+        - The raw saved settings string: the type's marker, then ``?`` and
+          ``key=value`` pairs joined by ``&``. Read values from ``settings``.
+      * - ``settings``
+        - dict
+        - all
+        - Setting name mapped to its current value. ``{}`` for a type without
+          settings. See :ref:`authoring-settings`.
+      * - ``settings_diagnostics``
+        - list[dict]
+        - unreadable ``data``
+        - Present only when ``data`` cannot be parsed. One entry with the code
+          ``settings_data_unreadable``; ``settings`` is then ``{}``. See
+          :ref:`authoring-settings`.
+      * - ``version``
+        - int
+        - all
+        - The menu's edit counter, passed as ``expected_version`` to slot and
+          layout operations. Session-local; ``0`` when the menu has no version
+          yet. It does not detect every raw Python write.
+      * - ``editable_slots``
+        - bool
+        - all
+        - ``False`` for types edited with their own operations
+          (:ref:`authoring-menu-types`).
+      * - ``slots``
+        - list[dict]
+        - all
+        - One entry per slot in saved order, or only the slots named in
+          ``slot_uids``. Each entry is described in
+          :ref:`authoring-slot-snapshot`.
+      * - ``rows``
+        - list[dict]
+        - ``DIALOG``, ``FPANEL``
+        - The layout rows, always complete. See :ref:`authoring-layout-rows`.
+      * - ``router``
+        - dict
+        - ``ROUTER``
+        - The Context Router definition. See :ref:`authoring-router`.
+      * - ``property_stack``
+        - dict
+        - ``CONDITION``
+        - The Property Stack definition. See :ref:`authoring-property-stack`.
+      * - ``property``
+        - dict
+        - ``PROPERTY``
+        - The Property definition. See :ref:`authoring-property`.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      menu = pme.editing.read_pm(pm_uid)
+      print(menu["mode"], menu["name"], [slot["uid"] for slot in menu["slots"]])
+
+   .. rubric:: Notes
+
+   * The returned values are detached copies. Changing them changes nothing.
+   * A slot's ``text`` is the stored text. :py:func:`read_slot_inputs` returns
+     the same slots under the input names that :py:func:`update_slots`
+     accepts.
+   * ``tags`` reads the saved tag text without synchronization. A saved
+     empty-name membership (``""``) and a literal ``"Untagged"`` stay
+     distinct. :py:attr:`PMHandle.tag <pme.types.PMHandle.tag>`,
+     :py:func:`~pme.list_tags` and ``PMItem.get_tags()`` keep their own
+     formats.
+
+Name, description and Poll
+==========================
+
+.. py:function:: update_pm(pm_uid, changes, *, expected=None)
+
+   Change a menu's name, description, description format or Poll source.
+
+   Fields are saved one at a time; the call is not atomic. The first rejected
+   field stops the sequence. Fields saved before it stay saved.
+
+   :param str pm_uid: UID of the menu.
+   :param dict changes: Field name mapped to its new value. Accepted names:
+      ``name``, ``description``, ``description_is_expr``, ``poll_cmd``.
+      Fields that are not named keep their values.
+   :param expected: Field name mapped to the value it must have now. Any subset
+      of the four fields. On a mismatch nothing is written
+      (``stale_metadata``).
+   :type expected: dict or None
+   :returns: The result described below.
+   :rtype: dict
+   :raises TypeError: ``changes`` or ``expected`` is not a mapping,
+      ``description_is_expr`` is not a bool, or another value is not a str.
+   :raises ValueError: A field name is not one of the four, a string contains a
+      NUL character or text that cannot be encoded as UTF-8, or the UID is
+      missing, invalid or ambiguous.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - Key
+        - Type
+        - Value
+      * - ``status``
+        - str
+        - See *Status* below.
+      * - ``committed``
+        - bool
+        - ``True`` only when ``status`` is ``"committed"``.
+      * - ``pm_uid``
+        - str
+        - The ``pm_uid`` argument.
+      * - ``before``
+        - dict
+        - The four fields read before the call.
+      * - ``after``
+        - dict
+        - The four fields read after the call.
+      * - ``changed_fields``
+        - list[str]
+        - Fields whose value differs between ``before`` and ``after``,
+          including changes made by editor callbacks.
+      * - ``fields``
+        - list[dict]
+        - One entry per attempted field, in save order: ``field``, ``status``
+          (``committed``, ``unchanged`` or ``rejected``), ``before``,
+          ``after`` and ``diagnostics``.
+      * - ``pending``
+        - list[str]
+        - Fields that were not attempted.
+      * - ``side_effects``
+        - list[dict]
+        - Present only when ``name`` is in ``changes`` and a slot of any menu
+          changed. One entry per slot: ``pm_uid``, ``pmi_uid``, ``before``,
+          ``after``.
+      * - ``diagnostics``
+        - list[dict]
+        - The diagnostics of all fields, or the ``stale_metadata`` entry.
+
+   .. rubric:: Status
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - Meaning
+      * - ``committed``
+        - At least one field was saved and none was rejected. Other fields can
+          be ``unchanged``.
+      * - ``unchanged``
+        - Every field already had the requested value, or ``changes`` is
+          empty. Nothing was written.
+      * - ``partial``
+        - A field was rejected after an earlier field or a callback changed
+          saved values. Inspect ``fields``, ``pending``, ``before``/``after``
+          and ``side_effects`` before retrying.
+      * - ``rejected``
+        - Nothing changed: ``expected`` did not match, or a field was rejected
+          before any value changed.
+
+   .. rubric:: Diagnostics
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``stale_metadata``
+        - A value in ``expected`` differs from the saved value. ``fields``
+          lists the names.
+      * - ``rename_rejected``
+        - The editor kept the old name for a different, non-empty name.
+      * - ``name_adjusted``
+        - The saved name differs from the requested one: ``@`` was removed,
+          or a suffix such as ``.001`` was added because the name is in use.
+          ``requested`` and ``actual`` give both names.
+      * - ``metadata_value_not_retained``
+        - A setter did not keep the requested ``description``,
+          ``description_is_expr`` or ``poll_cmd``.
+      * - ``poll_compile_error``
+        - ``poll_cmd`` was saved but does not compile. ``message`` gives the
+          error. The field status is not changed by this diagnostic.
+
+   .. rubric:: Example
+
+   Add a plain-text menu description, checking that the four fields are
+   unchanged since they were read:
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid)
+      fields = ("name", "description", "description_is_expr", "poll_cmd")
+      result = pme.editing.update_pm(pm_uid, {
+          "description_is_expr": False,
+          "description": "Mesh tools. Unmatched contexts keep Blender's shortcut.",
+      }, expected={key: before[key] for key in fields})
+      print(result["status"], result["after"], result["diagnostics"])
+
+   .. rubric:: Notes
+
+   * When both ``description`` and ``description_is_expr`` are given,
+     ``description_is_expr`` is saved first, so the format conversion does not
+     rewrite the supplied description. Other editor callbacks can also change
+     saved values; they appear in ``changed_fields``.
+   * Renaming uses the editor's rename: Menu slots that link the menu, Panel
+     Group items named after a renamed Pop-up Dialog, the Tree and hotkey
+     registration are updated. Command, Custom and Poll source text and a
+     Router target's ``fallback_name`` are not rewritten and not listed in
+     ``side_effects``; name-based calls in them keep the old name.
+   * ``@`` is removed from a requested name. An empty name, or the current
+     name, leaves the name unchanged.
+   * Renaming a Property Stack whose Property ID is not locked can generate a
+     new ID. Read ``property_stack["registered_property_id"]`` again after
+     renaming; widgets that embed the old ID are not rewritten.
+   * ``poll_cmd`` is appended to ``def poll(cls, context):``. A single-line
+     body such as ``"return context.mode == 'EDIT_MESH'"`` is valid as it is.
+     A multi-line body starts with a newline and indents its lines.
+   * Poll source that does not compile is saved, as in the editor, with
+     ``poll_compile_error``. Slot ``cmd``, ``prop`` and ``custom`` syntax
+     errors are instead rejected before the slot is saved. Neither check
+     proves run-time behavior.
+   * Enabled state, hotkeys and type settings are not fields of this
+     function. The Poll and description sources are not evaluated.
+   * An unexpected exception keeps its traceback and gains a note naming the
+     committed fields. Read the menu and the menus that refer to it before
+     retrying.
+
+Enabling and disabling
+======================
+
+.. py:function:: set_enabled(pm_uids, enabled, *, expected=None, dry_run=False)
+
+   Enable or disable menus, as the editor's batch Enable and Disable do.
+
+   All targets are checked before the first write. If a write fails, the
+   enabled values already written are restored.
+
+   :param pm_uids: Unique menu UIDs. Targets are processed in collection
+      order. An empty iterable returns ``unchanged``.
+   :type pm_uids: non-string iterable of str
+   :param bool enabled: The value for every target.
+   :param expected: Each requested UID mapped to the saved value it must have
+      now; exactly the requested UIDs. On a mismatch the call is rejected
+      before writing. ``None`` uses the values read at the start of the call.
+   :type expected: dict[str, bool] or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described below.
+   :rtype: dict
+   :raises TypeError: ``enabled`` or ``dry_run`` is not a bool (an int is not
+      accepted), ``pm_uids`` is a string, or ``expected`` is not a mapping of
+      bools.
+   :raises ValueError: ``pm_uids`` contains an invalid or duplicate UID, or
+      ``expected`` does not name exactly the requested UIDs.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 18 60
+
+      * - Key
+        - Type
+        - Value
+      * - ``status``
+        - str
+        - See *Status* below.
+      * - ``committed``
+        - bool
+        - ``True`` only when ``status`` is ``"committed"``.
+      * - ``dry_run``
+        - bool
+        - The ``dry_run`` argument.
+      * - ``target_uids``
+        - list[str]
+        - The targets in collection order, or as given when they could not be
+          resolved.
+      * - ``before``
+        - dict[str, bool]
+        - Saved values at the start of the call. ``{}`` when the targets could
+          not be resolved.
+      * - ``after``
+        - dict[str, bool]
+        - Values read after the call. A target that could not be read is
+          omitted and named in ``diagnostics``. After a dry run, the current
+          values.
+      * - ``expected``
+        - dict[str, bool]
+        - A copy of ``before``, to pass as ``expected``. It is not the new
+          state, also after a commit.
+      * - ``planned_uids``
+        - list[str]
+        - Targets whose saved value differs from ``enabled``.
+      * - ``attempted_uids``
+        - list[str]
+        - Targets whose setter was called. ``[]`` after a dry run.
+      * - ``changed_uids``
+        - list[str]
+        - Targets changed by the call. ``[]`` after a dry run and after a
+          confirmed restore.
+      * - ``registration``
+        - dict[str, dict]
+        - Per target, the hotkey registration observed after the call:
+          ``scope`` (``"hotkey"``), ``status`` (``not_required``,
+          ``registered``, ``partial`` or ``unknown``), ``required``, ``lanes``
+          and ``diagnostics``. See :ref:`authoring-hotkeys`.
+      * - ``selection``
+        - dict
+        - ``before`` and ``after``: ``active_pm_uid``, ``active_index``,
+          ``selected_pm_uids``, ``select_mode_active``, ``tree_cursor`` and
+          ``mode``, or ``None`` when unreadable.
+      * - ``visibility``
+        - dict
+        - ``before`` and ``after``: ``scope`` (``"last_rendered_region"``),
+          ``status`` (``observed`` or ``unknown``), ``visible_uids`` and
+          ``targets`` (UID mapped to bool or ``None``).
+      * - ``owner_status``
+        - str
+        - Status of the shared batch operation: ``APPLIED``, ``VALIDATED``,
+          ``NO_CHANGE``, ``REJECTED``, ``RESTORED_FAILURE`` or
+          ``ROLLBACK_FAILED``.
+      * - ``reason``
+        - str
+        - The rejection or failure code. ``""`` when there is none.
+      * - ``rollback_reason``
+        - str
+        - Why a restore was not confirmed. ``""`` when there is none.
+      * - ``diagnostics``
+        - list[dict]
+        - See *Diagnostics* below.
+
+   .. rubric:: Status
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - Meaning
+      * - ``validated``
+        - ``dry_run=True`` and at least one value would change. Nothing was
+          written.
+      * - ``unchanged``
+        - Every target already has the value, or ``pm_uids`` is empty. No
+          setter ran and hotkey registration was not repaired.
+      * - ``committed``
+        - Every value was written and read back.
+      * - ``rejected``
+        - Nothing was written. ``diagnostics`` names the cause.
+      * - ``restored_failure``
+        - A write failed and the restored enabled values were confirmed.
+      * - ``unknown``
+        - A write failed and the restore could not be confirmed. Read the
+          menus before retrying.
+
+   .. rubric:: Diagnostics
+
+   The rejection or failure entry has ``code`` (the ``reason``) and
+   ``rollback_reason``.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 42 58
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``pm_availability_target_missing``
+        - A UID is not in the menu collection.
+      * - ``pm_availability_live_identity_invalid``
+        - The saved menus fail the UID check, for example when several menus
+          share a UID. The check covers the whole collection, not only the
+          targets.
+      * - ``pm_availability_expected_mismatch``
+        - A value in ``expected`` differs from the saved value. ``before``
+          holds the saved values.
+      * - ``pm_availability_target_state_unavailable``
+        - A target's enabled value could not be read.
+      * - ``pm_availability_collection_stale``
+        - The menu collection changed during the call. Also a
+          ``rollback_reason``.
+      * - ``pm_availability_target_stale``
+        - A target's value changed before its write.
+      * - ``pm_availability_apply_failed``
+        - A setter raised.
+      * - ``pm_availability_apply_readback_mismatch``
+        - A setter did not keep the value.
+      * - ``pm_availability_post_apply_mismatch``
+        - The final read differs from the requested value.
+      * - ``pm_availability_rollback_incomplete``
+        - Only as ``rollback_reason``: the restored values could not all be
+          confirmed.
+      * - ``pm_availability_target_unavailable``
+        - After the call, a target could not be resolved. ``pm_uid``,
+          ``phase`` and ``reason`` (the resolver status).
+      * - ``pm_availability_readback_unavailable``
+        - Reading a target after the call raised. ``pm_uid``, ``phase``,
+          ``exception_type``.
+      * - ``pm_availability_registration_unavailable``
+        - Reading a target's hotkey registration raised. ``pm_uid``,
+          ``phase``, ``exception_type``.
+      * - ``pm_availability_context_unavailable``
+        - Selection and visibility could not be read. ``phase`` (``before``
+          or ``after``), ``exception_type``.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      preview = pme.editing.set_enabled([pm_uid], False, dry_run=True)
+      print(preview["status"], preview["before"], preview["planned_uids"])
+      if preview["status"] == "validated":
+          result = pme.editing.set_enabled(
+              [pm_uid], False, expected=preview["expected"],
+          )
+          print(result["status"], result["after"], result["registration"])
+          print(result["diagnostics"])
+
+   .. rubric:: Notes
+
+   * ``committed`` confirms the saved enabled values only. ``registration``
+     reports the current hotkey state. It does not check Macro, Property,
+     Property Stack or Panel resources, Poll, Getter or Setter, or whether
+     actions run. A registration warning or ``unknown`` observation does not
+     change a committed ``status``.
+   * A disabled menu, a menu without a key, a type without a hotkey and a
+     Vector Menu with Open Mode ``CLICK`` require no hotkey registration
+     (``not_required``).
+   * After a dry run, ``registration`` is the current registration, not a
+     prediction.
+   * A dry run does not reserve the targets or prove that their callbacks will
+     succeed. A later call resolves and checks again.
+   * A restore covers enabled values only, not other saved fields or editor
+     resources. After a failure, read ``before``, ``after``,
+     ``attempted_uids``, ``changed_uids``, ``reason``, ``rollback_reason`` and
+     ``diagnostics`` together.
+   * The selection, open drafts (also one owned by a target) and list filters
+     stay as they are, even when a target becomes hidden. ``visibility`` is
+     the last-rendered region's evidence, can be ``unknown``, and does not
+     prove that a new frame has drawn.
+
+Tags
+====
+
+.. py:function:: update_tags(pm_uids, *, add=(), remove=(), expected=None, dry_run=False)
+
+   Add and remove tag names on several menus in one batch.
+
+   The call has two phases: the normal Tag synchronization, then the batch
+   write that the editor's tag operations use. They are not one atomic
+   transaction.
+
+   :param pm_uids: Unique menu UIDs.
+   :type pm_uids: non-string iterable of str
+   :param add: Names to add. Each is trimmed. A comma separates several names.
+      An empty name and ``Untagged`` are ignored and listed in
+      ``ignored_names``.
+   :type add: non-string iterable of str
+   :param remove: Exact names to remove. Not trimmed, not split at commas.
+   :type remove: non-string iterable of str
+   :param expected: The complete ``expected`` of an earlier result of this
+      function, passed unchanged: ``activated``, ``targets_digest`` and
+      ``definitions_digest``. It is compared before synchronization.
+   :type expected: dict or None
+   :param bool dry_run: Check and return without synchronizing or writing.
+   :returns: The result described below.
+   :rtype: dict
+   :raises TypeError: ``dry_run`` is not a bool, ``pm_uids``, ``add`` or
+      ``remove`` is a string or contains a non-string, or
+      ``expected["activated"]`` is not a bool.
+   :raises ValueError: ``pm_uids`` contains an invalid or duplicate UID, a UID
+      is missing or ambiguous, ``remove`` contains a name twice, a name occurs
+      twice across ``add`` or in both ``add`` and ``remove``, or ``expected``
+      is not a mapping with exactly the three keys or has a digest that is not
+      a lowercase SHA-256 hex string.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 18 60
+
+      * - Key
+        - Type
+        - Value
+      * - ``status``
+        - str
+        - See *Status* below.
+      * - ``committed``
+        - bool
+        - ``True`` only when ``status`` is ``"committed"``.
+      * - ``dry_run``
+        - bool
+        - The ``dry_run`` argument.
+      * - ``target_uids``
+        - list[str]
+        - The ``pm_uids`` argument.
+      * - ``expected``
+        - dict or None
+        - ``activated``, ``targets_digest`` and ``definitions_digest`` of the
+          state read at the start. ``None`` when that read failed.
+      * - ``before``
+        - dict or None
+        - Per target, read before synchronization: ``raw`` (saved tag text),
+          ``tags``, ``ref_uids`` and ``projection_stamp``.
+      * - ``after``
+        - dict or None
+        - The same keys, read after the call. ``None`` when unreadable.
+      * - ``changed_uids``
+        - list[str] or None
+        - Targets whose values differ between synchronization and the final
+          read. ``None`` after a failed phase.
+      * - ``synchronized``
+        - dict or None
+        - Changes made by the normal synchronization, to any menu or tag
+          definition: ``pms``, ``definitions``, ``version`` and
+          ``activated``, as present. Can be set when ``status`` is
+          ``unchanged``.
+      * - ``ignored_names``
+        - list[dict]
+        - Per ignored ``add`` entry: ``name`` and ``reason``
+          (``"legacy_add_noop"``).
+      * - ``selection``
+        - dict
+        - ``before`` and ``after``: a :ref:`selection snapshot
+          <authoring-menu-selection>` with ``active_hidden_by_list_filter``
+          and ``list_filter_scope`` (``"mode_tag_new_health"``).
+      * - ``recovery``
+        - dict or None
+        - Set after a failed phase: ``phase``, ``baseline``,
+          ``carrier_matches``, ``attempted`` (``None``) and ``scope``
+          (``"tag_carrier"``).
+      * - ``diagnostics``
+        - list[dict]
+        - See *Diagnostics* below.
+
+   .. rubric:: Status
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - Meaning
+      * - ``validated``
+        - ``dry_run=True``, there are targets and changes, and ``expected``
+          matches. Nothing was written.
+      * - ``unchanged``
+        - There are no targets, or neither ``add`` nor ``remove`` has an
+          entry, or the batch write changed no menu. Inspect
+          ``synchronized`` separately.
+      * - ``committed``
+        - The batch write changed at least one menu.
+      * - ``rejected``
+        - Saved tag data is unchanged: ``expected`` is stale, the start
+          state could not be read, or synchronization failed and the saved
+          tag data still equals ``before``.
+      * - ``unknown``
+        - The batch write failed, or synchronization failed and the saved tag
+          data differs from ``before`` or could not be read. Read the values
+          before retrying.
+
+   .. rubric:: Diagnostics
+
+   Each entry has ``phase`` and ``code``. Entries caused by an exception also
+   have ``exception_type`` and ``message``.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 40 60
+
+      * - ``code``
+        - Cause
+      * - ``tag_expected_stale``
+        - ``expected`` differs from the current state. Phase ``preflight``.
+      * - ``tag_snapshot_failed``
+        - The tag data could not be read at the start.
+      * - ``tag_update_failed``
+        - Synchronization or the batch write raised. Phase ``synchronize`` or
+          ``batch``. An exception that carries its own code reports that code
+          instead.
+      * - ``tag_carrier_readback_failed``, ``tag_targets_readback_failed``
+        - The values after the call could not be read.
+      * - ``tag_synchronization_readback_failed``
+        - The synchronization changes could not be read after a failure.
+      * - ``tag_selection_readback_failed``, ``tag_filter_readback_failed``
+        - The selection or the list filter state could not be read.
+      * - ``refresh_pending``
+        - The display refresh was deferred. Phase ``refresh``.
+      * - ``tag_refresh_failed``
+        - The display refresh raised. Phase ``refresh``.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      targets = [first_pm_uid, second_pm_uid]
+      preview = pme.editing.update_tags(
+          targets, add=["Review"], remove=["Draft"], dry_run=True,
+      )
+      if preview["status"] == "validated":
+          result = pme.editing.update_tags(
+              targets, add=["Review"], remove=["Draft"], expected=preview["expected"],
+          )
+          print(result["status"], result["after"], result["synchronized"])
+      print(pme.editing.read_pm(first_pm_uid)["tags"])
+
+   .. rubric:: Notes
+
+   * The batch uses the editor's tag writer, with the Tag Registry active or
+     inactive. It does not delete tag definitions.
+   * Names keep their case and Unicode. ``add=["A,B"], remove=["B"]`` is a
+     conflict (``ValueError``). Ignored additions still take part in the
+     duplicate checks. There is no additional name-length limit.
+   * The write can normalize the order and duplicates of the saved tag text
+     even when the set of names does not change, for example for an existing
+     membership or a missing removal. Compare the saved values, not name sets.
+   * ``expected`` survives a JSON round trip. It covers the targets' saved tag
+     text, references and projection stamps and the registry definitions.
+     A stale ``expected`` is rejected without writing.
+   * A dry run checks the inputs, the targets and the name transformation. It
+     does not synchronize, allocate UIDs or predict new definitions, and does
+     not prove that a later write succeeds.
+   * Empty changes or an empty target set return ``unchanged`` after the
+     ``expected`` check, without synchronization or refresh.
+   * ``recovery.carrier_matches`` compares saved tag data with ``baseline``:
+     ``"before"`` when synchronization failed, ``"after_synchronize"`` when
+     the batch write failed. ``True`` proves equality of saved data only.
+     ``attempted`` is ``None`` because rollback execution is not known; a
+     match is not reported as ``restored_failure``.
+   * A failed readback or refresh after a successful batch write does not
+     change a committed result.
+   * The active menu, the selected menus and the open draft stay as they are.
+     The same Tree row stays selected when it is still available and the
+     refresh succeeds. ``active_hidden_by_list_filter`` is the current mode,
+     tag, new and health filter result, without name search and collapsed
+     rows; ``None`` when unknown.
+
+Duplicating
+===========
+
+.. py:function:: duplicate_pm(source_pm_uid, *, name=None, expected=None, dry_run=False)
+
+   Copy one menu and insert the copy immediately after its source.
+
+   The copy is made by the editor's Duplicate. The active menu, the selection
+   and the open draft stay as they are; the editor's Duplicate selects the
+   copy, this function does not.
+
+   :param str source_pm_uid: UID of the menu to copy.
+   :param name: Name of the copy. ``None`` or ``""`` uses the source name as
+      the base. The name goes through the unique-name step without trimming.
+   :type name: str or None
+   :param expected: The complete ``expected`` of a dry run, passed unchanged:
+      ``collection_version``, ``source_pm_uid`` and ``source_digest``.
+   :type expected: dict or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described below.
+   :rtype: dict
+   :raises TypeError: ``source_pm_uid`` is not a non-empty str, ``name`` is not
+      a str or ``None``, ``dry_run`` is not a bool, ``expected`` is not a
+      mapping, or one of its values has the wrong type.
+   :raises ValueError: ``expected`` does not have exactly the three keys, or
+      its ``collection_version`` is negative.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 28 16 56
+
+      * - Key
+        - Type
+        - Value
+      * - ``status``
+        - str
+        - See *Status* below.
+      * - ``committed``
+        - bool
+        - ``True`` only when ``status`` is ``"committed"``.
+      * - ``dry_run``
+        - bool
+        - The ``dry_run`` argument.
+      * - ``source_pm_uid``
+        - str
+        - The ``source_pm_uid`` argument.
+      * - ``created``
+        - dict or None
+        - ``pm_uid``, ``name`` and collection ``index`` of the copy. ``None``
+          after a dry run or when no copy exists.
+      * - ``before``
+        - dict
+        - ``pm_uids`` (collection order), ``source`` (a :ref:`saved menu
+          snapshot <authoring-menu-snapshot>`) and ``created`` (always
+          ``None``).
+      * - ``after``
+        - dict
+        - The same keys, read after the call. ``created`` is the copy's saved
+          snapshot.
+      * - ``expected``
+        - dict or None
+        - ``collection_version``, ``source_pm_uid`` and ``source_digest``.
+          ``None`` when the source could not be read.
+      * - ``collection_version_before``, ``collection_version_after``
+        - int or None
+        - Version of the menu collection before and after the call.
+      * - ``selection_before``, ``selection_after``
+        - dict or None
+        - :ref:`Selection snapshots <authoring-menu-selection>`.
+      * - ``not_inherited``
+        - list[str]
+        - ``key``, ``any``, ``ctrl``, ``shift``, ``alt``, ``oskey``,
+          ``key_mod``, ``enabled``.
+      * - ``recovery``
+        - dict
+        - ``attempted`` (``False``, ``True`` or ``None`` when unknown), and
+          ``uid_order``, ``active_uid`` and ``source_digest``: whether each
+          equals its value before the call (bool or ``None``). ``data_scope``
+          is ``"collection_order_active_uid_source_saved_values"``.
+      * - ``diagnostics``
+        - list[dict]
+        - See *Diagnostics* below.
+
+   .. rubric:: Status
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - Meaning
+      * - ``validated``
+        - ``dry_run=True`` and the checks passed. Nothing was written.
+      * - ``rejected``
+        - Nothing was written. ``diagnostics`` names the cause.
+      * - ``committed``
+        - The Duplicate committed.
+      * - ``restored_failure``
+        - The Duplicate failed. The original UID order, active UID and
+          source saved values were read back unchanged.
+      * - ``unknown``
+        - The outcome or the recovery could not be confirmed. Read the
+          collection before retrying.
+
+   .. rubric:: Diagnostics
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 38 62
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``pm_identity_*``
+        - The saved menus fail the UID check, for example
+          ``pm_identity_uid_duplicate`` when several menus share a UID.
+      * - ``pm_duplicate_source_unavailable``
+        - No menu has ``source_pm_uid``.
+      * - ``pm_duplicate_unsupported_mode``
+        - The source's type is not a known menu type.
+      * - ``pm_duplicate_stale_expected``
+        - ``expected`` differs from the current collection version or source.
+      * - ``pm_duplicate_snapshot_failed``
+        - Reading the state at the start raised. ``exception_type``,
+          ``message``.
+      * - ``target_rejected``, ``dry_run_rejected``
+        - The Duplicate refused before writing, for example because the
+          collection or the source changed. ``status`` is ``rejected``.
+      * - ``apply_failed``
+        - The Duplicate raised while writing and ran its rollback. ``status``
+          is ``restored_failure`` or ``unknown``.
+      * - ``pm_duplicate_failed``
+        - The Duplicate raised outside its own handling. ``status`` is
+          ``unknown``. ``exception_type``, ``message``.
+      * - ``pm_duplicate_refresh_failed``
+        - After the commit, the display refresh or the Tree selection restore
+          failed. The commit stands.
+      * - ``pm_duplicate_readback_failed``
+        - A value after the call could not be read; it is ``None``.
+          ``field``, ``exception_type``, ``message``.
+      * - ``pm_duplicate_readback_unavailable``
+        - The source or the copy could not be resolved after the call.
+          ``field``.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      preview = pme.editing.duplicate_pm(pm_uid, name="Working copy", dry_run=True)
+      print(preview["status"], preview["not_inherited"])
+      if preview["status"] == "validated":
+          result = pme.editing.duplicate_pm(
+              pm_uid, name="Working copy", expected=preview["expected"],
+          )
+          print(result["status"], result["created"], result["diagnostics"])
+
+   .. rubric:: Notes
+
+   * The copy is placed after its source in collection order, whatever the
+     active menu or the displayed sort order.
+   * The copy and its slots receive new UIDs. Slot contents, slot ``enabled``,
+     tags and the editor's type-specific copy behavior are kept. References in
+     the copy keep their targets.
+   * The fields in ``not_inherited`` are not copied: the copy starts enabled,
+     without a hotkey key.
+   * A Property Stack copy keeps the HUD appearance with monitoring off, and
+     does not reuse the source's Property ID.
+   * A dry run creates no UID, initializes no version, changes no selection,
+     registers nothing and writes no HUD settings. It does not reserve a name
+     or fix the collection order.
+   * ``expected`` survives a JSON round trip. It covers the source's saved
+     values, including edits that do not update a version, and the collection
+     version.
+   * The same Tree row stays selected when it still exists. A copy hidden by a
+     filter does not cause another menu to be selected.
+   * A failed refresh or readback does not undo a confirmed commit.
+     ``recovery`` covers only the Duplicate's own rollback and its saved-data
+     checks, not editor registration or host resources.
+
+Deleting
+========
+
+.. py:function:: delete_pms(pm_uids, *, expected=None, dry_run=False)
+
+   Delete menus, as the editor's Selected Remove does.
+
+   References to the deleted menus are reported, not removed or rewritten. A
+   surviving menu can keep a link to a deleted menu.
+
+   :param pm_uids: One or more unique menu UIDs, including a one-element list
+      for one menu. Targets are processed in collection order.
+   :type pm_uids: non-string iterable of str
+   :param expected: The complete ``expected`` of a dry run, passed unchanged:
+      ``collection_version``, ``collection_digest``, ``target_digests`` and
+      ``references_digest``. ``None`` uses the state read at the start of the
+      call.
+   :type expected: dict or None
+   :param bool dry_run: Check and return without deleting.
+   :returns: The result described below.
+   :rtype: dict
+   :raises TypeError: ``pm_uids`` is a string, or ``dry_run`` is not a bool.
+   :raises ValueError: ``pm_uids`` is empty or contains an invalid or duplicate
+      UID, or ``expected`` is malformed: missing keys, a negative
+      ``collection_version``, ``target_digests`` keys other than the requested
+      UIDs, or a digest that is not a lowercase SHA-256 hex string.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 28 16 56
+
+      * - Key
+        - Type
+        - Value
+      * - ``status``
+        - str
+        - See *Status* below.
+      * - ``committed``
+        - bool
+        - ``True`` only when ``status`` is ``"committed"``.
+      * - ``dry_run``
+        - bool
+        - The ``dry_run`` argument.
+      * - ``target_uids``
+        - list[str]
+        - The targets in collection order, or as given when they could not be
+          resolved.
+      * - ``before``
+        - dict
+        - Per target, a :ref:`saved menu snapshot <authoring-menu-snapshot>`
+          read at the start. ``{}`` when the targets could not be resolved.
+      * - ``after``
+        - dict
+        - Per target, the snapshot after the call: ``None`` for a removed
+          target, ``{"readback_unavailable": True}`` when unreadable.
+      * - ``references``
+        - list[dict]
+        - :ref:`Reference rows <authoring-reference-rows>` that point to the
+          targets or could not be read, with ``source_survives`` and
+          ``target_missing_after``.
+      * - ``expected``
+        - dict or None
+        - The four preconditions of the state read at the start. ``None``
+          when that read failed.
+      * - ``removed_uids``
+        - list[str]
+        - Targets no longer in the collection. ``[]`` when rejected.
+      * - ``remaining_target_uids``
+        - list[str]
+        - Targets still in the collection.
+      * - ``remaining_uids``
+        - list[str] or None
+        - The final collection order.
+      * - ``collection_version_before``, ``collection_version_after``
+        - int
+        - Version of the menu collection before and after the call.
+      * - ``selection_before``, ``selection_after``
+        - dict or None
+        - :ref:`Selection snapshots <authoring-menu-selection>`.
+      * - ``planned_active_uid``
+        - str or None
+        - The menu planned to be active after the deletion. ``None`` when the
+          deletion was not planned.
+      * - ``recovery``
+        - dict
+        - ``status`` (``APPLIED``, ``REJECTED``, ``RESTORED_FAILURE`` or
+          ``BLOCKED_RECOVERY``), ``rollback_attempted``,
+          ``rollback_confirmed``, ``rollback_reason``,
+          ``rollback_exception_type``, ``data_scope``
+          (``"owned_menu_saved_values"``), ``host_scope``
+          (``"existing_batch_recovery_postconditions"``) and
+          ``hotkey_observation``.
+      * - ``diagnostics``
+        - list[dict]
+        - See *Diagnostics* below.
+
+   .. rubric:: Status
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - Meaning
+      * - ``ready``
+        - ``dry_run=True`` and the checks passed. Nothing was removed.
+      * - ``rejected``
+        - Nothing was removed. ``diagnostics`` names the cause.
+      * - ``committed``
+        - The requested menus were removed from the collection.
+      * - ``restored_failure``
+        - The deletion failed and the deletion's own recovery was confirmed.
+      * - ``unknown``
+        - The recovery could not be confirmed, or a target remains or the
+          final read failed after the removal. Read the collection before
+          retrying.
+
+   .. rubric:: Diagnostics
+
+   Every result contains ``static_reference_coverage`` (``severity``
+   ``"warning"``). Each reference row with a ``warning`` adds an entry with
+   ``code`` (the warning), ``severity``, ``source_pm_uid`` and ``path``. A
+   rejection or failure adds an entry with ``code``, ``phase`` and
+   ``exception_type``.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 40 60
+
+      * - ``code``
+        - Cause
+      * - ``static_reference_coverage``
+        - Always present. Python that builds a reference at run time cannot be
+          found.
+      * - ``pm_remove_target_missing``
+        - A UID is not in the menu collection.
+      * - ``pm_remove_live_identity_invalid``
+        - The saved menus fail the UID check, for example when several menus
+          share a UID.
+      * - ``pm_remove_host_name_ambiguous``
+        - Another menu has the same name as a target.
+      * - ``pm_remove_active_invalid``
+        - The active menu index is not valid.
+      * - ``pm_remove_plan_invalid``
+        - The selection state or the collection version cannot be used to plan
+          the deletion.
+      * - ``pm_remove_draft_conflict``
+        - An open draft belongs to a target.
+      * - ``pm_remove_saved_state_stale``
+        - ``expected`` differs, or a target's saved values or the references
+          to it changed during the call.
+      * - ``pm_remove_collection_stale``
+        - The collection, its version or the selection changed during the
+          call.
+      * - ``pm_remove_target_changed``
+        - A target's name, type or position changed before its removal.
+      * - ``pm_remove_snapshot_failed``
+        - Reading the state at the start raised.
+      * - ``pm_remove_apply_failed``
+        - Removing a menu raised.
+      * - ``pm_remove_apply_readback_mismatch``
+        - A removal could not be confirmed by reading the collection.
+      * - ``pm_remove_terminal_failed``
+        - Setting the final active menu and selection failed.
+      * - ``pm_remove_version_commit_failed``
+        - The collection version could not be updated after the removal.
+      * - ``pm_remove_readback_failed``
+        - The final read raised.
+      * - ``pm_remove_hotkey_readback_failed``
+        - ``recovery.hotkey_observation`` could not be read.
+      * - ``pm_remove_refresh_failed``
+        - A display refresh step raised after the removal. ``phase`` names
+          the step. The commit stands.
+      * - ``pm_remove_recovery_publish_failed``
+        - A refresh step after a failed recovery raised.
+
+   ``recovery.rollback_reason`` is ``pm_remove_rollback_failed`` (the restored
+   collection or selection differs), ``pm_remove_host_recovery_unproven`` (a
+   hotkey or Floating Panel teardown had started), or
+   ``pm_remove_version_commit_failed``.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      preview = pme.editing.delete_pms([pm_uid], dry_run=True)
+      print(preview["status"], preview["references"], preview["diagnostics"])
+      if preview["status"] == "ready":
+          result = pme.editing.delete_pms([pm_uid], expected=preview["expected"])
+          print(result["status"], result["removed_uids"], result["recovery"])
+
+   .. rubric:: Notes
+
+   * A dry run changes no saved value, version, selection, draft or host
+     registration. ``before`` and ``after`` hold the same values. It returns
+     ``planned_active_uid``. It does not reserve the targets or prove that
+     teardown will succeed.
+   * ``expected`` compares the collection's identity and order, the targets'
+     saved contents and the saved references to the targets. It detects
+     changes that do not increment the collection version. A stale result
+     needs a new read and a new decision. Without ``expected``, the state at
+     the start is still checked again before each target is removed.
+   * ``references`` includes Router and Property Stack references that are
+     disabled or incomplete. Python that builds a reference at run time is not
+     found; coverage warnings do not prevent deletion.
+   * An open draft of another menu stays intact. An active menu outside the
+     targets keeps its UID. When the active menu is deleted, the next
+     surviving menu after it becomes active, or else the nearest one before
+     it. Filters are not cleared to show a surviving menu.
+   * Recovery of saved data and recovery of host registration are separate: a
+     restored definition does not prove that every editor resource was
+     restored. A failed display refresh after the deletion keeps the
+     committed result.
+   * ``recovery.hotkey_observation`` covers the deletion checkpoint and PME's
+     own hotkey records only. An absent record does not prove that every
+     Blender keymap item or other editor resource was removed.
+
+References
+==========
+
+.. py:function:: find_references(pm_uids)
+
+   List the saved places that refer to the given menus.
+
+   Nothing is written. Only static references in saved data are read. An empty
+   result means that no supported reference was found, not that the menu is
+   unused.
+
+   :param pm_uids: Unique menu UIDs.
+   :type pm_uids: non-string iterable of str
+   :returns: The result described below.
+   :rtype: dict
+   :raises TypeError: ``pm_uids`` is a string.
+   :raises ValueError: A UID is invalid or listed twice, or a UID is missing or
+      shared by several saved menus.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - Key
+        - Type
+        - Value
+      * - ``target_uids``
+        - list[str]
+        - The ``pm_uids`` argument.
+      * - ``references``
+        - list[dict]
+        - :ref:`Reference rows <authoring-reference-rows>` whose
+          ``target_uid`` is one of the targets.
+      * - ``unscannable``
+        - list[dict]
+        - Rows from every menu, not only the targets, whose content could not
+          be read statically. ``target_uid`` is ``None``.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      found = pme.editing.find_references([pm_uid])
+      for row in found["references"]:
+          print(row["kind"], row["source_pm_name"], row["path"])
+      if found["unscannable"]:
+          print("Possibly referenced:", len(found["unscannable"]), "unreadable places")
+
+   .. rubric:: Notes
+
+   * The rows are those of the :py:func:`delete_pms` preview, without
+     ``source_survives`` and ``target_missing_after``.
+   * Treat a menu as possibly referenced while ``unscannable`` is not empty.
+
+.. _authoring-reference-rows:
+
+Reference rows
+--------------
+
+Every row has these keys:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 16 58
+
+   * - Key
+     - Type
+     - Value
+   * - ``kind``
+     - str
+     - ``menu_reference``, ``text_call``, ``text_property_ref``, ``target``,
+       ``source`` or ``unscannable``. See the tables below.
+   * - ``source_pm_uid``, ``source_pm_name``, ``source_pm_mode``
+     - str
+     - The menu that holds the reference.
+   * - ``source_enabled``
+     - bool
+     - Whether that menu is enabled.
+   * - ``target_uid``
+     - str or None
+     - The referenced target. ``None`` for a row that could not be read.
+   * - ``path``
+     - list
+     - Location in the source menu: ``["pmis", index, "text"]`` for a slot,
+       or the storage field (``context_router_authoring`` or
+       ``condition_authoring``) followed by the path inside the saved logic.
+   * - ``raw_value``
+     - any
+     - The saved value at ``path``.
+   * - ``warning``
+     - str
+     - On slot rows and ``unscannable`` rows. ``""`` when the row was read,
+       otherwise the reason listed under *Listed in unscannable*.
+   * - ``source_survives``
+     - bool
+     - :py:func:`delete_pms` only. The source menu is not a target.
+   * - ``target_missing_after``
+     - bool
+     - :py:func:`delete_pms` only. The source survives and the row has a
+       target, so the link breaks.
+
+Rows from slots also have ``source_pmi_uid``. ``menu_reference``,
+``text_call`` and ``text_property_ref`` rows also have ``raw_target`` (the
+name or UID found), ``item_name``, ``item_mode``, ``item_enabled``,
+``target_pm_uid`` (the slot's saved target UID) and ``flags`` (the Menu slot's
+display flags, or ``None``).
+
+Rows from Router and Property Stack logic copy the fields that locate them.
+``target`` and ``source`` rows also have ``source_segment_index`` (``-1`` for
+a Router target).
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - Location
+     - Extra keys
+   * - Router branch target
+     - ``branch_uid``, ``branch_index``, ``is_otherwise`` (``False``),
+       ``branch_enabled``, ``label``, ``enabled``, ``authoring_state``
+   * - Router Otherwise target
+     - ``branch_uid`` (``None``), ``branch_index`` (``-1``), ``is_otherwise``
+       (``True``), ``label``, ``enabled``, ``authoring_state``, ``pass``
+   * - Router condition source
+     - ``branch_uid``, ``branch_index``, ``is_otherwise``, ``branch_enabled``,
+       ``condition_uid``, ``condition_index``, ``label``, ``enabled``,
+       ``authoring_state``
+   * - Property Stack row source
+     - ``condition_uid``, ``row_index``, ``label``, ``enabled``,
+       ``authoring_state``
+   * - Property Stack write entry source
+     - ``entry_uid``, ``entry_index``, ``entry_kind``,
+       ``derived_from_condition_uid``, ``status``
+
+Detected references:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 50 20
+
+   * - Saved place
+     - Reference found
+     - ``kind``
+   * - Menu slot, enabled or not
+     - The linked menu.
+     - ``menu_reference``
+   * - Command or Custom slot text, including a Property's callbacks
+     - ``open_menu("Name")`` and ``draw_menu("Name")``, the name as first
+       argument or ``name=``; ``pme_user_pie_menu_call()`` with a literal
+       ``pie_menu_name`` or ``pie_menu_uid``; ``pme_user_dialog_call()`` with
+       a literal ``pie_menu_name``. The operators are found as
+       ``bpy.ops.wm.<name>()`` and ``O.wm.<name>()``.
+     - ``text_call``
+   * - Command or Custom slot text, including a Property's callbacks
+     - ``props("id")``, ``props(name="id")``, ``props().id`` and
+       ``L.prop(props(), "id")`` on any layout object.
+     - ``text_property_ref``
+   * - Router branch or Otherwise
+     - A target that opens a menu.
+     - ``target``
+   * - Router condition, Property Stack row or write entry
+     - A source that reads a Property or Property Stack.
+     - ``source``
+
+Listed in ``unscannable``, by ``warning``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 38 62
+
+   * - ``warning``
+     - Saved place
+   * - ``invalid_text_syntax``
+     - Saved Python text that cannot be parsed.
+   * - ``unsupported_text_reference``
+     - A menu call or ``props()`` call whose target is computed at run time,
+       or a button made with ``<layout>.operator("wm.pme_user_pie_menu_call")``
+       or ``"wm.pme_user_dialog_call"``. The row keeps ``kind`` ``text_call``
+       or ``text_property_ref``.
+   * - ``external_script_not_scanned``
+     - An ``execute_script`` call. The external file is not read or executed.
+   * - ``invalid_saved_logic``
+     - Router or Property Stack logic that cannot be parsed or has malformed
+       containers.
+   * - ``invalid_saved_value_source``
+     - A Router condition or Property Stack source without the expected
+       shape.
+   * - ``invalid_saved_reference``
+     - A saved target or source that is not a mapping.
+   * - ``router_authoring_target_*``
+     - A Router target that cannot be decoded.
+
+Saved text coverage also includes Property slot paths, Router command/custom
+targets, Property Stack custom Set bodies, menu Poll and menu/slot description
+expressions. Literal menu and ``props()`` references use the same resolution
+as Command/Custom text. Their ``path`` identifies the saved field; a Poll or
+Router target is not reported as a numbered slot.
+
+External script contents are not read; ``execute_script`` calls are reported
+as ``external_script_not_scanned``. Arbitrary Python indirection, hotkeys and
+Python outside PME are not a complete, statically enumerable dependency graph.
+An empty result therefore remains no proof that a menu is unused.

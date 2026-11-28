@@ -1,0 +1,105 @@
+:vocab: developer-facing
+
+.. _authoring-recipe-router-add-branch:
+
+==========================================
+Add a Router branch and edit its condition
+==========================================
+
+.. py:currentmodule:: pme.editing
+
+Add a branch that calls a menu in Mesh Edit Mode in the 3D Viewport, then
+change one of its conditions without losing the other rows.
+
+``router_uid`` is the UID of an existing Router and ``target_uid`` the UID of
+the menu to call. Both are UIDs of menus that already exist.
+
+Steps
+=====
+
+1. Add the branch. ``enum_condition`` builds a complete Enum condition from
+   attribute names. It describes attribute-only paths such as
+   ``C.area.type``; it is not a parser for Python expressions.
+
+   .. code-block:: python
+
+      def enum_condition(*attributes, value):
+          return {
+              "source": {
+                  "kind": "rna_path", "root": "context",
+                  "segments": [{"kind": "attr", "name": part} for part in attributes],
+                  "detected_type": "enum", "readonly": True, "owner_type": None,
+              },
+              "op": "equals", "value": value, "value_type": "enum",
+          }
+
+      before = pme.editing.read_pm(router_uid)["router"]
+      result = pme.editing.update_router(
+          router_uid,
+          branches=[{
+              "name": "Edit Mesh", "combine_mode": "all",
+              "conditions": [enum_condition("area", "type", value="VIEW_3D"),
+                             enum_condition("mode", value="EDIT_MESH")],
+              "target": {"action": {"type": "menu", "value": target_uid, "opts": {}},
+                         "fallback_name": "Mesh Tools"},
+          }],
+          expected_digest=before["digest"],
+      )
+      print(result["status"], result["diagnostics"])
+      branch_uid = result["after"]["logic"]["branches"][-1]["branch_uid"]
+
+   The new branch is appended last, so its UID is the last one in ``after``.
+
+2. Change the second condition of that branch from ``EDIT_MESH`` to
+   ``OBJECT``. Copy the whole condition list, change one row, and pass the
+   list back: ``conditions`` replaces the branch's whole list, so passing only
+   the changed row would remove the others.
+
+   .. code-block:: python
+
+      from copy import deepcopy
+
+      router = pme.editing.read_pm(router_uid)["router"]
+      branch = next(b for b in router["logic"]["branches"]
+                    if b["branch_uid"] == branch_uid)
+      print(branch["branch_uid"], branch["conditions"])
+      condition_uid = branch["conditions"][1]["condition_uid"]
+      conditions = deepcopy(branch["conditions"])
+      next(c for c in conditions if c["condition_uid"] == condition_uid)["value"] = "OBJECT"
+      result = pme.editing.update_router(
+          router_uid,
+          branches=[{"branch_uid": branch["branch_uid"], "conditions": conditions}],
+          expected_digest=router["digest"],
+      )
+      print(result["status"], result["diagnostics"])
+
+   The copied list keeps the other row and every existing ``condition_uid``.
+   Fields of the branch that are not supplied, including its target and
+   position, stay unchanged. For another Router, read the branch names,
+   sources and values first to choose the branch and row.
+
+Check
+=====
+
+* ``result["status"]`` is ``"committed"``. ``diagnostics`` is empty, or
+  holds only ``router_target_menu_unresolved`` warnings when ``target_uid``
+  does not resolve.
+* ``read_pm(router_uid)["router"]["logic"]`` shows the branch last, with two
+  conditions and the same ``condition_uid`` values after step 2.
+* Saving does not prove that the branch runs. Invoke the Router's hotkey in a
+  matching context and in a non-matching one. With **Pass Through**, the
+  non-matching case goes to the next menu on the same key, then to Blender.
+
+Notes
+=====
+
+* An active Mesh is not necessarily a selected Mesh. A condition on
+  ``active_object.type`` does not test selection. A selected-only branch needs
+  a Property whose Getter returns the check, for example
+  ``return C.active_object is not None and C.active_object.select_get()``,
+  read by a ``pm_property_ref`` condition. :py:func:`update_router` does not
+  create that Property; a Property's Getter is set with
+  :py:func:`update_property`.
+
+Functions used: :py:func:`read_pm`, :py:func:`update_router`. Logic fields:
+:ref:`authoring-router-logic`.

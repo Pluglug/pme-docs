@@ -1,0 +1,28 @@
+---
+vocab: developer-facing
+orphan: true
+---
+
+(public_api)=
+
+# Public API
+
+このリファレンスは [オーサリング API](authoring/index.rst) になり、領域ごとのページに
+分かれました。このページにあった内容は、意味を変えずに移動しています。
+
+(local-menu-editing)=
+
+## ローカルでのメニュー編集
+
+`pme.editing` の操作は次のページにあります。
+
+- [基本事項](authoring/concepts.rst)
+- [結果とガード](authoring/results.rst)
+- [メニュー](authoring/menus.rst)
+- [スロット](authoring/slots.rst)
+- [レイアウトの行とパネル](authoring/layout.rst)
+- [メニューの種類ごとの設定](authoring/settings.rst)
+- [ホットキー](authoring/hotkeys.rst)
+- [Property](authoring/property.rst)
+- [Property Stack](authoring/property_stack.rst)
+- [Context Router](authoring/router.rst)

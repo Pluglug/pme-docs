@@ -1,0 +1,464 @@
+:vocab: developer-facing
+
+.. _authoring-overview:
+.. _authoring-api:
+
+============================================================
+オーサリング API
+============================================================
+
+オーサリング API は、``pme`` パッケージとその ``pme.editing`` モジュールを通じて、
+Python から PME のメニューを作成・読み取り・編集・書き出しします。
+Python Console、Text Editor、ほかのアドオン、Blender を操作する AI エージェントから呼び出します。
+スロットの中(Command、Custom、Poll)に書くコードは別の話題で、:doc:`../scripting` で説明します。
+
+.. py:module:: pme
+   :synopsis: Find, create, invoke and export menus; run code in PME's namespace; validate PME JSON.
+
+.. py:module:: pme.editing
+   :synopsis: Read and edit saved menu definitions by UID.
+
+.. toctree::
+   :hidden:
+
+   concepts
+   results
+   menus
+   slots
+   layout
+   settings
+   hotkeys
+   property
+   property_stack
+   router
+   export_validate
+   resources
+   execution
+   recipes/index
+
+ページ一覧
+============================================================
+
+各ページは単独で読めます。:ref:`authoring-concepts` と :ref:`authoring-results` は、
+すべての編集関数が従う規則を定めます。API 全体が **Experimental** です。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - ページ
+     - 扱う内容
+   * - :doc:`concepts`
+     - 編集関数を実行できる場所、対象、行わないこと、安定している範囲。
+   * - :doc:`results`
+     - 操作ごとの ``status`` の値、``dry_run``、``expected`` / ``expected_version`` /
+       ``expected_digest`` のガード、診断、例外。
+   * - :doc:`menus`
+     - メニューの作成・検索・一覧・呼び出し・読み取り・改名・有効化・タグ付け・複製・削除と、
+       メニューを参照している箇所の検索。
+   * - :doc:`slots`
+     - スロット入力の読み取りと、
+       スロットの編集・消去・追加・削除・移動・入れ替え・移送。
+   * - :doc:`layout`
+     - Pop-up Dialog と Floating Panel の行、spacer、揃え、Layout Panel。
+   * - :doc:`settings`
+     - Pop-up Dialog の Mode や幅など、メニューの種類が持つ設定。
+   * - :doc:`hotkeys`
+     - メニューのホットキー割り当ての読み取りと変更。
+   * - :doc:`property`
+     - Property の作成(型、引数、Enum 項目、コールバック、保存先、Property ID)。
+   * - :doc:`property_stack`
+     - Property Stack の作成と、条件行の編集。
+   * - :doc:`router`
+     - Context Router の分岐の追加・更新・削除・並べ替え。
+   * - :doc:`export_validate`
+     - メニューを PME の JSON 文書として書き出す処理と、文書の検証。
+   * - :doc:`resources`
+     - 登録済みのスクリプトとアイコンの場所、スクリプト参照の確認。
+   * - :doc:`execution`
+     - コードの実行、ユーザープロパティの読み書き、実行中のアドオンパッケージの特定、
+       UID の形式の確認。
+
+.. _public-api-import:
+
+実行中の API を読み込む
+============================================================
+
+例では ``import pme`` を使います。これは :doc:`../boot_options` で設定する任意の短縮エイリアスです。
+エイリアスが無効な場合は、有効化済みアドオンのパッケージを名前で読み込みます。
+起動設定の変更も Blender の再読み込みも不要です。
+
+.. code-block:: python
+
+   import bpy
+   import importlib
+
+   packages = [
+       addon.module for addon in bpy.context.preferences.addons
+       if addon.module.rsplit(".", 1)[-1].replace("-", "_") == "pie_menu_editor"
+   ]
+   if len(packages) != 1:
+       raise RuntimeError(f"Select the enabled PME package: {packages}")
+   pme = importlib.import_module(packages[0] + ".api")
+   print(pme.ADDON_ID)
+
+* このコードは、``bl_ext.<repository>.pie_menu_editor`` としてインストールした Blender Extension と、
+  Extension ID にハイフンを使うもの(``bl_ext.<repository>.pie-menu-editor``)も見つけます。
+  モジュール名はリポジトリの ID に従うため、比較ではハイフンとアンダースコアの違いを無視します。
+* 複数のパッケージが該当する場合は、編集の前に目的のインストール先を特定します。
+  このコードは、その一覧を付けて ``RuntimeError`` を送出します。
+* 明示的な読み込みで得た ``pme`` 変数は、エイリアスと同じ API です。
+  この変数を使うコードでは ``import pme`` を省きます。
+
+クイックスタート
+============================================================
+
+.. code-block:: python
+
+   import pme
+
+   # Runtime package identity (Legacy add-on or Blender Extension)
+   addon_id = pme.ADDON_ID
+
+   # Find a menu
+   pm = pme.find_pm("My Pie Menu")
+   pm = pme.find_pm(uid="pm_7f3c2k3h")
+
+   # Invoke a menu
+   pme.invoke_pm("My Pie Menu")
+   pme.invoke_pm(uid="pm_7f3c2k3h")
+
+   # List menus
+   all_menus = pme.list_pms()
+   pie_menus = pme.list_pms(mode="PMENU", enabled_only=True)
+   tags = pme.list_tags()
+
+   # Execute code
+   result = pme.execute("bpy.ops.mesh.primitive_cube_add()")
+   print(result.success, result.error_message)
+
+   # Evaluate an expression
+   value = pme.evaluate("len(C.selected_objects)")
+
+   # Validate JSON
+   result = pme.validate_json(json_string)
+   for err in result.errors:
+       print(err.code, err.message)
+
+関数一覧
+============================================================
+
+``pme``
+------------------------------------------------------------
+
+.. py:currentmodule:: pme
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 52 22
+
+   * - 関数
+     - 用途
+     - ページ
+   * - :py:func:`create_pm`
+     - ``PmCreationSpec`` から、エディターの既定の内容を持つメニューを作成します。
+       ``PmCreationResult`` を返します。
+     - :doc:`menus`
+   * - :py:func:`find_pm`
+     - 名前または UID で見つけたメニューの ``PMHandle``、または ``None`` を返します。
+     - :doc:`menus`
+   * - :py:func:`list_pms`
+     - ``PMHandle`` オブジェクトを返します。
+       メニューの種類と有効状態による絞り込みは任意です。
+     - :doc:`menus`
+   * - :py:func:`list_tags`
+     - 使用中のタグ名を Tag Registry の順で返します。
+     - :doc:`menus`
+   * - :py:func:`invoke_pm`
+     - ホットキーと同じように、メニューの呼び出しを要求します。
+     - :doc:`menus`
+   * - :py:func:`export_menus`
+     - メニューを PME の JSON 文書として書き出します。ファイルへの書き込みは任意です。
+     - :doc:`export_validate`
+   * - :py:func:`validate_json`
+     - PME の JSON 文字列を静的に検証します。``ValidationResult`` を返します。
+     - :doc:`export_validate`
+   * - :py:func:`validate_uid`
+     - 文字列がメニュー UID の形式かどうかを返します。
+     - :doc:`execution`
+   * - :py:func:`execute`
+     - PME の標準名前空間でコードを実行します。``ExecuteResult`` を返します。
+     - :doc:`execution`
+   * - :py:func:`evaluate`
+     - PME の標準名前空間で式を評価します。失敗時は例外を送出します。
+     - :doc:`execution`
+   * - :py:func:`check_syntax`
+     - コードを実行せずに Python の構文を確認します。
+       ``SyntaxResult`` を返します。
+     - :doc:`execution`
+   * - :py:func:`props`
+     - PME が登録したユーザープロパティを読み書きします。
+     - :doc:`execution`
+
+``pme`` が公開するその他の名前：
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 52 22
+
+   * - 名前
+     - 用途
+     - ページ
+   * - :py:class:`PmCreationSpec`
+     - :py:func:`create_pm` に渡す作成要求(``mode_id``、``name``、
+       ``slots``、``data``)。
+     - :doc:`menus`
+   * - :py:class:`PmCreationResult`
+     - :py:func:`create_pm` の結果(``accepted``、``pm_uid``、
+       ``diagnostics``)。
+     - :doc:`menus`
+   * - :py:class:`PmiSlotSpec`
+     - ``PmCreationSpec.slots`` のスロット項目(``mode``、``name``、``text``、
+       ``icon``)。:py:func:`create_pm` は、明示したスロットを
+       ``slots_unsupported_by_create_pm`` で拒否します。
+     - :doc:`menus`
+   * - :py:data:`ADDON_ID`
+     - 実行中のアドオンパッケージのモジュール ID。``pie_menu_editor`` や
+       ``bl_ext.<repository>.<package>`` など。
+     - :doc:`execution`
+   * - :py:data:`preferences`
+     - PME のアドオン Preferences オブジェクト。
+       アドオンのエントリーがあり、PME の Preferences クラスがない間は ``None`` です。
+       PME が有効でない場合、読み取ると ``KeyError`` を送出します。
+     - :doc:`execution`
+   * - :py:data:`context`
+     - PME1 の実行コンテキスト。後方互換のために残されています
+       (:ref:`authoring-backward-compatibility`)。
+     - :doc:`execution`
+
+サブモジュール：
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 52 22
+
+   * - モジュール
+     - 用途
+     - ページ
+   * - :py:mod:`pme.editing`
+     - 保存済みのメニュー定義を UID で読み取り・編集します。
+       関数の一覧は下にあります。
+     - このページ
+   * - :py:mod:`pme.validation`
+     - PME JSON の静的検証(``validate``、``validate_json``、
+       ``validate_file``、``ERROR_CODES``)。
+     - :doc:`export_validate`
+   * - :py:mod:`pme.resources`
+     - 登録済みのスクリプトとアイコンのフォルダー・ファイルの読み取り専用の探索と、
+       スクリプト参照の確認。
+     - :doc:`resources`
+   * - ``pme.types``
+     - 結果とハンドルの型。``ExecuteResult`` と ``SyntaxResult``
+       (:doc:`execution`)、``PMHandle`` と ``PmCreationResult``
+       (:doc:`menus`)、``ValidationIssue`` と ``ValidationResult``
+       (:doc:`export_validate`)。
+     - 型ごと
+   * - ``pme.constants``
+     - メニューの種類とスロットのモードの識別子(``MENU_MODES``、``ITEM_MODES``、
+       ``UNTAGGED``)と、``get_mode_label()``、``get_mode_icon()``、
+       ``is_valid_mode()``。``MENU_MODES`` は ``FPANEL`` を含みません。
+     - (なし)
+   * - ``pme.dev``
+     - ツール作成者向けの名前空間のイントロスペクション(``is_public()``、
+       ``get_stability()``、``validate_namespace()``、``namespace_report()``、
+       ``get_logger()``)。
+     - (なし)
+
+``pme.editing``
+------------------------------------------------------------
+
+.. py:currentmodule:: pme.editing
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 50 20
+
+   * - 関数
+     - 用途
+     - ページ
+   * - :py:func:`update_pm`
+     - メニューの名前、説明、説明の形式、Poll 本文を変更します。
+     - :doc:`menus`
+   * - :py:func:`set_enabled`
+     - 一括操作の処理を通じて、メニューを有効または無効にします。
+     - :doc:`menus`
+   * - :py:func:`update_tags`
+     - 複数のメニューにまたがるタグ名の追加と解除を、1 回の一括処理で行います。
+     - :doc:`menus`
+   * - :py:func:`duplicate_pm`
+     - メニューを 1 つ、複製元の直後へ複製します。
+     - :doc:`menus`
+   * - :py:func:`delete_pms`
+     - メニューを削除します。または、削除とその参照を事前確認します。
+     - :doc:`menus`
+   * - :py:func:`find_references`
+     - メニューを参照している保存済みの箇所を列挙します。読み取り専用です。
+     - :doc:`menus`
+   * - :py:func:`read_pm`
+     - 1 つのメニューの保存定義を返します。スロット UID による絞り込みは任意です。
+     - :doc:`menus`
+   * - :py:func:`read_slot_inputs`
+     - :py:func:`update_slots` が受け付ける入力名で、スロットを返します。
+       読み取り専用です。
+     - :doc:`slots`
+   * - :py:func:`slot_fields`
+     - Slot Editor の入力フィールドの説明(名前、型、Enum の値)を返します。
+     - :doc:`slots`
+   * - :py:func:`resolve_auto_icons`
+     - 各 Auto Icon スロットが、この Blender セッションでアイコンを見つけられるかを報告します。
+       読み取り専用です。
+     - :doc:`slots`
+   * - :py:func:`update_slots`
+     - Slot Editor の通常の保存を通じて、スロット UID で指定したスロットの内容を変更します。
+     - :doc:`slots`
+   * - :py:func:`clear_slots`
+     - スロットの UID と位置を保ったまま、内容を消去します。
+     - :doc:`slots`
+   * - :py:func:`add_slot`
+     - 既定の項目を 1 件、スロットの隣、末尾、
+       または Panel ヘッダーに追加します。
+     - :doc:`slots`
+   * - :py:func:`remove_slot`
+     - 項目を 1 件削除します。
+     - :doc:`slots`
+   * - :py:func:`move_slot`
+     - 項目を 1 件、別の項目の前後、行端、新しい行、
+       または Panel ヘッダーへ移動します。
+     - :doc:`slots`
+   * - :py:func:`swap_slots`
+     - 固定枠の項目 2 件、または Pop-up の項目 2 件を入れ替えます。
+     - :doc:`slots`
+   * - :py:func:`transfer_slot`
+     - 項目 1 件の内容を別のメニューへ移します。
+     - :doc:`slots`
+   * - :py:func:`add_row`
+     - 既定のボタンを持つレイアウト行を追加します。
+     - :doc:`layout`
+   * - :py:func:`add_panel`
+     - 既定のアンカーを持つ Layout Panel 行を追加します。
+     - :doc:`layout`
+   * - :py:func:`remove_row`
+     - レイアウト行全体を、その内容とともに削除します。
+     - :doc:`layout`
+   * - :py:func:`move_row`
+     - レイアウト行全体を別の行の前後へ移動します。
+     - :doc:`layout`
+   * - :py:func:`split_row`
+     - レイアウト行を、その中の項目の直前で分割します。
+     - :doc:`layout`
+   * - :py:func:`join_rows`
+     - 隣接する 2 つのレイアウト行を結合します。
+     - :doc:`layout`
+   * - :py:func:`update_row`
+     - 1 行、揃えでつながった行群、またはすべての行について、
+       保存された行設定を変更します。
+     - :doc:`layout`
+   * - :py:func:`update_spacer`
+     - spacer の設定を 1 つ変更します。必要なときは隣接する spacer を作成します。
+     - :doc:`layout`
+   * - :py:func:`align_slot`
+     - 項目を行の LEFT、CENTER、RIGHT の区分に配置します。または配置を解除します。
+     - :doc:`layout`
+   * - :py:func:`setting_fields`
+     - メニューの種類が受け付ける設定の説明を返します。
+     - :doc:`settings`
+   * - :py:func:`update_settings`
+     - メニューの種類の設定を変更します。
+     - :doc:`settings`
+   * - :py:func:`update_hotkey`
+     - メニューのホットキー割り当てを変更します。または変更を事前確認します。
+     - :doc:`hotkeys`
+   * - :py:func:`update_property`
+     - Property の型、引数、Enum 項目、コールバック、保存先、
+       Property ID を変更します。
+     - :doc:`property`
+   * - :py:func:`update_property_stack`
+     - Property Stack のロジック全体を置き換えます。
+     - :doc:`property_stack`
+   * - :py:func:`add_property_stack_row`
+     - 空の条件行を末尾に追加します。
+     - :doc:`property_stack`
+   * - :py:func:`update_property_stack_row`
+     - 条件行 1 件と、対応する SET 項目を変更します。
+     - :doc:`property_stack`
+   * - :py:func:`remove_property_stack_row`
+     - 条件行 1 件と、対応する SET 項目を削除します。
+     - :doc:`property_stack`
+   * - :py:func:`update_property_stack_hud`
+     - Property Stack の While True HUD を変更します。
+     - :doc:`property_stack`
+   * - :py:func:`update_router`
+     - Context Router の分岐と Otherwise を変更・追加・維持します。
+     - :doc:`router`
+   * - :py:func:`remove_router_branch`
+     - Otherwise を保ったまま、分岐を 1 件削除します。
+     - :doc:`router`
+   * - :py:func:`move_router_branch`
+     - 分岐を 1 件、別の分岐の前後へ移動します。
+     - :doc:`router`
+   * - :py:func:`reorder_router_branches`
+     - 1 回の保存で、すべての分岐を指定した順序に並べます。
+     - :doc:`router`
+
+PME1 からの変更点
+============================================================
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 34 42
+
+   * - 観点
+     - PME1
+     - PME2
+   * - インポート
+     - ``from pie_menu_editor import pme``
+     - ``import pme``
+   * - 実行中のアドオン ID
+     - ``"pie_menu_editor"`` の固定値
+     - ``pme.ADDON_ID``
+   * - 設計
+     - 内部モジュールの露出
+     - 公開 API ファサード
+   * - メニュー呼び出し
+     - ``pme.context.open_menu(name)``
+     - ``pme.invoke_pm(name)`` / ``pme.invoke_pm(uid=...)``
+   * - コード実行
+     - ``pme.context.exe(code)``
+     - ``ExecuteResult`` を返す ``pme.execute(code)``
+   * - メニュー検索
+     - なし
+     - ``pme.find_pm()``, ``pme.list_pms()``
+   * - JSON 検証
+     - なし
+     - ``pme.validate_json()``
+   * - 型・定数
+     - なし
+     - ``pme.types``, ``pme.constants``
+
+.. _authoring-backward-compatibility:
+
+後方互換
+============================================================
+
+PME1 の ``pme.context`` と、Command のグローバル ``props()`` は引き続き利用できます。
+PME の Command スロット内にある既存の ``props()`` スクリプトは、そのまま動作します。
+
+.. code-block:: python
+
+   # These still work in PME2
+   pme.context.open_menu("My Menu")
+   pme.context.event.mouse_x
+   pme.context.add_global("my_var", value)
+   props("MyCounter", 10)
+
+新しいコードでは ``pme.execute()`` と ``pme.invoke_pm()`` を使います。

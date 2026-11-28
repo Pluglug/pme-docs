@@ -1,0 +1,224 @@
+:vocab: developer-facing
+
+.. _authoring-concepts:
+
+========
+Concepts
+========
+
+.. py:currentmodule:: pme.editing
+
+Rules that every function of ``pme.editing`` follows: where it can run, what it
+acts on, what it does not do, and what is stable. Result statuses, guards and
+exceptions are described in :ref:`authoring-results`.
+
+Where the functions run
+=======================
+
+The functions run in Blender's main Python thread after PME has finished
+loading: the Python Console, the Text Editor, another add-on, or an external
+tool that runs Python there.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - Requirement
+     - When it is not met
+   * - Blender's main thread
+     - ``RuntimeError("Menu editing requires Blender's main thread")``.
+       Router and Property Stack operations raise
+       ``RuntimeError("PME editing must run on Blender's main thread")``.
+   * - PME has finished loading
+     - ``RuntimeError("Menu editing requires PME to finish loading")`` while the
+       add-on's boot script phase is active.
+   * - PME preferences exist
+     - ``RuntimeError("PME preferences are unavailable")``. Router and Property
+       Stack operations return ``status`` ``"rejected"`` with the diagnostic
+       ``preferences_unavailable`` instead. When PME is not enabled at all,
+       Blender has no add-on entry and the lookup raises
+       ``KeyError("Addon '<id>' not found")``.
+   * - A GUI session
+     - With ``--background``, PME registers without the temporary Preferences
+       and editor state that menu creation and editing use. Static JSON
+       validation (:py:func:`pme.validate_json`) is separate from this
+       requirement.
+
+* No public function reports PME's initialization state or waits for it.
+* A fixed startup delay, or a retry after an arbitrary ``RuntimeError``, does
+  not prove readiness.
+* PME is ready for authoring code once its Preferences editor is available.
+
+What the functions act on
+=========================
+
+* **Saved definitions.** The functions read and write the menu definitions in
+  PME's Preferences data in memory, through the same owners as the editor.
+* **Addressed by UID.** Every editing function takes UIDs. A name finds a menu
+  (:py:func:`pme.find_pm`); the UID addresses it afterwards. Renaming a menu
+  keeps its UID.
+* **Plain values.** Read results are ordinary Python dicts, lists, strings and
+  numbers, not live Blender data (RNA). They do not change when the menu
+  changes.
+* **Session version.** ``read_pm()["version"]`` is a counter kept for the
+  current session. It is not saved, and it does not detect every raw Python
+  write. The ``expected`` guards compare saved values instead.
+* **Unique targets.** A menu UID that is missing, malformed, or shared by
+  several saved menus raises
+  ``ValueError("Menu UID is missing, invalid or ambiguous: ...")``. The
+  functions never pick one of several menus with the same UID. Router and
+  Property Stack operations return ``status`` ``"rejected"`` with a diagnostic
+  instead.
+
+Menu UIDs
+---------
+
+A menu UID is ``<prefix>_<id>``. ``<id>`` is 8 characters from ``a``-``z`` and
+``2``-``7``. The prefix depends on the menu type. :py:func:`pme.validate_uid`
+checks this format.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 34 32
+
+   * - Menu type
+     - ``mode_id``
+     - UID prefix
+   * - Pie Menu
+     - ``PMENU``
+     - ``pm_``
+   * - Vector Menu
+     - ``VMENU``
+     - ``vm_``
+   * - Regular Menu
+     - ``RMENU``
+     - ``rm_``
+   * - Pop-up Dialog
+     - ``DIALOG``
+     - ``pd_``
+   * - Floating Panel
+     - ``FPANEL``
+     - ``fp_``
+   * - Stack Key
+     - ``SCRIPT``
+     - ``s_``
+   * - Panel Group
+     - ``PANEL``
+     - ``pg_``
+   * - Hidden Panel Group
+     - ``HPANEL``
+     - ``hpg_``
+   * - Sticky Key
+     - ``STICKY``
+     - ``sk_``
+   * - Macro Operator
+     - ``MACRO``
+     - ``mc_``
+   * - Modal Operator
+     - ``MODAL``
+     - ``md_``
+   * - Property
+     - ``PROPERTY``
+     - ``pr_``
+   * - Property Stack
+     - ``CONDITION``
+     - ``cn_``
+   * - Context Router
+     - ``ROUTER``
+     - ``rt_``
+
+Other identifiers
+-----------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 28 30 42
+
+   * - Identifier
+     - Format
+     - Scope
+   * - Slot UID
+     - ``pmi_<id>``, same ``<id>`` rule as menu UIDs
+     - Its menu. A slot is addressed by its menu's UID and its own UID.
+   * - Context Router branch UID
+     - Assigned as ``branch_`` and a number
+     - Its Router.
+   * - Context Router condition UID
+     - Assigned as ``cond_`` and a number
+     - Its Router branch.
+   * - Property Stack condition UID
+     - Assigned with the prefix ``cond_``
+     - Its Property Stack.
+   * - Layout ``row_ref``
+     - ``{"kind": ..., "slot_uid": ...}`` from ``read_pm()["rows"]``
+     - The current head of a row in a Pop-up Dialog or Floating Panel. Not a
+       persistent ID: it is read again after a structural change.
+
+What the functions do not do
+============================
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Guarantee
+     - Provided?
+   * - Save Preferences to disk
+     - No. Changes stay in memory until Blender saves Preferences (**Save
+       Preferences**, or auto-save). A restart verifies what was saved.
+   * - Add a Blender Undo step
+     - No.
+   * - Run what was authored
+     - No. Commands, Custom scripts, Poll, Router conditions and targets are not
+       run, and the menu is not invoked. Reading a Property does not evaluate
+       its Getter or run its Setter.
+   * - Prove that the authored menu works
+     - No. A committed result describes the saved definition. Display and
+       actions are separate observations in the editor and mode the menu
+       targets.
+   * - Change the selected menu
+     - No. Menus are addressed by UID, not by the editor selection.
+       :py:func:`delete_pms` keeps an unrelated active menu; deleting the
+       active or selected menus changes the selection, reported as
+       ``selection_before`` and ``selection_after``.
+       :py:func:`pme.create_pm` selects the new menu, as the editor's New Menu
+       action does.
+   * - Apply a batch atomically
+     - No. :py:func:`update_slots`, :py:func:`clear_slots`,
+       :py:func:`update_pm` and :py:func:`update_property` commit step by step;
+       earlier steps stay committed when a later one fails (``partial``).
+       Separate calls are independent.
+   * - Detect concurrent changes
+     - Only when a guard is passed: ``expected_version``, ``expected`` or
+       ``expected_digest`` (:ref:`authoring-results`).
+   * - Update Blender registration
+     - Yes. Hotkeys, extend targets, Panel Group placement and Property
+       registration are updated inside the call, as in the editor.
+
+.. _authoring-concepts-stability:
+
+Stability
+=========
+
+* The whole API is **Experimental**. The basic interface is intended to stay
+  stable. Smaller details can change in future versions.
+* The compatibility boundary is the UID-addressed operation: its documented
+  inputs, its conflict checks and its observable result.
+* Internal implementations can change while keeping the saved format and the
+  editor's normal normalization.
+* A change to what a failure leaves behind, or to stale detection, is an
+  observable behavior change, even when the function signature stays the
+  same.
+
+Working in batches
+==================
+
+* The result and its diagnostics distinguish completion, rejection, partial
+  application and an unknown outcome (:ref:`authoring-results`).
+* After an unexpected exception or an ``unknown`` status, the target is read
+  again before any retry.
+* An external tool that edits many menus sends small batches and keeps each
+  result and its progress between calls.
+* A tool timeout does not cancel Blender's work and does not prove that
+  nothing changed. The running call finishes first; the target menus are then
+  read to decide which changes, if any, to retry.

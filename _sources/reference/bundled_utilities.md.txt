@@ -1,0 +1,352 @@
+---
+vocab: developer-facing
+---
+
+(bundled-utilities)=
+
+# Bundled Utilities
+
+PME loads these helpers from its bundled `assets/scripts/autorun/` folder when
+the add-on starts. Use their registered names directly in PME script fields;
+you do not need to import or copy the bundled files. Do not edit those files to
+customize them: updates can replace them. To register your own helpers, see
+{ref}`Auto-run Scripts <autorun-scripts>`.
+
+These utilities complement the [API Reference](scripting.rst). They are not menu
+editing operations in the [Authoring API](authoring/index.rst). To manage script files,
+see [Managing Scripts](script_management.rst).
+
+Examples below are one-line expressions or statements for PME fields. `L` is
+available while drawing a Custom slot; `E` requires an input event. Pass `C`
+explicitly to helpers that accept a context so they use the invoking editor.
+Calls without a context use `bpy.context`, which can refer to another editor
+while a popup or Preferences is active. The helpers do not create missing
+editor context or make an unavailable Blender operator available.
+
+## Function index
+
+| Purpose | Registered names |
+| --- | --- |
+| Active tool | `get_active_tool`, `get_active_tool_id` |
+| Mesh selection and pointer | `get_mesh_selection_kind`, `pick_mesh_view3d`, `get_loc2d` |
+| Tool and DAT icons | `get_tool_icon_value`, `get_dat_icon`, `release_dat_icons` |
+| Paint settings | `ups`, `brush` |
+| Assignment and errors | `setattr`, `try_setattr`, `raise_error` |
+| Event modifiers | `event_mods` |
+| Existing name-based menu routing | `CSM` (see the collapsed reference below) |
+
+## Active tool
+
+### `get_active_tool(context=None)`
+
+Returns Blender's active `WorkSpaceTool`-like object, or `None` when Blender's
+tool resolver finds no tool. It uses the editor and mode of the supplied context,
+not a search for an arbitrary 3D View. Provide a context with a workspace and
+space data. Blender decides which editors expose a tool; this is not limited
+to mesh tools or the 3D View.
+
+```python
+tool = get_active_tool(C); message_box(tool.idname if tool else "No active tool")
+```
+
+Use the returned object immediately; do not retain it across workspace, editor,
+or mode changes. This resolves the current tool; it does not activate a tool.
+
+### `get_active_tool_id(context=None)`
+
+Returns the active tool's `idname` as a string, such as `"builtin.select_box"`.
+Returns `""` if the context has no workspace or space data, or no tool is found.
+The ID is not the translated label or an icon name.
+
+```python
+get_active_tool_id(C) == 'builtin.select_box'
+```
+
+Use that expression in a condition, or display the result in a Custom slot:
+
+```python
+L.label(text=get_active_tool_id(C) or "No active tool")
+```
+
+## Mesh selection and pointer
+
+### `get_mesh_selection_kind(context, fallback=True)`
+
+Returns `1` for vertices, `2` for edges, `3` for faces, or `0` for no applicable
+selection. Requires Mesh Edit Mode to inspect geometry; outside `EDIT_MESH` it
+returns `0`. It reads editable mesh data across objects with unique mesh data
+and does not change selection.
+
+```python
+get_mesh_selection_kind(C, fallback=False) == 3
+```
+
+- With one selection mode enabled and `fallback=True`, returns that mode even
+  when nothing is selected.
+- With `fallback=False`, a single mode requires a selected, non-hidden element
+  of that type; otherwise returns `0`.
+- In mixed selection modes, selected vertices that do not belong to selected
+  faces/edges in enabled modes take priority, then selected faces, then edges.
+  Hidden elements are excluded.
+- If no eligible element is found and `fallback=True`, uses the enabled modes
+  in vertex → face → edge order. With `fallback=False`, returns `0` instead.
+
+This is an inference from selection flags, not a record of what was clicked
+last. Blender can represent a selected face and its selected corner vertices
+with the same flags. Use `pick_mesh_view3d` when the element under the pointer is the
+information you need. This function does not inspect UV selection.
+
+### `pick_mesh_view3d(context, mouse_xy, radius=12)`
+
+Reads the object or mesh component under a window-coordinate pointer position
+without selecting it. Requires a 3D View **WINDOW region**, in Object Mode or
+Mesh Edit Mode. Other contexts return a no-hit dictionary.
+
+Example in an event-backed Command slot:
+
+```python
+hit = pick_mesh_view3d(C, (E.mouse_x, E.mouse_y)); message_box(hit['kind'] or "No hit")
+```
+
+Pass **window** coordinates, not `mouse_region_x` / `mouse_region_y`. The helper
+subtracts the target region's origin. It uses the coordinates you supply at
+call time; it does not capture the menu-opening position or track later motion.
+If routing must use the opening position, retain that position in the caller.
+
+| Result key | Value |
+| --- | --- |
+| `kind` | `'OBJECT'`, `'VERT'`, `'EDGE'`, `'FACE'`, or `None` |
+| `object` | Hit Blender object, or `None` |
+| `index` | Current BMesh iteration position for an Edit Mode component; otherwise `None` |
+| `mouse_xy` | Region-relative `(x, y)` after conversion, or `None` for an invalid area/region |
+| `distance_px` | Present only for a vertex/edge hit: distance from the pointer in screen pixels |
+
+In Object Mode this uses a scene ray cast and checks visibility of the returned
+object. It does not reproduce picking of non-surface objects such as lights or
+empties, and does not return a component index from the evaluated mesh.
+
+In Mesh Edit Mode, vertices within `radius` win over edges within `radius`, then
+the nearest surface face. Only enabled selection modes are considered. A negative
+radius is treated as zero. Hidden elements are excluded; X-Ray allows vertex/edge
+hits through editable faces.
+
+**Limits:** this is an approximation, not Blender's native selection-buffer
+picker. It uses the editable cage, not modifier output. Backfaces count as
+surfaces, and viewport clipping planes are not reproduced. In Edit Mode only
+non-hidden editable mesh faces occlude hits; objects outside Edit Mode do not.
+Indices are valid for the immediate observation only and must not be saved as
+stable element identifiers. Geometry is rebuilt for each call: avoid repeated
+calls in draw code or frequently evaluated conditions on dense meshes. No
+handlers, timers, selection writes, or persistent geometry caches are installed.
+
+### `get_loc2d(context, coord)`
+
+Projects a **world-space** 3D coordinate into region-relative 2D coordinates.
+Returns a `mathutils.Vector` with two components, or `None` if region/view data
+is unavailable or Blender cannot project the point (for example, behind a
+perspective view). `context=None` uses `bpy.context`.
+
+```python
+point = get_loc2d(C, C.active_object.matrix_world.translation)
+```
+
+This example requires an active object and a 3D View drawing region. Convert a
+mesh-local coordinate with `obj.matrix_world @ coord` first. A returned point
+can be outside the viewport; it is not a visibility or occlusion test. The
+helper uses `space_data.region_3d`, so do not assume it selects the correct
+subview in every Quad View region. Unlike `pick_mesh_view3d`, its output is already
+region-relative.
+
+## Icons
+
+### `get_tool_icon_value(name)`
+
+Returns an integer icon ID for a Blender **tool icon handle**, not a tool ID or
+an RNA icon enum. A typical handle is `"ops.generic.select_box"`.
+Returns `0` for an empty name. It first uses Blender's tool icon loader; if that
+raises, it falls back to `get_dat_icon(name)`. Unavailable icons may resolve to
+Blender's fallback icon or `0`, so a nonzero ID is not proof of an exact match.
+
+```python
+L.label(text="Box Select", icon_value=get_tool_icon_value('ops.generic.select_box'))
+```
+
+Use in a Custom slot with a drawing layout. Prefer PME's Auto Icon option for
+a normal tool-switching slot; this helper is for custom drawing.
+
+### `get_dat_icon(icon_name)`
+
+Returns an integer icon ID loaded from a `.dat` triangle icon. Pass its name
+without `.dat`, not a filesystem path. Search order is Blender's
+`DATAFILES/icons`, PME user icon directories, then bundled icons.
+
+```python
+L.label(text="Box Select", icon_value=get_dat_icon('ops.generic.select_box'))
+```
+
+Returns `0` for an empty name, a missing/ambiguous/unloadable icon, or when an
+old cached icon cannot be released before replacement. Missing/corrupt files
+produce a warning; ambiguous user names are reported through resource discovery.
+Loaded IDs are cached. Do not save these runtime IDs in a preset or reuse them
+across restarts. This is not a PNG loader. Icon availability depends on the
+installed Blender and configured resources, not the active modeling mode.
+
+### `release_dat_icons()`
+
+Releases the DAT IDs owned by this helper and clears its Blender path lookup
+cache. Returns `None`. IDs that cannot be released remain tracked for a later
+retry. This does not release all Blender icons or icons owned by other loaders.
+
+```python
+release_dat_icons()
+```
+
+This is a reload/development helper, not something to run on every draw. Stop
+using cached IDs before releasing them; request fresh IDs for subsequent UI.
+
+## Paint settings
+
+### `ups()`
+
+Returns the raw Unified Paint Settings object for the current `bpy.context`.
+On hosts with scene-wide unified settings it returns that owner. On hosts with
+mode-specific settings it resolves the current paint mode independently of the
+active tool. It raises `RuntimeError` if that context has no unified settings.
+
+Example Custom slot in an applicable paint context:
+
+```python
+L.prop(ups(), 'size', text='Unified Size')
+```
+
+It does not choose a brush or switch modes. Property availability follows the
+host's returned RNA object. In Blender 5.3, active `use_unified_*` flags live on
+the Brush; do not assume those flags exist on the object returned by `ups()`.
+
+### `brush(use_ups=False)`
+
+Returns the active Brush from Blender's current paint settings, or `None` when
+no brush is available. With `use_ups=True`, returns `ups()` instead (including
+its errors); that result is unified settings, not a Brush. Uses `bpy.context`
+and Blender's paint-settings resolver; mode and active tool can affect brush
+availability.
+
+```python
+b = brush(); L.prop(b, 'strength', text='Strength') if b else L.label(text='No active brush')
+```
+
+This example belongs in a Custom slot in a paint/sculpt context. Do not
+dereference `brush().size` without ensuring a brush exists. The historical
+expression `brush(ups().use_unified_size).size` assumes unified flags live on
+Unified Paint Settings and is not suitable for hosts that put them on Brush.
+
+## Assignment, events, and errors
+
+### `setattr(object, name, value)`
+
+Sets an attribute and returns `True` after a successful assignment. Unlike
+Python's built-in `setattr`, PME's registered helper returns a boolean.
+Assignment errors propagate. The target must exist and its property must be
+writable in the current context.
+
+```python
+setattr(C.tool_settings, 'use_proportional_edit', True)
+```
+
+Use in a Command, not a drawing callback or a condition that should only read
+state. For a visible toggle, prefer a Custom slot widget such as
+`L.prop(C.tool_settings, 'use_proportional_edit', toggle=True)`. This helper
+does not create its own Undo step.
+
+### `try_setattr(object, name, value)`
+
+Attempts the same assignment, but catches assignment exceptions and **always
+returns `True`**, including when nothing was changed. This is existing behavior;
+do not use the result to verify success.
+
+```python
+try_setattr(C.active_object, 'show_name', True)
+```
+
+No particular editor is required, but the target and property still determine
+whether the assignment can work. Use `setattr` when a failure should be visible,
+and read back the property when verifying a change. This helper neither reports
+the failure nor creates its own Undo step.
+
+### `event_mods(event)`
+
+Returns a string joining active modifiers in **Ctrl, Shift, Alt, OSKey** order,
+for example `"Ctrl+Shift"`. Returns the literal string `"None"` if none are set;
+missing modifier attributes count as false. Requires an event-like value, not
+a particular editor or mode. It does not report non-modifier keys.
+
+```python
+message_box(event_mods(E))
+```
+
+Use from an event-backed Command. This reads the supplied event, not the
+keyboard's current state at some later time.
+
+### `raise_error(message)`
+
+Attempts to show PME's error message box, then raises `Exception(message)`.
+It has no normal return value and aborts the current script. Requires a UI
+context where the message-box operator can run; if that operator fails, its
+error propagates instead.
+
+```python
+raise_error('Select a mesh before running this command')
+```
+
+Use for an actual error in a Command, not an ordinary false condition or
+repeated draw-time notification.
+
+## ContextSensitiveMenu (`CSM`)
+
+For new menus, use [Context Router](../editors/context_router_editor.md).
+Separate editors with Keymap where possible, then use a Context Router for
+conditions within an editor. This makes branches explicit without relying on
+menu naming conventions. `CSM` remains available for existing customizations.
+
+```{dropdown} ContextSensitiveMenu compatibility reference and examples
+`CSM.from_context(context, prefix="", suffix="")` returns a
+`ContextSensitiveMenu` instance with a resolved `menu_name` (string or `None`).
+Pass `C` to use the invoking context. It reads the **active object**, not the
+pointer hit or merely whether the selected-object list is empty.
+
+Command example, with menus such as `My Vertex Menu` and `My Mesh Menu` already created:
+
+    CSM.from_context(C, prefix='My ', suffix=' Menu').open_menu()
+
+Custom example, with drawable menus such as `My Vertex Panel` already created:
+
+    CSM.from_context(C, prefix='My ', suffix=' Panel').draw_menu(layout=L)
+
+Names are formed by replacing underscores with spaces, applying title case,
+then adding the prefix/suffix. Only existing, enabled menus match.
+
+- No active object: resolves the name `None Object`; it does not fall back to
+  `Any Object` in this branch.
+- Mesh Edit Mode: enabled selection modes in **Vertex → Edge → Face** order,
+  then `Edit Mesh`, `Mesh`, `Any Object`. This tests enabled selection modes,
+  not selected elements and not `get_mesh_selection_kind()`.
+- Mesh in another non-Object mode: current mode, then `Mesh`, `Any Object`.
+- Mesh in Object Mode: `Mesh`, then `Any Object`.
+- Empty: `Image`, or `Instance`, or the force-field type followed by `Field`
+  when applicable; then `Empty`, `Any Object`.
+- Other object types: current non-Object mode, object type, then `Any Object`.
+
+`open_menu(**kwargs)` and `draw_menu(**kwargs)` return `None`; keyword arguments
+are passed to PME's corresponding menu helper. Drawing requires a valid layout;
+opening requires a usable invocation context. Missing/disabled menus log a
+warning and do nothing. A failure from opening/drawing is reported as an error.
+An existing enabled menu may still be unavailable because of its Poll.
+
+For inspection, `CSM.has_menu(name)` and `instance.check_menu_exists()` return
+booleans; the latter also warns on a missing menu. `instance.format_name(name)`
+returns the formatted string, and `instance.check_and_set_menu(name)` returns
+that string for an enabled menu or `None` (it does not assign `menu_name`).
+`instance.gen_menu_name()` recomputes the name and returns `None`.
+Create a new instance after context changes instead of retaining a captured
+active object across edits.
+```

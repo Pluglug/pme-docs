@@ -1,0 +1,18 @@
+(examples)=
+
+# Examples and Ideas
+
+Explore [PME Treasure](https://pluglug.github.io/ba-pme-treasure/) for custom menus, combinations of operations, questions, and answers shared on Blender Artists.
+
+- **Create your first menu:** {ref}`basic-pie-menu` turns Blender's Apply menu into a pie menu.
+- **Find code:** [Code Examples](https://pluglug.github.io/ba-pme-treasure/Guides/code-examples) groups examples by the action or UI you want to build.
+- **Look up settings:** See {ref}`editor-common-elements` and each editor's page for controls and usage.
+
+Use this documentation as the reference for PME features, settings, and APIs, and Treasure as supporting material for examples and earlier solutions. Older posts may target different versions; check the corresponding reference for current setting names and constraints.
+
+```{toctree}
+:hidden:
+:maxdepth: 1
+
+Code Examples <scripting_workflow>
+```

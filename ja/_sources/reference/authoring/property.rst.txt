@@ -1,0 +1,660 @@
+:vocab: developer-facing
+
+.. _authoring-property:
+
+============================================================
+Property
+============================================================
+
+.. py:currentmodule:: pme.editing
+
+Property(メニューの種類 ``PROPERTY``)は、ユーザープロパティを 1 つ定義します。
+定義には型、引数、Enum 項目、コールバック、保存先、Property ID が含まれます。
+定義は項目名で読み取り、変更します。
+Property Stack は :ref:`authoring-property-stack` で説明します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 関数
+     - 用途
+   * - :py:func:`read_pm`
+     - 定義を ``property`` に入れて返します。
+   * - :py:func:`update_property`
+     - 定義、保存先、Property ID を変更します。
+
+関連項目: :ref:`authoring-recipe-property-switch`。
+
+.. _authoring-property-read:
+
+Property を読み取る
+============================================================
+
+``read_pm(pm_uid)["property"]`` は、:py:func:`update_property` が受け付ける項目名で表した定義に、
+``registered_property_id``、``digest``、``diagnostics`` を加えたものです。
+Property の型と保存先に該当する項目だけが入ります。:ref:`authoring-property-definition` を参照してください。
+値はエディターに表示される値です。読み取りでは Getter を評価しません。
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(pm_uid)["property"]
+   {'type': 'BOOL', 'size': 1, 'default': False, 'expand': True,
+    'horizontal': True, 'restore_default': False, 'get': None, 'set': None,
+    'update': None, 'init': None, 'storage': None, 'property_id': 'my_toggle',
+    'property_id_locked': False, 'registered_property_id': 'my_toggle',
+    'digest': '42aaaef6...', 'diagnostics': []}
+
+新しい Property は、コールバックを持たず、値を保存する Boolean です。
+
+``diagnostics`` には、保存されている定義の問題が入ります。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - ``code``
+     - 原因と追加のキー
+   * - ``callback_compile_error``
+     - 保存されたコールバックに構文エラーがあります。``field`` がそのコールバックを示し、
+       ``severity`` は ``"warning"`` です。
+   * - ``argument_unreadable``
+     - 保存された引数が Python のリテラルではありません。``field`` が引数を示し、
+       ``text`` に保存されたテキストが入ります。項目にはエディターの既定値が表示されます。
+
+.. _authoring-property-value:
+
+値の置き場所
+============================================================
+
+``storage`` が値の所有者を決めます。``registered_property_id`` は Property が登録された名前です。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 33 45
+
+   * - ``storage``
+     - 値の所有者
+     - 読み方
+   * - ``None``
+     - Addon Preferences。PME が値を 1 つ持ちます。
+     - ``pme.props(registered_property_id)``。
+   * - ``"Object"`` などの ID 型名
+     - その型の各データブロックが、``registered_property_id`` という名前の属性として自分の値を持ちます。
+     - ``getattr(data_block, registered_property_id)``。``pme.props()`` はこの値を持ちません。``pme.props(registered_property_id)`` は ``None`` を返すか、
+       Addon Preferences で同じ ID を使う別の Property の値を返します。
+
+.. code-block:: python
+
+   prop = pme.editing.read_pm(property_uid)["property"]
+   name = prop["registered_property_id"]
+   if prop["storage"] is None:  # Addon Preferences: one value
+       value = pme.props(name)
+       widget = f"L.prop(props(), {name!r})"
+   else:  # "Object": a value on each object
+       value = getattr(bpy.context.object, name)
+       widget = f"L.prop(C.object, {name!r})"
+
+Property が無効の間、``registered_property_id`` は空です。
+Property ID の規則は :ref:`property-id` にあります。
+
+.. _authoring-property-definition:
+
+Property の定義
+============================================================
+
+``read_pm()["property"]`` の項目です。最後の 3 つ以外は :py:func:`update_property` が受け付けます。
+*既定値* は、一度も設定されていない項目にエディターが表示する値です。
+引数 ``default``、``min``、``max``、``step``、``precision``、``subtype``、``unit`` は、
+同じ名前で Blender の ``bpy.props`` の関数に渡されます。
+:py:func:`update_property` で ``None`` を渡すと、その引数は既定値に戻ります。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 13 15 20 34
+
+   * - 項目
+     - 型
+     - 適用対象
+     - 既定値
+     - 意味
+   * - ``type``
+     - str
+     - すべて
+     - ``"BOOL"``
+     - ``"BOOL"``、``"INT"``、``"FLOAT"``、``"STRING"``、``"ENUM"`` のいずれか。
+   * - ``size``
+     - int
+     - BOOL, INT, FLOAT
+     - ``1``
+     - Property Size。1 は単一の値、2〜32 はその個数の成分を持つベクトルです。
+   * - ``default``
+     - bool, int, float, str or list
+     - すべて
+     - BOOL は ``False``、INT と FLOAT は ``0``、STRING は ``""``。ベクトルは ``size`` 個のそれらの値のリスト。ENUM は最初の項目の識別子で、項目がなければ ``None``。
+       Multi-Select は ``[]``
+     - Default Value。ベクトルの既定値は、ちょうど ``size`` 個の値のリストです。
+       Enum の既定値は識別子 1 つです。Multi-Select の既定値は識別子の list、tuple、set のいずれかで、ソートした list として読み戻されます。
+   * - ``min``
+     - int or float
+     - INT, FLOAT
+     - ``-2147483648``
+     - Min Value。INT では 32 bit 整数、FLOAT では有限の数です。
+   * - ``max``
+     - int or float
+     - INT, FLOAT
+     - ``2147483647``
+     - Max Value。規則は ``min`` と同じです。
+   * - ``step``
+     - int or float
+     - INT, FLOAT
+     - ``1`` (INT)、``3`` (FLOAT)
+     - Step。規則は ``min`` と同じです。
+   * - ``precision``
+     - int
+     - FLOAT
+     - ``2``
+     - Precision。0〜6。
+   * - ``subtype``
+     - str
+     - INT, FLOAT, STRING
+     - ``"NONE"``
+     - Subtype。:ref:`authoring-property-subtypes` を参照してください。
+   * - ``unit``
+     - str
+     - FLOAT
+     - ``"NONE"``
+     - Unit。:ref:`authoring-property-units` を参照してください。
+   * - ``multiselect``
+     - bool
+     - ENUM
+     - ``False``
+     - Multi-Select。値は識別子の集合です。
+   * - ``expand``
+     - bool
+     - すべて
+     - ``True``
+     - Expand。
+   * - ``horizontal``
+     - bool
+     - BOOL, INT, FLOAT, ENUM
+     - ``True``
+     - Horizontal Layout。
+   * - ``restore_default``
+     - bool
+     - ``storage`` が ``None``
+     - ``False``
+     - Restore Default Value。PME の初期化時に保存値を破棄し、``default`` から始めます。
+   * - ``items``
+     - list[dict]
+     - ENUM
+     - ``[]``
+     - 順序どおりの Enum 項目。:ref:`authoring-property-items` を参照してください。
+   * - ``get``
+     - str or None
+     - すべて
+     - ``None``
+     - Getter の本文。その ``return`` が値になります。``None``: Getter なし。
+   * - ``set``
+     - str or None
+     - すべて
+     - ``None``
+     - Setter の本文。Getter が必要です。``None``: Setter なし。
+   * - ``update``
+     - str or None
+     - すべて
+     - ``None``
+     - On Update の本文。``None``: On Update なし。
+   * - ``init``
+     - str or None
+     - すべて
+     - ``None``
+     - On Init の本文。``None``: On Init なし。
+   * - ``storage``
+     - str or None
+     - すべて
+     - ``None``
+     - Addon Preferences なら ``None``、または ``"Object"`` や ``"Scene"`` などの
+       Blender の ID 型名。:ref:`authoring-property-value` を参照してください。
+   * - ``property_id``
+     - str
+     - すべて
+     - メニュー名から生成
+     - 保存された Property ID。
+   * - ``property_id_locked``
+     - bool
+     - すべて
+     - ``False``
+     - Lock。``True`` のとき、Property ID はメニュー名の変更に追従しません。
+   * - ``registered_property_id``
+     - str
+     - 読み取り専用
+     -
+     - Property が登録された名前。Property が無効、または登録されていない間は空です。
+   * - ``digest``
+     - str
+     - 読み取り専用
+     -
+     - 保存された定義の 16 進 digest。``expected_digest`` として渡します。
+   * - ``diagnostics``
+     - list[dict]
+     - 読み取り専用
+     -
+     - 保存された定義の問題。:ref:`authoring-property-read` を参照してください。
+
+コールバックで使える変数は :ref:`property-callbacks` にあります。
+
+.. _authoring-property-items:
+
+Enum 項目
+------------------------------------------------------------
+
+``items`` の各要素:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 14 68
+
+   * - キー
+     - 型
+     - 値
+   * - ``uid``
+     - str
+     - 既存の項目の UID。入力では、既存の UID を渡すとその項目の identity を保ちます。
+       新しい項目では省略するか、``""`` または ``None`` を渡します。
+   * - ``identifier``
+     - str
+     - 必須。スクリプトで使う値です。空ではなく、空白や ``|`` を含まず、
+       Property 内で一意です。
+   * - ``name``
+     - str
+     - 表示ラベル。``|`` を含みません。省略または空のときは識別子を使います。
+   * - ``icon``
+     - str
+     - Blender のアイコン名。省略時は ``""``。
+
+``items`` は Enum 項目を渡した順序で置き換えます。Enum の値は、エディターと同じく項目の順序に従います。
+識別子に ``GET``、``SET``、``UPDATE``、``INIT``、``CLASS``、``default``、``min``、``max``、``step``、
+``precision``、``subtype``、``unit`` は使えません。Multi-Select の Enum は最大 31 項目です。
+
+.. _authoring-property-subtypes:
+
+Subtype の値
+------------------------------------------------------------
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Property
+     - 受け付ける ``subtype``
+   * - INT または FLOAT、``size`` 1
+     - ``PIXEL``、``UNSIGNED``、``PERCENTAGE``、``FACTOR``、``ANGLE``、
+       ``TIME``、``TIME_ABSOLUTE``、``DISTANCE``、``DISTANCE_CAMERA``、
+       ``POWER``、``TEMPERATURE``、``NONE``
+   * - INT または FLOAT、``size`` 2〜32
+     - ``COLOR``、``TRANSLATION``、``DIRECTION``、``VELOCITY``、
+       ``ACCELERATION``、``MATRIX``、``EULER``、``QUATERNION``、``AXISANGLE``、
+       ``XYZ``、``XYZ_LENGTH``、``COLOR_GAMMA``、``COORDINATES``、``LAYER``、
+       ``LAYER_MEMBER``、``NONE``
+   * - STRING
+     - ``FILE_PATH``、``DIR_PATH``、``FILE_NAME``、``BYTE_STRING``、
+       ``PASSWORD``、``NONE``
+
+.. _authoring-property-units:
+
+Unit の値
+------------------------------------------------------------
+
+``unit`` は Blender の ``FloatProperty.unit`` の識別子を受け付けます。
+Blender 5.2 では ``NONE``、``LENGTH``、``AREA``、``VOLUME``、``ROTATION``、``TIME``、
+``TIME_ABSOLUTE``、``VELOCITY``、``ACCELERATION``、``MASS``、``CAMERA``、
+``POWER``、``TEMPERATURE``、``WAVELENGTH``、``COLOR_TEMPERATURE``、``FREQUENCY`` です。
+一覧は実行中の Blender から読み取ります。
+
+.. _authoring-property-reset-rules:
+
+初期化の規則
+============================================================
+
+エディター自身の規則が、この順に適用されます。
+同じ呼び出しで渡した値は、これらの初期化のあとに適用されます。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - 変更
+     - 影響
+   * - ``type``
+     - ``size`` は 1、``multiselect`` は ``False``、``horizontal`` は ``True``、
+       ``items`` は ``[]`` になります。``default``、``min``、``max``、``step``、
+       ``precision``、``subtype``、``unit`` は、新しい型のエディター既定値に戻ります。
+       コールバック、``expand``、``restore_default``、``storage``、Property ID は保持されます。
+   * - ``items``
+     - 一度も設定されていない ``default``、または以前の最初の項目を指す ``default`` は、
+       新しい最初の項目に追従します。削除された識別子を指す ``default`` は、
+       ``default`` も渡さない限り ``default_not_in_items`` で拒否されます。
+   * - ``multiselect``
+     - ``default`` はエディター既定値に戻ります。オンなら ``[]``、オフなら最初の項目です。
+   * - ``size``
+     - ``subtype`` と ``unit`` は ``"NONE"`` になります。``default`` は新しいサイズに合わせて切り詰められるか補われます。サイズ 1 では最初の成分が残ります。
+
+関数
+============================================================
+
+.. py:function:: update_property(pm_uid, changes, *, expected_digest=None, dry_run=False)
+
+   Property の定義、保存先、Property ID を、エディターと同じ処理で変更します。
+
+   すべての変更を、最初の書き込みの前に検査します。1 つでも拒否されれば、何も書き込みません。
+   そのあと、変更を 3 つのグループに分け、決まった順序で保存します。
+
+   :param str pm_uid: Property の UID。
+   :param dict changes: 項目名と新しい値の対応。項目名は :ref:`authoring-property-definition`
+      の項目のうち、読み取り専用のもの以外です。
+      部分指定です。指定しない項目は、:ref:`authoring-property-reset-rules` による変化を除き、
+      値を保持します。``None`` は引数をエディター既定値に戻し、コールバックを削除します。
+   :param expected_digest: ``read_pm()["property"]["digest"]``。保存されている Property が変わっている場合、更新は ``stale_property`` で拒否されます。
+   :type expected_digest: str or None
+   :param bool dry_run: 変更を検査し、書き込まずに返ります。
+   :returns: 下で説明する結果。
+   :rtype: dict
+   :raises TypeError: ``changes`` がマッピングではない。``multiselect``、
+      ``expand``、``horizontal``、``restore_default``、
+      ``property_id_locked`` が bool ではない。コールバックが文字列でも
+      ``None`` でもない。``property_id`` が文字列ではない。``storage`` が ``None``
+      でも空でない文字列でもない。``items`` がマッピングのシーケンスではない、項目の
+      ``identifier`` が文字列ではない、または ``uid``、``name``、``icon`` が文字列でも ``None`` でもない。``expected_digest`` が文字列でも
+      ``None`` でもない。``dry_run`` が bool ではない。
+   :raises ValueError: 項目名が不明。``type`` が 5 つの型のいずれでもない。
+      ``size`` が 1〜32 の整数ではない。項目に ``uid``、``identifier``、``name``、``icon``
+      以外のキーがある。UID がない、不正、または曖昧。メニューが Property ではない。
+   :raises RuntimeError: Blender のメインスレッド以外から呼ばれた、PME の読み込みが完了していない、または PME の Preferences を利用できない。
+
+   .. rubric:: グループ
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 18 40 42
+
+      * - ``group``
+        - 実行される条件
+        - 保存処理
+      * - ``storage``
+        - ``storage`` が保存値と異なる。
+        - エディターの保存先の設定。移動先の保存先に合わせて、新しい Property ID を選ぶことがあります。
+      * - ``property_id``
+        - 保存されている Property ID または Lock が、要求されたものと異なる。
+          保存先グループが選んだ ID も含みます。
+        - エディターの Edit Property ID。
+      * - ``definition``
+        - その他の項目が保存値と異なる。
+        - エディターの各項目のあと、Blender への 1 回の登録。
+
+   各グループの終了時点で、Property は完成した形です。
+   ``groups`` は実行したグループ、``pending`` は実行しなかったグループを示します。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - キー
+        - 型
+        - 値
+      * - ``status``
+        - str
+        - 下の *ステータス* を参照してください。
+      * - ``committed``
+        - bool
+        - ``status`` が ``"committed"`` のときだけ ``True``。
+      * - ``dry_run``
+        - bool
+        - ``dry_run`` 引数。
+      * - ``pm_uid``
+        - str
+        - ``pm_uid`` 引数。
+      * - ``before``
+        - dict
+        - 呼び出し前の ``read_pm()["property"]``。
+      * - ``after``
+        - dict
+        - 呼び出し後の ``read_pm()["property"]``。何も書き込まなければ ``before`` と同じです。
+      * - ``candidate``
+        - dict or None
+        - 保存する定義。``storage``、``property_id``、``property_id_locked`` を含みます。
+          変更が拒否されたときは ``None``。
+      * - ``changed_fields``
+        - list[str]
+        - ``before`` と ``after`` で値が異なる項目名。dry run のあとは空です。
+      * - ``groups``
+        - list[dict]
+        - 実行したグループごとに 1 要素: ``group`` と ``status``
+          (``"committed"``、``"rejected"``、``"restored_failure"``、
+          ``"unknown"`` のいずれか)。dry run のあとは空です。
+      * - ``pending``
+        - list[str]
+        - 実行が必要で、実行されなかったグループ。dry run のあとは、実行されるはずのグループ。
+      * - ``registration``
+        - dict or None
+        - ``definition`` グループが実行されたときに設定されます。下の *登録* を参照してください。``storage`` と ``property_id`` のグループも Property を登録します。どのグループのあとでも、``after["storage"]`` と
+          ``after["registered_property_id"]`` が、登録先と登録名を示します。
+      * - ``recovery``
+        - dict or None
+        - グループが失敗したあとに設定されます: ``scope`` (そのグループ) と
+          ``saved_definition_matches``。
+      * - ``diagnostics``
+        - list[dict]
+        - 問題ごとに 1 要素: ``code``、``field`` (または ``fields``)、
+          ``message`` と、*診断* に挙げる詳細。警告には
+          ``severity: "warning"`` も付きます。
+
+   .. rubric:: 登録
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 26 10 64
+
+      * - キー
+        - 型
+        - 値
+      * - ``status``
+        - str
+        - ``"committed"``、``"failed"``、または Property が無効の間は
+          ``"not_applicable"``。
+      * - ``registered_property_id``
+        - str
+        - Property が登録された名前。登録されていないときは空です。
+      * - ``reason_code``
+        - str
+        - 成功時は空。無効な Property では ``property_disabled``。
+          それ以外では失敗した段階のコード (``host_registration_failed`` など)。
+      * - ``failed_stage``
+        - str
+        - 成功時は空。それ以外では失敗した段階: ``validate``、
+          ``claim``、``resolve_owner``、``prepare_metadata``、
+          ``inspect_native``、``migrate``、``migrate_native``、
+          ``prepare_cleanup``、``register_new``、``commit_ownership``、
+          ``publish``、``commit_metadata`` のいずれか。
+      * - ``blocked_owner``
+        - str
+        - 保存値の移動を妨げたデータブロック (``Object 'Cube'`` など)。
+          それ以外では空です。
+
+   .. rubric:: ステータス
+
+   共通の語彙は :ref:`authoring-results-status` にあります。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - 意味
+      * - ``committed``
+        - 実行が必要なすべてのグループが保存されました。
+      * - ``validated``
+        - ``dry_run=True`` で、変更を受け付けられます。何も書き込んでいません。
+      * - ``unchanged``
+        - 変更が保存されている Property と一致します。何も書き込んでいません。
+          dry run でも返ります。
+      * - ``rejected``
+        - 保存されている Property は変わっていません。``diagnostics`` が原因を示します。
+          原因は検査、または最初に実行したグループの失敗です。
+      * - ``partial``
+        - 先のグループが確定したあとで、グループが失敗しました。先のグループは保存されたままです。``pending`` が実行されなかったグループを示します。
+      * - ``restored_failure``
+        - Blender が保存した定義の登録を拒否し、保存した定義を元に戻しました。
+      * - ``unknown``
+        - 失敗したグループが保存されている Property を変えたまま残したか、
+          復元を確認できませんでした。``recovery["scope"]`` がそのグループを示します。
+          再試行の前に :py:func:`read_pm` を呼んでください。
+
+   .. rubric:: 診断
+
+   *拒否*: 最初の書き込みの前に検査します。ステータスは ``rejected`` です。
+   *警告*: ステータスに影響しません。*グループ*: 書き込み中にグループが失敗しました。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 30 12 58
+
+      * - ``code``
+        - 影響
+        - 原因と追加のキー
+      * - ``stale_property``
+        - 拒否
+        - ``expected_digest`` が保存されている digest と異なります。``field`` は
+          ``"digest"`` です。
+      * - ``field_not_applicable``
+        - 拒否
+        - 項目が変更後の型に該当しない、または ID の保存先に
+          ``restore_default`` が指定されています。
+      * - ``default_type_mismatch``
+        - 拒否
+        - ``default`` の型が違う、またはベクトルで長さが違います。
+      * - ``default_not_in_items``
+        - 拒否
+        - 指定した、または保持した ``default`` が、項目にない識別子を指しています。
+          ``missing`` がそれらを列挙します。
+      * - ``argument_type_mismatch``
+        - 拒否
+        - ``min``、``max``、``step`` が整数 (INT) または有限の数 (FLOAT) ではない、
+          または ``precision`` が整数ではありません。
+      * - ``argument_out_of_range``
+        - 拒否
+        - ``precision`` が 0〜6 の範囲外の整数。INT の ``default``、
+          ``min``、``max``、``step`` が 32 bit の範囲
+          (-2147483648〜2147483647) 外の整数。または FLOAT の ``default``、``min``、
+          ``max``、``step`` が 32 bit float の範囲 (約 ±3.4028235e38) 外の有限の数で、
+          Blender が無限大として登録してしまう値。``field`` がその項目を示します。
+      * - ``argument_not_a_choice``
+        - 拒否
+        - ``subtype`` または ``unit`` が、その型とサイズで受け付けられない値です。
+          ``choices`` が受け付ける値を列挙します。
+      * - ``min_greater_than_max``
+        - 拒否
+        - 結果の ``min`` が ``max`` より大きくなります。``min`` と ``max``
+          が両方の値を示します。もう一方の境界値を読めない場合は検査しません。
+      * - ``multiselect_item_limit``
+        - 拒否
+        - Multi-Select の Enum が 31 項目を超えます。``limit`` と
+          ``count`` が数を示します。
+      * - ``item_identifier_invalid``
+        - 拒否
+        - 識別子が空、または空白や ``|`` を含みます。``index``
+          が項目を示します。
+      * - ``item_identifier_duplicate``
+        - 拒否
+        - 識別子が前の識別子と重複しています。``index`` が項目を示します。
+      * - ``item_identifier_reserved``
+        - 拒否
+        - 識別子が予約された名前です (:ref:`authoring-property-items` に記載)。
+          ``index`` が項目を示します。
+      * - ``item_name_invalid``
+        - 拒否
+        - 名前が ``|`` を含みます。``index`` が項目を示します。
+      * - ``item_uid_duplicate``
+        - 拒否
+        - 2 つの項目が同じ ``uid`` を指定しています。
+      * - ``item_uid_unknown``
+        - 拒否
+        - ``uid`` がこの Property の項目ではありません。``uids`` がそれらを列挙します。
+      * - ``set_requires_get``
+        - 拒否
+        - 結果が Getter のない Setter になります。
+      * - ``argument_unreadable_would_be_replaced``
+        - 拒否
+        - リテラルではない保存済みの引数が、呼び出しで指定していない値に置き換わります。
+          ``text`` に保存されたテキストが入ります。その引数を明示的に渡すと置き換えます。
+      * - ``storage_type_unknown``
+        - 拒否
+        - ``storage`` が Blender の ID 型名ではありません。
+      * - ``empty``、``too_long``、``invalid_identifier``、``non_ascii``、
+          ``python_keyword``、``reserved_access_name``
+        - 拒否
+        - Property ID が空、63 バイトより長い、ASCII 英字で始まり英数字と ``_`` が続く形ではない、非 ASCII、Python のキーワード、または ``keys``、``values``、``items``、
+          ``get`` のいずれかです。``property_id`` または ``storage`` が変わるときに検査します。
+      * - ``owner_reserved``
+        - 拒否
+        - 移動先の保存先に、その名前の属性がすでにあります (Blender のプロパティや、
+          別の Property が登録したプロパティなど)。
+      * - ``manual_prop_id_collision``
+        - 拒否
+        - 同じ保存先の別の Property が、その Property ID を保存しています。
+      * - ``reserved``
+        - 拒否
+        - Property ID がほかの理由で予約されています。
+      * - ``callback_compile_error``
+        - 警告
+        - 指定したコールバックに構文エラーがあります。エディターと同じく保存されます。
+      * - ``argument_unreadable``
+        - 警告
+        - リテラルではない保存済みの引数が保持されます。``text`` に保存されたテキストが入ります。
+      * - ``property_readback_differs``
+        - 警告
+        - 確定後、保存されている Property が ``candidate`` と異なります。
+          ``fields`` が項目名を列挙します。
+      * - ``storage_registration_failed``
+        - グループ
+        - 保存先グループが受け付けられませんでした。``message`` はエディターの報告をつなげたものです。
+      * - Property ID 段階のコード
+        - グループ
+        - ``property_id`` グループが受け付けられませんでした。``code`` は上の Property
+          ID のコード、``runtime_prop_id_register_failed``、または登録の
+          ``reason_code`` です。``effect_codes`` が実行した段階を列挙します。
+      * - ``definition_registration_failed``
+        - グループ
+        - Blender が保存した定義の登録を拒否しました。``registration`` に詳細が入ります。
+
+   .. rubric:: 例
+
+   新しい Property を、長さの単位を持つ 0〜1 の Float にします。
+
+   .. code-block:: python
+
+      created = pme.create_pm(pme.PmCreationSpec("PROPERTY", name="Bevel Width"))
+      before = pme.editing.read_pm(created.pm_uid)["property"]
+      result = pme.editing.update_property(
+          created.pm_uid,
+          {"type": "FLOAT", "default": 0.1, "min": 0.0, "max": 1.0, "unit": "LENGTH"},
+          expected_digest=before["digest"],
+      )
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: 補足
+
+   * ``storage`` が変わるとき、要求された、または保持される Property ID を、
+     移動先の保存先で検査します。
+   * 検証、保存、読み取りのいずれもコールバックを実行しません。On Init も実行されません。
+   * 保存値は通常の登録の規則に従います。エディターと同じく、``type`` や
+     ``size`` を変えると保存値は破棄されます。失敗後に保存値は復元されません。
+   * 確定したグループ、または ``unknown`` で終わったグループは、
+     ``read_pm()["version"]`` を 1 増やします。
+   * 選択中のメニューと、編集中の下書きは変わりません。
+   * 定義グループの保存中に発生した例外は、保存した定義を復元したあとで再送出されます。
+     その注記に、復元を確認できたかどうかが記されます。再試行の前に :py:func:`read_pm` を呼んでください。
+   * この呼び出しは、Preferences のディスクへの保存、Undo ステップの追加、
+     Property の表示を行いません。

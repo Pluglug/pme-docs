@@ -1,0 +1,315 @@
+(stack-key-editor)=
+
+# Stack Key Editor
+
+**Stack Key** assigns several actions to one hotkey. Advance on each press, or reuse the previous action and switch candidates only with rapid repeated presses. A single-slot Stack Key can also assign a hotkey to a short piece of code.
+
+
+This page describes PME 2.1 settings.
+
+(stack-configuration-guide)=
+
+:::{dropdown} Configuration guide — features, combinations, and uses (for AI)
+
+**Name: Stack Key / Type ID: `SCRIPT`.**
+Uses one key to move through several candidates in sequence. Unlike Macro Operator, it does not complete all steps in one invocation.
+
+- **Inputs**: Command or Hotkey slots. Start with one, then add, remove, or reorder as needed. Normal cycling uses enabled items.
+- **Order**: top to bottom, wrapping to the first after the last. See {ref}`slots <stack-slots>`.
+- **Continuation**: decide Remember Slot, Advance On, and Repeat Timeout first. See {ref}`advanced settings <stack-advanced-settings>`.
+- **Constraints**: check [input limits](../reference/command_text.md) and the execution editor, mode, and target for code. Remembering a slot position does not save Blender data.
+- **Combinations**: call a Macro from each Command to give a candidate several sequential actions. See {ref}`usage patterns <stack-patterns>` for calling menus by name.
+- **Example design**: use Remember Slot + Quick Repeat to reuse a tool normally and change it only on rapid presses. Use Every Press to advance every time.
+- **Validation**: test the first press, rapid repetition, delayed presses, and presses after another action separately. Check Undo history when using Undo Previous Command.
+- **Variable lifetime**: Commands share variables while continuing the same cycle, separately from remembering the slot position. See {ref}`variable sharing and reset conditions <stack-shared-variables>`.
+:::
+
+
+## Interface and editing workflow
+
+```{raw} html
+:file: common/_stack_key_editor_overview_map.html
+```
+
+1. {ref}`Name and basic controls <stack-basic-settings>`
+2. {ref}`Advanced settings <stack-advanced-settings>`
+3. {ref}`Keymap / Hotkey <stack-hotkey-settings>`
+4. {ref}`Cycling slots <stack-slots>`
+
+
+Select a Stack Key in the list, check its name and enabled state, then configure invocation and slots.
+See [Common Editor Elements](editor_common_elements.md) for lists, search, and tags;
+see {ref}`name <stack-basic-settings>`, {ref}`hotkeys <stack-hotkey-settings>`,
+{ref}`slots <stack-slots>`, and {ref}`advanced settings <stack-advanced-settings>` for each section.
+
+(stack-basic-settings)=
+
+## Name and basic controls
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-8.55614973%">
+<img src="../_static/images/editors/overview/stack-key-blender-5-2.png" width="663" height="374" alt="Tool Stack name and enabled state.">
+</div>
+<figcaption>Name and basic controls in this example.</figcaption>
+</figure>
+```
+
+Identify the configuration by its name and enabled state. For tags, renaming, references, and related controls,
+see {ref}`selected menu settings <overview-selected>`.
+This type has no menu preview button.
+
+(stack-hotkey-settings)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 64;--crop-offset:-56.68449198%">
+<img src="../_static/images/editors/overview/stack-key-blender-5-2.png" width="663" height="374" alt="Tool Stack Keymap and Hotkey settings. This example uses Q.">
+</div>
+<figcaption>Keymap / Hotkey settings in this example.</figcaption>
+</figure>
+```
+
+Set where and how to invoke it. See the shared {ref}`Hotkey settings <hotkey-editor>` for input controls.
+
+(stack-slots)=
+
+## Slots
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 91;--crop-offset:-74.59893048%">
+<img src="../_static/images/editors/overview/stack-key-blender-5-2.png" width="663" height="374" alt="Tool Stack cycling slots, with three selection tools arranged in order.">
+</div>
+<figcaption>Cycling slots in this example.</figcaption>
+</figure>
+```
+
+Normal cycling uses enabled slots from top to bottom. Every Press advances on each press; Quick Repeat advances on rapid successive presses. After the last slot, it returns to the first.
+
+- Add, remove, and reorder slots.
+- Enable or disable individual slots.
+- Each slot has a display name, shown beside the cursor when the slot runs.
+- A Command slot can have a description. The {ref}`Show List on Hold <stack-advanced-settings>` list shows the description of the highlighted slot beside the list, vertically centered on the slot and aligned toward the list. It goes on the left, or on the right when {ref}`Slot Display <setting-overlay-stack-key-slot-display>` is Right of Cursor; when that side has no room it moves to the other side, and in a narrow editor it is shortened to fit. Write `\n` for a line break. A line that does not fit ends with `…`, and lines that do not fit in the editor's height are left out. A Python description is evaluated each time the list opens, so keep it light; when it fails, no description is shown and the error is reported in the console (with the traceback while Show Error Trace is on). To hide descriptions for one Stack Key, turn off {guilabel}`Show Descriptions` under Show List on Hold.
+
+```{versionadded} 2.0.5
+Slots now support individual icons. The notification shown when a slot runs includes its name and icon.
+```
+
+(stack-shared-variables)=
+
+### Save on the first press, restore on the next
+
+**Press once to hide the floor grid; press again to restore it.** While continuing the same Stack Key, a slot can read values saved by the preceding slot. Releasing the key alone does not advance it.
+
+```{mermaid}
+:name: stack-value-memory
+:alt: The first press saves and hides the floor grid, then waits for another press. The second press restores the original state.
+
+flowchart LR
+    A["First press<br/>Save and hide"] --> B["Wait for next press"]
+    B --> C["Second press<br/>Restore state"]
+    classDef remember fill:#e8f1fb,stroke:#4878aa,color:#172b43;
+    classDef restore fill:#e8f5ed,stroke:#45805d,color:#183f28;
+    class A,B remember;
+    class C restore;
+```
+
+**1. First Command — save the original state, then hide**
+
+```python
+view = C.space_data; start_floor = view.overlay.show_floor; view.overlay.show_floor = False
+```
+
+**2. Next Command — restore the state if it was saved**
+
+```python
+if "start_floor" in globals(): view.overlay.show_floor = start_floor
+```
+
+Set Keymap to **3D View** and turn **Remember Slot / Undo Previous Command off**. Enable both slots and invoke the same Stack Key twice in a perspective 3D Viewport without another operation in between.
+
+`view` and `start_floor` are names you choose. `start_floor` could be `banana`, provided save and restore use the same name. The second `if` checks whether the starting value is known; running only the second slot cannot restore an unknown value.
+
+To pass values to another independent invocation or menu, use temporary shared storage {ref}`U (User Data) <scripting-user-data>`.
+
+:::{admonition} Shared scope and restoration requirements
+:class: note
+
+- **Lifetime**: Commands continuing the same cycle share a Python namespace. A new cycle resets it. With Remember Slot off, another Stack Key or Blender operator can affect whether the cycle resets.
+- **Individual calls**: calls with an explicit slot number, and single-slot Stack Keys, create a new namespace each time.
+- **Quick Repeat**: advancing within the timeout preserves sharing. Re-running the current slot after the timeout creates a new namespace.
+- **Remember Slot**: remembers the slot position, not a separate variable store for each menu. Do not assume saved values survive after another Stack Key is used.
+- **Target and names**: the saved 3D Viewport must remain available. Do not overwrite PME-provided names such as `C`, `E`, `menu`, or `slot` to store values.
+- **Restoration**: switching to another operation without running the second slot leaves the changed value in place. Errors and cycle resets do not restore it automatically. Use [Sticky Key](sticky_key_editor.md) for press/release restoration, or [Modal Operator](modal_operator_editor.md) exit slots for confirm/cancel behavior.
+
+:::
+
+(stack-advanced-settings)=
+
+## Advanced settings
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 143;--crop-offset:-17.37967914%">
+<img src="../_static/images/editors/overview/stack-key-blender-5-2.png" width="663" height="374" alt="Tool Stack advanced settings: remembering the previous candidate and choosing when to advance.">
+</div>
+<figcaption>Advanced settings in this example.</figcaption>
+</figure>
+```
+
+Open these with the gear button. See the {ref}`shared advanced settings <editor-extra-settings>` for Description and Poll.
+
+:Remember Slot:
+  Remembers the last executed slot position. When disabled, a break in the sequence, such as another Stack Key or Blender operator, restarts from the first slot. Not every input, such as a click, is treated as another operation.
+
+  ```{versionchanged} 2.0.5
+  Renamed {guilabel}`Remember State` to {guilabel}`Remember Slot`.
+  ```
+
+:Advance On:
+  Chooses when to advance with Remember Slot enabled.
+
+  - **Every Press** — advances to the next slot on every press.
+  - **Quick Repeat** — advances only on rapid repeated presses; a delayed press reruns the current slot.
+
+  ```{versionadded} 2.0.5
+  Added Advance On. Existing Stack Key configurations retain behavior equivalent to Every Press.
+  ```
+
+:Repeat Timeout:
+  The maximum interval recognized as a repeated press when Advance On is Quick Repeat, in milliseconds. Minimum: 1 ms; default: 600 ms.
+
+:Show List on Hold:
+  Shown when the Hotkey Mode is Press. Holding the hotkey shows the enabled slots as a list beside the cursor, on the same side as the rows of {ref}`Slot Display <setting-overlay-stack-key-slot-display>` (left, or right when Slot Display is Right of Cursor), so the list does not cover the cursor. The list opens with the current slot — the slot this Stack Key ran last — level with the cursor and marked with a small ring. Each slot has its own accent color, and names near the cursor are drawn larger. Move to a slot and release to run it, or click it with the left mouse button while the key is still held (the slot runs when the button is released). The chosen slot stays shown for a moment after the list closes, in the same place and at the same size, filled with its accent color. A slot is picked even when the cursor is a little outside the list: to its left and right, and above the first row or below the last row. Releasing without moving or scrolling runs nothing, so the list can be opened just to see where the Stack Key is. Hovering does not run anything. Releasing or clicking outside the list, Esc, or the right mouse button closes the list without running a slot. After a click, nothing more runs until the key is released; when the hotkey itself is the right mouse button, releasing it runs the highlighted slot, and Esc or a left click outside the list closes the list. When the hotkey itself is the left mouse button, releasing it runs the highlighted slot, so a row cannot be clicked. When there are more slots than the list shows, scroll with the mouse wheel or a two-finger trackpad scroll, or rest the cursor on the outer half of the first or last row or just beyond it; a list with more slots beyond an end shows the next row faded out at that end; {ref}`Rows <setting-overlay-stack-key-list-rows>` sets how many rows are shown.
+
+  With this option, a short press runs its slot when the key is released instead of when it is pressed. The time before the list opens is {ref}`Delay <setting-overlay-stack-key-list-delay>`. A slot chosen from the list continues the sequence exactly as if the presses had reached it, including Remember Slot, Quick Repeat and Undo Previous Command.
+
+  From the press until the key is released or the list is closed, other keys and mouse buttons are ignored (except the left mouse button on an open list), and holding the key does not repeat the Stack Key.
+
+  In these cases the list is not used and the Stack Key behaves as it does without this option: fewer than two slots are enabled, a Hold, Tweak or Key Chords menu that can be used there shares the key, the Stack Key is called from another menu or a script, or the hotkey is a mouse wheel.
+
+:Show Descriptions:
+  Shown while Show List on Hold is on. Shows the description of the highlighted slot beside the list. Default: on. When off, this Stack Key shows no descriptions in its list and Python descriptions are not evaluated.
+
+:Undo Previous Command:
+  Undoes the previous result before running the next candidate during continuous switching. The first invocation or an explicit-slot call does not undo in the same way. This does not combine several changes into one operation; check the actual results and Undo history.
+
+---
+
+## Slot display
+
+During normal cycling, the slot that ran is shown beside the cursor with its icon, together with the previous and next slots. It is not shown for a single enabled slot, for an explicit-slot invocation, or after a slot is chosen from the Show List on Hold list (the list shows the chosen slot itself). The position is set by {ref}`Slot Display <setting-overlay-stack-key-slot-display>` in the Stack Key settings.
+
+A Command slot with {guilabel}`Auto Icon` on shows the icon of the tool or brush asset its command activates, both in these rows and in the Show List on Hold list, so a Stack Key that switches tools needs no icons of its own. The tool is looked up in the editor where the key was pressed. When no icon is found for the command, the slot's own icon is shown. When Slot Display is Overlay Settings, only the slot's own icon is shown.
+
+Each slot gets an accent color from its position in the Stack Key. To choose the color of a Command slot yourself, open the slot's ≡ menu and turn on {guilabel}`Custom Color`; a color column then appears in the slot list, as in the Vector Menu editor, and the chosen color is used for that slot's accent in these rows and in the Show List on Hold list.
+
+---
+
+## Code and input fields
+
+See the configuration guide above for supported inputs. Field controls are covered in the
+{ref}`shared Slot Editor <slot-editor>`; code guidance is in
+[Code Input and Execution](../reference/command_text.md) and
+[Code Examples](../reference/scripting_workflow.md).
+
+---
+
+(stack-patterns)=
+
+## Usage patterns and conditions to check
+
+### Cycle between two workspaces
+
+This example requires workspaces named `Layout` and `Scripting`. Use their actual names if you renamed them.
+
+Slot 1:
+
+```python
+C.window.workspace = D.workspaces['Layout']
+```
+
+Slot 2:
+
+```python
+C.window.workspace = D.workspaces['Scripting']
+```
+
+### One slot: Python code with a hotkey
+
+Write Python or an `open_menu()` call in one slot and assign a Stack Key hotkey.
+
+```python
+open_menu("My Pie Menu")
+```
+
+This can also switch brushes, but brush asset handling varies by Blender version and paint mode. Check the current brush-switching API and target before using older `D.brushes` assignment examples.
+
+### Choose a slot by modifier keys
+
+Named slots can be called externally by name. `event_mods(E)` returns a string such as `""`, `"Ctrl"`, `"Shift"`, or `"Ctrl Shift"` from the current event. Matching these to slot names selects an action by modifiers.
+
+```python
+open_menu("My Stack Key", event_mods(E))
+```
+
+This example requires an invocation providing event `E`. Do not copy it into an evaluation without an event, and ensure the corresponding slot names exist.
+
+### Choose a slot by context
+
+```python
+open_menu("My Stack Key", "Command 1") if C.mode == 'OBJECT' else open_menu("My Stack Key", "Command 2")
+```
+
+### Undo the previous action and rerun with different parameters
+
+This example requires Mesh Edit Mode with a loop already selected for region selection. Check selection and Undo behavior together.
+
+Enable Undo Previous Command to undo the last result before trying the next slot.
+
+Slot 1:
+
+```python
+bpy.ops.mesh.loop_to_region(select_bigger=False)
+```
+
+Slot 2:
+
+```python
+bpy.ops.mesh.loop_to_region(select_bigger=True)
+```
+
+---
+
+```{admonition} Related pages
+:class: seealso
+
+- [Common Editor Elements](editor_common_elements.md)
+- [Poll Method](../reference/poll_method.md)
+- [Choosing a Keymap](../reference/keymap_guide.md)
+```
+
+## Reference videos (original author's channel)
+
+From [roaoao's videos](../reference/original_author_videos.md). These show an older interface and workflow.
+
+:::{dropdown} Stack Keys in Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/4wZKiyKE_P4" title="Stack Keys in Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Stack Keys in Blender — Open on YouTube](https://www.youtube.com/watch?v=4wZKiyKE_P4)
+:::
+
+:::{dropdown} Blender Stack Key Tutorial by Jimmy Livefjord
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/-rknBwAPypk" title="Blender Stack Key Tutorial by Jimmy Livefjord" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Blender Stack Key Tutorial by Jimmy Livefjord — Open on YouTube](https://www.youtube.com/watch?v=-rknBwAPypk)
+:::

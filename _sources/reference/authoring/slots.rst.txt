@@ -1,0 +1,1911 @@
+:vocab: developer-facing
+
+.. _authoring-slots:
+
+=====
+Slots
+=====
+
+.. py:currentmodule:: pme.editing
+
+A slot is one saved item of a menu: a command, a property, a link to another
+menu, or a layout entry. This page covers the saved fields of a slot, the Slot
+Editor inputs, and the operations that edit, clear, add, remove, move, exchange
+and transfer slots. Rows, spacers and Layout Panels of Pop-up Dialogs and
+Floating Panels are on :ref:`authoring-layout`. The menu-level result of
+:py:func:`read_pm` is on :ref:`authoring-menus`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Function
+     - Purpose
+   * - :py:func:`read_pm`
+     - Returns the menu's slots under ``slots``, as described in
+       :ref:`authoring-slot-snapshot`.
+   * - :py:func:`slot_fields`
+     - Describes the inputs :py:func:`update_slots` accepts.
+   * - :py:func:`read_slot_inputs`
+     - Returns slots under those input names.
+   * - :py:func:`resolve_auto_icons`
+     - Reports whether Auto Icon finds an icon for each slot.
+   * - :py:func:`update_slots`
+     - Changes slot contents through the Slot Editor's save.
+   * - :py:func:`clear_slots`
+     - Clears slot contents and keeps the slots.
+   * - :py:func:`add_slot`
+     - Adds one default item.
+   * - :py:func:`remove_slot`
+     - Removes one item.
+   * - :py:func:`move_slot`
+     - Moves one item within its menu.
+   * - :py:func:`swap_slots`
+     - Exchanges two items.
+   * - :py:func:`transfer_slot`
+     - Moves one item's contents to another menu.
+
+.. _authoring-slots-by-type:
+
+Slots by menu type
+==================
+
+The menu type decides which operations apply. ``read_pm()["editable_slots"]``
+is ``False`` for the types in the last row; their slots are edited by their own
+operations.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 24 40
+
+   * - Menu type
+     - Slots
+     - Slot modes offered
+     - Operations
+   * - Pie Menu (``PMENU``), Vector Menu (``VMENU``)
+     - Fixed
+     - ``COMMAND``, ``PROP``, ``MENU``, ``HOTKEY``, ``CUSTOM``
+     - :py:func:`update_slots`, :py:func:`clear_slots`, :py:func:`swap_slots`,
+       :py:func:`transfer_slot`
+   * - Sticky Key (``STICKY``)
+     - Fixed: On Press, On Release
+     - ``COMMAND``, ``HOTKEY``
+     - :py:func:`update_slots`, :py:func:`transfer_slot`
+   * - Regular Menu (``RMENU``)
+     - List
+     - ``COMMAND``, ``PROP``, ``MENU``, ``HOTKEY``, ``CUSTOM``
+     - :py:func:`update_slots`, :py:func:`clear_slots`, :py:func:`add_slot`,
+       :py:func:`remove_slot`, :py:func:`move_slot`, :py:func:`transfer_slot`
+   * - Stack Key (``SCRIPT``)
+     - List
+     - ``COMMAND``, ``HOTKEY``
+     - :py:func:`update_slots`, :py:func:`add_slot`, :py:func:`remove_slot`,
+       :py:func:`move_slot`, :py:func:`transfer_slot`
+   * - Macro Operator (``MACRO``)
+     - List
+     - ``COMMAND``, ``MENU``
+     - :py:func:`update_slots`, :py:func:`add_slot`, :py:func:`remove_slot`,
+       :py:func:`move_slot`, :py:func:`transfer_slot`
+   * - Modal Operator (``MODAL``)
+     - List
+     - ``COMMAND``, ``PROP``, ``INVOKE``, ``FINISH``, ``CANCEL``, ``UPDATE``
+     - :py:func:`update_slots`, :py:func:`add_slot`, :py:func:`remove_slot`,
+       :py:func:`move_slot`, :py:func:`transfer_slot` between Modal Operators
+   * - Pop-up Dialog (``DIALOG``), Floating Panel (``FPANEL``)
+     - Rows (:ref:`authoring-layout`)
+     - ``COMMAND``, ``PROP``, ``MENU``, ``HOTKEY``, ``CUSTOM``
+     - All slot operations on this page
+   * - Panel Group (``PANEL``), Hidden Panel Group (``HPANEL``), Property
+       (``PROPERTY``), Property Stack (``CONDITION``), Context Router
+       (``ROUTER``)
+     - Own editor
+     - —
+     - None. Context Routers use :py:func:`update_router`; Property callbacks
+       are not slots.
+
+*Slot modes offered* are the modes of the Slot Editor's mode selector. The
+Sticky Key, Stack Key, Macro Operator and Modal Operator editors do not save
+empty slots; :py:func:`clear_slots` returns ``clear_unsupported`` there. For the
+types with their own editor, :py:func:`update_slots` and :py:func:`clear_slots`
+raise ``ValueError`` and the other operations are rejected.
+
+A menu created by :py:func:`pme.create_pm` starts with its editor's default
+slots: a Macro Operator has one empty Command step, and a Modal Operator has
+one On Invoke slot. Further slots are added with :py:func:`add_slot`.
+
+.. _authoring-slot-snapshot:
+
+Slot snapshot
+=============
+
+:py:func:`read_pm` returns the menu's slots in saved order under ``slots``.
+Each slot is a dictionary of plain Python values. The same dictionary is the
+``before`` and ``after`` value of a slot in operation results. Writes select a
+slot by ``uid``; ``index`` only reports the current position.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 14 56
+
+   * - Key
+     - Type
+     - Value
+   * - ``uid``
+     - str
+     - Slot UID. Unique within its menu.
+   * - ``index``
+     - int
+     - Position in the menu's saved slot list, from 0. Layout entries count.
+   * - ``enabled``
+     - bool
+     - Whether the slot is enabled. Not an input of :py:func:`update_slots`.
+   * - ``layout_panel``
+     - dict or None
+     - On a Layout Panel anchor: ``idname`` (str), ``default_closed`` (bool)
+       and ``use_header_layout`` (bool). ``None`` on other slots.
+   * - ``name``
+     - str
+     - Label.
+   * - ``icon``
+     - str
+     - Icon flags followed by the icon name. See :ref:`authoring-slot-icon`.
+       In a Modal Operator, the modal input of Command and Property slots. See
+       :ref:`authoring-slot-modal-input`.
+   * - ``mode``
+     - str
+     - ``EMPTY``, ``COMMAND``, ``PROP``, ``MENU``, ``HOTKEY``, ``CUSTOM``, or
+       for a Modal Operator ``INVOKE``, ``FINISH``, ``CANCEL``, ``UPDATE``.
+   * - ``auto_icon``
+     - bool
+     - Auto Icon. Saved as ``True`` only on a Command slot.
+   * - ``text``
+     - str
+     - Stored body. Its meaning depends on ``mode``. See
+       :ref:`authoring-slot-text`.
+   * - ``target_pm_uid``
+     - str
+     - Menu slot: UID of the linked menu. Empty for a link saved by name only
+       and for other modes.
+   * - ``target_pm_fallback_name``
+     - str
+     - Menu slot: last known name of the linked menu.
+   * - ``menu_presentation``
+     - str
+     - Menu slot linking a Regular Menu: ``BUTTON`` (Open on Selection),
+       ``SUBMENU`` or ``INLINE`` (Expand Contents). Empty for other targets and
+       for data saved before this field existed.
+   * - ``menu_sticky_close``
+     - bool
+     - Menu slot: close the Vector Menu when the link starts a Sticky Key.
+   * - ``menu_expand_width``
+     - float
+     - Menu slot: width of the expanded menu in pixels. ``-1`` uses the natural
+       width.
+   * - ``menu_expand_offset_x``, ``menu_expand_offset_y``
+     - float
+     - Menu slot: offset of the expanded menu in pixels.
+   * - ``exec_undo``
+     - bool
+     - Command slot: add an Undo step after running a command that is not a
+       Blender operator.
+   * - ``description``
+     - str
+     - Tooltip text, or Python code when ``description_is_expr`` is ``True``.
+   * - ``description_is_expr``
+     - bool
+     - Run ``description`` as Python and show the returned text.
+   * - ``vector_menu_enum_strategy``
+     - str
+     - Vector Menu enum presentation for this slot: ``global``, ``hover`` or
+       ``virtual_nest``.
+   * - ``use_property_split_override``
+     - str
+     - Property Split for this slot: ``inherit``, ``on`` or ``off``. Used by
+       Property slots in Pop-up Dialogs and Floating Panels.
+   * - ``button_background_color_enabled``
+     - bool
+     - Use ``button_background_color``. Used by Command slots in Floating
+       Panels, Vector Menus and Stack Keys.
+   * - ``button_background_color``
+     - list[float]
+     - Red, green and blue, each from 0.0 to 1.0, in scene linear color. See
+       :ref:`authoring-slot-button-background`.
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(pm_uid)["slots"][0]
+   {'uid': 'pmi_2j2ssemr', 'index': 0, 'enabled': True, 'layout_panel': None,
+    'name': 'Knife', 'icon': '', 'mode': 'COMMAND', 'auto_icon': True,
+    'text': "bpy.ops.wm.tool_set_by_id(name='builtin.knife')",
+    'target_pm_uid': '', 'target_pm_fallback_name': '', 'menu_presentation': '',
+    'menu_sticky_close': False, 'menu_expand_width': -1.0,
+    'menu_expand_offset_x': 0.0, 'menu_expand_offset_y': 0.0, 'exec_undo': False,
+    'description_is_expr': False, 'description': '',
+    'vector_menu_enum_strategy': 'global', 'use_property_split_override': 'inherit',
+    'button_background_color_enabled': False,
+    'button_background_color': [0.0, 0.0, 0.0]}
+
+.. _authoring-slot-text:
+
+Text by mode
+------------
+
+``text`` is stored text. It is edited through the inputs in the last column,
+not written directly.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 56 22
+
+   * - ``mode``
+     - ``text``
+     - Input
+   * - ``EMPTY``
+     - Empty for an empty slot. In a Regular Menu, a layout entry:
+       ``""`` separator, ``"label"`` label (``name`` holds its text),
+       ``"spacer"`` spacer, ``"column"`` column break. In a Pop-up Dialog or
+       Floating Panel, a row marker (``row`` with settings after ``?``) or a
+       spacer (``spacer?...``), described on :ref:`authoring-layout`.
+     - :py:func:`clear_slots`, :py:func:`add_slot`
+   * - ``COMMAND``
+     - Python code run when the slot is used.
+     - ``cmd``
+   * - ``PROP``
+     - Data path of a Blender property, for example
+       ``C.scene.tool_settings.use_snap``.
+     - ``prop``
+   * - ``MENU``
+     - Name of the linked menu, with an optional ``@`` or ``@@`` prefix. See
+       :ref:`authoring-slot-menu-text`.
+     - ``menu_target_uid``, ``expand_menu``, ``use_frame``
+   * - ``HOTKEY``
+     - Hotkey string: modifiers ``ctrl``, ``shift``, ``alt``, ``oskey``, then a
+       key modifier, then the key, joined by ``+``. Example: ``ctrl+A``.
+     - ``key``, ``ctrl``, ``shift``, ``alt``, ``oskey``, ``key_mod``
+   * - ``CUSTOM``
+     - Python code that draws a custom layout.
+     - ``custom``
+   * - ``INVOKE``, ``FINISH``, ``CANCEL``, ``UPDATE``
+     - Modal Operator: Python code run when the operator is invoked, confirmed,
+       cancelled or updated.
+     - ``cmd``
+
+.. _authoring-slot-menu-text:
+
+Menu slot text
+--------------
+
+A Menu slot's link is ``target_pm_uid``. The name in ``text`` is the display
+name and the fallback for a link saved by name only. The prefix stores how the
+linked menu is shown:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 40 40
+
+   * - ``text``
+     - Meaning
+     - Inputs
+   * - ``Name``
+     - No expansion.
+     - ``expand_menu=False``
+   * - ``@Name``
+     - Expand the linked menu.
+     - ``expand_menu=True``
+   * - ``@@Name``
+     - Expand the linked menu with a frame.
+     - ``expand_menu=True``, ``use_frame=True``
+
+* A link to a Regular Menu saves its presentation in ``menu_presentation`` and
+  no prefix. Links to a Context Router, and Vector Menu links to a Property, also
+  save no prefix. ``expand_menu=True`` or ``use_frame=True`` given for such a
+  link is not saved; the slot is ``committed`` and reports
+  ``slot_value_not_retained`` for the field.
+* With an empty ``menu_presentation``, a Regular Menu link whose text starts
+  with ``@`` is read as ``SUBMENU``. Otherwise it is read as ``BUTTON``.
+* The frame belongs to the expanded display. :py:func:`update_slots` raises
+  ``ValueError`` for ``use_frame=True`` when the resulting ``expand_menu`` is
+  ``False``. Setting ``expand_menu=False`` on a framed slot saves the plain
+  target name: the slot reads back as ``expand_menu=False``,
+  ``use_frame=False``.
+
+.. _authoring-slot-icon:
+
+Icon value
+----------
+
+``icon`` is optional flags followed by an icon name, for example
+``#!^TOOL_SETTINGS``. The flags are part of the string, not separate fields.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 16 84
+
+   * - Flag
+     - Meaning
+   * - ``#``
+     - Icon only: no label.
+   * - ``!``
+     - Hidden.
+   * - ``^``
+     - Checkbox style, where supported.
+
+Flags are read in the order ``#``, ``!``, ``^``. A flag out of that order is
+part of the name. The name is a Blender icon identifier such as
+``TOOL_SETTINGS``, ``""`` or ``NONE`` for no icon, or ``@filename`` for a
+:ref:`custom PNG icon <custom-icons>`. An unknown name is saved as given; the
+slot shows a fallback icon and :py:func:`update_slots` reports
+``icon_not_found``.
+
+In a Macro Operator, the editor sets the icon of every Command step when the
+Macro is registered: ``BLENDER`` for a step that runs as an operator step of
+Blender's Macro, ``TEXT`` for a step that runs as code. An ``icon`` input on
+such a step is replaced. The two kinds of step are described in
+:ref:`macro-step-kinds`.
+
+.. _authoring-slot-button-background:
+
+Button background color
+-----------------------
+
+``button_background_color`` is saved in scene linear color, as Blender's own
+color properties are, and converted to sRGB when the button is drawn. A value
+taken from a hex code or an sRGB color is converted before it is written.
+Written unchanged, it is drawn lighter than the source color.
+
+.. code-block:: python
+
+   def srgb_to_linear(channel):
+       if channel <= 0.04045:
+           return channel / 12.92
+       return ((channel + 0.055) / 1.055) ** 2.4
+
+   # sRGB #A83636
+   color = [srgb_to_linear(value / 255) for value in (0xA8, 0x36, 0x36)]
+   pme.editing.update_slots(pm_uid, {slot_uid: {
+       "button_background_color_enabled": True,
+       "button_background_color": color,
+   }})
+
+* The color is drawn only while ``button_background_color_enabled`` is
+  ``True``.
+* A Stack Key has no buttons. It uses the color as the slot's accent color in
+  the rows beside the cursor and in the Show List on Hold list, instead of the
+  color it picks from the slot's position.
+* The button's text color does not change. Whether the text stays readable on
+  the chosen color is checked by the author, against the theme's button text
+  color (``bpy.context.preferences.themes[0].user_interface.wcol_tool.text``)
+  and in the drawn menu.
+
+.. _authoring-slot-inputs:
+
+Slot input fields
+=================
+
+:py:func:`update_slots` accepts the Slot Editor's inputs, not saved fields.
+:py:func:`slot_fields` describes them and :py:func:`read_slot_inputs` returns
+their current values. Inputs that are not named keep the values the Slot Editor
+loads from the saved slot.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 12 22 40
+
+   * - Input
+     - Type
+     - Saved field
+     - Meaning
+   * - ``mode``
+     - str
+     - ``mode``
+     - Slot mode. ``EMPTY`` is not accepted. The modes each menu type offers
+       are listed in :ref:`authoring-slots-by-type`.
+   * - ``name``
+     - str
+     - ``name``
+     - Label.
+   * - ``icon``
+     - str
+     - ``icon``
+     - Flags and icon name. See :ref:`authoring-slot-icon`.
+   * - ``auto_icon``
+     - bool
+     - ``auto_icon``
+     - Auto Icon. Kept only on a Command slot.
+   * - ``cmd``
+     - str
+     - ``text``
+     - Python code of a ``COMMAND``, ``INVOKE``, ``FINISH``, ``CANCEL`` or
+       ``UPDATE`` slot.
+   * - ``prop``
+     - str
+     - ``text``
+     - Property data path of a ``PROP`` slot.
+   * - ``custom``
+     - str
+     - ``text``
+     - Layout code of a ``CUSTOM`` slot.
+   * - ``exec_undo``
+     - bool
+     - ``exec_undo``
+     - Undo step for a Command slot.
+   * - ``menu``
+     - str
+     - ``text``, ``target_pm_uid``
+     - Linked menu, by name or UID. Resolved to ``target_pm_uid`` when found.
+   * - ``menu_target_uid``
+     - str
+     - ``target_pm_uid``
+     - UID of the linked menu. When not empty it replaces ``menu``.
+   * - ``menu_target_fallback_name``
+     - str
+     - —
+     - Name used to resolve a link whose UID no longer exists. The saved
+       ``target_pm_fallback_name`` is the resolved menu's name.
+   * - ``menu_presentation``
+     - str
+     - ``menu_presentation``
+     - ``BUTTON``, ``SUBMENU`` or ``INLINE``. Saved only for a Regular Menu
+       target.
+   * - ``menu_sticky_close``
+     - bool
+     - ``menu_sticky_close``
+     - Close the Vector Menu when the link starts a Sticky Key.
+   * - ``expand_menu``
+     - bool
+     - ``@`` prefix of ``text``
+     - Expand the linked menu. See :ref:`authoring-slot-menu-text`.
+   * - ``use_frame``
+     - bool
+     - ``@@`` prefix of ``text``
+     - Draw a frame around the expanded menu.
+   * - ``menu_expand_width``
+     - float
+     - ``menu_expand_width``
+     - Width of the expanded menu; ``-1`` uses the natural width.
+   * - ``menu_expand_offset_x``, ``menu_expand_offset_y``
+     - float
+     - same name
+     - Offset of the expanded menu.
+   * - ``key``
+     - str
+     - ``text``
+     - Hotkey slot: key, a Blender event type such as ``A``.
+   * - ``ctrl``, ``shift``, ``alt``, ``oskey``
+     - bool
+     - ``text``
+     - Hotkey slot: modifier keys.
+   * - ``key_mod``
+     - str
+     - ``text``
+     - Hotkey slot: a regular key held as a modifier, or ``NONE``.
+   * - ``any``
+     - bool
+     - —
+     - Read from a saved hotkey. No slot saves it, so only ``False`` is
+       accepted; ``True`` raises ``ValueError``.
+   * - ``description``
+     - str
+     - ``description``
+     - Tooltip text or code.
+   * - ``description_is_expr``
+     - bool
+     - ``description_is_expr``
+     - Run the description as Python.
+   * - ``vector_menu_enum_strategy``
+     - str
+     - same name
+     - ``global``, ``hover`` or ``virtual_nest``.
+   * - ``use_property_split_override``
+     - str
+     - same name
+     - ``inherit``, ``on`` or ``off``.
+   * - ``button_background_color_enabled``
+     - bool
+     - same name
+     - Use the button background color.
+   * - ``button_background_color``
+     - list[float]
+     - same name
+     - Three numbers from 0.0 to 1.0, in scene linear color. See
+       :ref:`authoring-slot-button-background`.
+   * - ``layout_panel_default_closed``
+     - bool
+     - ``layout_panel["default_closed"]``
+     - Layout Panel anchor: show the panel closed the first time.
+   * - ``layout_panel_use_header_layout``
+     - bool
+     - ``layout_panel["use_header_layout"]``
+     - Layout Panel anchor: allow slots in the panel header. Switching an empty
+       header from ``False`` to ``True`` adds one button to it. Saving ``True``
+       on a header that is already on does not add one.
+   * - ``modal_input``
+     - dict
+     - ``icon``
+     - Modal Operator only. See :ref:`authoring-slot-modal-input`.
+
+Values are checked by type before anything is saved. A string or Enum input
+takes a ``str``, and an Enum value must be in ``slot_fields()[name]["values"]``.
+A bool input takes ``True`` or ``False`` only. A float input takes a finite
+``int`` or ``float``; ``button_background_color`` takes a list or tuple of three.
+
+.. _authoring-slot-modal-input:
+
+Modal input
+-----------
+
+In a Modal Operator, Command and Property slots store their modal input in
+``icon``: ``hotkey;expression`` for a Command slot, and
+``hotkey;minimum;maximum;step;expression`` for a Property slot with a key. The
+``modal_input`` input edits these values. On those slots the saved modal input
+replaces any ``icon`` input.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 18 60
+
+   * - Field
+     - Type
+     - Value
+   * - ``hotkey``
+     - str
+     - Hotkey string, as in a Hotkey slot. Default ``""``.
+   * - ``property_mode``
+     - str
+     - Property slot input method: ``KEY``, ``MOVE`` (``MOUSEMOVE``) or
+       ``WHEEL`` (``WHEELUPMOUSE``). Default ``KEY``.
+   * - ``custom``
+     - str
+     - Display Expression: Python expression whose result is shown in the modal
+       overlay.
+   * - ``minimum``, ``maximum``, ``step``
+     - float or None
+     - Property range and step. ``None`` uses the property's own value.
+
+* Fields that are not named keep their saved values.
+* Changing ``property_mode`` on a Property slot sets the key of ``MOVE`` or
+  ``WHEEL`` and keeps the hotkey's modifiers and the range.
+* Changing to ``KEY`` needs an explicit ``hotkey``. Without one the save is
+  rejected with ``editor_validation``.
+
+.. code-block:: python
+
+   # invoke_uid and lens_uid are slot UIDs read from the Modal Operator.
+   pme.editing.update_slots(modal_uid, {
+       invoke_uid: {"mode": "INVOKE", "cmd": "view = C.space_data"},
+       lens_uid: {"mode": "PROP", "name": "Lens", "prop": "view.lens",
+                  "modal_input": {"property_mode": "WHEEL", "step": 1.0}},
+   })
+
+The code of an ``INVOKE``, ``UPDATE``, ``FINISH`` or ``CANCEL`` slot is the
+``cmd`` input. A Property slot's path can start from a variable that an On
+Invoke slot assigned, as ``view`` here; see :ref:`modal-shared-variables`.
+The saved ``icon`` of the Property slot holds its modal input as text;
+:py:func:`read_slot_inputs` returns it as ``modal_input``.
+
+.. _authoring-slots-save-result:
+
+Slot save results
+=================
+
+:py:func:`update_slots` and :py:func:`clear_slots` return the same result. The
+status words are defined on :ref:`authoring-results`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``status``
+     - str
+     - See *Status* below.
+   * - ``committed``
+     - bool
+     - ``True`` only when ``status`` is ``"committed"``.
+   * - ``pm_uid``
+     - str
+     - The ``pm_uid`` argument.
+   * - ``version``
+     - int
+     - Menu version after the call.
+   * - ``slots``
+     - list[dict]
+     - One entry per attempted slot, in request order. See *Slot entry*.
+   * - ``pending``
+     - list[str]
+     - UIDs whose save was not attempted. Earlier editor callbacks can still
+       have changed them.
+   * - ``diagnostics``
+     - list[dict]
+     - Request-level problems found before the first save.
+   * - ``structure_changes``
+     - dict
+     - Present when the slot order changed: ``before_order`` and
+       ``after_order``, lists of slot UIDs.
+   * - ``side_effects``
+     - list[dict]
+     - Present when slots not in ``slots`` changed, pending slots included:
+       ``uid``, ``before`` and ``after`` per slot.
+
+.. rubric:: Slot entry
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``uid``
+     - str
+     - Slot UID.
+   * - ``status``
+     - str
+     - ``committed``, ``unchanged`` or ``rejected``. ``unchanged``: the changes
+       are empty, or saving them would leave the slot's saved values as they
+       are; nothing was written for the slot.
+   * - ``before``
+     - dict
+     - :ref:`Slot snapshot <authoring-slot-snapshot>` at the start of the call.
+   * - ``after``
+     - dict or None
+     - Slot snapshot after the call. ``None`` when the slot no longer exists.
+   * - ``reports``
+     - list
+     - ``(level, message)`` pairs from the save, such as a refresh warning.
+   * - ``diagnostics``
+     - list[dict]
+     - Problems and warnings for this slot. Absent on ``unchanged``.
+
+.. rubric:: Status
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - ``status``
+     - Meaning
+   * - ``committed``
+     - At least one slot is ``committed`` and none was rejected. The others
+       are ``unchanged``.
+   * - ``unchanged``
+     - Every requested slot is ``unchanged``, or the request is empty. Nothing
+       was written; the version does not change and no refresh runs.
+   * - ``partial``
+     - At least one slot committed, then a slot was rejected. Later slots are
+       in ``pending``.
+   * - ``rejected``
+     - No slot committed. ``diagnostics`` or the slot entry names the cause.
+
+.. rubric:: Diagnostics
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - ``code``
+     - Cause, and extra keys
+   * - ``stale_version``
+     - ``expected_version`` differs from the menu version. ``expected`` and
+       ``actual``.
+   * - ``slot_not_found``
+     - A slot UID is not in the menu. ``pmi_uid``.
+   * - ``stale_slot``
+     - A value in ``expected`` differs from the saved value. ``pmi_uid`` and
+       ``fields``.
+   * - ``clear_unsupported``
+     - :py:func:`clear_slots`: the editor does not save empty slots.
+       ``pmi_uid``.
+   * - ``structural_slot``
+     - :py:func:`clear_slots`: the slot is a layout entry. ``pmi_uid``.
+   * - ``invalid_syntax``
+     - ``cmd``, ``custom`` or ``prop`` does not compile. ``field``,
+       ``message``, ``line`` and ``column``. Nothing is saved for the slot.
+   * - ``editor_validation``
+     - The Slot Editor's check refused the input. ``message`` is the editor's
+       text.
+   * - ``save_rejected``
+     - The save was refused without another diagnostic. ``route``.
+   * - ``clear_rejected``
+     - The clear was refused. ``route``.
+   * - ``slot_mode_normalized``
+     - Warning: an empty slot edited without ``mode`` was saved with a mode.
+       ``field``, ``before`` and ``after``.
+   * - ``icon_not_found``
+     - Warning: the saved icon name is not a known icon. ``field`` and
+       ``value``.
+   * - ``slot_value_not_retained``
+     - Warning: the slot was saved, but the slot read back under input names
+       (as :py:func:`read_slot_inputs` returns it) does not have the requested
+       value. ``field``, ``requested`` and ``actual``. One entry per field.
+       ``modal_input`` is not compared.
+
+``stale_version`` is always request-level. ``slot_not_found``,
+``stale_slot``, ``clear_unsupported`` and ``structural_slot`` are request-level
+when found before the first save; the same checks run again before each slot,
+and a failure then appears in that slot's entry.
+
+.. _authoring-slots-item-result:
+
+Item operation results
+======================
+
+:py:func:`add_slot`, :py:func:`remove_slot`, :py:func:`move_slot` and
+:py:func:`swap_slots` return the keys below for every menu type.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``status``
+     - str
+     - See *Status* below.
+   * - ``committed``
+     - bool
+     - ``True`` only when ``status`` is ``"committed"``.
+   * - ``pm_uid``
+     - str
+     - The ``pm_uid`` argument.
+   * - ``version``
+     - int
+     - Menu version after the call.
+   * - ``slots``
+     - list[dict]
+     - The target items: ``uid``, ``status``, ``before``, ``after`` and
+       ``reports``. An added item's ``before`` and a removed item's ``after`` are
+       ``None``.
+   * - ``pending``
+     - list
+     - Always empty.
+   * - ``diagnostics``
+     - list[dict]
+     - ``code`` and details. See *Diagnostics* below.
+   * - ``before_order``, ``after_order``
+     - list[str]
+     - Slot UIDs in saved order before and after the call.
+   * - ``side_effects``
+     - list[dict]
+     - Other items whose snapshot changed, including a changed ``index``:
+       ``uid``, ``before``, ``after``. Lists and fixed slots include the key only
+       when not empty.
+   * - ``expected``
+     - dict
+     - Snapshot to pass back as ``expected``. Returned by every
+       :py:func:`add_slot` call, by a :py:func:`remove_slot` dry run, and by
+       every Pop-up Dialog or Floating Panel call.
+
+A Pop-up Dialog or Floating Panel result also has these keys. Rows and the
+insertion position are described on :ref:`authoring-layout`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 14 56
+
+   * - Key
+     - Type
+     - Value
+   * - ``version_before``, ``version_after``
+     - int
+     - Menu version before and after the call.
+   * - ``before_rows``, ``after_rows``
+     - list[dict] or None
+     - Rows before and after. ``after_rows`` is ``None`` when it could not be
+       read.
+   * - ``insertion_position``
+     - dict or None
+     - The resolved gap in the saved order before the call. ``None`` for
+       exchanges, removals and early rejections.
+   * - ``created_uids``, ``deleted_uids``, ``moved_uids``
+     - list[str]
+     - Items added, removed, or with a changed index.
+   * - ``structure_changes``
+     - list[dict]
+     - Actual row and layout entry changes, cleanup included.
+   * - ``recovery``
+     - str
+     - ``not_needed``, ``restored`` or ``unknown``.
+
+.. rubric:: Status
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - ``status``
+     - Meaning
+   * - ``committed``
+     - The change is saved and the version increased once.
+   * - ``validated``
+     - ``dry_run=True`` and the operation is acceptable. Nothing was written.
+   * - ``unchanged``
+     - :py:func:`move_slot` and :py:func:`swap_slots`: the item is already at
+       that position. The version does not change.
+   * - ``rejected``
+     - Nothing was written. ``diagnostics`` names the cause.
+   * - ``restored_failure``
+     - Pop-up Dialog and Floating Panel: a write failed and the saved items and
+       order were restored.
+   * - ``unknown``
+     - Pop-up Dialog and Floating Panel: a write failed and the restore could
+       not be confirmed. Call :py:func:`read_pm` before retrying.
+
+.. rubric:: Diagnostics
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - ``code``
+     - Cause, and extra keys
+   * - ``stale_version``
+     - ``expected_version`` differs from the menu version. Lists and fixed
+       slots add ``expected`` and ``actual``.
+   * - ``stale_snapshot``
+     - :py:func:`add_slot` on a list: ``expected`` differs from the saved
+       collection.
+   * - ``stale_slot``
+     - :py:func:`remove_slot` on a list: a value in ``expected`` differs.
+       ``pmi_uid`` and ``fields``.
+   * - ``stale_popup``
+     - Pop-up Dialog or Floating Panel: ``expected`` differs from the saved
+       collection.
+   * - ``slot_not_found``
+     - The target or anchor UID is not in the menu. Lists add ``pmi_uid``.
+   * - ``fixed_slots``
+     - :py:func:`add_slot`, :py:func:`remove_slot` or :py:func:`move_slot` on a
+       fixed-slot menu.
+   * - ``slot_membership_unsupported``, ``slot_move_unsupported``,
+       ``slot_swap_unsupported``
+     - The menu type does not support this operation. See
+       :ref:`authoring-slots-by-type`.
+   * - ``slot_kind_unsupported``
+     - :py:func:`add_slot`: ``kind`` is not accepted. ``available`` lists the
+       kinds; lists also add ``kind``.
+   * - ``unsupported_position``
+     - ``use_spacer=True``, ``row_ref`` or ``new_row`` on a menu that is not a
+       Pop-up Dialog or Floating Panel.
+   * - ``menu_reference_slot_incompatible``
+     - :py:func:`swap_slots`: a Menu slot would land on a slot that does not
+       accept its target.
+   * - ``structural_slot``
+     - A layout entry cannot be moved or exchanged as an item.
+   * - ``panel_row``
+     - The item is a Layout Panel anchor, or the position is inside a Layout
+       Panel row without a header position.
+   * - ``panel_anchor_not_found``, ``header_target_mismatch``,
+       ``header_role_required``
+     - The Layout Panel header position is invalid. See :ref:`authoring-layout`.
+   * - ``row_not_found``, ``position_not_found``
+     - ``row_ref`` or the resolved position does not exist.
+   * - ``invalid_slot_identity``, ``item_identity_unconfirmed``
+     - Saved slot UIDs are missing, invalid or duplicated.
+   * - ``slot_edit_conflict``
+     - :py:func:`remove_slot`: the Slot Editor has the target open.
+   * - ``header_layout_disabled``
+     - Warning: the item is in, or goes to, a header whose Header Layout is off.
+       ``anchor_uid``.
+   * - ``target_index_out_of_range``, ``target_rejected``,
+       ``document_version_rejected``, ``dry_run_rejected``
+     - Lists and fixed slots: the normal operation refused the change.
+   * - ``apply_failed``, ``post_apply_failed``
+     - Lists and fixed slots: the change or its editor hook raised, and the
+       order was restored. The traceback is printed to the console.
+   * - ``popup_add_failed``, ``popup_remove_failed``, ``popup_move_failed``
+     - The write raised. ``exception_type`` and ``message``. See ``recovery``.
+   * - ``popup_restore_failed``
+     - The restore after a failed write raised. ``status`` is ``unknown``.
+   * - ``refresh_failed``
+     - The editor refresh raised after the write. The saved status stays.
+   * - ``popup_readback_failed``
+     - The final readback raised. ``after_order`` or ``after_rows`` is ``None``
+       and the changed UID lists are empty.
+
+.. _authoring-slots-conflict-checks:
+
+Conflict checks
+===============
+
+``expected_version`` is the session-local menu version from :py:func:`read_pm`
+or a previous result. It changes only through PME's versioned editing
+operations and does not detect every change. ``expected`` compares saved
+values, including changes made outside those operations. After ``stale_*``,
+read again and reconcile the intended change before retrying.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - Operation
+     - Conflict check
+   * - :py:func:`update_slots`, :py:func:`clear_slots`
+     - ``expected_version``, and ``expected`` mapping each slot UID to any
+       subset of its slot snapshot.
+   * - :py:func:`add_slot`
+     - ``expected_version``, and the complete ``expected`` returned by a
+       previous call.
+   * - :py:func:`remove_slot` on a list
+     - ``expected_version``, and ``expected`` with any subset of the target's
+       snapshot. The dry run returns all of it.
+   * - :py:func:`remove_slot`, :py:func:`move_slot`, :py:func:`swap_slots` on a
+       Pop-up Dialog or Floating Panel
+     - ``expected_version``, and the complete ``expected`` returned by a
+       previous call.
+   * - :py:func:`move_slot` on a list, :py:func:`swap_slots` on fixed slots
+     - ``expected_version`` only. ``expected`` raises ``TypeError``.
+   * - :py:func:`transfer_slot`
+     - The complete ``expected`` returned by the same transfer's dry run,
+       covering both menus. No ``expected_version``.
+
+Pass a returned ``expected`` unchanged. Missing fields in a complete snapshot
+are not filled in.
+
+Functions
+=========
+
+.. py:function:: slot_fields()
+
+   Describe the inputs that :py:func:`update_slots` accepts.
+
+   :returns: Input name mapped to a description.
+   :rtype: dict[str, dict]
+
+   Each description has these keys:
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 20 24 56
+
+      * - Key
+        - Present for
+        - Value
+      * - ``type``
+        - all
+        - ``"STRING"``, ``"BOOLEAN"``, ``"ENUM"``, ``"FLOAT"``, or
+          ``"mapping"`` for ``modal_input``
+      * - ``description``
+        - all except ``modal_input``
+        - The editor's tooltip text. Empty for some inputs.
+      * - ``values``
+        - ``ENUM``
+        - Accepted identifiers. ``mode`` does not list ``EMPTY``.
+      * - ``length``
+        - array inputs
+        - Number of items: 3 for ``button_background_color``
+      * - ``fields``
+        - ``modal_input``
+        - Field names of the mapping
+
+   .. code-block:: python
+
+      >>> pme.editing.slot_fields()["menu_presentation"]
+      {'type': 'ENUM', 'description': '', 'values': ['BUTTON', 'SUBMENU', 'INLINE']}
+
+   .. rubric:: Notes
+
+   * The result is the same for every menu type. Which inputs a slot uses
+     depends on its mode and menu type.
+
+.. py:function:: read_slot_inputs(pm_uid, *, slot_uids=None)
+
+   Return slots under the input names that :py:func:`update_slots` accepts.
+
+   Values are what the Slot Editor loads from the saved slot: the body under
+   ``cmd``, ``prop`` or ``custom``, a Menu slot's prefix as ``expand_menu`` and
+   ``use_frame``, a hotkey split into ``key`` and modifiers.
+
+   :param str pm_uid: UID of the menu.
+   :param slot_uids: UIDs of the slots to return. ``None`` returns every slot.
+   :type slot_uids: iterable of str or None
+   :returns: ``pm_uid`` and ``slots``.
+   :rtype: dict
+   :raises ValueError: The menu UID is missing, invalid or ambiguous, or a
+      requested slot UID is not in the menu.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - Key
+        - Type
+        - Value
+      * - ``pm_uid``
+        - str
+        - The ``pm_uid`` argument.
+      * - ``slots``
+        - list[dict]
+        - In saved order: ``uid``, ``index`` and ``edit`` per slot.
+      * - ``edit``
+        - dict or None
+        - Every name in :ref:`authoring-slot-inputs` except ``modal_input``;
+          a Modal Operator slot adds ``modal_input``. ``None`` for empty slots,
+          layout entries (Regular Menu labels, spacers and column breaks; row
+          markers, spacers and Layout Panel anchors) and menu types with their
+          own editor.
+
+   .. rubric:: Example
+
+   Copy the content of one slot to another:
+
+   .. code-block:: python
+
+      inputs = pme.editing.read_slot_inputs(pm_uid, slot_uids=[source_uid])
+      edit = inputs["slots"][0]["edit"]
+      result = pme.editing.update_slots(pm_uid, {target_uid: edit})
+      assert result["status"] == "committed", result
+
+   .. rubric:: Notes
+
+   * ``edit`` can be passed to :py:func:`update_slots` unchanged, for the same
+     slot or another one. Passed back to its own slot, it returns
+     ``unchanged`` without writing.
+   * A Hotkey slot whose saved text contains ``any`` reads ``any=True``. Set
+     it to ``False`` before passing ``edit`` back: no slot saves ``any``, and
+     :py:func:`update_slots` raises ``ValueError`` for ``True``.
+   * On a Menu slot that links a Regular Menu, ``menu_presentation`` is the
+     saved value, or the value read from the ``@`` prefix when none is saved.
+     Other slots read ``BUTTON``.
+   * Nothing is saved.
+
+.. py:function:: resolve_auto_icons(pm_uid, *, slot_uids=None)
+
+   Report, per slot, whether Auto Icon finds an icon in this Blender session.
+
+   :param str pm_uid: UID of the menu.
+   :param slot_uids: UIDs of the slots to report. ``None`` reports every slot.
+   :type slot_uids: iterable of str or None
+   :returns: ``pm_uid`` and ``slots``.
+   :rtype: dict
+   :raises ValueError: The menu UID is missing, invalid or ambiguous, or a
+      requested slot UID is not in the menu.
+
+   .. rubric:: Result
+
+   ``slots`` lists the slots in saved order. Each entry has these keys:
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - Key
+        - Type
+        - Value
+      * - ``uid``, ``index``
+        - str, int
+        - Slot UID and position.
+      * - ``auto_icon``
+        - bool
+        - ``True`` when the slot is a Command slot with Auto Icon on.
+      * - ``source``
+        - dict or None
+        - What the command names for an icon. ``None`` when ``auto_icon`` is
+          ``False`` or the command is not a single tool or brush activation.
+      * - ``resolved``
+        - bool
+        - ``True`` when the lookup finds an icon.
+      * - ``manual_icon``
+        - str
+        - The saved ``icon``. The slot shows it when ``resolved`` is ``False``.
+
+   ``source`` has these keys:
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 22 56
+
+      * - ``kind``
+        - Key
+        - Value
+      * - ``"tool"``
+        - ``tool``
+        - Tool identifier, such as ``builtin.knife``.
+      * - ``"tool"``
+        - ``space_type``
+        - Space type named in the command, or ``None``.
+      * - ``"asset"``
+        - ``asset``
+        - Brush asset identifier, relative to its library.
+      * - ``"asset"``
+        - ``library_type``, ``library_identifier``
+        - Library type and identifier. The identifier is the Custom asset
+          library name; the lookup uses both.
+
+   .. code-block:: python
+
+      >>> pme.editing.resolve_auto_icons(pm_uid, slot_uids=[slot_uid])["slots"][0]
+      {'uid': 'pmi_2j2ssemr', 'index': 0, 'auto_icon': True,
+       'source': {'kind': 'tool', 'tool': 'builtin.knife', 'space_type': None},
+       'resolved': True, 'manual_icon': ''}
+
+   .. rubric:: Notes
+
+   * The lookup is the one the Preferences icon selector uses. It can load icon
+     previews, so it is not part of :py:func:`read_pm`.
+   * Nothing is saved.
+
+.. py:function:: update_slots(pm_uid, edits, *, expected_version=None, expected=None)
+
+   Change slot contents through the Slot Editor's save, one slot at a time.
+
+   Each slot commits on its own, in the order of ``edits``. The first rejected
+   slot stops the call; earlier commits stay.
+
+   :param str pm_uid: UID of the menu.
+   :param dict edits: Slot UID mapped to a dictionary of
+      :ref:`input names <authoring-slot-inputs>` and values. Partial: inputs
+      that are not named keep their loaded values. An empty dictionary, or
+      values that the save would store exactly as the slot already has them,
+      leave the slot ``unchanged``.
+   :param expected_version: Menu version the call requires. Rejected with
+      ``stale_version`` when it differs.
+   :type expected_version: int or None
+   :param expected: Slot UID mapped to saved field values the slot must have
+      now, any subset of the :ref:`slot snapshot <authoring-slot-snapshot>`.
+      Every UID must also be in ``edits``. Checked before the first save and
+      again before each slot. Rejected with ``stale_slot`` when a value
+      differs.
+   :type expected: dict or None
+   :returns: The :ref:`slot save result <authoring-slots-save-result>`.
+   :rtype: dict
+   :raises TypeError: ``edits``, ``expected``, a slot's changes or a slot's
+      expected values are not mappings; ``expected_version`` is not a
+      non-negative int; ``modal_input`` is not a mapping or names an unknown
+      field.
+   :raises ValueError: The menu UID is missing, invalid or ambiguous; the menu
+      type has its own editor; ``expected`` names a slot not in ``edits``; a
+      slot UID is malformed; an input name is unknown, ``mode`` is ``"EMPTY"``,
+      ``any`` is ``True``, or a value fails its type check; ``modal_input`` has
+      a non-finite number or is given for a menu that is not a Modal Operator;
+      ``use_frame`` is ``True`` while the slot's resulting ``expand_menu`` is
+      ``False``. All of these are checked for every slot before the first
+      save.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      pm_uid = pme.create_pm(pme.PmCreationSpec("PMENU", name="Tools Pie")).pm_uid
+      before = pme.editing.read_pm(pm_uid)
+      slot = before["slots"][0]
+      result = pme.editing.update_slots(
+          pm_uid,
+          {slot["uid"]: {
+              "mode": "COMMAND",
+              "name": "Knife",
+              "cmd": "bpy.ops.wm.tool_set_by_id(name='builtin.knife')",
+              "auto_icon": True,
+          }},
+          expected_version=before["version"],
+          expected={slot["uid"]: slot},
+      )
+      assert result["status"] == "committed", result
+
+   .. rubric:: Notes
+
+   * Each committed slot increases the menu version once. An ``unchanged``
+     slot writes nothing: no version change, editor hook or refresh. The
+     comparison uses the values the save would store before the editor's
+     later normalization, so a value that normalization would change back
+     (for example a background color on a menu type that does not use it) is
+     saved and reported ``committed``; its ``before`` and ``after`` are equal.
+   * A ``committed`` slot can carry ``slot_value_not_retained``: the save
+     succeeded, and a requested field does not read back as requested. Check
+     the ``diagnostics`` of committed slots, not only ``status``.
+   * An empty slot edited without ``mode`` is saved as ``COMMAND`` and reports
+     ``slot_mode_normalized``. A blank ``name`` can be filled from the editor's
+     suggested name. Read the ``after`` value instead of assuming an input
+     stayed empty.
+   * The editor normalizes the saved slot. ``before`` and ``after`` show the
+     result. Editor callbacks can change other slots, such as Macro icons, and
+     switching an empty Layout Panel header on adds a slot. These changes
+     appear in ``side_effects`` and ``structure_changes``.
+   * A Command edit in a Pie Menu or Vector Menu keeps the other slots and
+     their order.
+   * An icon-only edit leaves ``mode`` and ``menu_target_uid`` out; the other
+     settings keep their values.
+   * A Layout Panel anchor is a Menu slot. A save on an anchor without a body
+     target is rejected with ``editor_validation``.
+   * An exception after a save started keeps its traceback, with a note naming
+     the committed UIDs. A refresh can fail after a slot committed. Call
+     :py:func:`read_pm` before retrying.
+   * The call does not save Preferences to disk, add an Undo step, or run the
+     slot. It is not a raw field write or a JSON import.
+
+   See also: :ref:`authoring-recipe-link-child-menu`.
+
+.. py:function:: clear_slots(pm_uid, slot_uids, *, expected_version=None, expected=None)
+
+   Clear the contents of slots and keep the slots.
+
+   Each slot keeps its UID, position and ``enabled``. Its other saved fields
+   return to the values of an empty slot, through the editor's normal Clear.
+
+   :param str pm_uid: UID of the menu.
+   :param slot_uids: UIDs of the slots to clear, in order. Each UID once.
+   :type slot_uids: iterable of str
+   :param expected_version: Menu version the call requires.
+   :type expected_version: int or None
+   :param expected: Slot UID mapped to saved field values, as in
+      :py:func:`update_slots`.
+   :type expected: dict or None
+   :returns: The :ref:`slot save result <authoring-slots-save-result>`.
+   :rtype: dict
+   :raises TypeError: ``slot_uids`` is a string, bytes or a mapping, or
+      contains a value that is not a non-empty string. Other conditions as in
+      :py:func:`update_slots`.
+   :raises ValueError: A UID appears twice. Other conditions as in
+      :py:func:`update_slots`.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 40 60
+
+      * - Saved field
+        - Value after Clear
+      * - ``mode``
+        - ``"EMPTY"``
+      * - ``name``, ``icon``, ``text``, ``target_pm_uid``,
+          ``target_pm_fallback_name``, ``menu_presentation``, ``description``
+        - ``""``
+      * - ``auto_icon``, ``menu_sticky_close``, ``exec_undo``,
+          ``description_is_expr``, ``button_background_color_enabled``
+        - ``False``
+      * - ``menu_expand_width``
+        - ``-1.0``
+      * - ``menu_expand_offset_x``, ``menu_expand_offset_y``
+        - ``0.0``
+      * - ``vector_menu_enum_strategy``
+        - ``"global"``
+      * - ``use_property_split_override``
+        - ``"inherit"``
+      * - ``button_background_color``
+        - ``[0.0, 0.0, 0.0]``
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+      result = pme.editing.clear_slots(
+          pm_uid, [slot_uid],
+          expected_version=before["version"],
+          expected={slot_uid: before["slots"][0]},
+      )
+      assert result["status"] == "committed", result
+
+   .. rubric:: Notes
+
+   * :py:func:`update_slots` does not accept ``mode="EMPTY"``; Clear is the
+     only way to empty a slot.
+   * The editor's remove hook runs after each clear.
+   * In a Regular Menu, a cleared item becomes a separator; it is not removed.
+   * Layout entries are rejected with ``structural_slot``; they are edited on
+     :ref:`authoring-layout`. A menu type whose editor does not save empty
+     slots returns ``clear_unsupported``.
+   * Each cleared slot increases the menu version once, also when it was
+     already empty. An empty ``slot_uids`` returns ``unchanged``. A refresh can
+     fail after a clear committed; call :py:func:`read_pm` before retrying.
+   * The call does not save Preferences to disk or add an Undo step.
+
+.. py:function:: add_slot(pm_uid, *, kind=None, before_uid=None, after_uid=None, expected_version=None, expected=None, use_spacer=False, dry_run=False, header_anchor_uid=None, edge=None)
+
+   Add one default item through the menu's normal Add.
+
+   The new item's contents are set with :py:func:`update_slots`. Its UID is
+   ``result["slots"][0]["uid"]``.
+
+   :param str pm_uid: UID of the menu.
+   :param kind: Kind of item. See *Kinds* below. ``None`` uses the editor's
+      default.
+   :type kind: str or None
+   :param before_uid: Insert before this item.
+   :type before_uid: str or None
+   :param after_uid: Insert after this item. At most one of ``before_uid`` and
+      ``after_uid``; neither appends to the end.
+   :type after_uid: str or None
+   :param expected_version: Menu version the call requires.
+   :type expected_version: int or None
+   :param expected: The complete ``expected`` returned by a previous call. It
+      covers every saved item, so it also detects changes made outside
+      versioned operations.
+   :type expected: dict or None
+   :param bool use_spacer: Pop-up Dialog and Floating Panel only. ``True``
+      adds the automatic spacer: before an anchor the order is new item,
+      spacer, anchor; after an anchor it is anchor, spacer, new item. Default
+      ``False``, regardless of the Preferences setting.
+   :param bool dry_run: Check the addition and return without writing.
+   :param header_anchor_uid: Pop-up Dialog and Floating Panel only: UID of a
+      Layout Panel anchor, to add into its header. Combine it with exactly one
+      of ``before_uid``, ``after_uid`` (an item of that header) or ``edge``.
+      See :ref:`authoring-layout`.
+   :type header_anchor_uid: str or None
+   :param edge: ``"START"`` or ``"END"`` of the header named by
+      ``header_anchor_uid``.
+   :type edge: str or None
+   :returns: The :ref:`item operation result <authoring-slots-item-result>`.
+   :rtype: dict
+   :raises TypeError: ``kind`` is not a string or ``None``; ``expected`` is not
+      a mapping; an anchor UID is not a non-empty string; ``use_spacer`` or
+      ``dry_run`` is not a bool; ``expected_version`` is not a non-negative
+      int.
+   :raises ValueError: The menu UID is missing, invalid or ambiguous; both
+      ``before_uid`` and ``after_uid`` are given; ``header_anchor_uid`` or
+      ``edge`` is given for a menu that is not a Pop-up Dialog or Floating
+      Panel; ``edge`` is given without ``header_anchor_uid``; a header
+      position is not exactly one; ``edge`` is not ``START`` or ``END``; a list
+      anchor UID is malformed.
+
+   .. rubric:: Kinds
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 22 54
+
+      * - Menu type
+        - ``kind``
+        - New item
+      * - Regular Menu
+        - ``ITEM`` (default)
+        - ``COMMAND`` named ``Slot``
+      * - Regular Menu
+        - ``LABEL``
+        - Label: ``EMPTY``, name ``Label``, text ``label``
+      * - Regular Menu
+        - ``SPACER``
+        - ``EMPTY``, text ``spacer``
+      * - Regular Menu
+        - ``SEPARATOR``
+        - ``EMPTY``, empty text
+      * - Regular Menu
+        - ``COLUMN``
+        - ``EMPTY``, text ``column``
+      * - Pop-up Dialog, Floating Panel
+        - ``None`` or ``BUTTON``
+        - Empty Command button
+      * - Macro Operator, Modal Operator, Stack Key
+        - ``None``
+        - The editor's normal Add item
+
+   Any other kind is rejected with ``slot_kind_unsupported``.
+
+   .. rubric:: Example
+
+   Insert an item after the second item of a Regular Menu, checking first:
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid)
+      anchor_uid = before["slots"][1]["uid"]
+      checked = pme.editing.add_slot(
+          pm_uid, after_uid=anchor_uid, expected_version=before["version"], dry_run=True,
+      )
+      assert checked["status"] == "validated", checked["diagnostics"]
+      added = pme.editing.add_slot(
+          pm_uid, after_uid=anchor_uid,
+          expected_version=checked["version"], expected=checked["expected"],
+      )
+      assert added["committed"], added["diagnostics"]
+      new_uid = added["slots"][0]["uid"]
+
+   .. rubric:: Notes
+
+   * Existing items keep their UIDs and relative order. Add does not change
+     layout markers.
+   * In a Pop-up Dialog or Floating Panel, ``before_uid`` and ``after_uid`` are
+     exact saved positions; markers between items are not skipped. The
+     automatic spacer appears in ``created_uids``, ``side_effects`` and
+     ``structure_changes``, not in ``slots``.
+   * An empty menu takes an addition without an anchor. A Pop-up Dialog or
+     Floating Panel then gets no row marker.
+   * A fixed-slot menu is rejected with ``fixed_slots``; use
+     :py:func:`clear_slots`. A list rejects ``use_spacer=True`` with
+     ``unsupported_position``. Regular Menu ``kind="SPACER"`` is a separate
+     item kind.
+   * A dry run returns ``validated`` or ``rejected`` with ``slots=[]``. It
+     allocates no UID, does not change saved values or the version, and runs
+     no editor hook or refresh. It does not predict labels, cleanup or hook
+     success. Its ``expected`` can be passed to the same call without
+     ``dry_run``.
+   * A refresh can fail after the addition committed; call :py:func:`read_pm`
+     before retrying. The call does not save Preferences to disk or add an
+     Undo step.
+
+.. py:function:: remove_slot(pm_uid, slot_uid, *, expected_version=None, expected=None, dry_run=False)
+
+   Remove one item through the menu's normal Remove.
+
+   :param str pm_uid: UID of the menu.
+   :param str slot_uid: UID of the item.
+   :param expected_version: Menu version the call requires.
+   :type expected_version: int or None
+   :param expected: On a list: saved field values the item must have, any
+      subset of its :ref:`slot snapshot <authoring-slot-snapshot>`; ``{}`` adds
+      no condition. On a Pop-up Dialog or Floating Panel: the complete
+      ``expected`` returned by a previous call.
+   :type expected: dict or None
+   :param bool dry_run: Check the removal and return without writing.
+   :returns: The :ref:`item operation result <authoring-slots-item-result>`.
+      The removed item's ``after`` is ``None``.
+   :rtype: dict
+   :raises TypeError: ``slot_uid`` is not a non-empty string; ``expected`` is
+      not a mapping; ``dry_run`` is not a bool; ``expected_version`` is not a
+      non-negative int.
+   :raises ValueError: The menu UID is missing, invalid or ambiguous; on a
+      list, ``slot_uid`` is malformed.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      checked = pme.editing.remove_slot(pm_uid, slot_uid, dry_run=True)
+      if checked["status"] == "validated":
+          removed = pme.editing.remove_slot(
+              pm_uid, slot_uid,
+              expected_version=checked["version"], expected=checked["expected"],
+          )
+          print(removed["status"], removed["after_order"])
+
+   .. rubric:: Notes
+
+   * A dry run's ``expected`` is the target's full snapshot on a list and the
+     complete collection on a Pop-up Dialog or Floating Panel. Both are valid
+     ``expected`` values for the same call without ``dry_run``.
+   * The last item can be removed, which leaves an empty list. No row or item
+     is added in its place.
+   * Pop-up Dialog and Floating Panel: Remove merges adjacent markers and
+     removes subrow boundaries when the affected row has fewer than two
+     columns. A Layout Panel anchor is rejected with ``panel_row``; whole rows
+     are removed on :ref:`authoring-layout`. The item open in the Slot Editor
+     is rejected with ``slot_edit_conflict``; other drafts, the selection and
+     the clipboard stay.
+   * Lists: the editor's remove hook runs. A rejected operation can still leave
+     callback changes, reported in ``side_effects``; not every callback is
+     rolled back.
+   * A fixed-slot menu is rejected with ``fixed_slots``; use
+     :py:func:`clear_slots`.
+   * A dry run returns ``validated`` or ``rejected`` and shows the target with
+     equal ``before`` and ``after``. It runs no UID repair, editor hook or
+     refresh, and does not change the version. It does not predict cleanup or
+     hook success.
+   * A refresh can fail after the removal committed; call :py:func:`read_pm`
+     before retrying. The call does not save Preferences to disk or add an
+     Undo step.
+
+.. py:function:: move_slot(pm_uid, slot_uid, *, before_uid=None, after_uid=None, expected_version=None, row_ref=None, edge=None, new_row=None, expected=None, use_spacer=False, dry_run=False, header_anchor_uid=None)
+
+   Move one item to another position in the same menu.
+
+   Exactly one position form is given. The item keeps its UID and saved values.
+
+   :param str pm_uid: UID of the menu.
+   :param str slot_uid: UID of the item.
+   :param before_uid: Move before this item.
+   :type before_uid: str or None
+   :param after_uid: Move after this item.
+   :type after_uid: str or None
+   :param expected_version: Menu version the call requires.
+   :type expected_version: int or None
+   :param row_ref: Pop-up Dialog and Floating Panel: a current row reference
+      from ``read_pm()["rows"]``, ``{"kind": "marker" or "first_item",
+      "slot_uid": ...}``. Requires ``edge``. See :ref:`authoring-layout`.
+   :type row_ref: dict or None
+   :param edge: ``"START"`` or ``"END"`` of the row named by ``row_ref``, or of
+      the header named by ``header_anchor_uid``.
+   :type edge: str or None
+   :param new_row: Pop-up Dialog and Floating Panel: ``"END"`` moves the item
+      to a new last row.
+   :type new_row: str or None
+   :param expected: Pop-up Dialog and Floating Panel only: the complete
+      ``expected`` returned by a previous call.
+   :type expected: dict or None
+   :param bool use_spacer: Pop-up Dialog and Floating Panel only. ``True``
+      applies the normal Move spacer rules. Default ``False``, regardless of
+      the Preferences setting.
+   :param bool dry_run: Check the move and return without writing.
+   :param header_anchor_uid: Pop-up Dialog and Floating Panel: UID of a Layout
+      Panel anchor, to move into its header. Combine it with exactly one of
+      ``before_uid``, ``after_uid`` or ``edge``.
+   :type header_anchor_uid: str or None
+   :returns: The :ref:`item operation result <authoring-slots-item-result>`.
+   :rtype: dict
+   :raises TypeError: ``slot_uid`` or an anchor UID is not a non-empty string;
+      ``row_ref`` does not have exactly ``kind`` and ``slot_uid``;
+      ``expected`` is given for a menu that is not a Pop-up Dialog or Floating
+      Panel; ``use_spacer`` or ``dry_run`` is not a bool;
+      ``expected_version`` is not a non-negative int.
+   :raises ValueError: The menu UID is missing, invalid or ambiguous; the
+      number of position forms is not one; ``edge`` is missing, not ``START``
+      or ``END``, or given without ``row_ref`` or ``header_anchor_uid``;
+      ``new_row`` is not ``"END"``; ``row_ref`` has an invalid ``kind``;
+      ``header_anchor_uid`` is given for a list; on a list, a UID is
+      malformed.
+
+   .. rubric:: Example
+
+   Move the last item of a list before the first:
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid)
+      result = pme.editing.move_slot(
+          pm_uid, before["slots"][-1]["uid"],
+          before_uid=before["slots"][0]["uid"], expected_version=before["version"],
+      )
+      print(result["status"], result["before_order"], result["after_order"])
+
+   .. rubric:: Notes
+
+   * An item already at the requested position, including a self anchor,
+     returns ``unchanged``. The version does not change and no refresh runs.
+   * Other items keep their relative order.
+   * Lists: the editor's move hook runs on a changed order, including Macro
+     registration. A hook failure restores the order but does not revert every
+     callback effect.
+   * Pop-up Dialog and Floating Panel: ``before_uid`` and ``after_uid`` are
+     exact saved positions, including spacer and column boundaries. Row-end,
+     new-row and item-relative moves run the normal Move cleanup of empty rows
+     and spacers. Layout entries and Layout Panel anchors cannot be moved as
+     items. The selection and an open Slot Editor draft stay with their items.
+   * A fixed-slot menu is rejected with ``fixed_slots``; use
+     :py:func:`swap_slots`. ``row_ref``, ``new_row`` or ``use_spacer=True`` on
+     a list is rejected with ``unsupported_position``.
+   * A dry run runs the same checks without writing, hooks or refresh. It does
+     not change saved values, UIDs, the order, the version, the selection or an
+     open Slot Editor draft. It returns ``validated``, ``unchanged`` or
+     ``rejected``; ``before`` /
+     ``after`` and the orders stay the saved state and do not predict the
+     move. It does not reserve the position; the call without ``dry_run``
+     checks again.
+   * Unknown UIDs and stale versions are rejected before moving. A refresh can
+     fail after the move committed; call :py:func:`read_pm` before retrying.
+     The call does not save Preferences to disk or add an Undo step.
+
+.. py:function:: swap_slots(pm_uid, slot_uid, other_slot_uid, *, expected_version=None, expected=None, dry_run=False)
+
+   Exchange the positions of two items in the same menu.
+
+   Accepted for Pie Menus, Vector Menus, Pop-up Dialogs and Floating Panels.
+   Each UID moves with its saved values; the items between them stay in place.
+
+   :param str pm_uid: UID of the menu.
+   :param str slot_uid: UID of the first item.
+   :param str other_slot_uid: UID of the second item.
+   :param expected_version: Menu version the call requires.
+   :type expected_version: int or None
+   :param expected: Pop-up Dialog and Floating Panel only: the complete
+      ``expected`` returned by a previous call.
+   :type expected: dict or None
+   :param bool dry_run: Check the exchange and return without writing.
+   :returns: The :ref:`item operation result <authoring-slots-item-result>`,
+      with both items in ``slots``.
+   :rtype: dict
+   :raises TypeError: A UID is not a non-empty string; ``dry_run`` is not a
+      bool; ``expected_version`` is not a non-negative int; ``expected`` is
+      given for a fixed-slot menu.
+   :raises ValueError: The menu UID is missing, invalid or ambiguous; on a
+      fixed-slot menu, a UID is malformed.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid)
+      first, third = before["slots"][0]["uid"], before["slots"][2]["uid"]
+      checked = pme.editing.swap_slots(
+          pm_uid, first, third, expected_version=before["version"], dry_run=True,
+      )
+      if checked["status"] == "validated":
+          result = pme.editing.swap_slots(
+              pm_uid, first, third, expected_version=checked["version"],
+          )
+          print(result["status"], result["after_order"])
+
+   .. rubric:: Notes
+
+   * Both UIDs and the final placement of Menu slots are checked before
+     writing. A successful exchange increases the version once.
+   * The same UID twice returns ``unchanged`` without changing the version.
+   * A failure of the exchange or of an editor hook restores the order. Field
+     changes made by a hook can remain in the readback.
+   * Pop-up Dialog and Floating Panel: the exchange uses the normal Move owner
+     without Add or Move cleanup. Ordinary and header items, and items of
+     different headers, can be exchanged.
+   * Lists and Sticky Keys are rejected with ``slot_swap_unsupported``; use
+     :py:func:`move_slot` for lists.
+   * A dry run returns ``validated``, ``unchanged`` or ``rejected`` without
+     writing, hooks or refresh. It does not reserve the result.
+   * A refresh can fail after the exchange committed; call :py:func:`read_pm`
+     before retrying. The call does not save Preferences to disk or add an
+     Undo step.
+
+.. py:function:: transfer_slot(source_pm_uid, source_slot_uid, destination_pm_uid, *, destination_slot_uid=None, before_uid=None, after_uid=None, row_ref=None, edge=None, new_row=None, use_spacer=False, header_anchor_uid=None, expected=None, dry_run=False)
+
+   Move one item's contents to another menu and report both menus.
+
+   The contents, ``enabled`` included, follow the normal Paste rules. Both
+   menus are saved before the editor hooks run. The two menus must differ; use
+   :py:func:`move_slot` or :py:func:`swap_slots` within one menu.
+
+   :param str source_pm_uid: UID of the source menu.
+   :param str source_slot_uid: UID of the item to move.
+   :param str destination_pm_uid: UID of the destination menu.
+   :param destination_slot_uid: Fixed-slot destination: an empty slot that
+      receives the contents and keeps its UID.
+   :type destination_slot_uid: str or None
+   :param before_uid: List or layout destination: insert before this item.
+   :type before_uid: str or None
+   :param after_uid: List or layout destination: insert after this item.
+   :type after_uid: str or None
+   :param row_ref: Pop-up Dialog or Floating Panel destination: a current row
+      reference, with ``edge``. An ordinary row can be empty.
+   :type row_ref: dict or None
+   :param edge: ``"START"`` or ``"END"`` of ``row_ref`` or of the header named
+      by ``header_anchor_uid``.
+   :type edge: str or None
+   :param new_row: ``"END"``: a new last row of a Pop-up Dialog or Floating
+      Panel destination.
+   :type new_row: str or None
+   :param bool use_spacer: ``True`` applies the normal Move spacer rules to
+      item-relative and row-end positions. A new last row uses the existing
+      row settings rules and gets no extra spacer. Default ``False``,
+      regardless of the Preferences setting.
+   :param header_anchor_uid: Layout Panel anchor of the destination header,
+      with ``before_uid``, ``after_uid`` or ``edge``.
+   :type header_anchor_uid: str or None
+   :param expected: The complete ``expected`` returned by the same transfer's
+      dry run. ``None`` skips the comparison; the current state is still
+      checked.
+   :type expected: dict or None
+   :param bool dry_run: Check the transfer and return without writing.
+   :returns: The result described below.
+   :rtype: dict
+   :raises TypeError: A menu or slot UID is not a non-empty string; a
+      destination UID is not a non-empty string or ``None``; ``use_spacer`` or
+      ``dry_run`` is not a bool; ``row_ref`` does not have exactly ``kind`` and
+      ``slot_uid``; ``expected`` has values of the wrong type or non-JSON
+      values.
+   :raises ValueError: More than one destination form is given; ``expected``
+      keys do not match a transfer snapshot or a version is negative; a layout
+      position is malformed.
+
+   .. rubric:: Destination
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 30 70
+
+      * - Destination
+        - Position
+      * - Fixed slots
+        - ``destination_slot_uid`` of an empty slot. A Sticky Key slot is empty
+          when it is ``COMMAND`` with empty text.
+      * - List
+        - Exactly one of ``before_uid`` / ``after_uid``. An empty list takes
+          neither. The new item gets a new UID.
+      * - Pop-up Dialog, Floating Panel
+        - ``before_uid`` / ``after_uid``, ``row_ref`` with ``edge``, or
+          ``new_row="END"``. An empty menu takes no position. The new item
+          gets a new UID.
+      * - Layout Panel header
+        - ``header_anchor_uid`` with ``before_uid`` / ``after_uid`` or
+          ``edge``. Required even when Header Layout is on. A header that is
+          off stays off and reports ``header_layout_disabled``.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 20 16 64
+
+      * - Key
+        - Type
+        - Value
+      * - ``status``
+        - str
+        - See *Status* below.
+      * - ``committed``
+        - bool
+        - ``True`` only when ``status`` is ``"committed"``.
+      * - ``moved``
+        - dict or None
+        - After a commit: ``from`` and ``to``, each with ``pm_uid`` and
+          ``slot_uid``. ``to.slot_uid`` is the receiving item.
+      * - ``expected``
+        - dict or None
+        - Opaque snapshot of both menus, the target arguments and the linked
+          menu facts. It survives a JSON round trip. ``None`` when the call was
+          rejected before the source slot was found.
+      * - ``effects``
+        - list[dict]
+        - Predicted and observed effects. See *Effects*.
+      * - ``loss``
+        - list[dict]
+        - Values that are not transferred. See *Notes*.
+      * - ``diagnostics``
+        - list[dict]
+        - ``code`` and details. See *Diagnostics*.
+      * - ``from``, ``to``
+        - dict
+        - One side each: ``pm_uid``; ``before`` and ``after``, the saved item
+          collection; ``changed``; ``version_before`` and ``version_after``.
+          ``to`` adds ``insertion_position``. A Pop-up Dialog or Floating Panel
+          side adds ``before_rows`` and ``after_rows``. Unreadable ``after``
+          values are ``None``.
+
+   .. rubric:: Status
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - Meaning
+      * - ``validated``
+        - ``dry_run=True`` and the transfer is acceptable. Nothing was written.
+      * - ``committed``
+        - Both menus are saved. Each menu's version increased once.
+      * - ``rejected``
+        - Nothing was written. ``diagnostics`` names the cause.
+      * - ``restored_failure``
+        - A write failed and both saved item collections match their prior
+          snapshots. Macro registration is reported in ``effects``.
+      * - ``unknown``
+        - A write failed and the restore or readback could not confirm the
+          prior state. Call :py:func:`read_pm` before deciding; do not retry
+          automatically.
+
+   .. rubric:: Effects
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 20 80
+
+      * - ``kind``
+        - Value
+      * - ``prediction``
+        - ``destination_fields``: the saved fields the destination will
+          receive, ``enabled`` included. ``icon_prediction`` is ``"dynamic"``
+          when the destination computes the icon, otherwise ``"known"``.
+      * - ``registration``
+        - Macro Operator registration, ``phase`` ``before``, ``after`` or
+          ``recovery``, with ``pm_uid`` and the observed state.
+      * - ``hook``
+        - An editor hook that ran: ``pm_uid`` and ``hook``.
+      * - ``recovery``
+        - ``saved_restored``: whether both menus were restored after a failure.
+
+   .. rubric:: Diagnostics
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``menu_identity_unconfirmed``
+        - A menu UID does not resolve to one menu.
+      * - ``same_menu``
+        - The source and destination are the same menu.
+      * - ``slot_transfer_unsupported``
+        - A menu type has its own editor or no slot clipboard.
+      * - ``source_identity_unconfirmed``
+        - ``source_slot_uid`` is not in the source menu.
+      * - ``stale_transfer``
+        - ``expected`` differs from the current snapshot.
+      * - ``source_has_no_content``
+        - The source slot is empty.
+      * - ``popup_position_requires_popup_menu``
+        - A layout position is given for a destination that is not a Pop-up
+          Dialog or Floating Panel.
+      * - ``sticky_slot_role_invalid``
+        - A Sticky Key slot is not On Press or On Release.
+      * - ``paste_mode_unsupported``
+        - The destination does not accept this slot mode from this menu type.
+      * - ``destination_identity_unconfirmed``, ``destination_occupied``
+        - ``destination_slot_uid`` is not found, or is not empty.
+      * - ``destination_slot_requires_fixed_menu``
+        - ``destination_slot_uid`` is given for a list or layout destination.
+      * - ``anchor_identity_unconfirmed``, ``destination_anchor_required``
+        - The anchor is not found, or a non-empty destination got no
+          position.
+      * - ``slot_not_found``, ``structural_slot``, ``panel_row``,
+          ``row_not_found``, ``position_not_found``,
+          ``panel_anchor_not_found``, ``header_target_mismatch``,
+          ``header_role_required``
+        - The layout source or position is invalid, as in
+          :ref:`authoring-slots-item-result`.
+      * - ``menu_reference_slot_incompatible``,
+          ``menu_reference_target_mode_not_allowed``,
+          ``menu_reference_self_reference``,
+          ``menu_reference_presentation_not_supported``
+        - A Menu slot's resolved link is not valid at the destination.
+      * - ``menu_reference_unresolved``
+        - Warning: the link is missing or ambiguous and keeps its raw value.
+          ``kind``.
+      * - ``slot_edit_conflict``
+        - The Slot Editor has an affected item open: the source, a fixed
+          destination, or a layout entry that cleanup would remove or rewrite.
+      * - ``header_layout_disabled``
+        - Warning: a header involved has Header Layout off. ``anchor_uid``.
+      * - ``slot_transfer_failed``
+        - A write raised. ``exception_type`` and ``message``.
+      * - ``slot_transfer_restore_failed``,
+          ``slot_transfer_registration_restore_failed``
+        - The restore raised. ``status`` is ``unknown``.
+      * - ``transfer_snapshot_failed``, ``transfer_cleanup_failed``
+        - Reading the menus or planning the cleanup raised.
+      * - ``transfer_readback_failed``, ``transfer_rows_readback_failed``
+        - Reading a side after the call raised. ``side``. That side's ``after``
+          or ``after_rows`` is ``None``; the status stays. Read the menu again
+          instead of repeating a committed transfer.
+      * - ``transfer_refresh_failed``
+        - A refresh raised after the call. ``operation``. A committed status
+          stays.
+      * - ``macro_registration_read_failed``
+        - Reading Macro registration raised.
+
+   .. rubric:: Example
+
+   Move an item to the end of a list or layout menu, checking first:
+
+   .. code-block:: python
+
+      destination = pme.editing.read_pm(destination_pm_uid)
+      position = ({"after_uid": destination["slots"][-1]["uid"]}
+                  if destination["slots"] else {})
+      checked = pme.editing.transfer_slot(
+          source_pm_uid, source_slot_uid, destination_pm_uid,
+          **position, dry_run=True,
+      )
+      if checked["status"] == "validated":
+          result = pme.editing.transfer_slot(
+              source_pm_uid, source_slot_uid, destination_pm_uid,
+              **position, expected=checked["expected"],
+          )
+          print(result["status"], result["moved"], result["effects"], result["loss"])
+
+   For a fixed destination, ``position`` is
+   ``{"destination_slot_uid": empty_slot_uid}``. For a Panel header, it is
+   ``{"header_anchor_uid": anchor_uid, "edge": "END"}``. For an ordinary row,
+   it is ``{"row_ref": row_ref, "edge": "END"}``.
+
+   .. rubric:: Notes
+
+   * A fixed source is cleared and keeps its UID and ``enabled``. A Sticky Key
+     source also gets back its On Press or On Release name and an empty
+     command. A list source is removed, even when it is the last item.
+   * ``layout_panel`` is not transferred. It stays on a fixed source and is
+     lost with a removed list source. ``loss`` reports it: ``kind``
+     ``"layout_panel"``, ``value``, ``transferred`` (``False``) and
+     ``source_removed``.
+   * The destination editor's icon rule applies: Pop-up Dialogs and Floating
+     Panels keep icon flags, Macro Operators compute the icon, other types
+     drop the flags. A button background color is cleared where the
+     destination does not use it.
+   * Regular Menu labels and layout markers can be anchors but not the item
+     transferred. A Layout Panel anchor cannot be transferred; its header items
+     can, also from a header that is off.
+   * Layout cleanup covers the insertion and removal boundaries and an emptied
+     source row; unrelated empty rows and distant spacers stay. When the
+     markerless first row becomes empty, the next row marker is absorbed, as in
+     Move. This differs from :py:func:`remove_row`. Moving the last content out can
+     leave an empty menu; moving the last
+     header item out keeps the anchor and its empty header. Read row
+     references again after a transfer.
+   * A missing or ambiguous menu link keeps its raw value with
+     ``menu_reference_unresolved``. A uniquely resolved link that is not valid
+     at the destination is rejected before writing.
+   * The Slot Editor draft of an affected item rejects the call. Other drafts,
+     the clipboard and the selection stay.
+   * A dry run allocates no UID, does not initialize a version, and runs no
+     editor hook or refresh. ``before`` and ``after`` are the unchanged saved
+     values, and the cleanup and new UIDs are not predicted. Macro icons and
+     registration are observed only after the call.
+   * A refresh failure keeps a committed status. The call does not save
+     Preferences to disk or add an Undo step.

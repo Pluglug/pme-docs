@@ -1,0 +1,259 @@
+(sticky-key-editor)=
+
+# Sticky Key Editor
+
+**Sticky Key** は、キーを押したときと離したときに、それぞれ指定した処理を実行するエディターです。値の保存と復元を組み合わせると、押している間だけ別の状態にできます。On Press / On Release の固定 2 スロット構成で、押下解放のペアとして動作します。
+
+
+このページは PME 2.1 の設定を対象にしています。
+
+(sticky-configuration-guide)=
+
+:::{dropdown} 構成ガイド — 機能・組み合わせ・活用例（AI 向け）
+
+**呼び名：Sticky Key／種別 ID：`STICKY`。**
+押下と解放に別々の処理を割り当てる機能です。「押している間だけ別の状態」は、その二つの処理を組み合わせて作ります。
+
+- **入力**：On Press / On Release の固定2スロット。Command または Hotkey を設定します。{ref}`スロット <sticky-slots>`へ。
+- **制約**：並び替え、追加、削除、個別無効化はありません。解放側の処理を設定しなければ、自動で元の状態へ戻るわけではありません。
+- **値を一時変更する**：一つのプロパティ代入なら {ref}`Save and Restore Previous Value <sticky-save-restore>` で保存・復元コードを生成します。保存する値は実行時に読みます。
+- **組み合わせ**：常用ツールと一時ツールの切り替え、3D Viewport の表示切り替えに使います。処理全体を待たせたい用途では Block UI の意味と呼び出し元を確認します。
+- **実行条件**：押下と解放の両方で参照する対象が有効であること、起動キーの解放を受け取れることを確認します。別のエリア・モードへ移動する運用を含めるなら、その場合の復元対象も決めます。
+- **確認**：最初の値を変えてから押下・解放を繰り返し、固定値への切り替えではなく元の値に戻ることを確認します。{ref}`活用例 <sticky-patterns>`へ。
+- **変数の共有期間**：一回の押下から解放まで、Command 間で保存値を共有します。{ref}`変数の共有と復元 <sticky-shared-variables>`へ。
+:::
+
+
+## 画面と編集の流れ
+
+```{raw} html
+:file: common/_sticky_key_editor_overview_map.html
+```
+
+1. {ref}`名前と基本操作 <sticky-basic-settings>`
+2. {ref}`Advanced settings <sticky-advanced-settings>`
+3. {ref}`Keymap / Hotkey <sticky-hotkey-settings>`
+4. {ref}`押下と解放のスロット <sticky-slots>`
+
+
+一覧で編集対象を選び、名前と有効状態を確認して、呼び出し方とスロットを設定します。
+共通の一覧・検索・タグは [エディターの共通要素](editor_common_elements.md)、
+各部は {ref}`名前 <sticky-basic-settings>`、{ref}`キー設定 <sticky-hotkey-settings>`、
+{ref}`スロット <sticky-slots>`、{ref}`詳細設定 <sticky-advanced-settings>`を参照してください。
+
+(sticky-basic-settings)=
+
+## 名前と基本操作
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 28;--crop-offset:-12.35521236%">
+<img src="../_static/images/editors/overview/sticky-key-blender-5-2.png" width="663" height="259" alt="Axis Mirror の 名前と基本操作。キーの押下と解放に割り当てる設定全体の名前を確認します。">
+</div>
+<figcaption>名前と基本操作。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+名前と有効状態で編集対象を確認します。タグ・名前変更・参照元などの操作は
+{ref}`選択メニューの設定 <overview-selected>` を参照してください。
+この種別にはメニューのプレビューボタンはありません。
+
+(sticky-hotkey-settings)=
+
+## Keymap / Hotkey
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 62;--crop-offset:-54.82625483%">
+<img src="../_static/images/editors/overview/sticky-key-blender-5-2.png" width="663" height="259" alt="Axis Mirror の Keymap / Hotkey。使う場所と保持するキーを指定します。この例は Pose の T キーです。">
+</div>
+<figcaption>Keymap / Hotkey。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+呼び出す場所とキーを設定します。入力欄の操作は {ref}`共通の Hotkey 設定 <hotkey-editor>` を参照してください。
+
+Sticky Key は押された瞬間と離した瞬間の両方を受け取って動作します。Ctrl / Alt / Shift 単独や OS レベルの予約キーは、プラットフォームや Blender の Keymap 優先順位の影響を受ける場合があります。詳細は [キーマップの選び方](../reference/keymap_guide.md) を参照してください。
+
+(sticky-slots)=
+
+## スロット
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 48;--crop-offset:-79.92277992%">
+<img src="../_static/images/editors/overview/sticky-key-blender-5-2.png" width="663" height="259" alt="Axis Mirror の 押下と解放のスロット。上が押したとき、下が離したときの処理です。この例はミラー設定の True / False です。">
+</div>
+<figcaption>押下と解放のスロット。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+Sticky Key は固定 2 スロットで、それぞれの役割は決まっています。
+
+| 順序 | スロット | 役割 |
+|---|---|---|
+| 1 | **On Press** | 押した瞬間に走る処理（一時状態への切り替え） |
+| 2 | **On Release** | 離した瞬間に走る処理（元の状態への復帰） |
+
+スロットの並び替え・追加・削除・無効化はできません。
+
+(sticky-save-restore)=
+
+### Save and Restore Previous Value
+
+On Press に一つのプロパティ代入を設定すると、スロットの編集で保存・復元コードを生成できます。たとえば 3D Viewport の床グリッドを一時的に隠すなら、次の代入を使います。
+
+```python
+C.space_data.overlay.show_floor = False
+```
+
+ボタンを使うと、On Press と On Release の内容を次の形に書き換えます。
+
+| 入力先 | 生成される処理 |
+|---|---|
+| On Press | 実行時の現在値を `value` に保存してから指定値を代入する |
+| On Release | 保存した `value` を同じパスへ代入する |
+
+保存するのはボタンを押して編集した時点の値ではなく、Sticky Key を実際に押した時点の値です。
+既存の On Release の処理も置き換わるため、独自処理を設定済みの場合は生成後の両スロットを確認します。
+パスは両方のタイミングで有効である必要があります。この例は `C.space_data` が 3D Viewport の状態で使います。
+
+(sticky-shared-variables)=
+
+### 押したときに覚え、離したときに戻す
+
+**キーを押している間だけ床グリッドを隠す。** On Press で覚えた値を、On Release から使えます。
+
+```{mermaid}
+:name: sticky-value-memory
+:alt: 押したときに床グリッドの状態を覚えて隠し、キーを離したら元の状態へ戻す。
+
+flowchart LR
+    A["押す<br/>元の状態を覚える"] --> B["押している間<br/>グリッドを隠す"]
+    B --> C["離す<br/>元の状態へ戻す"]
+    classDef remember fill:#e8f1fb,stroke:#4878aa,color:#172b43;
+    classDef restore fill:#e8f5ed,stroke:#45805d,color:#183f28;
+    class A,B remember;
+    class C restore;
+```
+
+**① On Press の Command — 元の状態を覚えてから隠す**
+
+```python
+view = C.space_data; start_floor = view.overlay.show_floor; view.overlay.show_floor = False
+```
+
+**② On Release の Command — 同じビューへ元の状態を戻す**
+
+```python
+view.overlay.show_floor = start_floor
+```
+
+Keymap を **3D View** にして、透視投影の 3D ビューで押して離します。最初から非表示だった場合は、離した後も非表示です。
+
+`view` と `start_floor` は自分で付けた名前です。`start_floor` は `banana` でも構いませんが、覚える側と戻す側で同じ名前を使います。 {ref}`Save and Restore <sticky-save-restore>` が自動生成する `value` も、この変数共有を使っています。
+
+次の独立した呼び出しや別のメニューへ値を渡す場合は、一時的な共有メモ {ref}`U（User Data）<scripting-user-data>` を使えます。
+
+:::{admonition} 共有範囲と復元の条件
+:class: note
+
+- **共有期間**：On Press と On Release の Command は同じ Python 名前空間を使います。継続中の Sticky Key がない状態から新しく開始すると作り直され、前回の値を引き継ぎません。
+- **復元先**：この例は `view` に起動元の 3D ビューを覚えます。そのビューが操作中に残っていることが前提です。Save and Restore の生成コードは、解放時にも同じプロパティパスを評価するため、途中で対象を変える場合は復元先の参照も覚える必要があります。
+- **名前**：PME が提供する `C`、`E` などを保存先として上書きしません。
+- **復元**：On Release は任意の失敗に対する `finally` ではありません。On Press の `return_value` で継続せず終了すると通常の解放待ちに入りません。保存前のエラー・復元コードのエラー・処理の中断まで補う自動復元はありません。
+
+:::
+
+(sticky-advanced-settings)=
+
+## Advanced settings（詳細設定）
+
+```{raw} html
+<figure class="pme-overview pme-overview--editor" style="--editor-width:663px">
+<div class="pme-overview__crop" style="--crop-ratio:663 / 73;--crop-offset:-25.09652510%">
+<img src="../_static/images/editors/overview/sticky-key-blender-5-2.png" width="663" height="259" alt="Axis Mirror の Advanced settings。説明、利用条件、保持中の UI ブロックを設定します。">
+</div>
+<figcaption>Advanced settings。値はこの例の設定です。</figcaption>
+</figure>
+```
+
+歯車から開きます。Description と Poll は {ref}`共通の詳細設定 <editor-extra-settings>` を参照してください。
+
+:Block UI:
+  Sticky Key の継続中、他のツールへ入力を渡さないための設定です。既定は OFF。画面の描画を止める設定ではありません。
+
+---
+
+## コードと入力欄
+
+この種別で使える入力は冒頭の構成ガイドを参照してください。入力欄の操作は
+{ref}`共通のスロットエディタ <slot-editor>`、コードは
+[書き方と入力制限](../reference/command_text.md)、
+[コード例](../reference/scripting_workflow.md)にまとめています。
+
+---
+
+(sticky-patterns)=
+
+## 活用例と確認する条件
+
+### ブラシやアクティブツールを一時的に切り替える
+
+On Press で現在のブラシやツールを保存して切り替え、On Release で保存した対象へ戻す構成です。
+ツールの切り替えには Blender の `bpy.ops.wm.tool_set_by_id()`、現在のツールの確認には
+`C.workspace.tools.from_space_view3d_mode(C.mode)` が使われます。
+取得結果がない状態、対象モードが変わった場合、ツール ID がそのモードにない場合の処理も決めます。
+
+ブラシは Blender のバージョンによってアセットの扱いが異なります。旧版の
+`paint_settings().brush = D.brushes["Draw"]` という例は、同名のブラシがあり、代入可能な版・モードでのパターンです。
+現在の環境に無条件で貼り付けず、ブラシの取得・有効化方法を先に確認してください。
+値の一時共有は {ref}`U の例 <scripting-user-data>`、外部スクリプトの使い方は {ref}`external-command-script` にまとめています。
+
+### ビューポートオーバーレイの一時切り替え
+
+On Press スロットに次のコードを書き、Save and Restore を押します。On Release への復元コードは自動挿入されます。
+
+```python
+C.space_data.overlay.show_floor = False
+```
+
+### シェーディングモードの一時切り替え
+
+```python
+C.space_data.shading.type = 'WIREFRAME'
+```
+
+Save and Restore で On Release に元のシェーディングへ戻すコードが挿入されます。
+
+---
+
+```{admonition} 関連ページ
+:class: seealso
+
+- [エディターの共通要素](editor_common_elements.md)
+- [Poll Method の基礎](../reference/poll_method.md)
+- [キーマップの選び方](../reference/keymap_guide.md)
+```
+
+## 参考動画（原作者のチャンネル）
+
+[roaoao の動画一覧](../reference/original_author_videos.md)より。旧版の UI・手順を扱う参考動画です。
+
+:::{dropdown} Sticky Key Editor for Blender
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/pcFOPWnHC7U" title="Sticky Key Editor for Blender" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Sticky Key Editor for Blender — YouTube で開く](https://www.youtube.com/watch?v=pcFOPWnHC7U)
+:::
+
+:::{dropdown} Nested Pie Menu, Confirm Threshold and Sticky Keys
+
+<div class="video-container pme-reference-video">
+  <iframe src="https://www.youtube.com/embed/5zDp586Uy2w" title="Nested Pie Menu, Confirm Threshold and Sticky Keys" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+[Nested Pie Menu, Confirm Threshold and Sticky Keys — YouTube で開く](https://www.youtube.com/watch?v=5zDp586Uy2w)
+:::

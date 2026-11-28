@@ -1,0 +1,28 @@
+Sets the Python code evaluated when the item is executed.
+When calling an operator, use one that supports the current editor, mode, and selection.
+
+```python
+# Add a cube in the 3D Viewport's Object Mode
+bpy.ops.mesh.primitive_cube_add()
+```
+
+:::{admonition} Writing commands
+:class: important
+
+PME imposes no fixed length limit on Command storage or execution through Blender's native UI.
+GPU menus (Floating Panel / Vector Menu) retain a **4,096-character limit per transported string** (command body or string argument); text exceeding that limit is not executed and produces an `operator_property_string_too_long` diagnostic.
+Separate short simple statements with `;`; do not mechanically flatten indented blocks into one line.
+See [Code Input and Execution](/reference/command_text.md) for input behavior and moving code into an external script.
+
+:::
+
+:::{admonition} Global variables
+:class: hint
+
+**Examples of available globals:**
+- `C`: the context PME provides to scripts
+- `O`: bpy.ops (Blender operators)
+- `E`: event information
+
+See [Scripting Reference](/reference/scripting.rst) for details.
+:::

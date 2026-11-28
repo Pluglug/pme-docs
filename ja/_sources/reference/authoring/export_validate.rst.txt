@@ -1,0 +1,534 @@
+:vocab: developer-facing
+
+.. _authoring-export-validate:
+
+============================================================
+書き出しと検証
+============================================================
+
+.. py:currentmodule:: pme
+
+:py:func:`export_menus` は、メニューを PME の JSON 文書として書き出します。
+検証関数は、文書を変更も実行もせずに、同梱の JSON Schema v2 と PME の UID
+規則に照らして検査します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 関数
+     - 用途
+   * - :py:func:`export_menus`
+     - メニューを JSON 文書として書き出します。指定すればファイルにも書き込みます。
+   * - :py:func:`validate_json`
+     - JSON 文字列を検証します。
+       :py:class:`~pme.validation.ValidationResult` を返します。
+   * - :py:func:`pme.validation.validate`
+     - 解析済みの JSON データを検証します。
+   * - :py:func:`pme.validation.validate_file`
+     - UTF-8 の JSON ファイルを検証します。
+   * - :py:func:`validate_uid`
+     - メニュー UID の形式を確認します。:ref:`authoring-execution` で説明しています。
+
+メニューを書き出す
+============================================================
+
+.. py:function:: export_menus(pm_uids=None, *, include_referenced_menus=True, export_tags=True, filepath=None)
+
+   メニューを PME の JSON 文書として書き出します。
+
+   書き出し処理とファイルの書き込みには、**Export Menus** ダイアログと同じものを使います。選択中のメニュー、Select Mode、一覧のフィルターは読まず、
+   変更もしません。
+
+   :param pm_uids: 書き出すメニューの UID。文字列以外の iterable で渡します。
+      ``None`` はすべてのメニューを書き出します。
+   :type pm_uids: iterable of str or None
+   :param bool include_referenced_menus: 指定したメニューが参照するメニューも書き出します。:ref:`authoring-export-closure` を参照。``pm_uids`` が
+      ``None`` の場合は効果がありません。
+   :param bool export_tags: タグ名、タグ UID、タグレジストリを含めます。
+   :param filepath: JSON テキストを書き込むファイル。パスが ``.json`` で終わらない場合は ``.json`` を付けます（大文字と小文字を区別）。既存のファイルは置き換えます。
+   :type filepath: str or None
+   :returns: 下記の結果。
+   :rtype: dict
+   :raises TypeError: ``pm_uids`` が文字列、bytes、または iterable でない場合、``include_referenced_menus`` または ``export_tags`` が bool でない場合、``filepath`` が空でない文字列ではない場合。
+   :raises ValueError: ``pm_uids`` が空の場合、その中の UID が拒否された場合、またはデータを書き出せない場合。*エラー* を参照。
+   :raises RuntimeError: Blender のメインスレッド以外から呼び出された場合
+      （``"Menu export requires Blender's main thread"``）、PME が起動スクリプトを実行している間に呼び出された場合
+      （``"Menu export requires PME to finish loading"``）、
+      :py:data:`preferences` が ``None`` の間に呼び出された場合
+      （``"PME preferences are unavailable"``）。
+   :raises KeyError: :py:data:`preferences` と同じく、:py:data:`ADDON_ID`
+      が ``bpy.context.preferences.addons`` にない場合。
+   :raises OSError: ファイルを書き込めない場合。例: ディレクトリが存在しない場合の ``FileNotFoundError``。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 16 62
+
+      * - キー
+        - 型
+        - 値
+      * - ``data``
+        - dict
+        - 文書。:ref:`authoring-export-document` を参照。
+      * - ``text``
+        - str
+        - ファイルに書き込むものと同一の、``data`` の JSON テキスト。
+      * - ``pm_uids``
+        - list[str]
+        - 書き出したメニューの UID。文書内の順序です。
+      * - ``warnings``
+        - list[str]
+        - 書き出しを止めなかった問題。*警告* を参照。
+      * - ``filepath``
+        - str or None
+        - 書き込んだファイルのパス。付け足した ``.json`` を含みます。
+          ``filepath`` を指定しなかった場合は ``None``。
+
+   .. rubric:: エラー
+
+   どのエラーも ``ValueError`` です。``pm_uids`` の確認は指定順に行い、
+   最初に失敗した UID を示します。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 50 50
+
+      * - メッセージ
+        - 原因
+      * - ``pm_uids must name at least one menu; pass None to export all``
+        - ``pm_uids`` が空です。
+      * - ``Menu UID is invalid: <uid>``
+        - :py:func:`validate_uid` が受け付ける形式のメニュー UID ではありません。UID は ``repr()`` で表示します。
+      * - ``Menu UID is listed more than once in pm_uids: <uid>``
+        - ``pm_uids`` に同じ UID が 2 回現れます。
+      * - ``Menu UID is missing: <uid>``
+        - その UID を持つ保存済みメニューがありません。
+      * - ``Menu UID is ambiguous: <n> saved menus share <uid>``
+        - 複数の保存済みメニューがその UID を持ちます。
+      * - ``PME: Context Router logic export failed for menu '<name>': <source>
+          refers to <target>, which is outside the exported menu set``
+        - Context Router の分岐先メニューが書き出されません。``<source>`` は
+          ``branch '<label>'``、``otherwise '<label>'``、
+          ``condition '<label>'`` のいずれか。``<target>`` は
+          ``menu '<current name>'`` または
+          ``a menu that is not in Preferences (UID <uid>)``。
+      * - ``PME: Context Router logic export failed for menu '<name>': <codes>``
+        - Context Router の保存されたロジックを読めない、または書き出せません。
+      * - ``PME: <mode> export requires at most <n> slots: <name>``
+        - スロット数が固定されたメニューの種類で、スロットが多すぎます。
+      * - ``PME: Export blocked by invalid menu identity (<reason>,
+          count=<n>)``
+        - 保存済みメニューが PME のメニュー識別の確認に失敗しました。メニュー
+          UID の欠落、不正、重複などです。``<reason>`` が確認の名前を示します。
+      * - ``tag_registry_export_plan_failed`` などのタグレジストリのコード
+        - タグレジストリを書き出せません。
+
+   データのエラー（Context Router とスロット数）は ``ExportDataError``
+   です。警告を集めた後に送出されたエラーは ``ExportError`` で、その
+   ``warnings`` 属性が警告を保持します。どちらのクラスも ``ValueError`` のサブクラスで、``pme`` の公開名には含まれません。警告は
+   ``getattr(error, "warnings", ())`` で読みます。
+
+   .. rubric:: 警告
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 50 50
+
+      * - メッセージ
+        - 原因
+      * - ``PME: <n> Command/Custom slot(s) call menus that could not be
+          resolved, so those menus were not included: <slots>``
+        - Command または Custom スロットが、特定できないメニューを呼び出しています。スロットごとの理由は ``menu not found``、
+          ``duplicate menu name``、``target not static`` のいずれか。
+      * - ``PME: <n> Command/Custom slot(s) reference properties that could not
+          be resolved, so those properties were not included: <slots>``
+        - Command または Custom スロットの ``props()`` 参照を特定できません。
+          スロットごとの理由は ``prop id not found``、
+          ``display name ambiguous``、``target not static`` のいずれか。
+      * - ``PME: Property Stack logic omitted for menu '<name>': <codes>``
+        - 保存されたロジックを読めません。メニューはロジックなしで書き出します。
+      * - ``PME: Property Stack logic repaired for menu '<name>': <codes>``
+        - 保存されたロジックを正規化してから読みました。
+
+   ``<slots>`` は最大 10 個のスロットを ``'<menu>' slot <position> '<slot
+   name>' (<reasons>)`` の形で列挙し、続けて ``and <n> more`` を付けます。
+   スロットに関する二つの警告は、``pm_uids`` と
+   ``include_referenced_menus=True`` を指定したときだけ出ます。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      result = pme.export_menus([pm_uid], filepath="C:/exports/shading_pie")
+      print(result["filepath"], result["pm_uids"], result["warnings"])
+
+   .. rubric:: 補足
+
+   * Context Router の分岐先は、``include_referenced_menus`` が ``True`` の場合、またはその UID が ``pm_uids`` にある場合に書き出されます。このとき、その分岐先について「outside the exported menu set」のエラーは起きません。
+   * 書き出しの前に、書き出すメニューのスロットのうち、スロット UID がない、
+     不正、またはそのメニュー内で重複しているものに新しい UID を割り当てます。新しい UID は保存済みメニューに残ります。
+   * メニューは ``pm_uids`` の順ではなく、メニュー一覧の順に書き出します。
+     開発者オプション **Sort Exported Menus by Name** は名前順に並べます。
+
+.. _authoring-export-document:
+
+書き出される文書
+------------------------------------------------------------
+
+文書は JSON Schema v2 に従います。書き出したメニューのホットキーは文書に含まれます。スロットが呼び出すスクリプトファイルは含まれないため、受け取る側には別のファイルとして必要です。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - キー
+     - 値
+   * - ``$schema``
+     - ``"https://docs.pie-menu-editor.com/schema/pme2-2.0.json"``
+   * - ``schema_version``
+     - ``"2.0"``
+   * - ``addon_version``
+     - PME のバージョン。例: ``"2.3.1"``。
+   * - ``exported_at``
+     - 書き出した時刻（UTC）。例: ``"2026-11-18T06:59:46Z"``。
+   * - ``menus``
+     - メニューごとに一つのオブジェクト。``uid``、``name``、``mode``、
+       ``enabled``、``hotkey``、``settings``、``items`` と、該当する場合は
+       ``tags``、``extensions`` （Property Stack と Context Router のロジック、タグ UID）、``description``、``description_is_expr``、
+       ``poll`` を持ちます。
+   * - ``extensions``
+     - ``pme.exported_with.blender_version``、``pme.requires`` （文書が使う機能と、該当する場合は最低限必要な Blender のバージョン）、
+       ``pme.tag_registry``。
+   * - ``tags``
+     - 書き出したメニューが使うすべてのタグ名。``export_tags`` が ``True``
+       で、タグがある場合に含まれます。
+
+``hotkey`` は ``key``、``ctrl``、``shift``、``alt``、``oskey``、``any``、
+``key_mod``、``chord``、``keymaps``、``activation``、``drag_direction`` を持ち、設定されている場合は ``repeat`` と ``tweak_direction`` も持ちます。
+
+.. _authoring-export-closure:
+
+参照先のメニュー
+------------------------------------------------------------
+
+``pm_uids`` と ``include_referenced_menus=True`` を指定すると、書き出す集合は、指定したメニューと、そこから次の参照でたどれるすべてのメニューです。
+追加されるメニューがなくなるまで繰り返します。
+
+* Menu スロット。無効なスロットも含みます。
+* Property Stack と Context Router から、ほかのメニューへの参照。
+* Command と Custom スロットのテキスト内のメニュー呼び出しと ``props()``
+  参照。UID、または一つのメニューだけが持つ名前で、一つのメニューに解決できる場合に限ります。
+
+解決できない参照は何も追加しません。そのような Command と Custom スロットの参照は ``warnings`` に列挙します。``include_referenced_menus=False`` では、
+指定したメニューだけを書き出します。
+
+検証
+============================================================
+
+``valid=True`` は、要求した検査に合格したことを表します。現在の Blender
+環境での import の成功や、保存されたコマンドの実行は保証しません。
+
+.. _authoring-validation-stages:
+
+検証の段階
+------------------------------------------------------------
+
+1. **テキスト** （:py:func:`validate_json` のみ）。空の文字列、空白だけの文字列、``None`` は ``E102`` になります。JSON でないテキストは ``E101``
+   になります。
+2. **ルート。** 空または偽の値（``{}``、``[]``、``""``、``0``、``null``）は
+   ``E102`` になります。``$schema`` または ``schema_version`` を持つオブジェクトは Schema v2 として検査します（段階 3 から 5）。リスト、
+   または ``menus`` のリストと、``"1.18.7"`` のようなドット区切りの整数による ``version`` 文字列を持つオブジェクトは PME1 の文書です。結果には警告 ``W301`` が付き、それ以上の検査は行いません。それ以外は
+   ``E206`` になります。
+3. **Schema。** 文書を同梱のスキーマ ``pme2-2.0.json`` に照らして検査します。一度の呼び出しで報告する失敗は一つです。その失敗が必須項目の欠落である場合、そのオブジェクトで欠落している各項目が、同じメッセージの問題になります。型と必須項目の失敗は、条件付き規則の失敗より先に報告します。次の失敗は、最初の失敗を修正した後に現れます。
+4. **UID。** Schema の検査に合格したときに行います。メニュー UID は有効で、
+   メニューの ``mode`` と一致し、文書内で一意である必要があります。スロット
+   UID は有効で、そのメニュー内で一意である必要があります。複数の問題を報告する場合があります。
+5. **参照。** ``check_references`` が ``True`` のとき、UID の段階の後に行います。複数の問題を報告する場合があります。
+
+   * メニュー UID を対象とする Menu スロットでは、その UID が同じ文書内にある必要があります。名前で指定した対象は検査しません。
+   * Property Stack（``CONDITION``）または Context Router（``ROUTER``）のロジックを解読し、それが依存するメニュー UID が同じ文書内にある必要があります。ロジックのない ``CONDITION`` は飛ばします。
+
+``strict=True`` では、警告が一つでもある結果は ``valid=False`` になります。
+警告は ``warnings`` に残ります。
+
+.. py:function:: validate_json(json_string, *, strict=False, check_references=True)
+
+   テキストで渡した PME の JSON 文書を検証します。
+
+   ``pme.validation.validate_json`` と同じ関数です。文書は読むだけです。
+   変更せず、その Python コードを実行せず、``$schema`` の URL もダウンロードしません。
+
+   :param json_string: JSON テキスト。``bytes`` と ``bytearray`` は
+      :py:func:`json.loads` と同じように読みます。``None`` は空のテキストとして扱います。
+   :type json_string: str, bytes, bytearray or None
+   :param bool strict: 警告が一つでもあれば結果を無効にします。
+   :param bool check_references: 参照の段階を実行します。``False`` では省略しますが、Schema と UID の段階は実行します。
+   :returns: 見つかった問題と、文書のメタデータ。
+   :rtype: ValidationResult
+   :raises TypeError: ``json_string`` が ``int`` や解析済みの ``dict``
+      など、ほかの型の場合。メッセージは型を示します。例:
+      ``"json_string must be str, bytes, bytearray or None, not dict"``。
+      解析済みのデータは :py:func:`pme.validation.validate` で検証します。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      result = pme.validate_json(pme.export_menus([pm_uid])["text"])
+      if not result.valid:
+          print(result.format_report())
+
+   .. rubric:: 補足
+
+   * 文書内の問題は、例外ではなく問題として返します。
+   * ``check_references=False`` は、書き出しの一部など、参照先のメニューを別の文書で用意する文書に適します。
+   * 旧形式の名前参照と Blender のメニュー型名は、実行中の Blender に照会して解決しません。
+   * ``W301`` は、PME1 文書の項目の内容と名前参照を Schema v2 で検証していないことを表します。import には独自の検査があります。
+   * Extension には fastjsonschema 2.22.2 を同梱しています。同じ Python
+     プロセスで Blender が自身の 2.21 をすでに読み込んでいる場合があり、
+     実際に使う版は異なる場合があります。検証は両者に共通の API を使い、
+     読み込まれたライブラリを置き換えません。
+
+.. py:module:: pme.validation
+
+.. py:function:: validate(data, *, strict=False, check_references=True)
+
+   解析済みの JSON データを検証します。
+
+   *ルート* の段階から始めます。``data`` は変更しません。
+
+   :param object data: ``json.loads()`` の結果など、解析済みの JSON の値。
+   :param bool strict: 警告が一つでもあれば結果を無効にします。
+   :param bool check_references: 参照の段階を実行します。
+   :returns: 見つかった問題と、文書のメタデータ。
+   :rtype: ValidationResult
+
+.. py:function:: validate_file(filepath, *, strict=False, check_references=True)
+
+   UTF-8 の JSON ファイルを読み、そのテキストを :py:func:`pme.validate_json`
+   と同じように検証します。
+
+   :param str filepath: ファイルのパス。
+   :param bool strict: 警告が一つでもあれば結果を無効にします。
+   :param bool check_references: 参照の段階を実行します。
+   :returns: 見つかった問題と、文書のメタデータ。
+   :rtype: ValidationResult
+
+   .. rubric:: 補足
+
+   * 読めないファイルは、メッセージ ``"File not found: <path>"``、
+     ``"Permission denied: <path>"``、``"Failed to read file: <error>"``
+     のいずれかとともに ``E101`` になります。UTF-8 でないファイルは最後の形式になります。例外は送出しません。
+
+.. py:data:: ERROR_CODES
+   :type: dict[str, str]
+
+   問題のコードと短い説明の対応。:ref:`authoring-validation-codes` のコード、つまり検証が返すすべてのコードを列挙します。
+
+.. py:class:: ValidationResult
+
+   検証関数の結果。dataclass で、``pme.types.ValidationResult`` としても公開しています。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 24 54
+
+      * - 属性
+        - 型
+        - 値
+      * - ``valid``
+        - bool
+        - ``errors`` が空のとき ``True``。``strict=True`` では ``warnings``
+          も空のとき。
+      * - ``errors``
+        - list[ValidationIssue]
+        - 重大度が ``"error"`` の問題。
+      * - ``warnings``
+        - list[ValidationIssue]
+        - 重大度が ``"warning"`` の問題。``strict=True`` で結果が無効になっても残ります。
+      * - ``schema_version``
+        - str or None
+        - 文書の ``schema_version`` が文字列ならその値。それ以外は、PME1
+          文書の場合も含めて ``None``。
+      * - ``menu_count``
+        - int
+        - 文書の ``menus`` リストの長さ。文書が無効な場合も同じです。
+          リストがない場合は 0。
+      * - ``has_warnings``
+        - bool
+        - 読み取り専用。``warnings`` が空でないとき ``True``。
+      * - ``issue_count``
+        - int
+        - 読み取り専用。エラーと警告の合計数。
+
+   .. py:method:: format_report(*, include_warnings=True, max_issues=50)
+
+      結果を読みやすいテキストで返します。
+
+      :param bool include_warnings: 警告を含めます。
+      :param int max_issues: 列挙するエラーの最大数と、警告の最大数（それぞれ別に数えます）。0 はすべてを列挙します。
+      :returns: 複数行のテキスト。1 行目は ``✓ Valid (<n> menus)`` で、
+         その後に ``Schema version: <version>`` が続きます。無効な場合の
+         1 行目は ``✗ Invalid (<n> errors)`` です。問題は ``Errors:`` と
+         ``Warnings:`` の下に、1 行に一つずつ ``[<code>] <path>: <message>``
+         の形で続きます。``max_issues`` に達すると
+         ``... and <n> more errors`` が付きます。
+      :rtype: str
+
+.. py:class:: ValidationIssue
+
+   一つの問題。dataclass で、``pme.types.ValidationIssue`` としても公開しています。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - 属性
+        - 型
+        - 値
+      * - ``severity``
+        - str
+        - ``"error"`` または ``"warning"``。
+      * - ``code``
+        - str
+        - :ref:`authoring-validation-codes` を参照。
+      * - ``path``
+        - str
+        - 文書内の位置。例: ``menus[0].items[0].action.value``。文書全体では ``""``。
+      * - ``message``
+        - str
+        - 説明。Schema の問題では、
+          ``data must contain ['addon_version'] properties`` のような、
+          スキーマライブラリのメッセージが入ります。
+      * - ``suggestion``
+        - str or None
+        - 現在の検証が返す問題では ``None``。
+
+   .. code-block:: python
+
+      ValidationIssue(severity='error', code='E601',
+                      path='menus[0].items[0].action.value',
+                      message='PM UID reference is not present in this document: rm_6sshkekp',
+                      suggestion=None)
+
+.. _authoring-validation-codes:
+
+問題のコード
+------------------------------------------------------------
+
+``menus[i]`` はメニュー、``items[j]`` はそのスロットの一つです。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 10 12 28 50
+
+   * - ``code``
+     - 段階
+     - ``path``
+     - 原因
+   * - ``E101``
+     - テキスト
+     - ``""``
+     - JSON ではありません。メッセージは
+       ``Invalid JSON: <reason> (line <l>, column <c>)``。
+       :py:func:`validate_file` が読めないファイルもこのコードです。
+   * - ``E102``
+     - テキスト、ルート
+     - ``""``
+     - 空のテキスト（``Empty JSON string``）または空のデータ
+       （``Empty data``）。
+   * - ``E206``
+     - ルート、Schema
+     - ``""`` または失敗したパス
+     - ルートが認識できる文書ではありません。メッセージが問題を示します。
+       例: ``Invalid PME1 JSON: missing or invalid 'version'``。下に挙げていないパスでの Schema の失敗もこのコードです。
+   * - ``E201``
+     - Schema
+     - ``$schema``
+     - ``$schema`` がありません。この項目のほかの失敗は ``E206`` です。
+   * - ``E202``
+     - Schema
+     - ``schema_version``
+     - ``schema_version`` がありません。
+   * - ``E203``
+     - Schema
+     - ``schema_version``
+     - ``schema_version`` の値をスキーマが受け付けません。
+   * - ``E204``
+     - Schema
+     - ``menus``
+     - ``menus`` がありません。
+   * - ``E205``
+     - Schema
+     - ``menus``
+     - ``menus`` が配列でないなど、ほかの規則に違反しています。
+   * - ``E301``
+     - Schema
+     - ``menus[i].uid``, ``menus[i].items[j].uid``
+     - 必須の ``uid`` がありません。
+   * - ``E302``
+     - Schema、UID
+     - ``menus[i].uid``, ``menus[i].items[j].uid``
+     - UID が Schema に違反しています。または有効な UID ではありません
+       （``Invalid UID: '<uid>'``）。またはメニュー UID の接頭辞がメニューの
+       ``mode`` と一致しません
+       （``UID '<uid>' does not match menu mode '<mode>'``）。
+   * - ``E303``
+     - UID
+     - ``menus[i].uid``, ``menus[i].items[j].uid``
+     - ``Duplicate UID: <uid>``。文書内でメニュー UID が重複している、
+       または一つのメニュー内でスロット UID が重複しています。
+   * - ``E304``
+     - Schema
+     - ``menus[i].name``
+     - ``name`` がありません。この項目のほかの失敗は ``E206`` です。
+   * - ``E305``
+     - Schema
+     - ``menus[i].mode``
+     - ``mode`` がない、または受け付けるメニューの種類ではありません。
+   * - ``E306``
+     - Schema
+     - ``menus[i].items``
+     - ``items`` がありません。
+   * - ``E307``
+     - Schema
+     - ``menus[i].items``
+     - ``items`` が配列でないなど、ほかの規則に違反しています。
+   * - ``E401``
+     - Schema
+     - ``menus[i].items[j].action``
+     - ``action`` がありません。
+   * - ``E404``
+     - Schema
+     - ``menus[i].items[j].action``
+     - ``action`` がほかの規則に違反しています。
+   * - ``E402``
+     - Schema
+     - ``menus[i].items[j].action.type``
+     - ``type`` がない、または不正です。
+   * - ``E403``
+     - Schema
+     - ``menus[i].items[j].action.value``
+     - ``value`` がない、または不正です。
+   * - ``E601``
+     - 参照
+     - ``menus[i].items[j].action.value``, ``menus[i].extensions.pme.logic``
+     - ``PM UID reference is not present in this document: <uid>``。
+       ロジックの場合は、参照の種類が括弧内に続きます。
+   * - ``E603``
+     - 参照
+     - ``menus[i].extensions.pme.logic``
+     - ロジックを解読できません。メッセージは
+       ``PM UID reference check could not decode its source: <codes>``。
+   * - ``W202``
+     - 参照
+     - ``menus[i].extensions.pme.logic``
+     - ロジックの解読に正規化が必要でした。診断コードごとに一つの警告になります。メッセージは
+       ``Reference source normalization diagnostic: <code>``。渡したデータは変更しません。
+   * - ``W301``
+     - ルート
+     - ``""``
+     - PME1 文書と認識しました。内容は検証していません。

@@ -1,0 +1,1223 @@
+:vocab: developer-facing
+
+.. _authoring-property-stack:
+
+==============
+Property Stack
+==============
+
+.. py:currentmodule:: pme.editing
+
+A Property Stack (menu type ``CONDITION``) combines condition rows into one
+Boolean switch and writes settings when the switch is set. Its logic is
+replaced as a whole or edited one condition row at a time. The While True HUD
+has its own function; the logic functions leave it and the Property ID
+unchanged. A single Property is described on :ref:`authoring-property`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Function
+     - Purpose
+   * - :py:func:`read_pm`
+     - Returns the logic and registration under ``property_stack``.
+   * - :py:func:`update_property_stack`
+     - Replaces the complete logic.
+   * - :py:func:`add_property_stack_row`
+     - Appends an empty condition row.
+   * - :py:func:`update_property_stack_row`
+     - Changes one condition row.
+   * - :py:func:`remove_property_stack_row`
+     - Removes one condition row and its derived write entry.
+   * - :py:func:`update_property_stack_hud`
+     - Changes the While True HUD.
+
+See also: :ref:`authoring-recipe-property-stack-new`, and the
+:ref:`Property Stack Editor <property-stack-editor>` for the meaning of
+evaluation-only rows and write modes.
+
+Property ID and Lock
+====================
+
+Use :py:func:`update_property` for a Stack's ``property_id`` and
+``property_id_locked``. These are the only fields it accepts for a Property
+Stack. It uses the same ID operation as the editor; logic and the HUD remain
+unchanged. ``dry_run`` validates without writing, and ``expected_digest``
+compares the saved settings. Preferences are not saved to disk automatically.
+
+.. code-block:: python
+
+   before = pme.editing.read_pm(stack_uid)["property_stack"]
+   result = pme.editing.update_property(
+       stack_uid, {"property_id": "my_preset_surface", "property_id_locked": True},
+       expected_digest=before["property_id_digest"],
+   )
+   print(result["status"], result["diagnostics"])
+
+The lock keeps this ID when the menu is renamed. A conflicting or invalid ID
+is rejected. Read back an ``unknown`` result before retrying.
+
+.. _authoring-property-stack-read:
+
+Reading a Property Stack
+========================
+
+``read_pm(pm_uid)["property_stack"]`` holds:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 14 60
+
+   * - Key
+     - Type
+     - Value
+   * - ``logic``
+     - dict or None
+     - The saved logic as the storage decoder reads it. See
+       :ref:`authoring-property-stack-logic`. ``None`` when the saved logic
+       cannot be decoded.
+   * - ``digest``
+     - str
+     - Hex digest of the saved logic text. Pass it as ``expected_digest``.
+   * - ``property_id``
+     - str
+     - Saved Property ID.
+   * - ``property_id_locked``
+     - bool
+     - Whether renaming the menu leaves its Property ID unchanged.
+   * - ``property_id_digest``
+     - str
+     - Digest of the saved settings. Pass to ``update_property`` as
+       ``expected_digest``. The logic-editing ``digest`` remains separate.
+   * - ``registered_property_id``
+     - str
+     - ID the Property Stack is currently registered under. Empty when it is
+       not registered.
+   * - ``while_true_hud``
+     - dict
+     - While True HUD settings. Changed with
+       :py:func:`update_property_stack_hud`. See below.
+   * - ``diagnostics``
+     - list[dict]
+     - Problems found while reading the saved logic, with ``scope``
+       ``"current_storage"``. See below.
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(stack_uid)["property_stack"]
+   {'logic': {'version': 1, 'combine_mode': 'all', 'predicate_rows': [],
+              'write_plan': {'false_policy': 'no_op', 'entries': []}},
+    'digest': 'e3b0c442...', 'property_id': 'surface',
+    'registered_property_id': 'surface',
+    'while_true_hud': {'enabled': False, 'message': '', 'is_expr': False,
+                       'area_type': 'VIEW_3D', 'alignment': 'TOP',
+                       'display': 'LABEL', 'icon': '', 'use_color': False,
+                       'color': [1.0, 1.0, 1.0]},
+    'diagnostics': []}
+
+Reading does not evaluate the Getter or run the Setter.
+``registered_property_id`` is the ID a widget uses, for example
+``L.prop(props(), registered_property_id)``. It is not derived from the menu
+name.
+
+``while_true_hud`` has the keys of Schema v2 ``PropertyStackWhileTrueHud``.
+The values of a new Property Stack are shown above. The fields are listed
+under :ref:`authoring-property-stack-hud`; the editor is described under
+:ref:`property-stack-hud`.
+
+``logic`` is the storage decoder's normalized view, not the raw stored JSON.
+The view can omit unsupported or stale write entries, or turn writes off.
+``property_stack_storage_normalized`` reports each difference. When ``logic``
+is ``None``, the row operations reject the stack and
+:py:func:`update_property_stack` replaces it.
+
+Codes in ``diagnostics``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - ``code``
+     - Cause, and extra keys
+   * - ``authoring_storage_invalid``
+     - The saved text is not JSON, or an integer value of a ``float`` row
+       cannot become a float. ``logic`` is ``None``.
+   * - ``authoring_storage_not_string``
+     - The saved value is not text. ``logic`` is ``None``.
+   * - ``authoring_storage_non_object``
+     - The saved JSON is not an object. ``logic`` is ``None``.
+   * - ``authoring_storage_unsupported_version``
+     - ``version`` is not 1. ``logic`` is ``None``.
+   * - ``authoring_storage_write_entry_uid_duplicate``
+     - Two write entries share an ``entry_uid``. ``logic`` is ``None``.
+   * - ``authoring_storage_write_entry_enum_set_value_malformed``
+     - ``enum_set_write_values`` is not a list of non-empty strings. ``logic``
+       is ``None``.
+   * - ``authoring_storage_write_entry_pm_property_fields_malformed``
+     - A write entry has ``target_uid`` or ``write_mode``. ``logic`` is
+       ``None``.
+   * - ``authoring_storage_write_entry_source_malformed``
+     - A write entry's PME Property or Property Stack source is not read-only.
+       ``logic`` is ``None``.
+   * - ``authoring_storage_write_entry_pm_property_ref_stale_dropped``
+     - A write to a PME Property has no matching condition row. The view omits
+       it.
+   * - ``authoring_storage_write_entry_kind_unsupported``
+     - A write entry has an unknown ``kind``. The view has no write entries.
+   * - ``property_stack_storage_normalized``
+     - The view differs from the saved JSON. ``path`` names the field,
+       ``input`` the saved value and ``normalized`` the value in the view;
+       ``input_present`` and ``normalized_present`` tell an added or removed
+       field. ``normalization`` is ``"canonical"`` for the same meaning and
+       ``"repair"`` otherwise.
+
+Each entry has ``code``, ``path``, ``severity`` and ``scope``. The decoder codes
+also have ``address`` (a position such as ``entry_index``) and ``blocking``
+(``True`` when ``logic`` is ``None``). ``severity`` is ``"error"`` for a
+blocking code and ``"warning"`` otherwise.
+
+.. _authoring-property-stack-results:
+
+Common result
+=============
+
+The four editing functions return the same keys. The row operations add
+``condition_uid``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``status``
+     - str
+     - See *Status* below.
+   * - ``committed``
+     - bool
+     - ``True`` only when ``status`` is ``"committed"``.
+   * - ``pm_uid``
+     - str
+     - The ``pm_uid`` argument.
+   * - ``dry_run``
+     - bool
+     - The ``dry_run`` argument.
+   * - ``before``
+     - dict or None
+     - ``read_pm()["property_stack"]`` before the call. ``None`` when the call
+       stops before reading it.
+   * - ``after``
+     - dict or None
+     - ``read_pm()["property_stack"]`` after a write, or a copy of ``before``
+       for ``unchanged``. ``None`` when nothing was attempted.
+   * - ``candidate``
+     - dict or None
+     - The logic to save, in the form of ``logic``. After a rejected
+       normalization, the normalized logic, which is not saved. ``None`` when
+       an earlier check rejects.
+   * - ``diagnostics``
+     - list[dict]
+     - One entry per problem. See *Diagnostic entries* below.
+   * - ``condition_uid``
+     - str or None
+     - Row operations only. The row the call acted on.
+
+.. rubric:: Status
+
+The shared vocabulary is under :ref:`authoring-results-status`.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - ``status``
+     - Meaning
+   * - ``committed``
+     - The logic is saved in memory and read back exactly.
+   * - ``validated``
+     - ``dry_run=True`` and the input passed the checks. Nothing was written.
+       It does not mean executable or displayed.
+   * - ``unchanged``
+     - :py:func:`update_property_stack` and
+       :py:func:`update_property_stack_row`. The edited logic equals the
+       saved logic. Nothing was written. A dry run returns ``validated``
+       instead.
+   * - ``rejected``
+     - The saved logic is unchanged. ``diagnostics`` names the cause.
+   * - ``unknown``
+     - The write could not be verified. Call :py:func:`read_pm` before
+       retrying.
+
+.. rubric:: Diagnostic entries
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 14 60
+
+   * - Key
+     - Type
+     - Value
+   * - ``code``
+     - str
+     - See the tables on this page.
+   * - ``path``
+     - str
+     - ``"logic"``, a field path such as
+       ``"logic.predicate_rows[1].condition_uid"``, or ``""``.
+   * - ``severity``
+     - str
+     - ``"error"`` rejects. ``"warning"`` and ``"info"`` do not.
+   * - ``scope``
+     - str
+     - ``"input"``: the submitted logic or row fields. ``"current_storage"``:
+       the saved logic before the call, always ``"warning"`` in a result.
+       Absent for the request codes below.
+   * - ``message``
+     - str
+     - ``property_stack_schema_invalid`` only.
+   * - ``input``, ``normalized``, ``input_present``, ``normalized_present``
+     -
+     - Normalization codes: the submitted and the normalized value, and whether
+       each is present.
+   * - ``address``, ``blocking``, ``normalization``
+     -
+     - Current-storage codes. See :ref:`authoring-property-stack-read`.
+   * - ``exception_type``
+     - str
+     - Write codes: the exception class name, when one was raised.
+
+.. rubric:: Request and write diagnostics
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - ``code``
+     - Cause
+   * - ``dry_run_must_be_a_boolean``
+     - ``dry_run`` is not a bool. ``before`` is ``None``.
+   * - ``expected_digest_must_be_a_string``
+     - ``expected_digest`` is not a string or ``None``. ``before`` is
+       ``None``.
+   * - ``preferences_unavailable``
+     - PME preferences are unavailable. ``before`` is ``None``.
+   * - ``pm_identity_uid_not_found``
+     - No menu has the UID. ``before`` is ``None``.
+   * - ``pm_identity_uid_duplicate``
+     - Several menus have the UID. ``before`` is ``None``.
+   * - ``pm_identity_uid_missing``, ``pm_identity_uid_malformed``,
+       ``pm_identity_field_type_invalid``
+     - The UID is empty, malformed, or not a string. ``before`` is ``None``.
+   * - ``pm_identity_expected_mode_mismatch``
+     - The menu is not a Property Stack. ``before`` is ``None``.
+   * - Other ``pm_identity_*`` codes
+     - The menu collection changed during the call, or the menu's saved
+       identity is inconsistent.
+   * - ``stale_property_stack_digest``
+     - ``expected_digest`` differs from the saved digest, or the saved logic
+       changed during the call.
+   * - ``condition_authoring_read_failed``
+     - The saved logic could not be read before the write. Status
+       ``rejected``.
+   * - ``condition_authoring_stale``
+     - The saved logic changed just before the write. Status ``rejected``.
+   * - ``condition_authoring_write_failed``
+     - The write failed and the saved logic is unchanged. Status
+       ``rejected``.
+   * - ``condition_authoring_write_unverified``
+     - The read-back differs from both the old and the new logic. Status
+       ``unknown``.
+   * - ``property_stack_committed_after_exception``
+     - Warning. The logic is saved and read back, but the write raised.
+       Status ``committed``.
+
+Functions
+=========
+
+.. py:function:: update_property_stack(pm_uid, *, logic, expected_digest=None, dry_run=False)
+
+   Replace the complete logic of a Property Stack.
+
+   Rows and write entries that ``logic`` omits are removed. UIDs are not
+   allocated or repaired: each ``condition_uid`` and ``entry_uid`` must be
+   present and unique.
+
+   :param str pm_uid: UID of the Property Stack.
+   :param dict logic: The complete logic, in the form described under
+      :ref:`authoring-property-stack-logic`. Without ``while_true_hud``;
+      change the HUD with :py:func:`update_property_stack_hud`.
+   :param expected_digest: ``read_pm()["property_stack"]["digest"]``. The
+      update is rejected with ``stale_property_stack_digest`` when the saved
+      logic has changed.
+   :type expected_digest: str or None
+   :param bool dry_run: Check the logic and return without writing.
+   :returns: The result described under :ref:`authoring-property-stack-results`.
+      ``condition_uid`` is absent.
+   :rtype: dict
+   :raises RuntimeError: The call is not on Blender's main thread, or PME has
+      not finished loading.
+
+   .. rubric:: Status
+
+   ``committed``, ``validated``, ``unchanged``, ``rejected`` or ``unknown``.
+   Logic equal to the read ``logic`` returns ``unchanged`` without writing,
+   on a new Property Stack too. When the read ``diagnostics`` have a
+   ``"repair"`` normalization, the same logic is written instead: the write
+   removes from the saved data what the read view leaves out.
+
+   .. rubric:: Diagnostics
+
+   In addition to :ref:`authoring-property-stack-results`. All have ``scope``
+   ``"input"``.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 40 60
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``property_stack_logic_must_be_a_mapping``
+        - ``logic`` is not a dict.
+      * - ``property_stack_hud_not_editable``
+        - ``logic`` has ``while_true_hud``.
+      * - ``property_stack_input_must_be_json_values``
+        - ``logic`` holds a value JSON cannot represent, such as a set or NaN.
+      * - ``property_stack_schema_invalid``
+        - ``logic`` does not match Schema v2 ``PropertyStackLogic``. ``path``
+          names the field and ``message`` the rule.
+      * - ``schema_v2_logic_condition_uid_repaired``
+        - A ``condition_uid`` repeats an earlier one.
+      * - ``schema_v2_logic_entry_uid_repaired``
+        - An ``entry_uid`` is empty or repeats an earlier one.
+      * - ``schema_v2_logic_derived_condition_uid_repaired``,
+          ``schema_v2_logic_derived_condition_uid_unmatched``
+        - A ``derived_from_condition_uid`` names a repaired row, or more
+          entries derive from a ``condition_uid`` than rows have it.
+      * - ``schema_v2_logic_write_entry_pm_property_ref_stale_dropped``
+        - A write to a PME Property has no matching condition row.
+      * - ``schema_v2_logic_predicate_row_malformed``
+        - An integer value of a ``float`` row cannot become a float.
+      * - Other ``schema_v2_logic_*`` codes
+        - The Schema v2 decoder rejected or repaired the logic. ``path`` is
+          ``"logic"``.
+      * - ``property_stack_normalization_rejected``
+        - The decoder changed a value with a different meaning, such as a
+          repaired UID, a dropped entry or a write status turned ``off``.
+          ``path``, ``input`` and ``normalized`` give the change.
+      * - ``property_stack_canonicalized``
+        - ``severity`` ``"info"``; does not reject. The decoder changed the
+          form of a value with the same meaning, such as ``1.0`` to ``1``.
+
+   .. rubric:: Example
+
+   Make the stack TRUE when any condition matches:
+
+   .. code-block:: python
+
+      import copy
+
+      stack = pme.editing.read_pm(stack_uid)["property_stack"]
+      logic = copy.deepcopy(stack["logic"])
+      logic["combine_mode"] = "any"
+      result = pme.editing.update_property_stack(
+          stack_uid, logic=logic, expected_digest=stack["digest"],
+      )
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: Notes
+
+   * To change part of an existing stack, submit the read ``logic`` with that
+     part changed and the read ``digest``. Keep every other value, each
+     ``condition_uid``, ``entry_uid`` and ``derived_from_condition_uid``.
+   * Review ``scope="current_storage"`` diagnostics before submitting a read
+     ``logic``: the view can already omit entries or turn writes off. Input
+     validation does not undo normalization applied while reading.
+   * Current-storage diagnostics are carried into the result as warnings. They
+     do not reject the call. A stack whose ``logic`` is ``None`` can be
+     replaced.
+   * A dry run does not evaluate sources, check runtime writability, execute a
+     Setter, or test a widget.
+   * The While True HUD and the saved and registered Property ID are not
+     changed.
+   * The call does not save Preferences to disk, add an Undo step, or run the
+     Getter or Setter.
+   * An exception raised during the write keeps its traceback and gains a note
+     with the last status. Call :py:func:`read_pm` before retrying.
+
+.. py:function:: add_property_stack_row(pm_uid, *, expected_digest=None, dry_run=False)
+
+   Append an empty condition row, as the editor does.
+
+   The new row is enabled and ``incomplete``, with ``source``, ``op``,
+   ``value`` and ``value_type`` set to ``None`` and the label
+   ``"Condition N"``, N being its position. No write entry is added until the
+   row has a definition.
+
+   :param str pm_uid: UID of the Property Stack.
+   :param expected_digest: ``read_pm()["property_stack"]["digest"]``.
+   :type expected_digest: str or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described under :ref:`authoring-property-stack-results`.
+      ``condition_uid`` is the new row's UID, or the UID it would get after a
+      dry run; ``None`` when rejected before a candidate exists.
+   :rtype: dict
+   :raises RuntimeError: The call is not on Blender's main thread, or PME has
+      not finished loading.
+
+   .. rubric:: Diagnostics
+
+   In addition to :ref:`authoring-property-stack-results`:
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 40 60
+
+      * - ``code``
+        - Cause
+      * - ``property_stack_current_storage_requires_explicit_repair``
+        - The saved logic cannot be decoded, or reading it repaired meaning or
+          identity (a blocking code or a ``"repair"`` normalization).
+          :py:func:`update_property_stack` replaces it.
+      * - ``predicate_row_limit_reached``
+        - The stack already has 128 rows.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(stack_uid)["property_stack"]
+      added = pme.editing.add_property_stack_row(
+          stack_uid, expected_digest=before["digest"],
+      )
+      assert added["status"] == "committed", added["diagnostics"]
+      row_uid = added["condition_uid"]
+
+   .. rubric:: Notes
+
+   * A dry run's ``condition_uid`` is only a candidate until a later call
+     commits.
+   * Other rows, write entries, HUD settings and Property IDs are kept.
+
+.. py:function:: update_property_stack_row(pm_uid, condition_uid, fields, *, expected_digest=None, dry_run=False)
+
+   Change one condition row's source, operator, value, value type, label or
+   enabled state, as the editor does.
+
+   Omitted fields are kept. The row's ``authoring_state`` and its derived
+   write entry follow the editor's rules.
+
+   :param str pm_uid: UID of the Property Stack.
+   :param str condition_uid: ``condition_uid`` of the row. It cannot be
+      changed.
+   :param dict fields: Any of ``source``, ``op``, ``value``, ``value_type``,
+      ``label`` and ``enabled``, with the types of a
+      :ref:`condition row <authoring-property-stack-row>`.
+   :param expected_digest: ``read_pm()["property_stack"]["digest"]``.
+   :type expected_digest: str or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described under :ref:`authoring-property-stack-results`.
+      ``condition_uid`` is the argument.
+   :rtype: dict
+   :raises RuntimeError: The call is not on Blender's main thread, or PME has
+      not finished loading.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - Change
+        - Effect
+      * - A changed ``source``, ``op``, ``value`` or ``value_type``
+        - The row gets the definition. ``authoring_state`` becomes
+          ``complete`` when the operator accepts the value type and the value
+          fits the operator, otherwise ``incomplete``. The derived write entry
+          is created or updated; a new one has ``entry_uid``
+          ``"write_<condition_uid>"``.
+      * - Resulting ``op``, ``value`` and ``value_type`` all ``None``
+        - Source only. The row stays ``incomplete`` and its derived write entry
+          is removed.
+      * - ``label`` only
+        - The write plan is unchanged.
+      * - ``enabled``
+        - The derived write entry follows the editor's rules. Disabling the
+          row turns it ``off``.
+
+   A value equal to the saved one is not a change. When nothing changes, the
+   status is ``unchanged``.
+
+   .. rubric:: Diagnostics
+
+   In addition to :ref:`authoring-property-stack-results`. All have ``scope``
+   ``"input"``.
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 40 60
+
+      * - ``code``
+        - Cause
+      * - ``property_stack_current_storage_requires_explicit_repair``
+        - As for :py:func:`add_property_stack_row`.
+      * - ``condition_uid_invalid``
+        - ``condition_uid`` is not a non-empty string.
+      * - ``predicate_row_not_found``
+        - No row has ``condition_uid``.
+      * - ``condition_identity_ambiguous``
+        - Several rows have ``condition_uid``.
+      * - ``property_stack_row_fields_must_be_a_mapping``
+        - ``fields`` is not a dict.
+      * - ``property_stack_row_field_unsupported``
+        - ``fields`` has a key other than the six above.
+      * - ``property_stack_schema_invalid`` and the other codes of
+          :py:func:`update_property_stack`
+        - The row with ``fields`` applied does not match Schema v2
+          ``PmeLogicConditionRow``. The check runs on the input, and again on
+          a row that became ``complete``. ``path`` refers to a one-row logic,
+          such as ``"logic.predicate_rows[0].value"``.
+      * - ``predicate_row_source_required``
+        - A definition field is given and the row has no source.
+      * - ``predicate_row_operator_unsupported``
+        - The resulting ``op`` is ``None`` while ``value_type`` or ``value``
+          is set.
+      * - ``predicate_row_value_type_unsupported``
+        - The resulting ``value_type`` is ``None`` while ``op`` is set.
+      * - ``predicate_row_operator_type_mismatch``
+        - ``op`` does not accept ``value_type``.
+      * - ``predicate_row_value_type_mismatch``
+        - ``value`` does not fit ``op`` and ``value_type``.
+      * - ``write_entry_limit_reached``
+        - The definition would add a write entry beyond 128.
+
+   .. rubric:: Example
+
+   Add a row that is true on frame 1:
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(stack_uid)["property_stack"]
+      added = pme.editing.add_property_stack_row(stack_uid,
+          expected_digest=before["digest"])
+      if added["status"] != "committed":
+          raise RuntimeError(added)
+      row_uid = added["condition_uid"]
+      updated = pme.editing.update_property_stack_row(stack_uid, row_uid, {
+          "source": {"kind": "rna_path", "root": "context", "detected_type": "int",
+                     "readonly": False, "segments": [
+                         {"kind": "attr", "name": "scene"},
+                         {"kind": "attr", "name": "frame_current"}]},
+          "op": "equals", "value": 1, "value_type": "int", "label": "First frame",
+      }, expected_digest=added["after"]["digest"])
+      print(updated["status"], updated["diagnostics"])
+
+   .. rubric:: Notes
+
+   * An empty row accepts ``label`` and ``enabled``. A definition requires a
+     non-null source.
+   * An operator that needs a value, given without one, leaves the row
+     ``incomplete`` and its derived write entry ``manual_required``.
+   * Independent write entries, other rows, ``combine_mode``,
+     ``false_policy``, HUD settings and Property IDs are kept.
+   * The call does not save Preferences to disk, add an Undo step, or run the
+     Getter or Setter. After ``unknown`` or an exception, call
+     :py:func:`read_pm` before retrying.
+
+.. py:function:: remove_property_stack_row(pm_uid, condition_uid, *, expected_digest=None, dry_run=False)
+
+   Remove one condition row and its derived write entry.
+
+   The last row can be removed. Independent write entries are kept.
+
+   :param str pm_uid: UID of the Property Stack.
+   :param str condition_uid: ``condition_uid`` of the row.
+   :param expected_digest: ``read_pm()["property_stack"]["digest"]``.
+   :type expected_digest: str or None
+   :param bool dry_run: Check and return without writing.
+   :returns: The result described under :ref:`authoring-property-stack-results`.
+      ``condition_uid`` is the argument.
+   :rtype: dict
+   :raises RuntimeError: The call is not on Blender's main thread, or PME has
+      not finished loading.
+
+   .. rubric:: Diagnostics
+
+   In addition to :ref:`authoring-property-stack-results`:
+   ``property_stack_current_storage_requires_explicit_repair``,
+   ``condition_uid_invalid``, ``predicate_row_not_found`` and
+   ``condition_identity_ambiguous``, as for
+   :py:func:`update_property_stack_row`.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      current = pme.editing.read_pm(stack_uid)["property_stack"]
+      removed = pme.editing.remove_property_stack_row(stack_uid, row_uid,
+          expected_digest=current["digest"])
+
+.. py:function:: update_property_stack_hud(pm_uid, changes, *, expected=None, dry_run=False)
+
+   Change the While True HUD of a Property Stack, as its Advanced settings do.
+
+   Every value is checked before the first write. The HUD is written through
+   the same owner as JSON import and Duplicate, with ``enabled`` set last, and
+   read back.
+
+   :param str pm_uid: UID of the Property Stack.
+   :param changes: Field names from :ref:`authoring-property-stack-hud` mapped
+      to new values. Fields not given keep their saved values.
+   :type changes: dict
+   :param expected: Any subset of the saved ``while_true_hud``. The call is
+      rejected with ``stale_property_stack_hud`` when a value differs.
+   :type expected: dict or None
+   :param bool dry_run: Check and return the candidate without writing.
+   :returns: The result described below.
+   :rtype: dict
+   :raises TypeError: ``changes`` or ``expected`` is not a mapping with string
+      keys, or ``dry_run`` is not a bool.
+   :raises ValueError: A field name is unknown, or the UID is missing, invalid,
+      ambiguous or not a Property Stack.
+   :raises RuntimeError: Called off Blender's main thread, or before PME has
+      finished loading.
+
+   .. rubric:: Result
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 18 60
+
+      * - Key
+        - Type
+        - Value
+      * - ``status``
+        - str
+        - See *Status* below.
+      * - ``committed``
+        - bool
+        - ``True`` only when ``status`` is ``"committed"``.
+      * - ``dry_run``
+        - bool
+        - The ``dry_run`` argument.
+      * - ``pm_uid``
+        - str
+        - The ``pm_uid`` argument.
+      * - ``before``
+        - dict
+        - ``while_true_hud`` at the start of the call.
+      * - ``after``
+        - dict
+        - ``while_true_hud`` at the end of the call. Equal to ``before`` when
+          nothing was written.
+      * - ``candidate``
+        - dict or None
+        - The complete HUD that is saved, or would be saved with
+          ``dry_run=True``. ``None`` when the request was rejected before it
+          was built.
+      * - ``changed_fields``
+        - list[str]
+        - Fields whose saved value differs between ``before`` and ``after``.
+      * - ``recovery``
+        - dict or None
+        - After a failed write: ``scope`` (``"while_true_hud"``) and
+          ``saved_hud_matches``.
+      * - ``diagnostics``
+        - list[dict]
+        - See *Diagnostics* below.
+
+   .. rubric:: Status
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - Meaning
+      * - ``committed``
+        - The HUD is saved in memory and read back as requested.
+      * - ``validated``
+        - ``dry_run=True`` and the request is acceptable. Nothing was written.
+      * - ``unchanged``
+        - The candidate equals the saved HUD. Nothing was written.
+      * - ``rejected``
+        - Nothing was written. ``diagnostics`` names the cause.
+      * - ``restored_failure``
+        - A write raised or a value was not kept. The previous HUD was
+          written back and read back equal.
+      * - ``unknown``
+        - Writing the previous HUD back did not confirm. Read the menu before
+          retrying.
+
+   .. rubric:: Diagnostics
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 34 66
+
+      * - ``code``
+        - Cause, and extra keys
+      * - ``stale_property_stack_hud``
+        - A value in ``expected`` differs. ``fields``.
+      * - ``property_stack_hud_value_invalid``
+        - A value the HUD cannot keep: a wrong type, an editor the HUD cannot
+          show in, a ``display`` other than ``LABEL`` or ``FRAME``, an
+          ``alignment`` the display does not offer, a ``color`` component
+          outside 0.0 to 1.0, ``message`` or ``icon`` longer than 256 UTF-8
+          bytes, a name that is not a Blender icon or ``@custom`` icon, or a
+          Blender icon the HUD cannot draw. ``field``, ``value`` and
+          ``message``; ``choices`` for ``area_type``, ``display`` and
+          ``alignment``; ``size`` and ``limit`` for text length.
+      * - ``invalid_syntax``
+        - ``is_expr`` is ``True`` and ``message`` does not compile.
+          ``field``, ``message``, ``line`` and ``column`` (within
+          ``message``).
+      * - ``icon_not_found``
+        - Warning: no custom icon has the ``@name``. The HUD is saved and
+          shows no icon until the icon exists. ``field`` and ``value``.
+      * - ``property_stack_hud_write_failed``
+        - The write raised. ``exception_type`` and ``message``.
+      * - ``property_stack_hud_value_not_retained``
+        - A field read back differently. ``fields``, ``requested`` and
+          ``actual``.
+
+   .. rubric:: Example
+
+   .. code-block:: python
+
+      stack_uid = pme.create_pm(pme.PmCreationSpec("CONDITION", name="X Mirror")).pm_uid
+      result = pme.editing.update_property_stack_hud(stack_uid, {
+          "enabled": True, "message": "X-Axis Mirror", "display": "FRAME",
+          "alignment": "LEFT", "icon": "MOD_MIRROR",
+          "use_color": True, "color": [0.2, 0.6, 1.0],
+      })
+      assert result["status"] == "committed", result["diagnostics"]
+
+   .. rubric:: Notes
+
+   * The editor moves an alignment the new display does not offer to
+     ``TOP``. This function rejects it instead; give ``display`` and
+     ``alignment`` together.
+   * Changing only ``is_expr`` converts ``message`` as the editor's
+     Expression toggle does: ``Mirror`` becomes ``return 'Mirror'``. When
+     ``message`` is given too, it is saved as given.
+   * Text is limited by UTF-8 bytes, not characters: 256 bytes is 85
+     Japanese characters.
+   * An empty Property Stack can have an enabled HUD, as in the editor.
+   * ``logic``, its ``digest`` and the menu version do not change. The logic
+     functions leave the HUD unchanged.
+   * The HUD of a duplicate is copied with ``enabled`` off. Export and import
+     carry the HUD in ``logic.while_true_hud``.
+   * The call does not save Preferences to disk or add an Undo step.
+
+.. _authoring-property-stack-hud:
+
+While True HUD fields
+=====================
+
+``changes``, ``expected`` and ``read_pm()["property_stack"]["while_true_hud"]``
+use these fields.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 14 68
+
+   * - Field
+     - Type
+     - Value
+   * - ``enabled``
+     - bool
+     - Show the HUD while the Property Stack is True. Default ``False``.
+   * - ``message``
+     - str
+     - Text, or an expression when ``is_expr`` is ``True``. Empty shows the
+       menu name. At most 256 UTF-8 bytes.
+   * - ``is_expr``
+     - bool
+     - ``message`` is a description expression (``return ...``), evaluated
+       in the editor where the HUD is shown. Default ``False``.
+   * - ``area_type``
+     - str
+     - The editor that shows the HUD, such as ``VIEW_3D`` (default),
+       ``IMAGE_EDITOR``, ``NODE_EDITOR`` or ``PROPERTIES``. A value the HUD
+       cannot show in is rejected with the accepted ``choices``.
+   * - ``display``
+     - str
+     - ``LABEL`` (default): a label. ``FRAME``: a frame around the editor.
+   * - ``alignment``
+     - str
+     - ``LABEL``: ``TOP`` (default), ``TOP_LEFT``, ``TOP_RIGHT``, ``CENTER``,
+       ``BOTTOM``, ``BOTTOM_LEFT``, ``BOTTOM_RIGHT``. ``FRAME``: the same
+       without ``CENTER``, plus ``LEFT`` and ``RIGHT``.
+   * - ``icon``
+     - str
+     - A Blender icon name the HUD can draw, an ``@custom`` icon, or empty.
+   * - ``use_color``
+     - bool
+     - Use ``color`` as the accent color. Default ``False``.
+   * - ``color``
+     - list[float]
+     - Three components from 0.0 to 1.0. Default ``[1.0, 1.0, 1.0]``. Read
+       back with single precision: ``0.2`` reads as ``0.20000000298023224``.
+
+.. _authoring-property-stack-logic:
+
+Logic
+=====
+
+``logic`` follows Schema v2 ``PropertyStackLogic`` without ``while_true_hud``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``version``
+     - int
+     - ``1``.
+   * - ``combine_mode``
+     - str
+     - ``"all"`` or ``"any"``. See :ref:`authoring-property-stack-vocabulary`.
+   * - ``predicate_rows``
+     - list[dict]
+     - Condition rows in order.
+   * - ``write_plan``
+     - dict
+     - ``false_policy`` and ``entries``.
+
+.. _authoring-property-stack-row:
+
+Condition row
+-------------
+
+Schema v2 ``PmeLogicConditionRow``. Every key is required.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 22 54
+
+   * - Key
+     - Type
+     - Value
+   * - ``condition_uid``
+     - str
+     - Local UID, non-empty and unique in the stack. Write entries refer to it.
+   * - ``enabled``
+     - bool
+     - A disabled row does not take part in evaluation.
+   * - ``authoring_state``
+     - str
+     - ``"complete"`` or ``"incomplete"``.
+   * - ``label``
+     - str
+     - Display name, at most 256 characters.
+   * - ``source``
+     - dict or None
+     - The value read. See :ref:`authoring-property-stack-source`. ``None`` for
+       an empty row.
+   * - ``op``
+     - str or None
+     - Operator. See :ref:`authoring-property-stack-vocabulary`.
+   * - ``value``
+     - bool, int, float, str, list[str] or None
+     - Comparison value. Its shape depends on ``op``.
+   * - ``value_type``
+     - str or None
+     - ``"bool"``, ``"int"``, ``"float"``, ``"string"``, ``"enum"`` or
+       ``"enum_set"``.
+
+A ``complete`` row needs a ``source`` whose ``detected_type`` equals
+``value_type``, an ``op`` that accepts ``value_type``, and a ``value`` of the
+shape that ``op`` requires.
+
+.. _authoring-property-stack-source:
+
+Value source
+------------
+
+Schema v2 ``PmeLogicValueSource``. Used by condition rows and write entries.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 18 60
+
+   * - Key
+     - Type
+     - Value
+   * - ``kind``
+     - str
+     - ``"rna_path"``: a path from a root. ``"condition_ref"``: another
+       Property Stack's state, by UID. ``"pm_property_ref"``: a PME Property's
+       value, by UID.
+   * - ``root``
+     - str
+     - For ``rna_path``: ``"context"`` (``bpy.context``),
+       ``"paint_settings"`` (``paint_settings()``) or ``"pme_preferences"``
+       (``pme.preferences``). For the other kinds: ``"pm"``.
+   * - ``segments``
+     - list[dict]
+     - ``rna_path`` only, required. The path below ``root``; see below.
+   * - ``path``
+     - str
+     - ``condition_ref`` and ``pm_property_ref`` only, required. A Property
+       Stack UID (``cn_`` and 8 characters) or a Property UID (``pr_`` and 8
+       characters).
+   * - ``detected_type``
+     - str or None
+     - ``"bool"``, ``"int"``, ``"float"``, ``"string"``, ``"enum"``,
+       ``"enum_set"``, ``"vector"``, ``"color"``, ``"unsupported"`` or
+       ``None``. Always ``"bool"`` for ``condition_ref``.
+   * - ``readonly``
+     - bool
+     - ``True`` when the source cannot be written. Always ``True`` for
+       ``condition_ref`` and ``pm_property_ref``.
+   * - ``owner_type``
+     - str or None
+     - Optional. RNA type of a polymorphic owner, such as the Space type under
+       ``space_data``. The read form omits it when ``None``.
+   * - ``component``
+     - int
+     - Optional, ``pm_property_ref`` only. Component index of a vector
+       Property.
+
+Each entry of ``segments``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 18 18 64
+
+   * - ``kind``
+     - Other key
+     - Meaning
+   * - ``attr``
+     - ``name``
+     - Attribute ``.name``. A letter followed by letters, digits or ``_``.
+   * - ``key``
+     - ``key``
+     - Item by key, ``["key"]``.
+   * - ``index``
+     - ``index``
+     - Item by index, ``[n]``, n 0 or more.
+   * - ``index_source``
+     - ``source``
+     - Item by the value of an integer PME Property: a ``pm_property_ref``
+       source with ``detected_type`` ``"int"`` and ``readonly`` ``True``.
+
+One element of an array is addressed by ending the path with an ``index``
+segment. ``C.scene.tool_settings.mesh_select_mode[0]`` is root ``"context"``
+with the segments
+``[{"kind": "attr", "name": "scene"}, {"kind": "attr", "name": "tool_settings"}, {"kind": "attr", "name": "mesh_select_mode"}, {"kind": "index", "index": 0}]``.
+
+Write plan
+----------
+
+Schema v2 ``PropertyStackWritePlan``.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 64
+
+   * - Key
+     - Type
+     - Value
+   * - ``false_policy``
+     - str
+     - ``"no_op"`` or ``"explicit_off_write"``. See
+       :ref:`authoring-property-stack-vocabulary`.
+   * - ``entries``
+     - list[dict]
+     - Write entries in order. See below.
+
+Each write entry is a Schema v2 ``PropertyStackWriteEntry``. Every key is
+required.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 28 22 50
+
+   * - Key
+     - Type
+     - Value
+   * - ``entry_uid``
+     - str
+     - Local UID, non-empty and unique in the plan.
+   * - ``kind``
+     - str
+     - ``"derived"``, ``"manual_write"`` or ``"custom_set"``.
+   * - ``status``
+     - str
+     - ``"auto_resolved"``, ``"manual_resolved"``, ``"manual_required"`` or
+       ``"off"``.
+   * - ``derived_from_condition_uid``
+     - str or None
+     - ``condition_uid`` of the row the entry belongs to.
+   * - ``source``
+     - dict or None
+     - The write target, a :ref:`value source <authoring-property-stack-source>`.
+   * - ``value``
+     - bool, int, float, str or None
+     - The value written.
+   * - ``value_type``
+     - str or None
+     - As for a condition row.
+   * - ``custom_set_body``
+     - str
+     - Custom Set code, at most 32768 characters. ``""`` for other kinds.
+   * - ``enum_set_write_mode``
+     - str or None
+     - ``"add"``, ``"remove"`` or ``"replace"`` for an ``enum_set`` entry.
+   * - ``enum_set_write_values``
+     - list[str]
+     - Identifiers that the mode applies. Non-empty strings.
+
+An entry whose source is a ``condition_ref`` has ``kind`` ``derived`` or
+``manual_write``, ``value_type`` ``"bool"`` and no Enum-set write.
+
+.. _authoring-property-stack-vocabulary:
+
+Vocabularies
+------------
+
+.. list-table:: ``combine_mode``
+   :header-rows: 1
+   :widths: 24 76
+
+   * - Value
+     - Meaning
+   * - ``all``
+     - TRUE when every participating row is true.
+   * - ``any``
+     - TRUE when at least one participating row is true.
+
+Only enabled, ``complete`` rows participate. With no participating row, the
+result is FALSE.
+
+.. list-table:: ``op``
+   :header-rows: 1
+   :widths: 30 30 40
+
+   * - ``op``
+     - ``value_type``
+     - ``value``
+   * - ``is_true``, ``is_false``
+     - ``bool``
+     - ``None``
+   * - ``equals``
+     - ``bool``, ``int``, ``float``, ``string``, ``enum``
+     - One value of that type. An ``enum`` value is a non-empty identifier.
+   * - ``not_equals``
+     - ``int``, ``float``, ``string``, ``enum``
+     - One value of that type.
+   * - ``lt``, ``le``, ``ge``, ``gt``
+     - ``int``, ``float``
+     - A number.
+   * - ``contains``, ``starts_with``
+     - ``string``
+     - A string.
+   * - ``equals_any``, ``not_equals_any``
+     - ``enum``, ``enum_set``
+     - A non-empty list of identifiers.
+
+Comparison meanings are listed under :ref:`router-condition-comparison`.
+
+.. list-table:: Write entry ``kind``
+   :header-rows: 1
+   :widths: 24 76
+
+   * - Value
+     - Meaning
+   * - ``derived``
+     - Belongs to a condition row through ``derived_from_condition_uid``. The
+       row operations create, update and remove it.
+   * - ``manual_write``
+     - A write with an explicit value.
+   * - ``custom_set``
+     - Runs ``custom_set_body``.
+
+.. list-table:: Write entry ``status``
+   :header-rows: 1
+   :widths: 24 16 60
+
+   * - Value
+     - Editor
+     - Meaning
+   * - ``auto_resolved``
+     - Auto
+     - The write value is derived from the condition row. ``derived`` only.
+   * - ``manual_resolved``
+     - Set
+     - A write value or method is set explicitly.
+   * - ``manual_required``
+     - Need
+     - A write value must be specified before the entry can write.
+   * - ``off``
+     - Off
+     - The entry does not write.
+
+.. list-table:: ``false_policy``
+   :header-rows: 1
+   :widths: 24 76
+
+   * - Value
+     - FALSE request, for ``derived`` and ``manual_write`` entries
+   * - ``no_op``
+     - Only entries that follow the switch write: a ``derived``
+       ``auto_resolved`` Boolean entry writes the opposite value, and a
+       ``derived`` Enum-set entry with ``add`` or ``remove`` applies the
+       opposite change. Fixed values are not written.
+   * - ``explicit_off_write``
+     - The entries that follow the switch write as under ``no_op``. In
+       addition, an entry with a fixed value writes that same value, and every
+       Enum-set entry with ``add`` or ``remove`` applies the opposite change.
+
+.. list-table:: ``enum_set_write_mode``
+   :header-rows: 1
+   :widths: 24 38 38
+
+   * - Value
+     - TRUE request
+     - FALSE request
+   * - ``add``
+     - Adds ``enum_set_write_values``.
+     - Removes them, when the entry writes on FALSE.
+   * - ``remove``
+     - Removes ``enum_set_write_values``.
+     - Adds them, when the entry writes on FALSE.
+   * - ``replace``
+     - Replaces the set with ``enum_set_write_values``.
+     - No write.
+
+.. _authoring-property-stack-true-false:
+
+TRUE and FALSE
+==============
+
+FALSE behaviour is chosen per setting. With ``false_policy="no_op"``, a
+Boolean ``auto_resolved`` entry still writes its inverse on FALSE.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 36 42
+
+   * - Intended operation
+     - TRUE
+     - FALSE / write-entry choice
+   * - Surface or Volume preset
+     - Set both Boolean values
+     - No writes: fixed Boolean entries use ``manual_resolved``
+   * - 3D Step Snap
+     - Global Snap on, selected transform on, INCREMENT
+     - Turn only the transform off: its Boolean entry is ``auto_resolved``;
+       other fixed values stay manual
+   * - UV Step Snap
+     - UV Snap on, selected transform on, INCREMENT
+     - Turn UV Snap off: its Boolean entry is ``auto_resolved``; other fixed
+       values stay manual
+
+For Enum sets, a ``manual_resolved`` entry with
+``enum_set_write_mode="replace"`` and ``enum_set_write_values=["INCREMENT"]``
+replaces the set on TRUE and makes no FALSE write. Test the Getter against
+extra set members as well as the desired set. FALSE does not restore a
+previous state. The editor's view of the same rules is under
+:ref:`property-stack-write-values`.

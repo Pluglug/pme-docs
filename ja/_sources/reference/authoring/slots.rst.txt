@@ -1,0 +1,1856 @@
+:vocab: developer-facing
+
+.. _authoring-slots:
+
+============================================================
+スロット
+============================================================
+
+.. py:currentmodule:: pme.editing
+
+スロットは、メニューに保存された一つの項目です。
+コマンド、プロパティ、別のメニューへのリンク、レイアウト項目のいずれかを表します。
+このページでは、スロットの保存フィールド、Slot Editor の入力、スロットを編集・消去・追加・削除・移動・入れ替え・移送する操作を扱います。
+Pop-up Dialog と Floating Panel の行、spacer、Layout Panel は :ref:`authoring-layout` で扱います。
+:py:func:`read_pm` のメニュー単位の結果は :ref:`authoring-menus` にあります。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - 関数
+     - 用途
+   * - :py:func:`read_pm`
+     - メニューのスロットを ``slots`` に入れて返します。形式は
+       :ref:`authoring-slot-snapshot` のとおりです。
+   * - :py:func:`slot_fields`
+     - :py:func:`update_slots` が受け付ける入力を説明します。
+   * - :py:func:`read_slot_inputs`
+     - スロットをその入力名で返します。
+   * - :py:func:`resolve_auto_icons`
+     - Auto Icon が各スロットのアイコンを見つけられるかを報告します。
+   * - :py:func:`update_slots`
+     - Slot Editor の保存処理を通してスロットの内容を変更します。
+   * - :py:func:`clear_slots`
+     - スロットを残したまま内容を消去します。
+   * - :py:func:`add_slot`
+     - 既定の項目を1件追加します。
+   * - :py:func:`remove_slot`
+     - 項目を1件削除します。
+   * - :py:func:`move_slot`
+     - 項目を1件、同じメニュー内で移動します。
+   * - :py:func:`swap_slots`
+     - 2項目を入れ替えます。
+   * - :py:func:`transfer_slot`
+     - 1項目の内容を別のメニューへ移します。
+
+.. _authoring-slots-by-type:
+
+メニューの種類ごとのスロット
+============================================================
+
+適用できる操作は、メニューの種類で決まります。
+最後の行の種類では ``read_pm()["editable_slots"]`` が ``False`` です。
+これらの種類のスロットは、それぞれ専用の操作で編集します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 12 24 40
+
+   * - メニューの種類
+     - スロット
+     - 選べるスロットモード
+     - 操作
+   * - Pie Menu (``PMENU``)、Vector Menu (``VMENU``)
+     - 固定
+     - ``COMMAND``、``PROP``、``MENU``、``HOTKEY``、``CUSTOM``
+     - :py:func:`update_slots`、:py:func:`clear_slots`、:py:func:`swap_slots`、
+       :py:func:`transfer_slot`
+   * - Sticky Key (``STICKY``)
+     - 固定: On Press、On Release
+     - ``COMMAND``、``HOTKEY``
+     - :py:func:`update_slots`、:py:func:`transfer_slot`
+   * - Regular Menu (``RMENU``)
+     - 一覧
+     - ``COMMAND``、``PROP``、``MENU``、``HOTKEY``、``CUSTOM``
+     - :py:func:`update_slots`、:py:func:`clear_slots`、:py:func:`add_slot`、
+       :py:func:`remove_slot`、:py:func:`move_slot`、:py:func:`transfer_slot`
+   * - Stack Key (``SCRIPT``)
+     - 一覧
+     - ``COMMAND``、``HOTKEY``
+     - :py:func:`update_slots`、:py:func:`add_slot`、:py:func:`remove_slot`、
+       :py:func:`move_slot`、:py:func:`transfer_slot`
+   * - Macro Operator (``MACRO``)
+     - 一覧
+     - ``COMMAND``、``MENU``
+     - :py:func:`update_slots`、:py:func:`add_slot`、:py:func:`remove_slot`、
+       :py:func:`move_slot`、:py:func:`transfer_slot`
+   * - Modal Operator (``MODAL``)
+     - 一覧
+     - ``COMMAND``、``PROP``、``INVOKE``、``FINISH``、``CANCEL``、``UPDATE``
+     - :py:func:`update_slots`、:py:func:`add_slot`、:py:func:`remove_slot`、
+       :py:func:`move_slot`、Modal Operator 間の :py:func:`transfer_slot`
+   * - Pop-up Dialog (``DIALOG``)、Floating Panel (``FPANEL``)
+     - 行 (:ref:`authoring-layout`)
+     - ``COMMAND``、``PROP``、``MENU``、``HOTKEY``、``CUSTOM``
+     - このページのすべてのスロット操作
+   * - Panel Group (``PANEL``)、Hidden Panel Group (``HPANEL``)、Property
+       (``PROPERTY``)、Property Stack (``CONDITION``)、Context Router
+       (``ROUTER``)
+     - 専用エディター
+     - —
+     - なし。Context Router は :py:func:`update_router` を使います。Property
+       のコールバックはスロットではありません。
+
+*選べるスロットモード* は、Slot Editor のモード選択にあるモードです。
+Sticky Key、Stack Key、Macro Operator、Modal Operator のエディターは空のスロットを保存しません。
+これらの種類では :py:func:`clear_slots` が ``clear_unsupported`` を返します。
+専用エディターを持つ種類では、:py:func:`update_slots` と :py:func:`clear_slots` は ``ValueError`` を送出し、ほかの操作は拒否されます。
+
+:py:func:`pme.create_pm` で作成したメニューは、エディターの既定のスロットを持ちます。
+Macro Operator は空の Command のステップを1つ、Modal Operator は On Invoke のスロットを1つ持ちます。
+スロットを増やすには :py:func:`add_slot` を使います。
+
+.. _authoring-slot-snapshot:
+
+スロットのスナップショット
+============================================================
+
+:py:func:`read_pm` は、メニューのスロットを保存順で ``slots`` に返します。
+各スロットは、通常の Python 値でできた辞書です。
+操作結果に入るスロットの ``before`` と ``after`` も同じ辞書です。
+書き込みでは ``uid`` でスロットを指定します。``index`` は現在の位置を示すだけです。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 14 56
+
+   * - キー
+     - 型
+     - 値
+   * - ``uid``
+     - str
+     - スロットの UID。メニュー内で一意です。
+   * - ``index``
+     - int
+     - メニューの保存スロット一覧での位置。0 から数えます。レイアウト項目も数に入ります。
+   * - ``enabled``
+     - bool
+     - スロットが有効かどうか。:py:func:`update_slots` の入力ではありません。
+   * - ``layout_panel``
+     - dict or None
+     - Layout Panel のアンカーでは ``idname`` (str)、``default_closed`` (bool)、
+       ``use_header_layout`` (bool)。ほかのスロットでは ``None``。
+   * - ``name``
+     - str
+     - ラベル。
+   * - ``icon``
+     - str
+     - アイコンのフラグと、その後に続くアイコン名。:ref:`authoring-slot-icon` を参照。
+       Modal Operator では、Command スロットと Property スロットのモーダル入力。
+       :ref:`authoring-slot-modal-input` を参照。
+   * - ``mode``
+     - str
+     - ``EMPTY``、``COMMAND``、``PROP``、``MENU``、``HOTKEY``、``CUSTOM``、または
+       Modal Operator の ``INVOKE``、``FINISH``、``CANCEL``、``UPDATE``。
+   * - ``auto_icon``
+     - bool
+     - Auto Icon。Command スロットでだけ ``True`` として保存されます。
+   * - ``text``
+     - str
+     - 保存された本文。意味は ``mode`` によって異なります。
+       :ref:`authoring-slot-text` を参照。
+   * - ``target_pm_uid``
+     - str
+     - Menu スロット: リンク先メニューの UID。名前だけで保存されたリンクと、ほかのモードでは空。
+   * - ``target_pm_fallback_name``
+     - str
+     - Menu スロット: リンク先メニューの、最後に確認された名前。
+   * - ``menu_presentation``
+     - str
+     - Regular Menu へリンクする Menu スロット: ``BUTTON`` (Open on Selection)、
+       ``SUBMENU``、``INLINE`` (Expand Contents)。ほかのリンク先と、
+       この項目ができる前に保存されたデータでは空。
+   * - ``menu_sticky_close``
+     - bool
+     - Menu スロット: リンクが Sticky Key を開始したときに Vector Menu を閉じます。
+   * - ``menu_expand_width``
+     - float
+     - Menu スロット: 展開したメニューの幅 (ピクセル)。``-1`` は本来の幅を使います。
+   * - ``menu_expand_offset_x``、``menu_expand_offset_y``
+     - float
+     - Menu スロット: 展開したメニューのオフセット (ピクセル)。
+   * - ``exec_undo``
+     - bool
+     - Command スロット: Blender のオペレーターではないコマンドを実行した後に、
+       Undo ステップを追加します。
+   * - ``description``
+     - str
+     - ツールチップの文字列。``description_is_expr`` が ``True`` のときは Python コード。
+   * - ``description_is_expr``
+     - bool
+     - ``description`` を Python として実行し、返された文字列を表示します。
+   * - ``vector_menu_enum_strategy``
+     - str
+     - このスロットの、Vector Menu での Enum の表示方法: ``global``、``hover``、
+       ``virtual_nest``。
+   * - ``use_property_split_override``
+     - str
+     - このスロットの Property Split: ``inherit``、``on``、``off``。
+       Pop-up Dialog と Floating Panel の Property スロットで使われます。
+   * - ``button_background_color_enabled``
+     - bool
+     - ``button_background_color`` を使います。
+       Floating Panel・Vector Menu・Stack Key の Command スロットで使われます。
+   * - ``button_background_color``
+     - list[float]
+     - 赤、緑、青。それぞれ 0.0 から 1.0 の scene linear の値です。
+       :ref:`authoring-slot-button-background` を参照してください。
+
+.. code-block:: python
+
+   >>> pme.editing.read_pm(pm_uid)["slots"][0]
+   {'uid': 'pmi_2j2ssemr', 'index': 0, 'enabled': True, 'layout_panel': None,
+    'name': 'Knife', 'icon': '', 'mode': 'COMMAND', 'auto_icon': True,
+    'text': "bpy.ops.wm.tool_set_by_id(name='builtin.knife')",
+    'target_pm_uid': '', 'target_pm_fallback_name': '', 'menu_presentation': '',
+    'menu_sticky_close': False, 'menu_expand_width': -1.0,
+    'menu_expand_offset_x': 0.0, 'menu_expand_offset_y': 0.0, 'exec_undo': False,
+    'description_is_expr': False, 'description': '',
+    'vector_menu_enum_strategy': 'global', 'use_property_split_override': 'inherit',
+    'button_background_color_enabled': False,
+    'button_background_color': [0.0, 0.0, 0.0]}
+
+.. _authoring-slot-text:
+
+モードごとの text
+------------------------------------------------------------
+
+``text`` は保存された文字列です。
+直接書き込まず、最後の列の入力を通して編集します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 56 22
+
+   * - ``mode``
+     - ``text``
+     - 入力
+   * - ``EMPTY``
+     - 空のスロットでは空。Regular Menu ではレイアウト項目:
+       ``""`` は区切り線、``"label"`` はラベル (``name`` に文字列が入ります)、
+       ``"spacer"`` は spacer、``"column"`` は列区切り。Pop-up Dialog と
+       Floating Panel では行マーカー (``row`` の後の ``?`` に続けて設定) または
+       spacer (``spacer?...``)。詳細は :ref:`authoring-layout` を参照。
+     - :py:func:`clear_slots`、:py:func:`add_slot`
+   * - ``COMMAND``
+     - スロットを使ったときに実行する Python コード。
+     - ``cmd``
+   * - ``PROP``
+     - Blender のプロパティのデータパス。例:
+       ``C.scene.tool_settings.use_snap``。
+     - ``prop``
+   * - ``MENU``
+     - リンク先メニューの名前。先頭に ``@`` または ``@@`` が付く場合があります。
+       :ref:`authoring-slot-menu-text` を参照。
+     - ``menu_target_uid``、``expand_menu``、``use_frame``
+   * - ``HOTKEY``
+     - ホットキー文字列: 修飾キー ``ctrl``、``shift``、``alt``、``oskey``、
+       次にキー修飾、最後にキーを ``+`` でつなげます。例: ``ctrl+A``。
+     - ``key``、``ctrl``、``shift``、``alt``、``oskey``、``key_mod``
+   * - ``CUSTOM``
+     - カスタムレイアウトを描画する Python コード。
+     - ``custom``
+   * - ``INVOKE``、``FINISH``、``CANCEL``、``UPDATE``
+     - Modal Operator: オペレーターの起動、確定、キャンセル、更新のときに実行する
+       Python コード。
+     - ``cmd``
+
+.. _authoring-slot-menu-text:
+
+Menu スロットの text
+------------------------------------------------------------
+
+Menu スロットのリンクは ``target_pm_uid`` です。
+``text`` の名前は表示名で、名前だけで保存されたリンクの代替にもなります。
+接頭辞は、リンク先メニューの表示方法を保存します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 40 40
+
+   * - ``text``
+     - 意味
+     - 入力
+   * - ``Name``
+     - 展開しません。
+     - ``expand_menu=False``
+   * - ``@Name``
+     - リンク先メニューを展開します。
+     - ``expand_menu=True``
+   * - ``@@Name``
+     - リンク先メニューを枠付きで展開します。
+     - ``expand_menu=True``、``use_frame=True``
+
+* Regular Menu へのリンクは、表示方法を ``menu_presentation`` に保存し、接頭辞を保存しません。
+  Context Router へのリンクと、Vector Menu から Property へのリンクも接頭辞を保存しません。
+  このようなリンクに指定した ``expand_menu=True`` や ``use_frame=True`` は保存されません。
+  スロットは ``committed`` になり、その項目について ``slot_value_not_retained`` を報告します。
+* ``menu_presentation`` が空のとき、text が ``@`` で始まる Regular Menu へのリンクは
+  ``SUBMENU`` として読み取られます。それ以外は ``BUTTON`` として読み取られます。
+* 枠は展開表示に属します。
+  結果の ``expand_menu`` が ``False`` になるとき、:py:func:`update_slots` は
+  ``use_frame=True`` に対して ``ValueError`` を送出します。
+  枠付きのスロットに ``expand_menu=False`` を設定すると、接頭辞のないリンク先の名前を保存します。
+  読み戻すと ``expand_menu=False``、``use_frame=False`` です。
+
+.. _authoring-slot-icon:
+
+アイコンの値
+------------------------------------------------------------
+
+``icon`` は、省略できるフラグと、その後に続くアイコン名です。例: ``#!^TOOL_SETTINGS``。
+フラグは文字列の一部で、別のフィールドではありません。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 16 84
+
+   * - フラグ
+     - 意味
+   * - ``#``
+     - アイコンのみ。ラベルを表示しません。
+   * - ``!``
+     - 非表示。
+   * - ``^``
+     - チェックボックス風の表示 (対応する場所のみ)。
+
+フラグは ``#``、``!``、``^`` の順に読み取られます。
+この順序から外れたフラグは、名前の一部になります。
+名前は ``TOOL_SETTINGS`` などの Blender のアイコン識別子、アイコンなしを表す ``""`` または ``NONE``、
+:ref:`カスタム PNG アイコン <custom-icons>` を表す ``@filename`` のいずれかです。
+未知の名前は指定どおりに保存されます。
+スロットは代替アイコンを表示し、:py:func:`update_slots` は ``icon_not_found`` を報告します。
+
+Macro Operator では、Macro を登録するときに、エディターが Command のステップすべてのアイコンを設定します。
+Blender の Macro のオペレーターのステップとして実行するものは ``BLENDER``、コードとして実行するものは ``TEXT`` です。
+これらのステップへの ``icon`` の入力は置き換えられます。
+2種類のステップは :ref:`macro-step-kinds` で説明しています。
+
+.. _authoring-slot-button-background:
+
+ボタンの背景色
+------------------------------------------------------------
+
+``button_background_color`` は、Blender 自身の色のプロパティと同じく scene linear で保存され、ボタンを描くときに sRGB へ変換されます。
+16進のカラーコードや sRGB の色から取った値は、書き込む前に変換します。
+変換せずに書き込むと、元の色より明るく描かれます。
+
+.. code-block:: python
+
+   def srgb_to_linear(channel):
+       if channel <= 0.04045:
+           return channel / 12.92
+       return ((channel + 0.055) / 1.055) ** 2.4
+
+   # sRGB #A83636
+   color = [srgb_to_linear(value / 255) for value in (0xA8, 0x36, 0x36)]
+   pme.editing.update_slots(pm_uid, {slot_uid: {
+       "button_background_color_enabled": True,
+       "button_background_color": color,
+   }})
+
+* 色が描かれるのは、``button_background_color_enabled`` が ``True`` の間だけです。
+* Stack Key にはボタンがありません。この色を、カーソルの横の 3 行と Show List on Hold の一覧で、
+  並びの位置から決まる色の代わりに、そのスロットのアクセントの色として使います。
+* ボタンの文字色は変わりません。
+  選んだ色の上で文字が読めるかは、作者が確かめます。
+  テーマのボタンの文字色 (``bpy.context.preferences.themes[0].user_interface.wcol_tool.text``) と比べ、描かれたメニューでも確認します。
+
+.. _authoring-slot-inputs:
+
+スロットの入力フィールド
+============================================================
+
+:py:func:`update_slots` が受け付けるのは、保存フィールドではなく Slot Editor の入力です。
+:py:func:`slot_fields` はその説明を返し、:py:func:`read_slot_inputs` は現在の値を返します。
+指定しなかった入力は、Slot Editor が保存済みのスロットから読み込む値を保ちます。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 12 22 40
+
+   * - 入力
+     - 型
+     - 保存フィールド
+     - 意味
+   * - ``mode``
+     - str
+     - ``mode``
+     - スロットモード。``EMPTY`` は受け付けません。メニューの種類ごとに選べるモードは
+       :ref:`authoring-slots-by-type` にあります。
+   * - ``name``
+     - str
+     - ``name``
+     - ラベル。
+   * - ``icon``
+     - str
+     - ``icon``
+     - フラグとアイコン名。:ref:`authoring-slot-icon` を参照。
+   * - ``auto_icon``
+     - bool
+     - ``auto_icon``
+     - Auto Icon。Command スロットでだけ保持されます。
+   * - ``cmd``
+     - str
+     - ``text``
+     - ``COMMAND``、``INVOKE``、``FINISH``、``CANCEL``、``UPDATE`` スロットの
+       Python コード。
+   * - ``prop``
+     - str
+     - ``text``
+     - ``PROP`` スロットのプロパティのデータパス。
+   * - ``custom``
+     - str
+     - ``text``
+     - ``CUSTOM`` スロットのレイアウトコード。
+   * - ``exec_undo``
+     - bool
+     - ``exec_undo``
+     - Command スロットの Undo ステップ。
+   * - ``menu``
+     - str
+     - ``text``、``target_pm_uid``
+     - リンク先メニュー。
+       名前または UID で指定します。
+       見つかった場合は ``target_pm_uid`` に解決されます。
+   * - ``menu_target_uid``
+     - str
+     - ``target_pm_uid``
+     - リンク先メニューの UID。空でないときは ``menu`` の代わりに使われます。
+   * - ``menu_target_fallback_name``
+     - str
+     - —
+     - UID が存在しなくなったリンクを解決するための名前。保存される
+       ``target_pm_fallback_name`` は、解決されたメニューの名前です。
+   * - ``menu_presentation``
+     - str
+     - ``menu_presentation``
+     - ``BUTTON``、``SUBMENU``、``INLINE``。リンク先が Regular Menu のときだけ保存されます。
+   * - ``menu_sticky_close``
+     - bool
+     - ``menu_sticky_close``
+     - リンクが Sticky Key を開始したときに Vector Menu を閉じます。
+   * - ``expand_menu``
+     - bool
+     - ``text`` の ``@`` 接頭辞
+     - リンク先メニューを展開します。:ref:`authoring-slot-menu-text` を参照。
+   * - ``use_frame``
+     - bool
+     - ``text`` の ``@@`` 接頭辞
+     - 展開したメニューの周りに枠を描画します。
+   * - ``menu_expand_width``
+     - float
+     - ``menu_expand_width``
+     - 展開したメニューの幅。``-1`` は本来の幅を使います。
+   * - ``menu_expand_offset_x``、``menu_expand_offset_y``
+     - float
+     - 同名
+     - 展開したメニューのオフセット。
+   * - ``key``
+     - str
+     - ``text``
+     - Hotkey スロット: キー。``A`` などの Blender のイベントタイプ。
+   * - ``ctrl``、``shift``、``alt``、``oskey``
+     - bool
+     - ``text``
+     - Hotkey スロット: 修飾キー。
+   * - ``key_mod``
+     - str
+     - ``text``
+     - Hotkey スロット: 修飾キーとして押し続ける通常のキー、または ``NONE``。
+   * - ``any``
+     - bool
+     - —
+     - 保存済みのホットキーから読み取られます。どのスロットも保存しないため、
+       ``False`` だけを受け付けます。``True`` は ``ValueError`` を送出します。
+   * - ``description``
+     - str
+     - ``description``
+     - ツールチップの文字列またはコード。
+   * - ``description_is_expr``
+     - bool
+     - ``description_is_expr``
+     - 説明を Python として実行します。
+   * - ``vector_menu_enum_strategy``
+     - str
+     - 同名
+     - ``global``、``hover``、``virtual_nest``。
+   * - ``use_property_split_override``
+     - str
+     - 同名
+     - ``inherit``、``on``、``off``。
+   * - ``button_background_color_enabled``
+     - bool
+     - 同名
+     - ボタンの背景色を使います。
+   * - ``button_background_color``
+     - list[float]
+     - 同名
+     - 0.0 から 1.0 の数値3つ。scene linear の値です。
+       :ref:`authoring-slot-button-background` を参照してください。
+   * - ``layout_panel_default_closed``
+     - bool
+     - ``layout_panel["default_closed"]``
+     - Layout Panel のアンカー: 最初はパネルを閉じた状態で表示します。
+   * - ``layout_panel_use_header_layout``
+     - bool
+     - ``layout_panel["use_header_layout"]``
+     - Layout Panel のアンカー: パネルのヘッダーにスロットを置けるようにします。
+       空のヘッダーを ``False`` から ``True`` へ切り替えると、ボタンを1つ追加します。
+       すでにオンのヘッダーに ``True`` を保存しても追加しません。
+   * - ``modal_input``
+     - dict
+     - ``icon``
+     - Modal Operator のみ。:ref:`authoring-slot-modal-input` を参照。
+
+値は、何かを保存する前に型で検査されます。
+文字列と Enum の入力は ``str`` を受け付け、Enum の値は ``slot_fields()[name]["values"]`` に含まれている必要があります。
+bool の入力は ``True`` または ``False`` だけを受け付けます。
+float の入力は有限の ``int`` または ``float`` を受け付けます。
+``button_background_color`` は要素3つの list または tuple を受け付けます。
+
+.. _authoring-slot-modal-input:
+
+モーダル入力
+------------------------------------------------------------
+
+Modal Operator では、Command スロットと Property スロットがモーダル入力を ``icon`` に保存します。
+Command スロットは ``hotkey;expression``、キーを使う Property スロットは
+``hotkey;minimum;maximum;step;expression`` です。
+これらの値は ``modal_input`` 入力で編集します。
+これらのスロットでは、``icon`` の入力は保存されるモーダル入力に置き換わります。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 18 60
+
+   * - 項目
+     - 型
+     - 値
+   * - ``hotkey``
+     - str
+     - Hotkey スロットと同じ形式のホットキー文字列。既定値は ``""``。
+   * - ``property_mode``
+     - str
+     - Property スロットの入力方法: ``KEY``、``MOVE`` (``MOUSEMOVE``)、
+       ``WHEEL`` (``WHEELUPMOUSE``)。既定値は ``KEY``。
+   * - ``custom``
+     - str
+     - Display Expression: 結果をモーダルのオーバーレイに表示する Python 式。
+   * - ``minimum``、``maximum``、``step``
+     - float or None
+     - プロパティの範囲と刻み幅。``None`` はプロパティ自身の値を使います。
+
+* 指定しなかった項目は保存値を保ちます。
+* Property スロットの ``property_mode`` を変更すると、``MOVE`` または ``WHEEL`` のキーを設定し、
+  ホットキーの修飾キーと範囲を保ちます。
+* ``KEY`` へ変更するには、``hotkey`` を明示する必要があります。
+  明示しない場合、保存は ``editor_validation`` で拒否されます。
+
+.. code-block:: python
+
+   # invoke_uid と lens_uid は、Modal Operator から読み取ったスロット UID です。
+   pme.editing.update_slots(modal_uid, {
+       invoke_uid: {"mode": "INVOKE", "cmd": "view = C.space_data"},
+       lens_uid: {"mode": "PROP", "name": "Lens", "prop": "view.lens",
+                  "modal_input": {"property_mode": "WHEEL", "step": 1.0}},
+   })
+
+``INVOKE``、``UPDATE``、``FINISH``、``CANCEL`` のスロットのコードは、``cmd`` の入力で渡します。
+Property スロットのパスは、この例の ``view`` のように、On Invoke のスロットが代入した変数から始められます。
+:ref:`modal-shared-variables` を参照してください。
+Property スロットの保存された ``icon`` は、モーダル入力を文字列で持ちます。
+:py:func:`read_slot_inputs` はそれを ``modal_input`` として返します。
+
+.. _authoring-slots-save-result:
+
+スロット保存の結果
+============================================================
+
+:py:func:`update_slots` と :py:func:`clear_slots` は同じ形の結果を返します。
+ステータスの語は :ref:`authoring-results` で定義しています。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``status``
+     - str
+     - 下の *ステータス* を参照。
+   * - ``committed``
+     - bool
+     - ``status`` が ``"committed"`` のときだけ ``True``。
+   * - ``pm_uid``
+     - str
+     - 引数の ``pm_uid``。
+   * - ``version``
+     - int
+     - 呼び出し後のメニューのバージョン。
+   * - ``slots``
+     - list[dict]
+     - 試行したスロットごとに1要素。要求の順に並びます。*スロットの要素* を参照。
+   * - ``pending``
+     - list[str]
+     - 保存を試行しなかったスロットの UID。先に実行したエディターのコールバックが、
+       これらを変更している場合があります。
+   * - ``diagnostics``
+     - list[dict]
+     - 最初の保存より前に見つかった、要求全体の問題。
+   * - ``structure_changes``
+     - dict
+     - スロットの順序が変わったときに存在します。``before_order`` と
+       ``after_order`` (スロット UID のリスト)。
+   * - ``side_effects``
+     - list[dict]
+     - ``slots`` にないスロットが変わったときに存在します。pending のスロットも含みます。
+       スロットごとに ``uid``、``before``、``after``。
+
+.. rubric:: スロットの要素
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``uid``
+     - str
+     - スロットの UID。
+   * - ``status``
+     - str
+     - ``committed``、``unchanged``、``rejected``。``unchanged`` は、変更が空であるか、
+       保存してもスロットの保存値が変わらないことを示します。
+       そのスロットには何も書き込まれていません。
+   * - ``before``
+     - dict
+     - 呼び出し開始時の :ref:`スロットのスナップショット <authoring-slot-snapshot>`。
+   * - ``after``
+     - dict or None
+     - 呼び出し後のスロットのスナップショット。スロットが存在しなくなった場合は ``None``。
+   * - ``reports``
+     - list
+     - 保存処理が出した ``(level, message)`` の組。画面更新の警告など。
+   * - ``diagnostics``
+     - list[dict]
+     - このスロットの問題と警告。``unchanged`` では存在しません。
+
+.. rubric:: ステータス
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - ``status``
+     - 意味
+   * - ``committed``
+     - 1つ以上のスロットが ``committed`` で、拒否されたスロットはありません。
+       ほかのスロットは ``unchanged`` です。
+   * - ``unchanged``
+     - 要求したすべてのスロットが ``unchanged`` か、要求が空です。
+       何も書き込まれていません。バージョンは変わらず、画面更新も行いません。
+   * - ``partial``
+     - 1つ以上のスロットが確定した後、あるスロットが拒否されました。
+       後続のスロットは ``pending`` に入ります。
+   * - ``rejected``
+     - 確定したスロットはありません。原因は ``diagnostics`` またはスロットの要素に示されます。
+
+.. rubric:: 診断
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - ``code``
+     - 原因と追加のキー
+   * - ``stale_version``
+     - ``expected_version`` がメニューのバージョンと異なります。``expected`` と
+       ``actual``。
+   * - ``slot_not_found``
+     - スロット UID がメニューにありません。``pmi_uid``。
+   * - ``stale_slot``
+     - ``expected`` の値が保存値と異なります。``pmi_uid`` と ``fields``。
+   * - ``clear_unsupported``
+     - :py:func:`clear_slots`: エディターが空のスロットを保存しません。
+       ``pmi_uid``。
+   * - ``structural_slot``
+     - :py:func:`clear_slots`: スロットがレイアウト項目です。``pmi_uid``。
+   * - ``invalid_syntax``
+     - ``cmd``、``custom``、``prop`` がコンパイルできません。``field``、
+       ``message``、``line``、``column``。そのスロットには何も保存されません。
+   * - ``editor_validation``
+     - Slot Editor の検査が入力を拒否しました。``message`` はエディターの文言です。
+   * - ``save_rejected``
+     - ほかの診断なしで保存が拒否されました。``route``。
+   * - ``clear_rejected``
+     - 消去が拒否されました。``route``。
+   * - ``slot_mode_normalized``
+     - 警告: ``mode`` を指定せずに編集した空のスロットが、モード付きで保存されました。
+       ``field``、``before``、``after``。
+   * - ``icon_not_found``
+     - 警告: 保存したアイコン名が既知のアイコンではありません。``field`` と
+       ``value``。
+   * - ``slot_value_not_retained``
+     - 警告: スロットは保存されましたが、入力名で読み戻したスロット
+       (:py:func:`read_slot_inputs` が返す形) が要求した値を持っていません。
+       ``field``、``requested``、``actual``。項目ごとに1件。
+       ``modal_input`` は比較しません。
+
+``stale_version`` は常に要求全体の診断です。
+``slot_not_found``、``stale_slot``、``clear_unsupported``、``structural_slot`` は、最初の保存より前に見つかった場合は要求全体の診断です。
+同じ検査は各スロットの前にも再び行われ、そこで失敗するとそのスロットの要素に入ります。
+
+.. _authoring-slots-item-result:
+
+項目操作の結果
+============================================================
+
+:py:func:`add_slot`、:py:func:`remove_slot`、:py:func:`move_slot`、:py:func:`swap_slots` は、
+すべてのメニューの種類で次のキーを返します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 14 64
+
+   * - キー
+     - 型
+     - 値
+   * - ``status``
+     - str
+     - 下の *ステータス* を参照。
+   * - ``committed``
+     - bool
+     - ``status`` が ``"committed"`` のときだけ ``True``。
+   * - ``pm_uid``
+     - str
+     - 引数の ``pm_uid``。
+   * - ``version``
+     - int
+     - 呼び出し後のメニューのバージョン。
+   * - ``slots``
+     - list[dict]
+     - 対象の項目: ``uid``、``status``、``before``、``after``、``reports``。
+       追加した項目の ``before`` と、削除した項目の ``after`` は ``None``。
+   * - ``pending``
+     - list
+     - 常に空。
+   * - ``diagnostics``
+     - list[dict]
+     - ``code`` と詳細。下の *診断* を参照。
+   * - ``before_order``、``after_order``
+     - list[str]
+     - 呼び出し前後の、保存順のスロット UID。
+   * - ``side_effects``
+     - list[dict]
+     - スナップショットが変わったほかの項目 (``index`` の変化を含む):
+       ``uid``、``before``、``after``。一覧と固定枠では、空でないときだけこのキーが入ります。
+   * - ``expected``
+     - dict
+     - ``expected`` として渡し直すスナップショット。すべての :py:func:`add_slot` の呼び出し、
+       :py:func:`remove_slot` の dry run、Pop-up Dialog と Floating Panel でのすべての呼び出しが返します。
+
+Pop-up Dialog と Floating Panel の結果には、次のキーも入ります。
+行と挿入位置は :ref:`authoring-layout` で説明します。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 14 56
+
+   * - キー
+     - 型
+     - 値
+   * - ``version_before``、``version_after``
+     - int
+     - 呼び出し前後のメニューのバージョン。
+   * - ``before_rows``、``after_rows``
+     - list[dict] or None
+     - 呼び出し前後の行。読み取れなかった場合、``after_rows`` は ``None``。
+   * - ``insertion_position``
+     - dict or None
+     - 呼び出し前の保存順で解決した隙間。入れ替え、削除、早期の拒否では ``None``。
+   * - ``created_uids``、``deleted_uids``、``moved_uids``
+     - list[str]
+     - 追加した項目、削除した項目、index が変わった項目。
+   * - ``structure_changes``
+     - list[dict]
+     - 実際の行とレイアウト項目の変更。整理による変更を含みます。
+   * - ``recovery``
+     - str
+     - ``not_needed``、``restored``、``unknown``。
+
+.. rubric:: ステータス
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - ``status``
+     - 意味
+   * - ``committed``
+     - 変更が保存され、バージョンが1回増えました。
+   * - ``validated``
+     - ``dry_run=True`` で、操作を受け付けられます。何も書き込まれていません。
+   * - ``unchanged``
+     - :py:func:`move_slot` と :py:func:`swap_slots`: 項目はすでにその位置にあります。
+       バージョンは変わりません。
+   * - ``rejected``
+     - 何も書き込まれていません。原因は ``diagnostics`` に示されます。
+   * - ``restored_failure``
+     - Pop-up Dialog と Floating Panel: 書き込みが失敗し、保存された項目と順序を復元しました。
+   * - ``unknown``
+     - Pop-up Dialog と Floating Panel: 書き込みが失敗し、復元を確認できませんでした。
+       再試行の前に :py:func:`read_pm` を呼び出してください。
+
+.. rubric:: 診断
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - ``code``
+     - 原因と追加のキー
+   * - ``stale_version``
+     - ``expected_version`` がメニューのバージョンと異なります。一覧と固定枠では
+       ``expected`` と ``actual`` が加わります。
+   * - ``stale_snapshot``
+     - 一覧での :py:func:`add_slot`: ``expected`` が保存されたコレクションと異なります。
+   * - ``stale_slot``
+     - 一覧での :py:func:`remove_slot`: ``expected`` の値が異なります。
+       ``pmi_uid`` と ``fields``。
+   * - ``stale_popup``
+     - Pop-up Dialog と Floating Panel: ``expected`` が保存されたコレクションと異なります。
+   * - ``slot_not_found``
+     - 対象または基準項目の UID がメニューにありません。一覧では ``pmi_uid`` が加わります。
+   * - ``fixed_slots``
+     - 固定枠のメニューでの :py:func:`add_slot`、:py:func:`remove_slot`、
+       :py:func:`move_slot`。
+   * - ``slot_membership_unsupported``、``slot_move_unsupported``、
+       ``slot_swap_unsupported``
+     - メニューの種類がこの操作に対応していません。
+       :ref:`authoring-slots-by-type` を参照。
+   * - ``slot_kind_unsupported``
+     - :py:func:`add_slot`: ``kind`` を受け付けません。
+       ``available`` は受け付ける種類を列挙します。一覧のメニューでは ``kind`` も加わります。
+   * - ``unsupported_position``
+     - Pop-up Dialog と Floating Panel 以外のメニューでの ``use_spacer=True``、
+       ``row_ref``、``new_row``。
+   * - ``menu_reference_slot_incompatible``
+     - :py:func:`swap_slots`: Menu スロットが、そのリンク先を受け付けないスロットの位置へ移ることになります。
+   * - ``structural_slot``
+     - レイアウト項目は、項目として移動・入れ替えできません。
+   * - ``panel_row``
+     - 項目が Layout Panel のアンカーであるか、ヘッダー位置の指定なしで
+       Layout Panel の行の内側が位置に指定されています。
+   * - ``panel_anchor_not_found``、``header_target_mismatch``、
+       ``header_role_required``
+     - Layout Panel のヘッダー位置が不正です。:ref:`authoring-layout` を参照。
+   * - ``row_not_found``、``position_not_found``
+     - ``row_ref`` または解決した位置が存在しません。
+   * - ``invalid_slot_identity``、``item_identity_unconfirmed``
+     - 保存されたスロット UID が欠けている、不正、または重複しています。
+   * - ``slot_edit_conflict``
+     - :py:func:`remove_slot`: Slot Editor で対象を開いています。
+   * - ``header_layout_disabled``
+     - 警告: 項目が、Header Layout がオフのヘッダーにあるか、そこへ移ります。
+       ``anchor_uid``。
+   * - ``target_index_out_of_range``、``target_rejected``、
+       ``document_version_rejected``、``dry_run_rejected``
+     - 一覧と固定枠: 通常の操作が変更を拒否しました。
+   * - ``apply_failed``、``post_apply_failed``
+     - 一覧と固定枠: 変更またはそのエディターのフックが例外を送出し、順序を復元しました。
+       traceback はコンソールに出力されます。
+   * - ``popup_add_failed``、``popup_remove_failed``、``popup_move_failed``
+     - 書き込みが例外を送出しました。``exception_type`` と ``message``。
+       ``recovery`` を参照。
+   * - ``popup_restore_failed``
+     - 書き込み失敗後の復元が例外を送出しました。``status`` は ``unknown``。
+   * - ``refresh_failed``
+     - 書き込み後に、エディターの画面更新が例外を送出しました。保存結果のステータスは維持されます。
+   * - ``popup_readback_failed``
+     - 最後の読み戻しが例外を送出しました。``after_order`` または ``after_rows`` は
+       ``None`` で、変更された UID のリストは空です。
+
+.. _authoring-slots-conflict-checks:
+
+競合の確認
+============================================================
+
+``expected_version`` は、:py:func:`read_pm` または前の結果から得る、セッション内でだけ有効なメニューのバージョンです。
+PME のバージョン管理された編集操作でだけ変わり、すべての変更を検出するわけではありません。
+``expected`` は保存値を比較するため、それらの操作の外で行われた変更も検出します。
+``stale_*`` が返ったら、読み直して意図した変更を調整してから再試行してください。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 34 66
+
+   * - 操作
+     - 競合の確認
+   * - :py:func:`update_slots`、:py:func:`clear_slots`
+     - ``expected_version`` と、各スロット UID をそのスナップショットの任意の一部に対応付けた ``expected``。
+   * - :py:func:`add_slot`
+     - ``expected_version`` と、前の呼び出しが返した完全な ``expected``。
+   * - 一覧での :py:func:`remove_slot`
+     - ``expected_version`` と、対象のスナップショットの任意の一部を入れた ``expected``。
+       dry run はその全体を返します。
+   * - Pop-up Dialog と Floating Panel での :py:func:`remove_slot`、
+       :py:func:`move_slot`、:py:func:`swap_slots`
+     - ``expected_version`` と、前の呼び出しが返した完全な ``expected``。
+   * - 一覧での :py:func:`move_slot`、固定枠での :py:func:`swap_slots`
+     - ``expected_version`` のみ。``expected`` は ``TypeError`` を送出します。
+   * - :py:func:`transfer_slot`
+     - 同じ移送の dry run が返した、両方のメニューを含む完全な ``expected``。
+       ``expected_version`` はありません。
+
+返された ``expected`` は、変更せずにそのまま渡してください。
+完全なスナップショットで欠けている項目は補完されません。
+
+関数
+============================================================
+
+.. py:function:: slot_fields()
+
+   :py:func:`update_slots` が受け付ける入力の説明を返します。
+
+   :returns: 入力名から説明への対応。
+   :rtype: dict[str, dict]
+
+   各説明は次のキーを持ちます。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 20 24 56
+
+      * - キー
+        - 対象
+        - 値
+      * - ``type``
+        - すべて
+        - ``"STRING"``、``"BOOLEAN"``、``"ENUM"``、``"FLOAT"``、または
+          ``modal_input`` の ``"mapping"``
+      * - ``description``
+        - ``modal_input`` 以外のすべて
+        - エディターのツールチップの文字列。一部の入力では空。
+      * - ``values``
+        - ``ENUM``
+        - 受け付ける識別子。``mode`` には ``EMPTY`` が含まれません。
+      * - ``length``
+        - 配列の入力
+        - 要素数。``button_background_color`` では 3
+      * - ``fields``
+        - ``modal_input``
+        - マッピングの項目名
+
+   .. code-block:: python
+
+      >>> pme.editing.slot_fields()["menu_presentation"]
+      {'type': 'ENUM', 'description': '', 'values': ['BUTTON', 'SUBMENU', 'INLINE']}
+
+   .. rubric:: 補足
+
+   * 結果はメニューの種類によらず同じです。スロットが使う入力は、
+     そのモードとメニューの種類によって決まります。
+
+.. py:function:: read_slot_inputs(pm_uid, *, slot_uids=None)
+
+   :py:func:`update_slots` が受け付ける入力名でスロットを返します。
+
+   値は、Slot Editor が保存済みのスロットから読み込む値です。
+   本文は ``cmd``、``prop``、``custom`` に入り、Menu スロットの接頭辞は ``expand_menu`` と
+   ``use_frame`` に入り、ホットキーは ``key`` と修飾キーに分かれます。
+
+   :param str pm_uid: メニューの UID。
+   :param slot_uids: 返すスロットの UID。``None`` はすべてのスロットを返します。
+   :type slot_uids: iterable of str or None
+   :returns: ``pm_uid`` と ``slots``。
+   :rtype: dict
+   :raises ValueError: メニューの UID が欠けている、不正、曖昧のいずれかであるか、
+      要求したスロット UID がメニューにありません。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - キー
+        - 型
+        - 値
+      * - ``pm_uid``
+        - str
+        - 引数の ``pm_uid``。
+      * - ``slots``
+        - list[dict]
+        - 保存順。スロットごとに ``uid``、``index``、``edit``。
+      * - ``edit``
+        - dict or None
+        - :ref:`authoring-slot-inputs` の、``modal_input`` 以外のすべての名前。
+          Modal Operator のスロットでは ``modal_input`` が加わります。空のスロット、
+          レイアウト項目 (Regular Menu のラベル、spacer、列区切り。行マーカー、
+          spacer、Layout Panel のアンカー)、専用エディターを持つメニューの種類では
+          ``None``。
+
+   .. rubric:: 例
+
+   あるスロットの内容を別のスロットへ写します。
+
+   .. code-block:: python
+
+      inputs = pme.editing.read_slot_inputs(pm_uid, slot_uids=[source_uid])
+      edit = inputs["slots"][0]["edit"]
+      result = pme.editing.update_slots(pm_uid, {target_uid: edit})
+      assert result["status"] == "committed", result
+
+   .. rubric:: 補足
+
+   * ``edit`` は、同じスロットにも別のスロットにも、そのまま :py:func:`update_slots` へ渡せます。
+     元のスロットへ渡すと、書き込まずに ``unchanged`` を返します。
+   * 保存された本文に ``any`` を含む Hotkey スロットは、``any=True`` と読み取られます。
+     ``edit`` を渡し直す前に ``False`` にしてください。どのスロットも ``any`` を保存せず、
+     :py:func:`update_slots` は ``True`` に対して ``ValueError`` を送出します。
+   * Regular Menu へリンクする Menu スロットでは、``menu_presentation`` は保存値です。
+     保存値がない場合は ``@`` 接頭辞から読み取った値です。ほかのスロットでは
+     ``BUTTON`` と読み取られます。
+   * 何も保存しません。
+
+.. py:function:: resolve_auto_icons(pm_uid, *, slot_uids=None)
+
+   この Blender セッションで Auto Icon がアイコンを見つけられるかを、スロットごとに報告します。
+
+   :param str pm_uid: メニューの UID。
+   :param slot_uids: 報告するスロットの UID。``None`` はすべてのスロットを報告します。
+   :type slot_uids: iterable of str or None
+   :returns: ``pm_uid`` と ``slots``。
+   :rtype: dict
+   :raises ValueError: メニューの UID が欠けている、不正、曖昧のいずれかであるか、
+      要求したスロット UID がメニューにありません。
+
+   .. rubric:: 結果
+
+   ``slots`` は保存順にスロットを並べます。各要素は次のキーを持ちます。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 14 64
+
+      * - キー
+        - 型
+        - 値
+      * - ``uid``、``index``
+        - str, int
+        - スロットの UID と位置。
+      * - ``auto_icon``
+        - bool
+        - スロットが Auto Icon をオンにした Command スロットのとき ``True``。
+      * - ``source``
+        - dict or None
+        - コマンドがアイコンの元として指すもの。``auto_icon`` が ``False`` の場合、
+          またはコマンドが単独のツールやブラシの切り替えでない場合は ``None``。
+      * - ``resolved``
+        - bool
+        - 検索でアイコンが見つかったとき ``True``。
+      * - ``manual_icon``
+        - str
+        - 保存された ``icon``。``resolved`` が ``False`` のとき、スロットはこれを表示します。
+
+   ``source`` は次のキーを持ちます。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 22 22 56
+
+      * - ``kind``
+        - キー
+        - 値
+      * - ``"tool"``
+        - ``tool``
+        - ``builtin.knife`` などのツール識別子。
+      * - ``"tool"``
+        - ``space_type``
+        - コマンドが指定するスペースタイプ、または ``None``。
+      * - ``"asset"``
+        - ``asset``
+        - ブラシアセットの識別子。ライブラリからの相対です。
+      * - ``"asset"``
+        - ``library_type``、``library_identifier``
+        - ライブラリの種類と識別子。識別子は Custom アセットライブラリの名前です。
+          検索には両方を使います。
+
+   .. code-block:: python
+
+      >>> pme.editing.resolve_auto_icons(pm_uid, slot_uids=[slot_uid])["slots"][0]
+      {'uid': 'pmi_2j2ssemr', 'index': 0, 'auto_icon': True,
+       'source': {'kind': 'tool', 'tool': 'builtin.knife', 'space_type': None},
+       'resolved': True, 'manual_icon': ''}
+
+   .. rubric:: 補足
+
+   * 検索は、Preferences のアイコン選択が使うものと同じです。
+     アイコンのプレビューを読み込むことがあるため、:py:func:`read_pm` には含まれません。
+   * 何も保存しません。
+
+.. py:function:: update_slots(pm_uid, edits, *, expected_version=None, expected=None)
+
+   Slot Editor の保存処理を通して、スロットの内容を1つずつ変更します。
+
+   各スロットは ``edits`` の順に、個別に確定します。
+   最初に拒否されたスロットで呼び出しは止まり、それまでの確定は残ります。
+
+   :param str pm_uid: メニューの UID。
+   :param dict edits: スロット UID から、:ref:`入力名 <authoring-slot-inputs>` と値の辞書への対応。
+      部分指定です。指定しなかった入力は、読み込んだ値を保ちます。空の辞書、
+      または保存してもスロットの現在の値と完全に同じになる値では、スロットは
+      ``unchanged`` になります。
+   :param expected_version: 呼び出しが要求するメニューのバージョン。異なる場合は
+      ``stale_version`` で拒否されます。
+   :type expected_version: int or None
+   :param expected: スロット UID から、そのスロットが現在持っているべき保存フィールドの値への対応。
+      :ref:`スロットのスナップショット <authoring-slot-snapshot>` の任意の一部を使います。
+      どの UID も ``edits`` に含まれている必要があります。
+      最初の保存の前と、各スロットの前に検査します。
+      値が異なる場合は ``stale_slot`` で拒否されます。
+   :type expected: dict or None
+   :returns: :ref:`スロット保存の結果 <authoring-slots-save-result>`。
+   :rtype: dict
+   :raises TypeError: ``edits``、``expected``、スロットの変更、スロットの期待値のいずれかがマッピングではありません。``expected_version`` が 0 以上の int ではありません。
+      ``modal_input`` がマッピングではないか、未知の項目を指定しています。
+   :raises ValueError: メニューの UID が欠けている、不正、曖昧のいずれかです。
+      メニューの種類が専用エディターを持ちます。
+      ``expected`` が ``edits`` にないスロットを指定しています。
+      スロット UID の形式が不正です。入力名が未知、``mode`` が ``"EMPTY"``、``any`` が
+      ``True``、または値が型の検査に失敗しました。``modal_input`` が有限でない数値を含むか、
+      Modal Operator ではないメニューに指定されています。スロットの結果の ``expand_menu`` が
+      ``False`` なのに ``use_frame`` が ``True`` です。
+      これらはすべて、最初の保存の前に全スロットについて検査します。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      pm_uid = pme.create_pm(pme.PmCreationSpec("PMENU", name="Tools Pie")).pm_uid
+      before = pme.editing.read_pm(pm_uid)
+      slot = before["slots"][0]
+      result = pme.editing.update_slots(
+          pm_uid,
+          {slot["uid"]: {
+              "mode": "COMMAND",
+              "name": "Knife",
+              "cmd": "bpy.ops.wm.tool_set_by_id(name='builtin.knife')",
+              "auto_icon": True,
+          }},
+          expected_version=before["version"],
+          expected={slot["uid"]: slot},
+      )
+      assert result["status"] == "committed", result
+
+   .. rubric:: 補足
+
+   * 確定したスロットごとに、メニューのバージョンが1回増えます。
+     ``unchanged`` のスロットは何も書き込みません。
+     バージョンの変更、エディターのフック、画面更新もありません。
+     比較には、エディターが後で正規化する前の、保存処理が保存する値を使います。
+     そのため、正規化で元に戻る値 (たとえば、背景色を使わないメニューの種類での背景色) は保存され、``committed`` と報告されます。
+     その ``before`` と ``after`` は等しくなります。
+   * ``committed`` のスロットが ``slot_value_not_retained`` を持つことがあります。
+     保存は成功したものの、要求した項目が要求どおりに読み戻されないことを示します。
+     ``status`` だけでなく、確定したスロットの ``diagnostics`` も確認してください。
+   * ``mode`` なしで編集した空のスロットは ``COMMAND`` として保存され、
+     ``slot_mode_normalized`` を報告します。
+     空の ``name`` には、エディターが提案する名前が入ることがあります。
+     入力が空のまま残ると仮定せず、``after`` の値を読んでください。
+   * エディターは保存したスロットを正規化します。結果は ``before`` と ``after`` に示されます。
+     エディターのコールバックは、Macro のアイコンなど、ほかのスロットを変更することがあります。
+     空の Layout Panel ヘッダーをオンに切り替えると、スロットが1つ追加されます。
+     これらの変更は ``side_effects`` と ``structure_changes`` に現れます。
+   * Pie Menu と Vector Menu での Command の編集は、ほかのスロットとその順序を保ちます。
+   * アイコンだけを編集する場合は ``mode`` と ``menu_target_uid`` を省きます。
+     ほかの設定は値を保ちます。
+   * Layout Panel のアンカーは Menu スロットです。本文のリンク先がないアンカーへの保存は
+     ``editor_validation`` で拒否されます。
+   * 保存の開始後に起きた例外は traceback を保ち、確定した UID を示す注記が付きます。
+     スロットの確定後に画面更新が失敗することがあります。再試行の前に
+     :py:func:`read_pm` を呼び出してください。
+   * この呼び出しは Preferences をディスクに保存せず、Undo ステップを追加せず、
+     スロットを実行しません。保存フィールドへの直接の書き込みや JSON のインポートとは異なります。
+
+   関連項目: :ref:`authoring-recipe-link-child-menu`。
+
+.. py:function:: clear_slots(pm_uid, slot_uids, *, expected_version=None, expected=None)
+
+   スロットを残したまま、その内容を消去します。
+
+   各スロットは UID、位置、``enabled`` を保ちます。
+   ほかの保存フィールドは、エディターの通常の Clear を通して空のスロットの値に戻ります。
+
+   :param str pm_uid: メニューの UID。
+   :param slot_uids: 消去するスロットの UID。この順に処理します。各 UID は1回だけ指定します。
+   :type slot_uids: iterable of str
+   :param expected_version: 呼び出しが要求するメニューのバージョン。
+   :type expected_version: int or None
+   :param expected: スロット UID から保存フィールドの値への対応。
+      :py:func:`update_slots` と同じです。
+   :type expected: dict or None
+   :returns: :ref:`スロット保存の結果 <authoring-slots-save-result>`。
+   :rtype: dict
+   :raises TypeError: ``slot_uids`` が文字列、bytes、マッピングのいずれかであるか、
+      空でない文字列ではない値を含みます。そのほかの条件は :py:func:`update_slots` と同じです。
+   :raises ValueError: 同じ UID が2回現れます。そのほかの条件は
+      :py:func:`update_slots` と同じです。
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 40 60
+
+      * - 保存フィールド
+        - Clear 後の値
+      * - ``mode``
+        - ``"EMPTY"``
+      * - ``name``、``icon``、``text``、``target_pm_uid``、
+          ``target_pm_fallback_name``、``menu_presentation``、``description``
+        - ``""``
+      * - ``auto_icon``、``menu_sticky_close``、``exec_undo``、
+          ``description_is_expr``、``button_background_color_enabled``
+        - ``False``
+      * - ``menu_expand_width``
+        - ``-1.0``
+      * - ``menu_expand_offset_x``、``menu_expand_offset_y``
+        - ``0.0``
+      * - ``vector_menu_enum_strategy``
+        - ``"global"``
+      * - ``use_property_split_override``
+        - ``"inherit"``
+      * - ``button_background_color``
+        - ``[0.0, 0.0, 0.0]``
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid, slot_uids=[slot_uid])
+      result = pme.editing.clear_slots(
+          pm_uid, [slot_uid],
+          expected_version=before["version"],
+          expected={slot_uid: before["slots"][0]},
+      )
+      assert result["status"] == "committed", result
+
+   .. rubric:: 補足
+
+   * :py:func:`update_slots` は ``mode="EMPTY"`` を受け付けません。
+     スロットを空にする方法は Clear だけです。
+   * 各消去の後に、エディターの remove フックが実行されます。
+   * Regular Menu では、消去した項目は区切り線になります。削除はされません。
+   * レイアウト項目は ``structural_slot`` で拒否されます。レイアウト項目は
+     :ref:`authoring-layout` の操作で編集します。
+     エディターが空のスロットを保存しないメニューの種類では ``clear_unsupported`` を返します。
+   * 消去したスロットごとに、すでに空だった場合も含め、メニューのバージョンが1回増えます。
+     空の ``slot_uids`` は ``unchanged`` を返します。
+     消去の確定後に画面更新が失敗することがあります。
+     再試行の前に :py:func:`read_pm` を呼び出してください。
+   * この呼び出しは Preferences をディスクに保存せず、Undo ステップも追加しません。
+
+.. py:function:: add_slot(pm_uid, *, kind=None, before_uid=None, after_uid=None, expected_version=None, expected=None, use_spacer=False, dry_run=False, header_anchor_uid=None, edge=None)
+
+   メニューの通常の Add を通して、既定の項目を1件追加します。
+
+   新しい項目の内容は :py:func:`update_slots` で設定します。
+   その UID は ``result["slots"][0]["uid"]`` です。
+
+   :param str pm_uid: メニューの UID。
+   :param kind: 項目の種類。下の *種類* を参照。``None`` はエディターの既定を使います。
+   :type kind: str or None
+   :param before_uid: この項目の前に挿入します。
+   :type before_uid: str or None
+   :param after_uid: この項目の後に挿入します。
+      ``before_uid`` と ``after_uid`` は多くとも一方だけ指定します。
+      どちらも指定しない場合は末尾に追加します。
+   :type after_uid: str or None
+   :param expected_version: 呼び出しが要求するメニューのバージョン。
+   :type expected_version: int or None
+   :param expected: 前の呼び出しが返した完全な ``expected``。
+      保存されたすべての項目を含むため、バージョン管理された操作の外で行われた変更も検出します。
+   :type expected: dict or None
+   :param bool use_spacer: Pop-up Dialog と Floating Panel のみ。``True`` は自動の
+      spacer を追加します。基準項目の前では新しい項目、spacer、基準項目の順、
+      基準項目の後では基準項目、spacer、新しい項目の順です。既定値は
+      Preferences の設定にかかわらず ``False``。
+   :param bool dry_run: 追加を検査し、書き込まずに返します。
+   :param header_anchor_uid: Pop-up Dialog と Floating Panel のみ: ヘッダーへ追加するときの
+      Layout Panel のアンカーの UID。``before_uid``、``after_uid`` (そのヘッダーの項目)、
+      ``edge`` のうちちょうど1つと組み合わせます。:ref:`authoring-layout` を参照。
+   :type header_anchor_uid: str or None
+   :param edge: ``header_anchor_uid`` が指すヘッダーの ``"START"`` または ``"END"``。
+   :type edge: str or None
+   :returns: :ref:`項目操作の結果 <authoring-slots-item-result>`。
+   :rtype: dict
+   :raises TypeError: ``kind`` が文字列でも ``None`` でもありません。``expected`` がマッピングではありません。基準となる UID が空でない文字列ではありません。
+      ``use_spacer`` または ``dry_run`` が bool ではありません。``expected_version`` が
+      0 以上の int ではありません。
+   :raises ValueError: メニューの UID が欠けている、不正、曖昧のいずれかです。
+      ``before_uid`` と ``after_uid`` の両方が指定されています。Pop-up Dialog と
+      Floating Panel 以外のメニューに ``header_anchor_uid`` または ``edge`` が指定されています。
+      ``header_anchor_uid`` なしで ``edge`` が指定されています。
+      ヘッダー位置の指定がちょうど1つではありません。
+      ``edge`` が ``START`` でも ``END`` でもありません。
+      一覧の基準となる UID の形式が不正です。
+
+   .. rubric:: 種類
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 22 54
+
+      * - メニューの種類
+        - ``kind``
+        - 追加される項目
+      * - Regular Menu
+        - ``ITEM`` (既定)
+        - 名前が ``Slot`` の ``COMMAND``
+      * - Regular Menu
+        - ``LABEL``
+        - ラベル: ``EMPTY``、名前 ``Label``、text ``label``
+      * - Regular Menu
+        - ``SPACER``
+        - ``EMPTY``、text ``spacer``
+      * - Regular Menu
+        - ``SEPARATOR``
+        - ``EMPTY``、空の text
+      * - Regular Menu
+        - ``COLUMN``
+        - ``EMPTY``、text ``column``
+      * - Pop-up Dialog、Floating Panel
+        - ``None`` または ``BUTTON``
+        - 空の Command ボタン
+      * - Macro Operator、Modal Operator、Stack Key
+        - ``None``
+        - エディターの通常の Add で追加される項目
+
+   ほかの種類は ``slot_kind_unsupported`` で拒否されます。
+
+   .. rubric:: 例
+
+   先に検査してから、Regular Menu の2番目の項目の後に項目を挿入します。
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid)
+      anchor_uid = before["slots"][1]["uid"]
+      checked = pme.editing.add_slot(
+          pm_uid, after_uid=anchor_uid, expected_version=before["version"], dry_run=True,
+      )
+      assert checked["status"] == "validated", checked["diagnostics"]
+      added = pme.editing.add_slot(
+          pm_uid, after_uid=anchor_uid,
+          expected_version=checked["version"], expected=checked["expected"],
+      )
+      assert added["committed"], added["diagnostics"]
+      new_uid = added["slots"][0]["uid"]
+
+   .. rubric:: 補足
+
+   * 既存の項目は UID と相対順序を保ちます。Add はレイアウトのマーカーを変更しません。
+   * Pop-up Dialog と Floating Panel では、``before_uid`` と ``after_uid`` は保存上の正確な位置です。
+     項目の間のマーカーを飛ばしません。
+     自動の spacer は ``slots`` ではなく、
+     ``created_uids``、``side_effects``、``structure_changes`` に現れます。
+   * 空のメニューには基準項目なしで追加します。
+     このとき Pop-up Dialog と Floating Panel に行マーカーは作られません。
+   * 固定枠のメニューは ``fixed_slots`` で拒否されます。:py:func:`clear_slots` を使ってください。
+     一覧は ``use_spacer=True`` を ``unsupported_position`` で拒否します。
+     Regular Menu の ``kind="SPACER"`` は別の項目の種類です。
+   * dry run は ``slots=[]`` とともに ``validated`` または ``rejected`` を返します。
+     UID を割り当てず、保存値とバージョンを変更せず、エディターのフックも画面更新も実行しません。
+     ラベル、整理、フックの成否は予測しません。
+     その ``expected`` は、``dry_run`` なしの同じ呼び出しに渡せます。
+   * 追加の確定後に画面更新が失敗することがあります。
+     再試行の前に :py:func:`read_pm` を呼び出してください。
+     この呼び出しは Preferences をディスクに保存せず、Undo ステップも追加しません。
+
+.. py:function:: remove_slot(pm_uid, slot_uid, *, expected_version=None, expected=None, dry_run=False)
+
+   メニューの通常の Remove を通して、項目を1件削除します。
+
+   :param str pm_uid: メニューの UID。
+   :param str slot_uid: 項目の UID。
+   :param expected_version: 呼び出しが要求するメニューのバージョン。
+   :type expected_version: int or None
+   :param expected: 一覧では、項目が持っているべき保存フィールドの値。
+      :ref:`スロットのスナップショット <authoring-slot-snapshot>` の任意の一部です。
+      ``{}`` は条件を追加しません。
+      Pop-up Dialog と Floating Panel では、前の呼び出しが返した完全な
+      ``expected``。
+   :type expected: dict or None
+   :param bool dry_run: 削除を検査し、書き込まずに返します。
+   :returns: :ref:`項目操作の結果 <authoring-slots-item-result>`。
+      削除した項目の ``after`` は ``None``。
+   :rtype: dict
+   :raises TypeError: ``slot_uid`` が空でない文字列ではありません。``expected`` がマッピングではありません。``dry_run`` が bool ではありません。``expected_version`` が
+      0 以上の int ではありません。
+   :raises ValueError: メニューの UID が欠けている、不正、曖昧のいずれかです。一覧で
+      ``slot_uid`` の形式が不正です。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      checked = pme.editing.remove_slot(pm_uid, slot_uid, dry_run=True)
+      if checked["status"] == "validated":
+          removed = pme.editing.remove_slot(
+              pm_uid, slot_uid,
+              expected_version=checked["version"], expected=checked["expected"],
+          )
+          print(removed["status"], removed["after_order"])
+
+   .. rubric:: 補足
+
+   * dry run の ``expected`` は、一覧では対象の完全なスナップショット、Pop-up Dialog と
+     Floating Panel では完全なコレクションです。
+     どちらも、``dry_run`` なしの同じ呼び出しで有効な ``expected`` の値です。
+   * 最後の項目も削除でき、空の一覧になります。代わりの行や項目は追加されません。
+   * Pop-up Dialog と Floating Panel: Remove は隣接するマーカーを統合し、該当する行の列が
+     2つ未満のときは subrow の境界を外します。
+     Layout Panel のアンカーは ``panel_row`` で拒否されます。
+     行全体の削除は :ref:`authoring-layout` の操作で行います。
+     Slot Editor で開いている項目は ``slot_edit_conflict`` で拒否されます。
+     ほかの編集中の内容、選択、
+     クリップボードは保たれます。
+   * 一覧: エディターの remove フックが実行されます。
+     拒否された操作でもコールバックによる変更が残ることがあり、``side_effects`` に報告されます。
+     すべてのコールバックが巻き戻されるわけではありません。
+   * 固定枠のメニューは ``fixed_slots`` で拒否されます。:py:func:`clear_slots` を使ってください。
+   * dry run は ``validated`` または ``rejected`` を返し、対象を等しい ``before`` と ``after`` で示します。
+     UID の修復、エディターのフック、画面更新を実行せず、バージョンも変更しません。
+     整理やフックの成否は予測しません。
+   * 削除の確定後に画面更新が失敗することがあります。
+     再試行の前に :py:func:`read_pm` を呼び出してください。
+     この呼び出しは Preferences をディスクに保存せず、Undo ステップも追加しません。
+
+.. py:function:: move_slot(pm_uid, slot_uid, *, before_uid=None, after_uid=None, expected_version=None, row_ref=None, edge=None, new_row=None, expected=None, use_spacer=False, dry_run=False, header_anchor_uid=None)
+
+   同じメニュー内で、項目を1件別の位置へ移動します。
+
+   位置の形式はちょうど1つ指定します。項目は UID と保存値を保ちます。
+
+   :param str pm_uid: メニューの UID。
+   :param str slot_uid: 項目の UID。
+   :param before_uid: この項目の前へ移動します。
+   :type before_uid: str or None
+   :param after_uid: この項目の後へ移動します。
+   :type after_uid: str or None
+   :param expected_version: 呼び出しが要求するメニューのバージョン。
+   :type expected_version: int or None
+   :param row_ref: Pop-up Dialog と Floating Panel: ``read_pm()["rows"]`` から得た現在の行参照
+      ``{"kind": "marker" or "first_item", "slot_uid": ...}``。
+      ``edge`` が必要です。:ref:`authoring-layout` を参照。
+   :type row_ref: dict or None
+   :param edge: ``row_ref`` が指す行、または ``header_anchor_uid`` が指すヘッダーの
+      ``"START"`` または ``"END"``。
+   :type edge: str or None
+   :param new_row: Pop-up Dialog と Floating Panel: ``"END"`` は項目を新しい末尾の行へ移動します。
+   :type new_row: str or None
+   :param expected: Pop-up Dialog と Floating Panel のみ: 前の呼び出しが返した完全な
+      ``expected``。
+   :type expected: dict or None
+   :param bool use_spacer: Pop-up Dialog と Floating Panel のみ。``True`` は通常の Move の
+      spacer の規則を適用します。既定値は Preferences の設定にかかわらず ``False``。
+   :param bool dry_run: 移動を検査し、書き込まずに返します。
+   :param header_anchor_uid: Pop-up Dialog と Floating Panel: ヘッダーへ移動するときの
+      Layout Panel のアンカーの UID。
+      ``before_uid``、``after_uid``、``edge`` のうちちょうど1つと組み合わせます。
+   :type header_anchor_uid: str or None
+   :returns: :ref:`項目操作の結果 <authoring-slots-item-result>`。
+   :rtype: dict
+   :raises TypeError: ``slot_uid`` または基準となる UID が空でない文字列ではありません。
+      ``row_ref`` のキーがちょうど ``kind`` と ``slot_uid`` ではありません。
+      Pop-up Dialog と Floating Panel 以外のメニューに ``expected`` が指定されています。
+      ``use_spacer`` または ``dry_run`` が bool ではありません。
+      ``expected_version`` が 0 以上の int ではありません。
+   :raises ValueError: メニューの UID が欠けている、不正、曖昧のいずれかです。
+      位置の形式の数が1つではありません。
+      ``edge`` がない、``START`` でも ``END`` でもない、または
+      ``row_ref`` も ``header_anchor_uid`` もなしに指定されています。``new_row`` が
+      ``"END"`` ではありません。``row_ref`` の ``kind`` が不正です。一覧に
+      ``header_anchor_uid`` が指定されています。一覧で UID の形式が不正です。
+
+   .. rubric:: 例
+
+   一覧の最後の項目を、先頭の項目の前へ移動します。
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid)
+      result = pme.editing.move_slot(
+          pm_uid, before["slots"][-1]["uid"],
+          before_uid=before["slots"][0]["uid"], expected_version=before["version"],
+      )
+      print(result["status"], result["before_order"], result["after_order"])
+
+   .. rubric:: 補足
+
+   * すでに指定位置にある項目 (自分自身を基準項目にした場合を含む) は ``unchanged`` を返します。
+     バージョンは変わらず、画面更新も行いません。
+   * ほかの項目は相対順序を保ちます。
+   * 一覧: 順序が変わると、エディターの move フックが実行されます。Macro の登録も含みます。
+     フックが失敗すると順序を復元しますが、コールバックの影響をすべて元に戻すわけではありません。
+   * Pop-up Dialog と Floating Panel: ``before_uid`` と ``after_uid`` は、spacer と列の境界を含む保存上の正確な位置です。
+     行端、新しい行、項目相対の移動では、通常の Move と同じ空行と spacer の整理を行います。
+     レイアウト項目と Layout Panel のアンカーは、項目として移動できません。
+     選択と、Slot Editor で編集中の内容は、それぞれの項目に結び付いたままです。
+   * 固定枠のメニューは ``fixed_slots`` で拒否されます。:py:func:`swap_slots` を使ってください。
+     一覧での ``row_ref``、``new_row``、``use_spacer=True`` は ``unsupported_position`` で拒否されます。
+   * dry run は、書き込み、フック、画面更新なしで同じ検査を行います。保存値、UID、順序、
+     バージョン、選択、Slot Editor で編集中の内容を変更しません。
+     ``validated``、``unchanged``、``rejected`` を返します。``before`` /
+     ``after`` と順序は保存状態のままで、移動後を予測しません。位置を予約しません。
+     ``dry_run`` なしの呼び出しで改めて検査します。
+   * 未知の UID と古いバージョンは、移動の前に拒否されます。
+     移動の確定後に画面更新が失敗することがあります。
+     再試行の前に :py:func:`read_pm` を呼び出してください。
+     この呼び出しは Preferences をディスクに保存せず、Undo ステップも追加しません。
+
+.. py:function:: swap_slots(pm_uid, slot_uid, other_slot_uid, *, expected_version=None, expected=None, dry_run=False)
+
+   同じメニュー内で、2項目の位置を入れ替えます。
+
+   Pie Menu、Vector Menu、Pop-up Dialog、Floating Panel で受け付けます。
+   各 UID は保存値とともに移動し、間の項目は元の位置に残ります。
+
+   :param str pm_uid: メニューの UID。
+   :param str slot_uid: 1つ目の項目の UID。
+   :param str other_slot_uid: 2つ目の項目の UID。
+   :param expected_version: 呼び出しが要求するメニューのバージョン。
+   :type expected_version: int or None
+   :param expected: Pop-up Dialog と Floating Panel のみ: 前の呼び出しが返した完全な
+      ``expected``。
+   :type expected: dict or None
+   :param bool dry_run: 入れ替えを検査し、書き込まずに返します。
+   :returns: :ref:`項目操作の結果 <authoring-slots-item-result>`。
+      ``slots`` に両方の項目が入ります。
+   :rtype: dict
+   :raises TypeError: UID が空でない文字列ではありません。``dry_run`` が bool ではありません。
+      ``expected_version`` が 0 以上の int ではありません。固定枠のメニューに
+      ``expected`` が指定されています。
+   :raises ValueError: メニューの UID が欠けている、不正、曖昧のいずれかです。
+      固定枠のメニューで UID の形式が不正です。
+
+   .. rubric:: 例
+
+   .. code-block:: python
+
+      before = pme.editing.read_pm(pm_uid)
+      first, third = before["slots"][0]["uid"], before["slots"][2]["uid"]
+      checked = pme.editing.swap_slots(
+          pm_uid, first, third, expected_version=before["version"], dry_run=True,
+      )
+      if checked["status"] == "validated":
+          result = pme.editing.swap_slots(
+              pm_uid, first, third, expected_version=checked["version"],
+          )
+          print(result["status"], result["after_order"])
+
+   .. rubric:: 補足
+
+   * 両方の UID と、Menu スロットの最終的な配置を書き込みの前に検査します。
+     入れ替えが成功すると、バージョンが1回増えます。
+   * 同じ UID を2つ指定すると、バージョンを変えずに ``unchanged`` を返します。
+   * 入れ替えまたはエディターのフックが失敗すると、順序を復元します。
+     フックによるフィールドの変更は、読み戻しに残ることがあります。
+   * Pop-up Dialog と Floating Panel: 入れ替えは通常の Move を担う処理を使い、Add や Move の整理は行いません。
+     通常の項目とヘッダーの項目、異なるヘッダーの項目どうしも入れ替えられます。
+   * 一覧と Sticky Key は ``slot_swap_unsupported`` で拒否されます。一覧では
+     :py:func:`move_slot` を使ってください。
+   * dry run は、書き込み、フック、画面更新なしで ``validated``、``unchanged``、``rejected`` を返します。
+     結果を予約しません。
+   * 入れ替えの確定後に画面更新が失敗することがあります。
+     再試行の前に :py:func:`read_pm` を呼び出してください。
+     この呼び出しは Preferences をディスクに保存せず、Undo ステップも追加しません。
+
+.. py:function:: transfer_slot(source_pm_uid, source_slot_uid, destination_pm_uid, *, destination_slot_uid=None, before_uid=None, after_uid=None, row_ref=None, edge=None, new_row=None, use_spacer=False, header_anchor_uid=None, expected=None, dry_run=False)
+
+   1項目の内容を別のメニューへ移し、両方のメニューを報告します。
+
+   ``enabled`` を含む内容は、通常の Paste の規則に従います。
+   両方のメニューを保存してから、エディターのフックを実行します。
+   2つのメニューは異なる必要があります。同じメニュー内では :py:func:`move_slot` または
+   :py:func:`swap_slots` を使ってください。
+
+   :param str source_pm_uid: 移動元メニューの UID。
+   :param str source_slot_uid: 移す項目の UID。
+   :param str destination_pm_uid: 移動先メニューの UID。
+   :param destination_slot_uid: 固定枠の移動先: 内容を受け取り、自身の UID を保つ空のスロット。
+   :type destination_slot_uid: str or None
+   :param before_uid: 一覧またはレイアウトの移動先: この項目の前に挿入します。
+   :type before_uid: str or None
+   :param after_uid: 一覧またはレイアウトの移動先: この項目の後に挿入します。
+   :type after_uid: str or None
+   :param row_ref: Pop-up Dialog と Floating Panel の移動先: ``edge`` と組み合わせる現在の行参照。
+      通常の行は空でもかまいません。
+   :type row_ref: dict or None
+   :param edge: ``row_ref``、または ``header_anchor_uid`` が指すヘッダーの ``"START"`` または
+      ``"END"``。
+   :type edge: str or None
+   :param new_row: ``"END"``: Pop-up Dialog または Floating Panel の移動先の、新しい末尾の行。
+   :type new_row: str or None
+   :param bool use_spacer: ``True`` は、項目相対と行端の位置に通常の Move の spacer の規則を適用します。
+      新しい末尾の行は既存の行設定の規則を使い、追加の spacer は作りません。
+      既定値は Preferences の設定にかかわらず ``False``。
+   :param header_anchor_uid: 移動先のヘッダーの Layout Panel のアンカー。
+      ``before_uid``、``after_uid``、``edge`` と組み合わせます。
+   :type header_anchor_uid: str or None
+   :param expected: 同じ移送の dry run が返した完全な ``expected``。``None`` は比較を省きます。
+      その場合も現在の状態は検査します。
+   :type expected: dict or None
+   :param bool dry_run: 移送を検査し、書き込まずに返します。
+   :returns: 下で説明する結果。
+   :rtype: dict
+   :raises TypeError: メニューまたはスロットの UID が空でない文字列ではありません。移動先の
+      UID が空でない文字列でも ``None`` でもありません。``use_spacer`` または ``dry_run`` が
+      bool ではありません。``row_ref`` のキーがちょうど ``kind`` と ``slot_uid`` ではありません。
+      ``expected`` が誤った型の値、または JSON でない値を含みます。
+   :raises ValueError: 移動先の形式が2つ以上指定されています。
+      ``expected`` のキーが移送のスナップショットと一致しないか、バージョンが負です。
+      レイアウトの位置の形式が不正です。
+
+   .. rubric:: 移動先
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 30 70
+
+      * - 移動先
+        - 位置
+      * - 固定枠
+        - 空のスロットの ``destination_slot_uid``。Sticky Key のスロットは、
+          ``COMMAND`` で text が空のとき空とみなします。
+      * - 一覧
+        - ``before_uid`` / ``after_uid`` のちょうど一方。空の一覧ではどちらも指定しません。
+          新しい項目には新しい UID が付きます。
+      * - Pop-up Dialog、Floating Panel
+        - ``before_uid`` / ``after_uid``、``edge`` 付きの ``row_ref``、または
+          ``new_row="END"``。空のメニューでは位置を指定しません。
+          新しい項目には新しい UID が付きます。
+      * - Layout Panel のヘッダー
+        - ``header_anchor_uid`` と、``before_uid`` / ``after_uid`` または
+          ``edge``。Header Layout がオンでも必要です。オフのヘッダーはオフのままで、
+          ``header_layout_disabled`` を報告します。
+
+   .. rubric:: 結果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 20 16 64
+
+      * - キー
+        - 型
+        - 値
+      * - ``status``
+        - str
+        - 下の *ステータス* を参照。
+      * - ``committed``
+        - bool
+        - ``status`` が ``"committed"`` のときだけ ``True``。
+      * - ``moved``
+        - dict or None
+        - 確定後: ``from`` と ``to``。それぞれ ``pm_uid`` と ``slot_uid`` を持ちます。
+          ``to.slot_uid`` は受け取った項目です。
+      * - ``expected``
+        - dict or None
+        - 両方のメニュー、対象の引数、リンク先メニューの情報を含む不透明なスナップショット。
+          JSON を経由して往復しても有効です。
+          移動元のスロットが見つかる前に拒否された場合は ``None``。
+      * - ``effects``
+        - list[dict]
+        - 予測した効果と観測した効果。*効果* を参照。
+      * - ``loss``
+        - list[dict]
+        - 移されない値。*補足* を参照。
+      * - ``diagnostics``
+        - list[dict]
+        - ``code`` と詳細。*診断* を参照。
+      * - ``from``、``to``
+        - dict
+        - それぞれ一方の側: ``pm_uid``、保存された項目のコレクションである ``before`` と
+          ``after``、``changed``、``version_before`` と ``version_after``。
+          ``to`` には ``insertion_position`` が加わります。Pop-up Dialog と Floating Panel
+          の側には ``before_rows`` と ``after_rows`` が加わります。読み取れない ``after``
+          の値は ``None``。
+
+   .. rubric:: ステータス
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 24 76
+
+      * - ``status``
+        - 意味
+      * - ``validated``
+        - ``dry_run=True`` で、移送を受け付けられます。何も書き込まれていません。
+      * - ``committed``
+        - 両方のメニューが保存されました。各メニューのバージョンは1回増えました。
+      * - ``rejected``
+        - 何も書き込まれていません。原因は ``diagnostics`` に示されます。
+      * - ``restored_failure``
+        - 書き込みが失敗し、両方の保存された項目のコレクションが以前のスナップショットと一致しています。
+          Macro の登録は ``effects`` に報告されます。
+      * - ``unknown``
+        - 書き込みが失敗し、復元または読み戻しで以前の状態を確認できませんでした。
+          判断する前に :py:func:`read_pm` を呼び出してください。自動で再試行しないでください。
+
+   .. rubric:: 効果
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 20 80
+
+      * - ``kind``
+        - 値
+      * - ``prediction``
+        - ``destination_fields``: 移動先が受け取る保存フィールド。``enabled`` を含みます。
+          ``icon_prediction`` は、移動先がアイコンを計算する場合は ``"dynamic"``、
+          それ以外は ``"known"``。
+      * - ``registration``
+        - Macro Operator の登録。
+          ``phase`` は ``before``、``after``、``recovery`` のいずれかで、``pm_uid`` と観測した状態を持ちます。
+      * - ``hook``
+        - 実行されたエディターのフック: ``pm_uid`` と ``hook``。
+      * - ``recovery``
+        - ``saved_restored``: 失敗の後に両方のメニューが復元されたかどうか。
+
+   .. rubric:: 診断
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 36 64
+
+      * - ``code``
+        - 原因と追加のキー
+      * - ``menu_identity_unconfirmed``
+        - メニューの UID が1つのメニューに解決されません。
+      * - ``same_menu``
+        - 移動元と移動先が同じメニューです。
+      * - ``slot_transfer_unsupported``
+        - メニューの種類が専用エディターを持つか、スロットのクリップボードを持ちません。
+      * - ``source_identity_unconfirmed``
+        - ``source_slot_uid`` が移動元メニューにありません。
+      * - ``stale_transfer``
+        - ``expected`` が現在のスナップショットと異なります。
+      * - ``source_has_no_content``
+        - 移動元のスロットが空です。
+      * - ``popup_position_requires_popup_menu``
+        - Pop-up Dialog と Floating Panel 以外の移動先に、レイアウトの位置が指定されています。
+      * - ``sticky_slot_role_invalid``
+        - Sticky Key のスロットが On Press でも On Release でもありません。
+      * - ``paste_mode_unsupported``
+        - 移動先が、このメニューの種類からのこのスロットモードを受け付けません。
+      * - ``destination_identity_unconfirmed``、``destination_occupied``
+        - ``destination_slot_uid`` が見つからないか、空ではありません。
+      * - ``destination_slot_requires_fixed_menu``
+        - 一覧またはレイアウトの移動先に ``destination_slot_uid`` が指定されています。
+      * - ``anchor_identity_unconfirmed``、``destination_anchor_required``
+        - 基準項目が見つからないか、空でない移動先に位置が指定されていません。
+      * - ``slot_not_found``、``structural_slot``、``panel_row``、
+          ``row_not_found``、``position_not_found``、
+          ``panel_anchor_not_found``、``header_target_mismatch``、
+          ``header_role_required``
+        - レイアウトの移動元または位置が不正です。
+          :ref:`authoring-slots-item-result` と同じです。
+      * - ``menu_reference_slot_incompatible``、
+          ``menu_reference_target_mode_not_allowed``、
+          ``menu_reference_self_reference``、
+          ``menu_reference_presentation_not_supported``
+        - Menu スロットの解決済みのリンクが、移動先で有効ではありません。
+      * - ``menu_reference_unresolved``
+        - 警告: リンクが見つからないか曖昧なため、元の値を保ちます。
+          ``kind``。
+      * - ``slot_edit_conflict``
+        - 影響を受ける項目を Slot Editor で開いています。移動元、固定枠の移動先、
+          または整理によって削除・書き換えされるレイアウト項目です。
+      * - ``header_layout_disabled``
+        - 警告: 関係するヘッダーの Header Layout がオフです。``anchor_uid``。
+      * - ``slot_transfer_failed``
+        - 書き込みが例外を送出しました。``exception_type`` と ``message``。
+      * - ``slot_transfer_restore_failed``、
+          ``slot_transfer_registration_restore_failed``
+        - 復元が例外を送出しました。``status`` は ``unknown``。
+      * - ``transfer_snapshot_failed``、``transfer_cleanup_failed``
+        - メニューの読み取り、または整理の計画が例外を送出しました。
+      * - ``transfer_readback_failed``、``transfer_rows_readback_failed``
+        - 呼び出し後に、一方の側の読み取りが例外を送出しました。``side``。その側の ``after``
+          または ``after_rows`` は ``None`` で、ステータスは維持されます。
+          確定した移送を繰り返さず、メニューを読み直してください。
+      * - ``transfer_refresh_failed``
+        - 呼び出し後に画面更新が例外を送出しました。``operation``。
+          確定したステータスは維持されます。
+      * - ``macro_registration_read_failed``
+        - Macro の登録状態の読み取りが例外を送出しました。
+
+   .. rubric:: 例
+
+   先に検査してから、一覧またはレイアウトのメニューの末尾へ項目を移します。
+
+   .. code-block:: python
+
+      destination = pme.editing.read_pm(destination_pm_uid)
+      position = ({"after_uid": destination["slots"][-1]["uid"]}
+                  if destination["slots"] else {})
+      checked = pme.editing.transfer_slot(
+          source_pm_uid, source_slot_uid, destination_pm_uid,
+          **position, dry_run=True,
+      )
+      if checked["status"] == "validated":
+          result = pme.editing.transfer_slot(
+              source_pm_uid, source_slot_uid, destination_pm_uid,
+              **position, expected=checked["expected"],
+          )
+          print(result["status"], result["moved"], result["effects"], result["loss"])
+
+   固定枠の移動先では、``position`` は
+   ``{"destination_slot_uid": empty_slot_uid}`` です。Panel のヘッダーでは
+   ``{"header_anchor_uid": anchor_uid, "edge": "END"}``、通常の行では
+   ``{"row_ref": row_ref, "edge": "END"}`` です。
+
+   .. rubric:: 補足
+
+   * 固定枠の移動元は消去され、UID と ``enabled`` を保ちます。Sticky Key の移動元は、
+     さらに On Press または On Release の名前と空のコマンドに戻ります。一覧の移動元は、
+     最後の項目であっても削除されます。
+   * ``layout_panel`` は移されません。
+     固定枠の移動元には残り、削除される一覧の移動元とともに失われます。
+     ``loss`` がこれを報告します: ``kind`` が
+     ``"layout_panel"``、``value``、``transferred`` (``False``)、
+     ``source_removed``。
+   * 移動先エディターのアイコンの規則が適用されます。
+     Pop-up Dialog と Floating Panel はアイコンのフラグを保ち、Macro Operator はアイコンを計算し、ほかの種類はフラグを外します。
+     移動先がボタンの背景色を使わない場合、背景色は消去されます。
+   * Regular Menu のラベルとレイアウトのマーカーは、基準項目にはできますが、移す項目にはできません。
+     Layout Panel のアンカーは移せません。
+     そのヘッダーの項目は、オフのヘッダーからでも移せます。
+   * レイアウトの整理は、挿入と削除の境界、および空になった移動元の行を対象にします。
+     無関係な空行と離れた spacer は残ります。
+     マーカーのない先頭行が空になると、Move と同じく次の行マーカーを吸収します。
+     これは :py:func:`remove_row` とは異なります。
+     最後の内容を移すと、空のメニューになることがあります。最後のヘッダー項目を移しても、
+     アンカーとその空のヘッダーは残ります。移送の後は行参照を読み直してください。
+   * 見つからない、または曖昧なメニューのリンクは、``menu_reference_unresolved`` とともに元の値を保ちます。
+     一意に解決したリンクが移動先で有効でない場合は、書き込みの前に拒否されます。
+   * 影響を受ける項目を Slot Editor で編集中の場合、呼び出しは拒否されます。
+     ほかの編集中の内容、クリップボード、選択は保たれます。
+   * dry run は UID を割り当てず、バージョンを初期化せず、エディターのフックも画面更新も実行しません。
+     ``before`` と ``after`` は変更前の保存値のままで、整理と新しい UID は予測しません。
+     Macro のアイコンと登録は、呼び出しの後にだけ観測されます。
+   * 画面更新が失敗しても、確定したステータスは維持されます。
+     この呼び出しは Preferences をディスクに保存せず、Undo ステップも追加しません。

@@ -1,0 +1,28 @@
+項目を実行したときに評価する Python コードを設定します。
+オペレーターを呼び出す場合は、実行するエディター・モード・選択状態に対応した処理を使います。
+
+```python
+# 3D Viewport の Object Mode で立方体を追加する
+bpy.ops.mesh.primitive_cube_add()
+```
+
+:::{admonition} コマンドの記述方法
+:class: important
+
+Command の保存と Blender 標準 UI 経由の実行には、PME 独自の文字数上限はありません。
+GPU メニュー（Floating Panel / Vector Menu）の Command で運ぶ文字列（本文または文字列引数）は、それぞれ **4,096 文字**までです。超過すると実行されず、`operator_property_string_too_long` 診断が出ます。
+短い単純文は `;` で区切れますが、インデントを持つブロックを機械的に 1 行へ変換しないでください。
+入力操作と外部スクリプトへの分割は [コードの入力と実行](/reference/command_text.md) を参照してください。
+
+:::
+
+:::{admonition} グローバル変数
+:class: hint
+
+**利用可能なグローバル変数の例：**
+- `C`: PME がスクリプトに提供するコンテキスト
+- `O`: bpy.ops（Blenderのオペレーター）
+- `E`: event（イベント情報）
+
+[Scripting Reference](/reference/scripting.rst) でグローバル変数の説明を確認できます。
+:::

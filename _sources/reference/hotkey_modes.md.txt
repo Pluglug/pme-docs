@@ -1,0 +1,43 @@
+(hotkey-modes)=
+
+# Hotkey Mode
+
+**Which action opens the menu, and when.** Choose a mode from the leftmost button in Hotkey settings.
+
+:::{div} pme-hkm-reference
+
+| Mode | <span class="hkm-axis"><span>Press</span><span>Holding</span><span>Release</span><span>Next input</span></span> | Trigger condition |
+|---|---|---|
+| ![Press](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pPress.png) **Press** | <span class="hkm-line hkm-at-press" aria-label="Opens when the key is pressed"><i></i><i></i><i></i><i></i></span> | As soon as you press ※ |
+| ![Hold](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pHold.png) **Hold** | <span class="hkm-line hkm-at-hold hkm-with-note" aria-label="Opens when the hold timeout is reached"><i></i><i></i><i></i><i></i><small class="hkm-dot-note">Time</small></span> | Reach the Hold timeout |
+| ![Tweak](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pTweak.png) **Tweak** | <span class="hkm-line hkm-at-hold hkm-with-note" aria-label="Opens when mouse movement exceeds the drag threshold while the key is held"><i></i><i></i><i></i><i></i><small class="hkm-dot-note">Distance · direction</small></span> | Exceed the drag threshold<br><small>Detected by PME</small> |
+| ![Double Click](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pDouble.png) **Double Click** | <span class="hkm-line hkm-at-next" aria-label="Opens on the second press within the time limit"><i></i><i></i><i></i><i></i></span> | Press again within the time limit |
+| ![Key Chords](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pChord.png) **Key Chords** | <span class="hkm-line hkm-at-next" aria-label="Opens when the Chord key is pressed after the trigger key"><i></i><i></i><i></i><i></i></span> | Press the Chord key within the timeout |
+| ![Click](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pClick.png) **Click** | <span class="hkm-line hkm-native hkm-at-release" aria-label="Opens when the key is released without dragging"><i></i><i></i><i></i><i></i></span> | Release without dragging |
+| ![Click Drag](../../../../src/pie_menu_editor/assets/internal/icons/_intr_pDrag.png) **Click Drag** | <span class="hkm-line hkm-native hkm-at-hold hkm-with-note" aria-label="On the native route, opens when mouse movement exceeds the drag threshold while the key is held"><i></i><i></i><i></i><i></i><small class="hkm-dot-note">Distance · direction</small></span> | Exceed the drag threshold<br><small>Detected by Blender on the native route</small> |
+
+:::
+
+<span class="hkm-caption">Tweak / Click Drag support Any and eight directions.</span>
+
+(hotkey-mode-combinations)=
+
+## Combine multiple modes on one key
+
+```{raw} html
+:file: _hotkey_routing.html
+```
+
+**In this example, even Press waits instead of opening immediately.** PME waits and routes the input to the first action that qualifies. Double Click and Key Chords can also share the same key.
+
+(hotkey-mode-click-conflicts)=
+
+**Click cannot trigger if Press, Hold, or Tweak handles the input.** To separate a short press from a drag using Blender's detection, combine Click with Click Drag.
+
+Outside Context Router, PME may invoke Click Drag from Press assigned to the same Keymap, key, and modifiers. This route bypasses Blender's drag detection and Direction setting. Context Router does not include Click Drag in its routing.
+
+**To show Click / Click Drag:** enable {guilabel}`Settings > Hotkeys > Native Click / Click Drag`.
+
+<span class="hkm-caption">Release only means letting go. Click also requires that you have not dragged. Release is not a PME mode.</span>
+
+See {ref}`Hotkey settings <hotkey-editor>` for assigning modes, and {ref}`Settings > Hotkeys <settings-hotkeys>` for timeouts and drag thresholds.
